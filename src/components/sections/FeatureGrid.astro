@@ -1,0 +1,27 @@
+---
+import Card from "../ui/Card.astro";
+
+interface Feature {
+  title: string;
+  description: string;
+}
+
+interface Props {
+  items: Feature[];
+}
+
+const { items } = Astro.props;
+---
+
+<section class="section">
+  <div class="container grid-3">
+    {
+      items.map((feature) => (
+        <Card>
+          <h3>{feature.title}</h3>
+          <p>{feature.description}</p>
+        </Card>
+      ))
+    }
+  </div>
+</section>

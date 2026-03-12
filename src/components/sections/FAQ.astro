@@ -1,0 +1,19 @@
+---
+import { faqs } from "../../data/faqs";
+---
+
+<section class="section">
+  <div class="container">
+    <h2>Frequently asked questions</h2>
+    <div class="faq-grid">
+      {
+        faqs.map((item) => (
+          <article class="card">
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

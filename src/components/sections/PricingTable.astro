@@ -1,0 +1,26 @@
+---
+import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
+import { plans } from "../../data/pricing";
+---
+
+<section class="section">
+  <div class="container">
+    <h2>Plans built for every growth stage</h2>
+    <div class="grid-3">
+      {
+        plans.map((plan) => (
+          <Card>
+            <h3>{plan.name}</h3>
+            <p>{plan.tagline}</p>
+            <p class="price">{plan.price}</p>
+            <ul>
+              {plan.features.map((feature) => <li>{feature}</li>)}
+            </ul>
+            <Button href={plan.ctaHref}>{plan.ctaText}</Button>
+          </Card>
+        ))
+      }
+    </div>
+  </div>
+</section>

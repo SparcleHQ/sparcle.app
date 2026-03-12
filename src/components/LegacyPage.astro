@@ -1,0 +1,18 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical: string;
+  bodyHtml: string;
+  headHtml?: string;
+}
+
+const { title, description, canonical, bodyHtml, headHtml = "" } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} canonical={canonical}>
+  {headHtml && <Fragment slot="head" set:html={headHtml} />}
+  <Fragment set:html={bodyHtml} />
+</BaseLayout>

@@ -5,6 +5,7 @@ interface Props {
   canonical?: string;
   ogTitle?: string;
   ogDescription?: string;
+  ogImage?: string;
 }
 
 const {
@@ -13,6 +14,7 @@ const {
   canonical,
   ogTitle = title,
   ogDescription = description,
+  ogImage = "https://sparcle.llc/images/og-preview.png",
 } = Astro.props;
 ---
 
@@ -41,9 +43,29 @@ const {
     <meta property="og:description" content={ogDescription} />
     <meta property="og:site_name" content="Sparcle" />
 
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={ogTitle} />
     <meta name="twitter:description" content={ogDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Sparcle",
+      "url": "https://sparcle.llc",
+      "logo": "https://sparcle.llc/images/bolt-logo.svg",
+      "description": "Unified AI intelligence platform for enterprise productivity.",
+      "sameAs": ["https://sparcle.app"],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "bolt@sparcle.app",
+        "contactType": "sales"
+      }
+    })} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

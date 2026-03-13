@@ -1,0 +1,77 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Terms of Service | Sparcle"
+  description="Terms of service for Sparcle, LLC and the Bolt enterprise AI platform."
+  canonical="https://sparcle.llc/terms"
+>
+  <nav class="site-nav">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">Sparcle</a>
+      <div class="nav-links">
+        <a href="/#products">Products</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/research.html">Research</a>
+        <a href="mailto:bolt@sparcle.app">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main style="max-width:800px;margin:0 auto;padding:120px 24px 80px;color:var(--text-body,#e2e8f0);line-height:1.8;">
+    <h1 style="font-size:2rem;font-weight:800;margin-bottom:0.5rem;color:var(--text-heading,#f8fafc);">Terms of Service</h1>
+    <p style="color:var(--text-muted,#94a3b8);margin-bottom:3rem;">Last updated: March 12, 2026</p>
+
+    <h2>1. Acceptance</h2>
+    <p>By accessing or using sparcle.llc or the Bolt platform ("Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+
+    <h2>2. Description of Service</h2>
+    <p>Sparcle, LLC provides an enterprise AI productivity platform ("Bolt") that unifies workplace tools via the Model Context Protocol (MCP). The website at sparcle.llc provides information about our services and allows prospective customers to contact us.</p>
+
+    <h2>3. Eligibility</h2>
+    <p>The Service is intended for business use. By using the Service, you represent that you are authorized to enter into these Terms on behalf of your organization.</p>
+
+    <h2>4. Use of the Service</h2>
+    <p>You agree not to: (a) use the Service for any unlawful purpose; (b) attempt to gain unauthorized access to any system; (c) transmit malware or harmful code; (d) violate any applicable laws or regulations.</p>
+
+    <h2>5. Intellectual Property</h2>
+    <p>All content, trademarks, and technology on this site and in the Bolt platform are owned by Sparcle, LLC or its licensors. Three patents are pending (US 63/951,582; 63/952,801; 63/952,804). No license is granted except as expressly stated.</p>
+
+    <h2>6. Enterprise Agreements</h2>
+    <p>Enterprise use of the Bolt platform is governed by a separate Master Service Agreement (MSA) and Data Processing Agreement (DPA). In the event of conflict, the MSA takes precedence over these Terms.</p>
+
+    <h2>7. Disclaimer of Warranties</h2>
+    <p>The website is provided "as is." We make no warranties, express or implied, regarding availability, accuracy, or fitness for a particular purpose.</p>
+
+    <h2>8. Limitation of Liability</h2>
+    <p>To the maximum extent permitted by law, Sparcle, LLC shall not be liable for indirect, incidental, or consequential damages arising from use of the website.</p>
+
+    <h2>9. Governing Law</h2>
+    <p>These Terms are governed by the laws of the State of Delaware, USA, without regard to conflict of law principles.</p>
+
+    <h2>10. Changes</h2>
+    <p>We may update these Terms at any time. Continued use of the Service after changes constitutes acceptance.</p>
+
+    <h2>11. Contact</h2>
+    <p>Questions: <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a></p>
+  </main>
+
+  <footer style="text-align:center;padding:2rem;color:var(--text-muted,#94a3b8);font-size:.875rem;border-top:1px solid var(--border,#1e293b);">
+    <p>© 2026 Sparcle, LLC. All rights reserved. &nbsp;|&nbsp;
+      <a href="/privacy" style="color:inherit;">Privacy Policy</a> &nbsp;|&nbsp;
+      <a href="/terms" style="color:inherit;">Terms of Service</a>
+    </p>
+  </footer>
+</BaseLayout>
+
+<style>
+  h2 { font-size: 1.2rem; font-weight: 700; margin: 2rem 0 0.5rem; color: var(--text-heading, #f8fafc); }
+  a { color: var(--accent, #60a5fa); }
+  .site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,15,28,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .nav-container { max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  .nav-logo { font-weight: 700; font-size: 1.1rem; color: var(--text-heading, #f8fafc); text-decoration: none; }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { color: var(--text-muted, #94a3b8); text-decoration: none; font-size: 0.9rem; }
+  .nav-links a:hover { color: var(--text-heading, #f8fafc); }
+</style>

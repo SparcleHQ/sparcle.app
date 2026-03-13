@@ -7,12 +7,13 @@ interface Props {
   canonical: string;
   bodyHtml: string;
   headHtml?: string;
+  ogImage?: string;
 }
 
-const { title, description, canonical, bodyHtml, headHtml = "" } = Astro.props;
+const { title, description, canonical, bodyHtml, headHtml = "", ogImage } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} canonical={canonical}>
+<BaseLayout title={title} description={description} canonical={canonical} ogImage={ogImage}>
   {headHtml && <Fragment slot="head" set:html={headHtml} />}
   <Fragment set:html={bodyHtml} />
 </BaseLayout>

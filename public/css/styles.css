@@ -202,17 +202,17 @@ section {
    ================================================================================================== */
 .navbar {
     position: fixed;
-    top: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 3rem);
-    max-width: calc(var(--container-max) + 4rem);
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
     height: var(--nav-height);
     z-index: 1000;
     background: var(--bg-surface-glass);
     backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-2xl);
+    border: none;
+    border-bottom: 1px solid var(--border-default);
+    border-radius: 0 0 8px 8px;
     padding: 0 2rem;
     display: flex;
     align-items: center;
@@ -1354,11 +1354,12 @@ h3 {
     }
 
     .navbar {
-        top: 0.75rem;
-        width: calc(100% - 1.5rem);
+        top: 0;
+        width: 100%;
         padding: 0 1rem;
         justify-content: flex-start;
         gap: 0.5rem;
+        border-radius: 0;
     }
 
     .nav-logo {

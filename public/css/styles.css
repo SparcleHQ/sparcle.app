@@ -1452,3 +1452,10 @@ h3 {
         display: none;
     }
 }
+
+.hero-citation {
+    font-size: 0.75rem;
+    opacity: 0.4;
+    font-style: italic;
+    line-height: 1.5;
+}

@@ -1,5 +1,24 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
+        /* Hide shared nav & footer on slides page — max specificity */
+        html body .navbar,
+        html body #navbar,
+        html body nav.navbar,
+        html body .footer,
+        html body footer.footer,
+        html body .nav-toggle {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            position: absolute !important;
+            pointer-events: none !important;
+        }
+        html body {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+
         :root {
             --bg: #050810;
             --s: #0d1426;
@@ -42,7 +61,7 @@
             height: 100dvh;
             margin: 0;
             padding: 0;
-            font-size: clamp(14px, 1.4vw, 26px);
+            font-size: clamp(14px, 1.5vw, 24px);
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--t);
@@ -64,8 +83,7 @@
             flex: 1 1 0;
             position: relative;
             overflow: hidden;
-            margin-bottom: 65px;
-            /* Give space for absolute footer */
+            margin-bottom: 50px;
         }
 
         .slide {
@@ -75,44 +93,34 @@
             width: 100%;
             height: 100%;
             inset: 0;
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 2rem 4rem;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(80px);
-            pointer-events: none;
-            transition: opacity .45s ease, transform .45s ease, visibility .45s;
-            will-change: transform;
+            padding: .8rem 3rem 1rem;
+            background: var(--bg);
             z-index: 1;
+            overflow: hidden;
         }
 
         .slide.active {
-            opacity: 1;
-            transform: translateX(0);
-            pointer-events: all;
+            display: flex;
             z-index: 10;
-            visibility: visible;
         }
 
         .slide.out-left {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(-80px);
-            z-index: 1;
+            display: none;
         }
 
         /* SLIDE INNER */
         .s-content {
             width: 100%;
-            max-width: 1500px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
         .s-tag {
-            font-size: .7rem;
+            font-size: .72rem;
             font-weight: 700;
             letter-spacing: .18em;
             text-transform: uppercase;
@@ -120,7 +128,7 @@
             display: flex;
             align-items: center;
             gap: .5rem;
-            margin-bottom: .9rem
+            margin-bottom: .4rem
         }
 
         .s-tag::before {
@@ -131,14 +139,14 @@
         }
 
         h1.s-h {
-            font-size: clamp(2.2rem, 5vw, 4.2rem);
+            font-size: clamp(2rem, 3.5vw, 3.2rem);
             font-weight: 900;
             line-height: 1.05;
             letter-spacing: -.03em
         }
 
         h2.s-h {
-            font-size: clamp(1.8rem, 3.5vw, 3rem);
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem);
             font-weight: 800;
             line-height: 1.1;
             letter-spacing: -.02em
@@ -153,9 +161,9 @@
 
         .s-sub {
             color: var(--t2);
-            font-size: 1.05rem;
-            line-height: 1.8;
-            margin-top: .9rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-top: .35rem;
         }
 
         /* CXO VALUE ADDITIONS */
@@ -163,14 +171,14 @@
             background: rgba(34, 211, 160, 0.08);
             border: 1px solid rgba(34, 211, 160, 0.3);
             border-left: 4px solid var(--g);
-            padding: 1.25rem 1.5rem;
+            padding: .5rem 1rem;
             border-radius: 8px;
-            margin-top: 1.5rem;
-            font-size: 0.95rem;
+            margin-top: .6rem;
+            font-size: .95rem;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: .75rem;
             box-shadow: 0 4px 20px rgba(34, 211, 160, 0.1);
         }
 
@@ -217,30 +225,30 @@
         .g2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 1.8rem
+            gap: .85rem;
+            margin-top: .8rem
         }
 
         .g3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.25rem;
-            margin-top: 1.8rem
+            gap: .7rem;
+            margin-top: .8rem
         }
 
         .g4 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-top: 1.8rem
+            gap: .6rem;
+            margin-top: .8rem
         }
 
         /* CARDS */
         .card {
             background: var(--s);
             border: 1px solid var(--b);
-            border-radius: 14px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: .75rem 1rem;
             transition: all .2s
         }
 
@@ -253,30 +261,30 @@
         .card h3 {
             font-size: .95rem;
             font-weight: 700;
-            margin: .6rem 0 .4rem
+            margin: .4rem 0 .25rem
         }
 
         .card p {
-            font-size: .82rem;
+            font-size: .88rem;
             color: var(--t2);
-            line-height: 1.6
+            line-height: 1.5
         }
 
         .card .ci {
             color: var(--a);
             display: flex;
-            margin-bottom: .25rem
+            margin-bottom: .2rem
         }
 
         /* PAIN ITEMS */
         .pain {
             display: flex;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
+            gap: .6rem;
+            padding: .35rem .75rem;
             background: rgba(248, 113, 113, .06);
             border: 1px solid rgba(248, 113, 113, .2);
-            border-radius: 10px;
-            margin-bottom: .5rem
+            border-radius: 8px;
+            margin-bottom: .2rem
         }
 
         .pain .pi {
@@ -288,51 +296,52 @@
         .pain strong {
             color: var(--t);
             display: block;
-            font-size: .85rem;
-            margin-bottom: .2rem
+            font-size: .92rem;
+            margin-bottom: 0
         }
 
         .pain p {
-            font-size: .8rem;
+            font-size: .85rem;
             color: var(--t2);
             margin: 0;
-            line-height: 1.5
+            line-height: 1.35
         }
 
         /* STAT BLOCKS */
         .stats {
             display: flex;
-            gap: 3rem;
-            margin-top: 1.5rem;
+            gap: 2rem;
+            margin-top: 1rem;
             flex-wrap: wrap
         }
 
         .stat .n {
-            font-size: 2.8rem;
+            font-size: clamp(1.3rem, 2vw, 2rem);
             font-weight: 900;
             background: linear-gradient(135deg, var(--a), var(--a2));
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent
+            -webkit-text-fill-color: transparent;
+            background-clip: text
         }
 
         .stat .l {
-            font-size: .72rem;
+            font-size: .68rem;
             color: var(--t3);
             text-transform: uppercase;
             letter-spacing: .1em;
-            margin-top: .15rem
+            margin-top: .1rem
         }
 
         /* SECURITY LAYERS */
         .layer {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: .75rem 1.25rem;
+            gap: .6rem;
+            padding: .35rem .85rem;
             background: var(--s);
             border-left: 3px solid var(--a);
             border-radius: 0 8px 8px 0;
-            margin-bottom: .5rem;
+            margin-bottom: .2rem;
             font-size: .85rem
         }
 
@@ -341,13 +350,13 @@
             color: var(--a);
             font-size: .72rem;
             font-weight: 600;
-            min-width: 22px
+            min-width: 20px
         }
 
         .layer .ll {
             color: var(--t);
             font-weight: 600;
-            min-width: 190px
+            min-width: 140px
         }
 
         .layer .ld {
@@ -359,14 +368,14 @@
         .badges {
             display: flex;
             flex-wrap: wrap;
-            gap: .4rem;
-            margin-top: .9rem
+            gap: .35rem;
+            margin-top: .6rem
         }
 
         .badge {
-            padding: .25rem .7rem;
+            padding: .25rem .65rem;
             border-radius: 50px;
-            font-size: .72rem;
+            font-size: .75rem;
             font-weight: 600;
             background: rgba(59, 130, 246, .14);
             color: var(--a);
@@ -383,13 +392,13 @@
         .tbl {
             width: 100%;
             border-collapse: collapse;
-            font-size: .82rem;
-            margin-top: 1.5rem
+            font-size: .85rem;
+            margin-top: .8rem
         }
 
         .tbl th,
         .tbl td {
-            padding: .75rem 1rem;
+            padding: .5rem .75rem;
             text-align: left;
             border-bottom: 1px solid var(--b)
         }
@@ -431,14 +440,14 @@
 
         /* VERTICAL TIMELINE */
         .timeline {
-            margin-top: 1.5rem
+            margin-top: 1rem
         }
 
         .tl-item {
             display: flex;
-            gap: 1.25rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
+            gap: 1rem;
+            margin-bottom: .6rem;
+            padding-bottom: .6rem;
             border-bottom: 1px solid var(--b)
         }
 
@@ -448,48 +457,48 @@
         }
 
         .tl-num {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--a), var(--a2));
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: .8rem;
+            font-size: .75rem;
             flex-shrink: 0;
-            margin-top: .15rem
+            margin-top: .1rem
         }
 
         .tl-text h3 {
-            font-size: .9rem;
+            font-size: .92rem;
             font-weight: 700
         }
 
         .tl-text p {
-            font-size: .82rem;
+            font-size: .85rem;
             color: var(--t2);
-            margin-top: .2rem;
-            line-height: 1.55
+            margin-top: .15rem;
+            line-height: 1.5
         }
 
         /* MCP TILES */
         .mcps {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: .6rem;
-            margin-top: 1.5rem
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: .4rem;
+            margin-top: 1rem
         }
 
         .mcp {
             background: var(--s);
             border: 1px solid var(--b);
-            border-radius: 8px;
-            padding: .65rem .85rem;
+            border-radius: 7px;
+            padding: .45rem .7rem;
             display: flex;
             align-items: center;
-            gap: .5rem;
-            font-size: .8rem;
+            gap: .4rem;
+            font-size: .82rem;
             font-weight: 500
         }
 
@@ -505,15 +514,15 @@
         .plats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem
+            gap: .6rem;
+            margin-top: 1rem
         }
 
         .plat {
             background: var(--s);
             border: 1px solid var(--b);
-            border-radius: 12px;
-            padding: 1.1rem;
+            border-radius: 10px;
+            padding: .75rem;
             text-align: center
         }
 
@@ -521,18 +530,18 @@
             color: var(--a);
             display: flex;
             justify-content: center;
-            margin-bottom: .5rem
+            margin-bottom: .35rem
         }
 
         .plat strong {
             display: block;
-            font-size: .85rem
+            font-size: .88rem
         }
 
         .plat p {
-            font-size: .72rem;
+            font-size: .78rem;
             color: var(--t2);
-            margin-top: .2rem
+            margin-top: .15rem
         }
 
         /* HERO BG */
@@ -565,13 +574,13 @@
         .code {
             background: var(--s2);
             border: 1px solid var(--b);
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            padding: .65rem 1rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: .78rem;
-            line-height: 1.8;
+            font-size: .82rem;
+            line-height: 1.6;
             color: var(--a2);
-            margin-top: 1rem
+            margin-top: .75rem
         }
 
         .code .cm {
@@ -586,15 +595,15 @@
         .pii-flow {
             display: flex;
             flex-direction: column;
-            gap: .5rem;
-            margin-top: 1.25rem
+            gap: .35rem;
+            margin-top: .75rem
         }
 
         .pii-row {
-            padding: .65rem 1rem;
-            border-radius: 8px;
+            padding: .45rem .85rem;
+            border-radius: 6px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: .8rem
+            font-size: .82rem
         }
 
         .pii-r {
@@ -616,53 +625,53 @@
         }
 
         .pii-lbl {
-            font-size: .7rem;
+            font-size: .62rem;
             color: var(--t3);
-            margin: .3rem 0 .1rem .5rem;
+            margin: .2rem 0 .1rem .5rem;
             font-family: 'Inter', sans-serif
         }
 
         /* QUOTE SLIDE */
         .blockquote {
             border-left: 4px solid var(--a);
-            padding: 1.25rem 1.75rem;
+            padding: 1rem 1.5rem;
             background: rgba(59, 130, 246, .06);
-            border-radius: 0 12px 12px 0;
-            margin-top: 1.5rem
+            border-radius: 0 10px 10px 0;
+            margin-top: 1rem
         }
 
         .blockquote p {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             color: var(--t);
-            line-height: 1.7;
+            line-height: 1.6;
             font-style: italic
         }
 
         .blockquote cite {
-            font-size: .8rem;
+            font-size: .82rem;
             color: var(--t3);
-            margin-top: .75rem;
+            margin-top: .5rem;
             display: block
         }
 
         /* CTA SLIDE */
         .cta-links {
             display: flex;
-            gap: 1.25rem;
-            margin-top: 2rem;
+            gap: 1rem;
+            margin-top: 1.5rem;
             flex-wrap: wrap;
             justify-content: center
         }
 
         .btn {
-            padding: .8rem 2rem;
+            padding: .65rem 1.6rem;
             border-radius: 50px;
             font-weight: 700;
-            font-size: .9rem;
+            font-size: .92rem;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: .5rem;
+            gap: .45rem;
             transition: all .2s
         }
 
@@ -697,11 +706,12 @@
             background: rgba(5, 8, 16, .92);
             backdrop-filter: blur(20px);
             border-top: 1px solid var(--b);
-            padding: .75rem 2rem;
+            padding: .5rem 1.5rem;
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
             z-index: 1000;
+            height: 50px;
         }
 
         #slide-counter {
@@ -888,11 +898,27 @@
             }
 
             .stat .n {
-                font-size: 2.2rem;
+                font-size: clamp(1.1rem, 2vw, 1.6rem);
             }
 
             .stats {
-                gap: 2rem;
+                gap: 1.5rem;
+            }
+
+            .s-content {
+                max-width: 100%;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .card h3 {
+                font-size: .85rem;
+            }
+
+            .card p {
+                font-size: .78rem;
             }
 
             #slide-title-bar {
@@ -995,7 +1021,7 @@
             }
 
             .stat .n {
-                font-size: 1.8rem;
+                font-size: clamp(0.9rem, 4vw, 1.3rem);
             }
 
             .stat .l {

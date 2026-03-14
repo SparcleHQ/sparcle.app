@@ -253,11 +253,16 @@
             <div class="section-header">
                 <span class="section-label">Our Products</span>
                 <h2>Two Products.<br>One Vision.</h2>
-                <p>Built for unified intelligence across enterprise and individual workflows.</p>
+                <p>Built for one enterprise outcome: trusted answers and autonomous execution across your systems.</p>
+            </div>
+
+            <div class="product-tab-switch" role="navigation" aria-label="Focus product card">
+                <a href="#product-bolt" class="product-tab-link active">Bolt</a>
+                <a href="#product-bolt-data" class="product-tab-link">Bolt Data</a>
             </div>
 
             <div class="products-showcase">
-                <div class="product-main">
+                <div class="product-main" id="product-bolt">
                     <div class="product-badge">Enterprise</div>
                     <div class="product-header">
                         <img src="images/bolt-logo.svg" alt="Bolt" class="product-logo-img">
@@ -336,25 +341,26 @@
                     </div>
                 </div>
 
-                <div class="product-secondary">
-                    <div class="product-badge">macOS</div>
+                <div class="product-secondary" id="product-bolt-data">
+                    <div class="product-badge">Data Plane</div>
                     <div class="product-header">
                         <div class="sparcle-app-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                <ellipse cx="12" cy="5" rx="8" ry="3" />
+                                <path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
+                                <path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" />
                             </svg>
                         </div>
                         <div>
-                            <h3>Sparcle.app</h3>
-                            <p class="product-subtitle">AI for Mac Power Users</p>
+                            <h3>Bolt Data</h3>
+                            <p class="product-subtitle">Catalog to Federated, same contract</p>
                         </div>
                     </div>
 
                     <p class="product-intro">
-                        Lightweight desktop app bringing AI assistance to your fingertips. Global hotkey access, context
-                        awareness, integrated terminal—transform your Mac into an intelligent workspace.
+                        Bolt Data is the enterprise data plane behind search and grounding. Start with included Catalog,
+                        then scale to Dynamic, Enhanced, and Federated without changing your app integrations.
                     </p>
 
                     <div class="product-features-compact">
@@ -363,29 +369,33 @@
                                 stroke-width="2">
                                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                             </svg>
-                            Instant access anywhere
+                            Catalog included in every Bolt plan
                         </div>
                         <div class="compact-feature">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                             </svg>
-                            Context-aware assistant
+                            Same API and ACL semantics across tiers
                         </div>
                         <div class="compact-feature">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                             </svg>
-                            Autonomous workflows
+                            Dynamic and Enhanced for scale and governance
                         </div>
                         <div class="compact-feature">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
                                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                             </svg>
-                            Free during alpha
+                            Federated for multi-region enterprise programs
                         </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-start; margin-top: 1.5rem;">
+                        <a href="/pricing.html#bolt-data" class="btn btn-secondary btn-lg">View Bolt Data Plans</a>
                     </div>
                 </div>
             </div>

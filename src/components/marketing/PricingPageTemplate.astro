@@ -1,0 +1,429 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import type { PricingPageContent } from "../../data/offerings";
+
+interface Props {
+  content: PricingPageContent;
+  pageId: string;
+}
+
+const { content, pageId } = Astro.props;
+const toggleEnabled = Boolean(content.toggleLabelLeft && content.toggleLabelRight);
+---
+
+<BaseLayout
+  title={content.title}
+  description={content.description}
+  canonical={content.canonical}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: content.schemaName,
+      description: content.schemaDescription,
+      provider: {
+        "@type": "Organization",
+        name: "Sparcle, LLC",
+      },
+      url: content.canonical,
+    })} />
+  </Fragment>
+
+  <main class="pricing-page" data-page-id={pageId}>
+    <section class="pricing-hero">
+      <div class="container">
+        <p class="eyebrow">{content.pageKicker}</p>
+        <h1>{content.headline}</h1>
+        <p>{content.intro}</p>
+
+        {
+          toggleEnabled && (
+            <div class="hosting-toggle" role="group" aria-label="Select hosting model">
+              <button class="toggle-btn active" type="button" data-hosting-mode="selfHosted">
+                {content.toggleLabelLeft}
+              </button>
+              <button class="toggle-btn" type="button" data-hosting-mode="managed">
+                {content.toggleLabelRight}
+              </button>
+            </div>
+          )
+        }
+
+        {
+          content.includesCallout && (
+            <div class="includes-callout" role="note">
+              <p>{content.includesCallout}</p>
+              {content.includesCalloutHref && <a href={content.includesCalloutHref}>View Bolt Data pricing</a>}
+            </div>
+          )
+        }
+      </div>
+    </section>
+
+    <section class="pricing-plans" aria-label="Pricing plans">
+      <div class="container">
+        <div class="plan-grid">
+          {
+            content.plans.map((plan) => (
+              <article class={`plan-card ${plan.highlight ? "featured" : ""}`}>
+                {plan.highlight && <span class="plan-badge">{plan.highlight}</span>}
+                <h2>{plan.name}</h2>
+                <p class="plan-tagline">{plan.tagline}</p>
+                {plan.description && <p class="plan-description">{plan.description}</p>}
+                {plan.price && <p class="plan-price">{plan.price}</p>}
+                {
+                  plan.prices && (
+                    <p class="plan-price" data-hosting-price data-self-hosted={plan.prices.selfHosted} data-managed={plan.prices.managed}>
+                      {plan.prices.selfHosted}
+                    </p>
+                  )
+                }
+                {plan.note && <p class="plan-note">{plan.note}</p>}
+                <a href={plan.ctaHref} class="btn btn-primary btn-sm">{plan.ctaLabel}</a>
+                <ul class="plan-features">
+                  {plan.features.map((feature) => <li>{feature}</li>)}
+                </ul>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="compare" aria-label="Compare plans">
+      <div class="container">
+        <h2>Compare plans</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Capability</th>
+                {content.compareHeaders.map((header) => <th scope="col">{header}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {
+                content.compareRows.map((row) => (
+                  <tr>
+                    <th scope="row">{row.feature}</th>
+                    {row.values.map((value) => <td>{value}</td>)}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq" aria-label="Pricing questions">
+      <div class="container">
+        <h2>Questions?</h2>
+        <div class="faq-grid">
+          {
+            content.faqs.map((item) => (
+              <article class="faq-item">
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {
+    toggleEnabled && (
+      <script is:inline>
+        (() => {
+          const root = document.querySelector(`[data-page-id="${pageId}"]`);
+          if (!root) return;
+
+          const buttons = root.querySelectorAll(".toggle-btn");
+          const prices = root.querySelectorAll("[data-hosting-price]");
+
+          const setMode = (mode) => {
+            buttons.forEach((btn) => {
+              const active = btn.getAttribute("data-hosting-mode") === mode;
+              btn.classList.toggle("active", active);
+              btn.setAttribute("aria-pressed", String(active));
+            });
+
+            prices.forEach((node) => {
+              const next = node.getAttribute(mode === "managed" ? "data-managed" : "data-self-hosted");
+              if (next) node.textContent = next;
+            });
+          };
+
+          buttons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const mode = btn.getAttribute("data-hosting-mode") || "selfHosted";
+              setMode(mode);
+            });
+          });
+
+          setMode("selfHosted");
+        })();
+      </script>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .pricing-page {
+    padding-top: calc(var(--nav-height) + 2rem);
+    padding-bottom: 3rem;
+  }
+
+  .pricing-hero {
+    padding: 2.8rem 0 1.8rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+  }
+
+  .pricing-hero h1 {
+    margin-bottom: 0.9rem;
+    max-width: 880px;
+  }
+
+  .pricing-hero p {
+    max-width: 760px;
+  }
+
+  .hosting-toggle {
+    margin-top: 1.1rem;
+    display: inline-flex;
+    padding: 0.25rem;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    gap: 0.25rem;
+    background: var(--bg-elevated);
+  }
+
+  .toggle-btn {
+    border-radius: 999px;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.86rem;
+    color: var(--text-body);
+    border: 1px solid transparent;
+  }
+
+  .toggle-btn.active {
+    color: var(--text-on-primary);
+    background: linear-gradient(135deg, var(--brand-gradient-start), var(--brand-gradient-end));
+  }
+
+  .includes-callout {
+    margin-top: 1rem;
+    border: 1px solid var(--border-default);
+    background: var(--bg-elevated);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+  }
+
+  .includes-callout p {
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  .includes-callout a {
+    display: inline-block;
+    margin-top: 0.4rem;
+    color: var(--brand-primary);
+    font-weight: 600;
+  }
+
+  .pricing-plans {
+    padding: 1.2rem 0 1.5rem;
+  }
+
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .plan-card {
+    position: relative;
+    border: 1px solid var(--border-default);
+    background: var(--bg-elevated);
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  .plan-card.featured {
+    border-color: var(--brand-primary);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .plan-badge {
+    position: absolute;
+    top: -10px;
+    right: 12px;
+    font-size: 0.74rem;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--brand-gradient-start), var(--brand-gradient-end));
+    color: var(--text-on-primary);
+  }
+
+  .plan-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .plan-tagline {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .plan-description {
+    font-size: 0.9rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .plan-price {
+    margin: 0 0 0.2rem;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1.2;
+  }
+
+  .plan-note {
+    margin: 0 0 0.7rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .plan-features {
+    margin-top: 0.8rem;
+    list-style: none;
+  }
+
+  .plan-features li {
+    margin-bottom: 0.4rem;
+    font-size: 0.86rem;
+    color: var(--text-body);
+  }
+
+  .plan-features li::before {
+    content: "\2713";
+    margin-right: 0.5rem;
+    color: #34d399;
+    font-weight: 700;
+  }
+
+  .compare {
+    padding: 1rem 0 1.8rem;
+  }
+
+  .compare h2 {
+    margin-bottom: 0.8rem;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-elevated);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+  }
+
+  th,
+  td {
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--border-default);
+    text-align: left;
+    font-size: 0.86rem;
+  }
+
+  thead th {
+    color: var(--text-heading);
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .faq {
+    padding: 1rem 0 0;
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 0.9rem;
+  }
+
+  .faq-item {
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    padding: 1rem;
+  }
+
+  .faq-item h3 {
+    font-size: 1rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .faq-item p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 980px) {
+    .plan-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .pricing-page {
+      padding-top: calc(var(--nav-height) + 1rem);
+    }
+
+    .hosting-toggle {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .toggle-btn {
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 0.5rem 0.55rem;
+    }
+
+    .plan-price {
+      font-size: 1.35rem;
+    }
+  }
+</style>

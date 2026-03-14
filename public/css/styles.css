@@ -235,6 +235,16 @@ section {
     gap: 0.5rem;
 }
 
+.nav-item {
+    position: relative;
+}
+
+.nav-link-with-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+}
+
 .nav-link {
     font-size: 0.9375rem;
     font-weight: 500;
@@ -253,6 +263,57 @@ section {
 .nav-link.nav-active {
     color: var(--brand-primary);
     background: var(--brand-primary-light);
+}
+
+.submenu-toggle {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    color: var(--text-body);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.submenu-toggle:hover,
+.submenu-toggle:focus-visible {
+    color: var(--text-heading);
+    background: var(--brand-primary-light);
+}
+
+.submenu-caret {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.nav-item-has-submenu .submenu-toggle[aria-expanded="true"] .submenu-caret {
+    transform: rotate(180deg);
+}
+
+.nav-submenu {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    min-width: 220px;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 0.4rem;
+    box-shadow: var(--shadow-lg);
+    display: none;
+    z-index: 1200;
+}
+
+.nav-submenu .nav-link {
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+}
+
+.nav-item-has-submenu:hover .nav-submenu,
+.nav-item-has-submenu:focus-within .nav-submenu {
+    display: block;
 }
 
 .nav-controls {
@@ -1186,6 +1247,60 @@ h3 {
     -webkit-backdrop-filter: blur(16px);
 }
 
+/* ─── PRODUCT TAB SWITCH (shared pill) ─── */
+.product-tab-switch {
+    display: inline-flex;
+    gap: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 100px;
+    padding: 3px;
+    margin: 0 auto 1.2rem;
+}
+
+.product-tab-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 28px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.product-tab-link:hover {
+    color: var(--text-heading);
+}
+
+.product-tab-link.active {
+    color: var(--text-heading);
+    background: var(--bg-muted);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+#product-bolt,
+#product-bolt-data,
+#bolt,
+#bolt-data {
+    scroll-margin-top: 108px;
+}
+
+#product-bolt:target,
+#product-bolt-data:target,
+#bolt:target,
+#bolt-data:target {
+    border-color: var(--brand-primary);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-4px);
+}
+
 /* ==================================================================================================
    SCROLL-TRIGGERED NUMBER COUNTER
    ================================================================================================== */
@@ -1406,6 +1521,43 @@ h3 {
         border-radius: var(--radius-md);
     }
 
+    .nav-item {
+        width: 100%;
+    }
+
+    .nav-link-with-toggle {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .nav-link-with-toggle .nav-link {
+        width: 100%;
+    }
+
+    .submenu-toggle {
+        flex-shrink: 0;
+    }
+
+    .nav-submenu {
+        position: static;
+        min-width: 100%;
+        margin: 0.15rem 0 0.35rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
+        padding: 0.35rem;
+        box-shadow: none;
+        border: 1px solid var(--border-default);
+    }
+
+    .nav-item-has-submenu:hover .nav-submenu,
+    .nav-item-has-submenu:focus-within .nav-submenu {
+        display: none;
+    }
+
+    .nav-item-has-submenu.submenu-open .nav-submenu {
+        display: block;
+    }
+
     .hero {
         padding-top: calc(var(--nav-height) + 4rem);
     }
@@ -1437,6 +1589,24 @@ h3 {
     .product-main,
     .product-secondary {
         padding: 2rem 1.5rem;
+    }
+
+    .products-focus-switch {
+        justify-content: stretch;
+        border-radius: 14px;
+        padding: 0.5rem;
+        top: calc(var(--nav-height) + 6px);
+    }
+
+    .section-pill-switch {
+        justify-content: stretch;
+        border-radius: 14px;
+        padding: 0.5rem;
+        top: calc(var(--nav-height) + 6px);
+    }
+
+    .focus-chip {
+        width: 100%;
     }
 
     .hero-ctas {

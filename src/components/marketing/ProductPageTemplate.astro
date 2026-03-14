@@ -1,0 +1,346 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import type { ProductPageContent } from "../../data/offerings";
+
+interface Props {
+  content: ProductPageContent;
+  secondContent?: ProductPageContent;
+  activeProduct?: string;
+}
+
+const { content, secondContent, activeProduct } = Astro.props;
+const hasDual = !!secondContent;
+const isSecondActive = activeProduct === 'second';
+---
+
+<BaseLayout
+  title={hasDual ? "Products | Sparcle" : content.title}
+  description={hasDual ? "Bolt and Bolt Data — two products, one vision for enterprise AI." : content.description}
+  canonical={content.canonical}
+>
+  <main class="offering-page" aria-labelledby="offering-title">
+
+    {hasDual && (
+      <div class="product-tab-bar">
+        <div class="product-tab-switch" role="tablist" aria-label="Product">
+          <button class={`product-tab ${!isSecondActive ? 'active' : ''}`} data-target="product-section-1" role="tab" aria-selected={!isSecondActive ? "true" : "false"} onclick="switchProductPage(this)">{content.productName}</button>
+          <button class={`product-tab ${isSecondActive ? 'active' : ''}`} data-target="product-section-2" role="tab" aria-selected={isSecondActive ? "true" : "false"} onclick="switchProductPage(this)">{secondContent!.productName}</button>
+        </div>
+      </div>
+    )}
+
+    <div id="product-section-1" class={`product-section ${!isSecondActive ? 'active' : ''}`}>
+      <section class="offering-hero">
+        <div class="container">
+          <p class="eyebrow">{content.productKicker}</p>
+          <h1 id="offering-title">{content.productHeadline}</h1>
+          <p class="intro">{content.productIntro}</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href={content.primaryCtaHref}>{content.primaryCtaLabel}</a>
+            <a class="btn btn-secondary btn-lg" href={content.secondaryCtaHref}>{content.secondaryCtaLabel}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="offering-highlights" aria-label={`${content.productName} highlights`}>
+        <div class="container">
+          <div class="section-title-wrap">
+            <h2>{content.productName} highlights</h2>
+            <p>Same visual framework, focused narrative for this product.</p>
+          </div>
+          <div class="card-grid">
+            {content.highlights.map((point) => (
+              <article class="feature-card">
+                <h3>{point.title}</h3>
+                <p>{point.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="offering-faq" aria-label={`${content.productName} questions`}>
+        <div class="container">
+          <div class="section-title-wrap">
+            <h2>Questions about {content.productName}?</h2>
+          </div>
+          <div class="faq-grid">
+            {content.faqs.map((item) => (
+              <article class="faq-card">
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+
+    {secondContent && (
+      <div id="product-section-2" class={`product-section ${isSecondActive ? 'active' : ''}`}>
+        <section class="offering-hero">
+          <div class="container">
+            <p class="eyebrow">{secondContent.productKicker}</p>
+            <h1>{secondContent.productHeadline}</h1>
+            <p class="intro">{secondContent.productIntro}</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary btn-lg" href={secondContent.primaryCtaHref}>{secondContent.primaryCtaLabel}</a>
+              <a class="btn btn-secondary btn-lg" href={secondContent.secondaryCtaHref}>{secondContent.secondaryCtaLabel}</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="offering-highlights" aria-label={`${secondContent.productName} highlights`}>
+          <div class="container">
+            <div class="section-title-wrap">
+              <h2>{secondContent.productName} highlights</h2>
+              <p>Same visual framework, focused narrative for this product.</p>
+            </div>
+            <div class="card-grid">
+              {secondContent.highlights.map((point) => (
+                <article class="feature-card">
+                  <h3>{point.title}</h3>
+                  <p>{point.detail}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section class="offering-faq" aria-label={`${secondContent.productName} questions`}>
+          <div class="container">
+            <div class="section-title-wrap">
+              <h2>Questions about {secondContent.productName}?</h2>
+            </div>
+            <div class="faq-grid">
+              {secondContent.faqs.map((item) => (
+                <article class="faq-card">
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    )}
+
+  </main>
+</BaseLayout>
+
+<style>
+  .offering-page {
+    padding-top: calc(var(--nav-height) + 2rem);
+  }
+
+  /* Product tab switch */
+  .product-tab-bar {
+    position: sticky;
+    top: var(--nav-height, 80px);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    padding: 14px 0;
+    background: var(--bg-body);
+  }
+
+  .product-tab-switch {
+    display: inline-flex;
+    gap: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 100px;
+    padding: 3px;
+  }
+
+  .product-tab {
+    padding: 7px 28px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+
+  .product-tab:hover {
+    color: var(--text-heading);
+  }
+
+  .product-tab.active {
+    color: var(--text-heading);
+    background: var(--bg-muted);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+
+  .product-section {
+    display: none;
+  }
+
+  .product-section.active {
+    display: block;
+  }
+
+  .offering-hero {
+    padding: 4rem 0 2.5rem;
+    background: radial-gradient(circle at 50% 0%, rgba(99, 179, 237, 0.16), transparent 55%);
+  }
+
+  .eyebrow {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: var(--brand-primary);
+    margin-bottom: 0.85rem;
+  }
+
+  .offering-hero h1 {
+    max-width: 880px;
+    margin-bottom: 1rem;
+  }
+
+  .intro {
+    max-width: 760px;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text-body);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
+  .offering-highlights {
+    padding: 2.5rem 0;
+  }
+
+  .section-title-wrap {
+    margin-bottom: 1.4rem;
+  }
+
+  .section-title-wrap h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title-wrap p {
+    color: var(--text-muted);
+  }
+
+  .card-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feature-card {
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    padding: 1.15rem 1.1rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .feature-card p {
+    margin: 0;
+    color: var(--text-body);
+    font-size: 0.93rem;
+  }
+
+  .offering-faq {
+    padding: 2.5rem 0 4rem;
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .faq-card {
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    padding: 1rem;
+  }
+
+  .faq-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .faq-card p {
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .card-grid,
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .offering-page {
+      padding-top: calc(var(--nav-height) + 1rem);
+    }
+
+    .offering-hero {
+      padding-top: 3rem;
+    }
+
+    .intro {
+      font-size: 0.97rem;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .hero-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<script is:inline>
+  function switchProductPage(tab) {
+    var tabs = document.querySelectorAll('.product-tab');
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].classList.remove('active');
+      tabs[i].setAttribute('aria-selected', 'false');
+    }
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+
+    var sections = document.querySelectorAll('.product-section');
+    for (var j = 0; j < sections.length; j++) {
+      sections[j].classList.remove('active');
+    }
+    document.getElementById(tab.dataset.target).classList.add('active');
+
+    var hash = tab.dataset.target === 'product-section-2' ? '#bolt-data' : '#bolt';
+    history.replaceState(null, '', hash);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  (function() {
+    var hash = window.location.hash;
+    if (hash === '#bolt-data') {
+      var tab = document.querySelector('[data-target="product-section-2"]');
+      if (tab) switchProductPage(tab);
+    }
+  })();
+</script>

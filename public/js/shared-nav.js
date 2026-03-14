@@ -33,6 +33,7 @@
     function activeClass(page) {
         if (page === 'research' && path.indexOf('research') !== -1) return ' nav-active';
         if (page === 'pricing' && path.indexOf('pricing') !== -1) return ' nav-active';
+        if (page === 'products' && (path.indexOf('/products') !== -1 || path.indexOf('/bolt') !== -1 || isHome)) return ' nav-active';
         if (page === 'home' && isHome) return ' nav-active';
         return '';
     }
@@ -51,8 +52,8 @@
         '  <ul class="nav-menu" id="navMenu">',
         '    <li><a href="' + href('#problem') + '" class="nav-link">The Crisis</a></li>',
         '    <li><a href="' + href('#solution') + '" class="nav-link">Our Solution</a></li>',
-        '    <li><a href="' + href('#products') + '" class="nav-link">Products</a></li>',
-        '    <li><a href="/pricing.html" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
+        '    <li><a href="' + href('#products') + '" class="nav-link' + activeClass('products') + '">Products</a></li>',
+        '    <li><a href="/pricing.html#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
         '    <li><a href="' + href('#proof') + '" class="nav-link">Why Sparcle</a></li>',
         '    <li><a href="/research.html" class="nav-link' + activeClass('research') + '">Research</a></li>',
         '    <li><a href="' + href('#contact') + '" class="nav-link">Contact</a></li>',
@@ -102,8 +103,8 @@
         '      <div class="footer-col">',
         '        <h5>Products</h5>',
         '        <ul>',
-        '          <li><a href="/#products">Bolt Enterprise</a></li>',
-        '          <li><a href="https://sparcle.app/" target="_blank">Sparcle.app</a></li>',
+        '          <li><a href="/products.html">Bolt Platform</a></li>',
+        '          <li><a href="/products/bolt-data.html">Bolt Data</a></li>',
         '        </ul>',
         '      </div>',
         '      <div class="footer-col">',
@@ -219,7 +220,7 @@
         });
 
         // Close on nav link click
-        menu.querySelectorAll('.nav-link').forEach(function (link) {
+        menu.querySelectorAll('a.nav-link').forEach(function (link) {
             link.addEventListener('click', function () {
                 menu.classList.remove('open');
                 toggle.classList.remove('open');

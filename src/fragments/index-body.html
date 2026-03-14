@@ -63,24 +63,67 @@
 
                 <!-- Full-Width Video Below -->
                 <div class="hero-video-full">
-                    <div class="video-wrapper" id="heroVideoWrapper">
+                    <div class="video-wrapper" id="heroVideoWrapper" style="cursor:pointer;" title="Watch demo with audio">
                         <video id="heroVideo" autoplay loop muted playsinline preload="metadata">
                             <source src="images/bolt-demo.mp4" type="video/mp4">
                         </video>
-                        <div class="video-controls-overlay">
-                            <button class="video-expand-btn" id="expandVideo" title="Play with audio">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"
-                                        stroke="none" />
-                                    <line x1="23" y1="9" x2="17" y2="15" />
-                                    <line x1="17" y1="9" x2="23" y2="15" />
+                        <div class="video-controls-overlay" id="heroPlayOverlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);transition:background 0.2s;">
+                            <div style="background:rgba(99,102,241,0.85);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(99,102,241,0.5);">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="none">
+                                    <polygon points="8,5 20,12 8,19" />
                                 </svg>
-                            </button>
+                            </div>
                         </div>
                     </div>
                     <p class="video-caption">Click to watch the full demo with audio</p>
                 </div>
+
+                <!-- Video modal -->
+                <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;">
+                    <button id="heroModalClose" style="position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;color:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;z-index:10000;" aria-label="Close">&times;</button>
+                    <video id="heroModalVideo" controls playsinline style="max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 0 60px rgba(0,0,0,0.8);">
+                        <source src="images/bolt-demo.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <script>
+                (function() {
+                    var wrapper = document.getElementById('heroVideoWrapper');
+                    var heroVideo = document.getElementById('heroVideo');
+                    var overlay = document.getElementById('heroPlayOverlay');
+                    var modal = document.getElementById('heroVideoModal');
+                    var modalVideo = document.getElementById('heroModalVideo');
+                    var closeBtn = document.getElementById('heroModalClose');
+                    if (!wrapper || !modal) return;
+
+                    function openModal() {
+                        modal.style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                        if (heroVideo) heroVideo.pause();
+                        if (modalVideo) { modalVideo.currentTime = 0; modalVideo.play().catch(function(){}); }
+                    }
+                    function closeModal() {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = '';
+                        if (modalVideo) modalVideo.pause();
+                        if (heroVideo) heroVideo.play().catch(function(){});
+                    }
+
+                    wrapper.addEventListener('click', openModal);
+                    closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeModal(); });
+                    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+                    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+
+                    // Hide overlay once hero video is playing (to not obstruct autoplay preview)
+                    if (heroVideo) {
+                        heroVideo.addEventListener('playing', function() {
+                            if (overlay) overlay.style.background = 'rgba(0,0,0,0)';
+                        });
+                        heroVideo.addEventListener('pause', function() {
+                            if (overlay) overlay.style.background = 'rgba(0,0,0,0.15)';
+                        });
+                    }
+                })();
+                </script>
             </div>
         </div>
     </section>

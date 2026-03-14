@@ -33,8 +33,8 @@
     function activeClass(page) {
         if (page === 'research' && path.indexOf('research') !== -1) return ' nav-active';
         if (page === 'pricing' && path.indexOf('pricing') !== -1) return ' nav-active';
-        if (page === 'products' && (path.indexOf('/products') !== -1 || path.indexOf('/bolt') !== -1 || isHome)) return ' nav-active';
-        if (page === 'home' && isHome) return ' nav-active';
+        // On home page, active state is handled dynamically by scrollspy below
+        if (page === 'products' && (path.indexOf('/products') !== -1 || path.indexOf('/bolt') !== -1)) return ' nav-active';
         return '';
     }
 
@@ -228,5 +228,51 @@
             });
         });
     }());
+
+    /* ------------------------------------------------------------------
+       SCROLLSPY — highlight nav link for the visible section (home only)
+       ------------------------------------------------------------------ */
+    if (isHome) {
+        var sectionMap = [
+            { id: 'contact',  link: 'Contact' },
+            { id: 'proof',    link: 'Why Sparcle' },
+            { id: 'products', link: 'Products' },
+            { id: 'solution', link: 'Our Solution' },
+            { id: 'problem',  link: 'The Crisis' }
+        ];
+
+        function updateActiveNav() {
+            var scrollY = window.scrollY + 100; // 100px offset for navbar height
+            var active = null;
+
+            for (var i = 0; i < sectionMap.length; i++) {
+                var el = document.getElementById(sectionMap[i].id);
+                if (el && el.offsetTop <= scrollY) {
+                    active = sectionMap[i].link;
+                    break;
+                }
+            }
+
+            // Update nav-active class
+            var links = document.querySelectorAll('#navMenu a.nav-link');
+            links.forEach(function (a) {
+                if (active && a.textContent.trim() === active) {
+                    a.classList.add('nav-active');
+                } else {
+                    a.classList.remove('nav-active');
+                }
+            });
+        }
+
+        // Debounced scroll listener
+        var scrollTimer;
+        window.addEventListener('scroll', function () {
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(updateActiveNav, 50);
+        }, { passive: true });
+
+        // Run once on load
+        updateActiveNav();
+    }
 
 }());

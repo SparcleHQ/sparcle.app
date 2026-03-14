@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sparcle - AI-powered productivity assistant for macOS. Coming soon.">
+    <meta property="og:title" content="Sparcle - AI-Powered Productivity for macOS">
+    <meta property="og:description"
+        content="Transform your Mac into an AI-powered productivity powerhouse. Coming soon.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sparcle.app">
+    <title>Sparcle - AI-Powered Productivity for macOS</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5BBF4KVH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Z5BBF4KVH3');
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="logo">
+                        <span class="logo-icon">✨</span>
+                        <span class="logo-text" id="typingText"></span>
+                    </div>
+                </div>
+                <div class="header-bottom">
+                    <div class="context-bar">
+                        <span>Launch anywhere with Shift + ⌘ + Space • Context-aware AI • Powerful plugins</span>
+                    </div>
+                    <nav class="header-nav">
+                        <a href="#agent" class="nav-tab active">
+                            <span class="tab-icon">✨</span>
+                            <span>Agent</span>
+                        </a>
+                        <a href="#terminal" class="nav-tab">
+                            <span class="tab-icon">⌘</span>
+                            <span>Terminal</span>
+                        </a>
+                        <a href="#settings" class="nav-tab">
+                            <span class="tab-icon">⚙️</span>
+                            <span>Settings</span>
+                        </a>
+                    </nav>
+                </div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <span class="badge">🚀 Alpha Available</span>
+                <h2 class="headline">AI-Powered Productivity<br>for macOS</h2>
+                <p class="subheadline">
+                    Transform your Mac into an intelligent workspace.
+                    Sparcle brings AI assistance right to your fingertips with natural language commands,
+                    smart context awareness, and powerful automation.
+                </p>
+
+                <!-- Download CTA -->
+                <div class="alpha-cta">
+                    <a href="download.html" class="download-btn">
+                        <span>Download Alpha</span>
+                        <span class="version-tag">v0.1.0-alpha.2</span>
+                    </a>
+                    <p class="alpha-note">
+                        macOS 13.0+ • Free during alpha • 10 MB
+                    </p>
+                    <p class="install-note">
+                        ⚠️ Installation requires bypassing macOS security warning (one-time setup)
+                        <a href="download.html#installation">View guide →</a>
+                    </p>
+                </div>
+
+                <p class="form-note" id="formMessage"></p>
+
+                <!-- Video Demos Section -->
+                <div class="video-gallery">
+                    <h3 class="section-title">See Sparcle in Action</h3>
+
+                    <div class="video-row">
+                        <!-- Overview Video -->
+                        <div class="video-container" data-video-id="overview">
+                            <video width="100%" preload="metadata">
+                                <source src="media/Overview.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="video-controls">
+                                <button class="control-btn play-pause-btn" aria-label="Play/Pause">
+                                    <span class="play-icon">▶</span>
+                                    <span class="pause-icon">⏸</span>
+                                </button>
+                                <div class="spacer"></div>
+
+                                <button class="control-btn maximize-btn" aria-label="Maximize">
+                                    <span class="maximize-icon">⛶</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Enterprise Video -->
+                        <div class="video-container" data-video-id="enterprise">
+                            <video width="100%" preload="metadata">
+                                <source src="media/Demo1.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="video-controls">
+                                <button class="control-btn play-pause-btn" aria-label="Play/Pause">
+                                    <span class="play-icon">▶</span>
+                                    <span class="pause-icon">⏸</span>
+                                </button>
+                                <div class="spacer"></div>
+                                <button class="control-btn maximize-btn" aria-label="Maximize">
+                                    <span class="maximize-icon">⛶</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Agentic Video -->
+                        <div class="video-container" data-video-id="agentic">
+                            <video width="100%" preload="metadata">
+                                <source src="media/Demo2.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="video-controls">
+                                <button class="control-btn play-pause-btn" aria-label="Play/Pause">
+                                    <span class="play-icon">▶</span>
+                                    <span class="pause-icon">⏸</span>
+                                </button>
+                                <div class="spacer"></div>
+                                <button class="control-btn maximize-btn" aria-label="Maximize">
+                                    <span class="maximize-icon">⛶</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Research & ROI Section -->
+            <section id="research-highlight" class="feature-section">
+                <div class="research-highlight">
+                    <div class="research-container">
+                        <div class="research-content">
+                            <h3 class="section-subtitle">Impact Assessment</h3>
+                            <h2 class="section-title">The Cost of Fragmentation</h2>
+                            <p class="section-description">
+                                Modern work is a war zone of digital interruptions. Context switching is more than a
+                                productivity annoyance—it's a massive enterprise drain.
+                            </p>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-value">$450B</span>
+                                    <span class="stat-label">Annual cost to U.S. economy</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">47s</span>
+                                    <span class="stat-label">Average attention span</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">5 Weeks</span>
+                                    <span class="stat-label">Lost annually per employee</span>
+                                </div>
+                            </div>
+                            <div class="research-cta"
+                                style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                                <a href="research.html" class="research-link">
+                                    <span>View Interactive Research</span>
+                                    <span class="arrow">→</span>
+                                </a>
+                                <a href="media/Bolt_Strategic_Vision.pdf" target="_blank"
+                                    style="font-size: 0.9rem; color: #666; text-decoration: none; border-bottom: 1px dashed #999;">
+                                    Download The Bolt Vision (PDF)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="agent" class="feature-section first-section">
+                <h2 class="section-title">Agentic AI Capabilities</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <span class="item-icon">⚡</span>
+                        <h4>Instant Access</h4>
+                        <p>Launch anywhere with a global hotkey. Your AI assistant is always ready.</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🧠</span>
+                        <h4>Context Aware</h4>
+                        <p>Understands your screen, apps, and workflow to provide intelligent assistance.</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🤖</span>
+                        <h4>Autonomous Actions</h4>
+                        <p>Execute complex workflows automatically based on your intent and context.</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🔌</span>
+                        <h4>Tool Integration</h4>
+                        <p>Seamlessly connect with your tools and services through intelligent plugins.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="terminal" class="feature-section">
+                <h2 class="section-title">Integrated Terminal</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <span class="item-icon">⚡</span>
+                        <h4>Quick Commands</h4>
+                        <p>Execute terminal commands without leaving your workflow</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🔍</span>
+                        <h4>Smart Suggestions</h4>
+                        <p>AI-powered command suggestions based on context</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">▫️</span>
+                        <h4>Tool for your AI</h4>
+                        <p>AI uses it as a tool and you get to see the output</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">◼️</span>
+                        <h4>Your shell</h4>
+                        <p>You native configured shell works - be it ZSH, BASH or something else</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="settings" class="feature-section">
+                <h2 class="section-title">Enterprise Capabilities</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <span class="item-icon">🔐</span>
+                        <h4>SSO & SAML</h4>
+                        <p>Single Sign-On with SAML/OIDC and enterprise identity providers.</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🧾</span>
+                        <h4>Audit Logging</h4>
+                        <p>Comprehensive event audit trails for compliance and investigations.</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🛡️</span>
+                        <h4>Policy Controls</h4>
+                        <p>Fine‑grained permissions, approvals, and guardrails for safe automation.</p>
+                    </div>
+                    <div class="feature-item">
+                        <span class="item-icon">🌐</span>
+                        <h4>Data Residency</h4>
+                        <p>Privacy‑first design with configurable model routing and data boundaries.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="research.html">Research</a>
+                    <a href="mailto:team@sparcle.app">Contact</a>
+                </div>
+                <p class="copyright">&copy; 2025 Sparcle. All rights reserved. <span style="opacity:.6">This site is a
+                        marketing preview; capabilities are subject to change.</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="video-expand.js"></script>
+</body>
+
+</html>

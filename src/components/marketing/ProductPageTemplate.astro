@@ -220,8 +220,7 @@ function renderIcon(iconId: string | undefined): string {
     }
     document.getElementById(tab.dataset.target).classList.add('active');
 
-    var hash = tab.dataset.target === 'product-section-2' ? '#aeira' : '#bolt';
-    history.replaceState(null, '', hash);
+    history.replaceState(null, '', window.location.pathname);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 

@@ -126,7 +126,7 @@
         '    </div>',
         '    <div class="footer-bottom">',
         '      <span>&copy; 2026 Sparcle, LLC. All rights reserved.</span>',
-        '      <span class="footer-legal">Patents Pending: US 63/951,662 &bull; 63/952,801 &bull; 63/952,804</span>',
+        '      <span class="footer-legal">Patents Pending</span>',
         '    </div>',
         '  </div>',
         '</footer>'

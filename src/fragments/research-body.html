@@ -148,7 +148,7 @@
                     <div>
                         <strong style="color: var(--text-heading); display: block; margin-bottom: 0.2rem;">The Bolt
                             Solution</strong>
-                        Proactive awareness, patent-pending caching, MCP integration, enterprise security
+                        Proactive awareness, intelligent caching, MCP integration, enterprise security
                     </div>
                 </a>
                 <a href="#section-roi" class="toc-item">
@@ -486,41 +486,40 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
-                    Patent Pending — US Application No. 63/951,582
+                    Patent Pending
                 </div>
 
-                <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">Multi-Tier Caching Architecture</h3>
+                <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">Intelligent Caching Architecture</h3>
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem; max-width: 760px;">
                     LLM token costs and latency make "query everything" models economically unsustainable at scale.
-                    Bolt's three-tier architecture is designed to achieve high cache hit rates with lightning-fast
-                    responses.
+                    Bolt's multi-tier caching architecture is designed to achieve high cache hit rates with
+                    sub-second responses — delivering most answers without any LLM cost.
                 </p>
 
                 <div class="tier-list">
                     <div class="tier-item">
                         <span class="tier-badge">Tier 1</span>
                         <div class="tier-content">
-                            <h4>Vector RAG — &lt;100ms, zero LLM cost</h4>
-                            <p>Frequently accessed data (emails, calendar events, recent Jira tickets) is embedded and
-                                stored in a vector database. Queries hit this layer first. Cache hit delivers responses
-                                under 100ms with no token spend.</p>
+                            <h4>Semantic Cache — Sub-100ms, zero LLM cost</h4>
+                            <p>Frequently accessed data (emails, calendar events, recent tickets) is pre-indexed
+                                for instant retrieval. Queries hit this layer first, delivering responses in
+                                milliseconds with no token spend.</p>
                         </div>
                     </div>
                     <div class="tier-item">
                         <span class="tier-badge">Tier 2</span>
                         <div class="tier-content">
-                            <h4>Redis Cache — &lt;200ms, zero LLM cost</h4>
-                            <p>Structured data (user profiles, org charts, project metadata) cached in Redis with
-                                configurable TTLs. Delivers under 200ms with no token cost — handles the majority of
-                                repeated structured queries.</p>
+                            <h4>Structured Cache — Sub-200ms, zero LLM cost</h4>
+                            <p>Structured data (user profiles, org charts, project metadata) cached with
+                                configurable TTLs. Handles the majority of repeated queries with no token cost.</p>
                         </div>
                     </div>
                     <div class="tier-item">
                         <span class="tier-badge">Tier 3</span>
                         <div class="tier-content">
                             <h4>LLM Fallback — Novel or complex queries only</h4>
-                            <p>Only novel or complex queries invoke the LLM with full MCP tool orchestration. This
-                                represents 10–30% of queries, keeping token costs predictable and reducing spend 10–20×
+                            <p>Only novel or complex queries invoke the LLM with full tool orchestration. This
+                                keeps token costs predictable and reduces spend significantly
                                 vs. uncached architectures.</p>
                         </div>
                     </div>
@@ -595,7 +594,7 @@
                         </tr>
                         <tr>
                             <td>PII Protection</td>
-                            <td>Regex-based redaction for SSNs, credit cards, API keys</td>
+                            <td>Automated redaction for SSNs, credit cards, API keys, and other sensitive data</td>
                         </tr>
                         <tr>
                             <td>Audit Trail</td>
@@ -785,7 +784,7 @@
                     </svg>
                     Download Strategic Vision PDF
                 </a>
-                <a href="https://sparcle.app/whitepaper-print.html" target="_blank" class="btn btn-primary btn-lg">
+                <a href="https://sparcle.app/legacy/whitepaper-print.html" target="_blank" class="btn btn-primary btn-lg">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

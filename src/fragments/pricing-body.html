@@ -28,7 +28,7 @@
             </p>
 
             <div class="trial-cta-strip">
-                <a href="mailto:bolt@sparcle.app?subject=Bolt%20Free%20Trial%20%E2%80%93%207%20Days&body=I%27d%20like%20to%20try%20Bolt%20for%207%20days.%0A%0AName%3A%20%0ACompany%3A%20%0ATeam%20size%3A%20"
+                <a href="#" onclick="openContactModal('Bolt Free Trial – 7 Days'); return false;"
                     class="trial-cta-btn">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -69,7 +69,7 @@
                     <span class="period">/ seat / month</span>
                 </div>
                 <div class="plan-price-note">Billed annually &middot; Self-hosted &middot; Full data sovereignty</div>
-                <a href="mailto:bolt@sparcle.app?subject=Bolt%20Absolute%20Pilot%20Request"
+                <a href="#" onclick="openContactModal('Bolt Absolute Pilot Request'); return false;"
                     class="plan-cta outline">Request Pilot</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -113,7 +113,7 @@
                     <span class="period">/ seat / month</span>
                 </div>
                 <div class="plan-price-note">Billed annually &middot; Self-hosted &middot; AI + smart routing</div>
-                <a href="mailto:bolt@sparcle.app?subject=Bolt%20Bundled%20Pilot%20Request"
+                <a href="#" onclick="openContactModal('Bolt Bundled Pilot Request'); return false;"
                     class="plan-cta primary">Request Pilot</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -155,7 +155,7 @@
                     <span class="period">/ seat / month</span>
                 </div>
                 <div class="plan-price-note">Billed annually &middot; Fully managed hosting + more AI</div>
-                <a href="mailto:bolt@sparcle.app?subject=Bolt%20Complete%20Inquiry" class="plan-cta warm">Contact
+                <a href="#" onclick="openContactModal('Bolt Complete Inquiry'); return false;" class="plan-cta warm">Contact
                     Sales</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -568,7 +568,7 @@
                         <li>On-premise / air-gapped option</li>
                         <li>Regional data residency</li>
                     </ul>
-                    <a href="mailto:bolt@sparcle.app?subject=Bolt%20Enterprise%20Pilot%20Inquiry"
+                    <a href="#" onclick="openContactModal('Bolt Enterprise Pilot Inquiry'); return false;"
                         class="plan-cta primary" style="display:inline-block; width:auto; padding:12px 32px;">Talk to
                         Sales</a>
                 </div>
@@ -709,7 +709,7 @@
                 </div>
                 <div class="plan-price-note">8 core + 2 custom categories &middot; 50 records each &middot;
                     fair-use limits</div>
-                <a href="mailto:bolt@sparcle.app?subject=Aeira%20Catalog%20Overview" class="plan-cta outline">Learn
+                <a href="#" onclick="openContactModal('Aeira Catalog Overview'); return false;" class="plan-cta outline">Learn
                     more</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -741,7 +741,7 @@
                 </div>
                 <div class="plan-price-note">Billed annually &middot; Up to 10K records &middot; Private Instance
                     License</div>
-                <a href="mailto:bolt@sparcle.app?subject=Aeira%20Dynamic%20Pilot" class="plan-cta outline">Start
+                <a href="#" onclick="openContactModal('Aeira Dynamic Pilot'); return false;" class="plan-cta outline">Start
                     Dynamic</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -775,7 +775,7 @@
                 </div>
                 <div class="plan-price-note">Billed annually &middot; Up to 100K records &middot; Private Instance
                     License</div>
-                <a href="mailto:bolt@sparcle.app?subject=Aeira%20Enhanced%20Inquiry" class="plan-cta primary">Talk to
+                <a href="#" onclick="openContactModal('Aeira Enhanced Inquiry'); return false;" class="plan-cta primary">Talk to
                     Aeira Team</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -806,7 +806,7 @@
                     <span class="amount" style="font-size:2.4rem; letter-spacing:-1px">Custom</span>
                 </div>
                 <div class="plan-price-note">Custom annual contract &middot; Air-gapped / private</div>
-                <a href="mailto:bolt@sparcle.app?subject=Aeira%20Federated%20Architecture" class="plan-cta warm">Design
+                <a href="#" onclick="openContactModal('Aeira Federated Architecture'); return false;" class="plan-cta warm">Design
                     Federated Plan</a>
                 <hr class="plan-divider">
                 <ul class="plan-features">
@@ -1009,9 +1009,9 @@
                         <li>Roadmap influence and early access</li>
                     </ul>
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <a href="mailto:bolt@sparcle.app?subject=Aeira%20Managed%20Solution" class="plan-cta primary"
+                        <a href="#" onclick="openContactModal('Aeira Managed Solution'); return false;" class="plan-cta primary"
                             style="display:inline-block; width:auto; padding:12px 32px;">Get Managed Solution</a>
-                        <a href="mailto:bolt@sparcle.app?subject=Aeira%20Enterprise%20Inquiry" class="plan-cta outline"
+                        <a href="#" onclick="openContactModal('Aeira Enterprise Inquiry'); return false;" class="plan-cta outline"
                             style="display:inline-block; width:auto; padding:12px 32px;">Talk to Aeira Team</a>
                     </div>
                 </div>
@@ -1173,4 +1173,119 @@
 
     if (window.location.hash) activateFromHash();
     window.addEventListener('hashchange', activateFromHash);
+</script>
+
+<!-- Contact Modal -->
+<div id="contactModalOverlay" class="contact-modal-overlay" role="dialog" aria-modal="true" aria-label="Contact form">
+    <div class="contact-modal">
+        <button class="contact-modal-close" onclick="closeContactModal()" aria-label="Close">&times;</button>
+        <h3 id="contactModalTitle">Get in Touch</h3>
+        <p class="modal-subtitle">We'll respond within one business day.</p>
+        <form id="contactForm" autocomplete="on">
+            <div id="contactFormFields">
+                <input type="hidden" id="contactInterest" name="interest" value="">
+                <div class="contact-form-group">
+                    <label for="contactName">Name</label>
+                    <input type="text" id="contactName" name="name" required placeholder="Jane Smith" autocomplete="name">
+                </div>
+                <div class="contact-form-group">
+                    <label for="contactEmail">Work Email</label>
+                    <input type="email" id="contactEmail" name="email" required placeholder="jane@company.com" autocomplete="email">
+                </div>
+                <div class="contact-form-group">
+                    <label for="contactCompany">Company</label>
+                    <input type="text" id="contactCompany" name="company" placeholder="Acme Corp" autocomplete="organization">
+                </div>
+                <div class="contact-form-group">
+                    <label for="contactTeamSize">Team Size</label>
+                    <select id="contactTeamSize" name="teamSize">
+                        <option value="">Select…</option>
+                        <option value="1-10">1–10</option>
+                        <option value="11-50">11–50</option>
+                        <option value="51-200">51–200</option>
+                        <option value="201-500">201–500</option>
+                        <option value="500+">500+</option>
+                    </select>
+                </div>
+                <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">Send Request</button>
+            </div>
+            <div id="contactFormStatus" class="contact-form-status"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    /* ── Contact Modal ─────────────────────────────── */
+    var contactOverlay = document.getElementById('contactModalOverlay');
+    var contactForm    = document.getElementById('contactForm');
+    var contactFields  = document.getElementById('contactFormFields');
+    var contactStatus  = document.getElementById('contactFormStatus');
+    var contactInterest = document.getElementById('contactInterest');
+    var contactSubmit  = document.getElementById('contactSubmitBtn');
+    var contactTitle   = document.getElementById('contactModalTitle');
+
+    function openContactModal(interest) {
+        contactInterest.value = interest || 'General Inquiry';
+        contactTitle.textContent = interest || 'Get in Touch';
+        contactFields.style.display = '';
+        contactStatus.className = 'contact-form-status';
+        contactSubmit.disabled = false;
+        contactSubmit.textContent = 'Send Request';
+        contactOverlay.classList.add('open');
+        setTimeout(function() {
+            document.getElementById('contactName').focus();
+        }, 100);
+    }
+
+    function closeContactModal() {
+        contactOverlay.classList.remove('open');
+        contactForm.reset();
+    }
+
+    contactOverlay.addEventListener('click', function(e) {
+        if (e.target === contactOverlay) closeContactModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && contactOverlay.classList.contains('open')) {
+            closeContactModal();
+        }
+    });
+
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        contactSubmit.disabled = true;
+        contactSubmit.textContent = 'Sending\u2026';
+
+        var payload = {
+            name: document.getElementById('contactName').value.trim(),
+            email: document.getElementById('contactEmail').value.trim(),
+            company: document.getElementById('contactCompany').value.trim(),
+            teamSize: document.getElementById('contactTeamSize').value,
+            interest: contactInterest.value
+        };
+
+        var FORM_URL = 'https://script.google.com/macros/s/AKfycbzNqgqye15z-BzB6vQyciBp0-5HoGI8TtphENSpYxpWDk_5EB5amv30VDEgOhI58nBTbQ/exec';
+
+        fetch(FORM_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function() {
+            contactFields.style.display = 'none';
+            contactStatus.className = 'contact-form-status show';
+            contactStatus.innerHTML =
+                '<div class="status-icon">&#10003;</div>' +
+                '<h4>Request Sent!</h4>' +
+                '<p>We\u2019ll get back to you within one business day.</p>';
+        }).catch(function() {
+            contactFields.style.display = 'none';
+            contactStatus.className = 'contact-form-status show';
+            contactStatus.innerHTML =
+                '<div class="status-icon">&#9993;</div>' +
+                '<h4>Almost there!</h4>' +
+                '<p>Please email us directly at <a href="mailto:bolt@sparcle.app" style="color:var(--brand-primary)">bolt@sparcle.app</a></p>';
+        });
+    });
 </script>

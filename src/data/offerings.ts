@@ -142,7 +142,7 @@ export const aeiraProductContent: ProductPageContent = {
   primaryCtaLabel: "Talk to Aeira Team",
   primaryCtaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Architecture%20Discussion",
   secondaryCtaLabel: "View Aeira Pricing",
-  secondaryCtaHref: "/pricing/aeira.html",
+  secondaryCtaHref: "/pricing.html#aeira",
   highlights: [
     {
       title: "Included Catalog Baseline",
@@ -197,7 +197,7 @@ export const boltPricingContent: PricingPageContent = {
     "Bolt platform pricing with three tiers and included Aeira Catalog.",
   includesCallout:
     "Aeira Catalog is included in every Bolt plan. Need higher scale or governance? View Aeira plans.",
-  includesCalloutHref: "/pricing/aeira.html",
+  includesCalloutHref: "/pricing.html#aeira",
   plans: [
     {
       name: "Bolt Absolute",

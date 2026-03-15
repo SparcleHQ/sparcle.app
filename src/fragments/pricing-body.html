@@ -594,15 +594,6 @@
                 <strong>updates, patches, and support included in every tier.</strong></p>
             <p style="font-size:0.95rem; color:var(--text-muted,#94a3b8); margin-top:0.75rem;">Deploy on <strong style="color:var(--text-body,#e2e8f0)">AWS</strong>, <strong style="color:var(--text-body,#e2e8f0)">Azure</strong>, <strong style="color:var(--text-body,#e2e8f0)">GCP</strong>, or <strong style="color:var(--text-body,#e2e8f0)">On-Prem</strong> &mdash; total control over your AI data infrastructure.</p>
 
-            <div class="billing-toggle">
-                <span id="data-monthly-label">Monthly</span>
-                <button class="toggle-track annual" id="data-billing-toggle" onclick="toggleDataBilling()"
-                    aria-label="Toggle annual billing" aria-pressed="true">
-                    <div class="toggle-knob"></div>
-                </button>
-                <span class="active" id="data-annual-label">Annual</span>
-                <span class="save-badge">2+ months free</span>
-            </div>
         </section>
 
         <!-- AEIRA PRICING CARDS -->
@@ -644,10 +635,10 @@
                     <div class="plan-tagline">Self-managed deployment on your own infrastructure.</div>
                     <div class="plan-price">
                         <span class="currency">$</span>
-                        <span class="amount" data-monthly="18" data-annual="15">15</span>
-                        <span class="period">/ instance / month</span>
+                        <span class="amount">99</span>
+                        <span class="period">/ month</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Private Instance License</div>
+                    <div class="plan-price-note">Up to 10K records &middot; Private Instance License</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Dynamic%20Pilot" class="plan-cta outline">Start Dynamic</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
@@ -659,9 +650,9 @@
                         <li>20 ready-made entity templates + custom types via API</li>
                         <li>4-level ACL (public, department, group, user)</li>
                         <li>Bulk API ingestion (CSV, YAML, JSON)</li>
-                        <li>Up to 500K indexed records</li>
+                        <li>Up to 10K indexed records</li>
                         <li>Operational metrics (Prometheus)</li>
-                        <li>10K queries/day included</li>
+                        <li>Email support (5-day SLA)</li>
                     </ul>
                 </div>
 
@@ -675,24 +666,23 @@
                     <div class="plan-tagline">Private cloud orchestration with enterprise-grade Kafka ingestion.</div>
                     <div class="plan-price">
                         <span class="currency">$</span>
-                        <span class="amount" data-monthly="55" data-annual="45">45</span>
-                        <span class="period">/ cluster / month</span>
+                        <span class="amount">499</span>
+                        <span class="period">/ month</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Private Instance License</div>
+                    <div class="plan-price-note">Up to 100K records &middot; Private Instance License</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Enhanced%20Inquiry" class="plan-cta primary">Talk to Aeira Team</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
                         <li class="highlight">Everything in Dynamic, plus:</li>
                         <li><strong>Deployment:</strong> Private cloud (VPC)</li>
                         <li><strong>Data residency:</strong> 100% in-network</li>
-                        <li>Up to 5M indexed records</li>
+                        <li>Up to 100K indexed records</li>
                         <li>Async Kafka ingestion pipeline (high-throughput)</li>
                         <li>Per-user daily quotas with soft &amp; hard limits</li>
                         <li>30 QPS rate limiting with burst &amp; sliding window</li>
                         <li>Region-aware ACL filtering</li>
                         <li>Dedicated namespace isolation</li>
-                        <li>50K queries/day included</li>
-                        <li>Priority support + data advisory</li>
+                        <li>Priority support (1-day SLA)</li>
                     </ul>
                 </div>
 
@@ -715,7 +705,7 @@
                         <li class="highlight">Everything in Enhanced, plus:</li>
                         <li><strong>Deployment:</strong> Air-gapped / private cloud</li>
                         <li><strong>Data residency:</strong> 100% in-network</li>
-                        <li>Negotiated scale limits (millions+ records)</li>
+                        <li>Negotiated scale limits (100K+ records)</li>
                         <li>Dedicated cluster isolation (not just namespace)</li>
                         <li>Custom QPS and rate-limit profiles</li>
                         <li>Custom deployment topology and SLAs</li>
@@ -757,10 +747,10 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Price (annual)</td>
+                                <td>Price</td>
                                 <td class="plan-col">Free w/ Bolt</td>
-                                <td class="plan-col">$15/instance</td>
-                                <td class="plan-col">$45/cluster</td>
+                                <td class="plan-col">$99/mo</td>
+                                <td class="plan-col">$499/mo</td>
                                 <td class="plan-col">Contact Sales</td>
                             </tr>
                             <tr>
@@ -794,8 +784,8 @@
                             <tr>
                                 <td>Records</td>
                                 <td class="plan-col">500 (50/cat)</td>
-                                <td class="plan-col">Up to 500K</td>
-                                <td class="plan-col">Up to 5M</td>
+                                <td class="plan-col">Up to 10K</td>
+                                <td class="plan-col">Up to 100K</td>
                                 <td class="plan-col">Negotiated</td>
                             </tr>
                             <tr>

@@ -587,11 +587,11 @@
 
         <!-- HERO -->
         <section class="pricing-hero container">
-            <h1>Aeira pricing.<br><span class="gradient">Index anything. Find everything. Your infrastructure.</span></h1>
-            <p>Start free with Bolt Catalog &mdash; a curated company directory included in every Bolt plan.
-                Need to index wiki pages, runbooks, knowledge base articles, or any corporate data?
-                Aeira is a full enterprise search platform with hybrid AI&nbsp;search, ACL enforcement,
-                and <strong>every tier includes updates, patches, and support.</strong></p>
+            <h1>Aeira pricing.<br><span class="gradient">Your data. Your infrastructure. Zero compromise.</span></h1>
+            <p>Aeira is a <strong>100% self-hosted</strong> enterprise data plane. All indexing, search,
+                and AI retrieval run inside your own security perimeter &mdash; VPC, on-prem, or air-gapped.
+                No data ever leaves your infrastructure. Start free with Bolt Catalog, then scale with
+                <strong>updates, patches, and support included in every tier.</strong></p>
 
             <div class="billing-toggle">
                 <span id="data-monthly-label">Monthly</span>
@@ -640,22 +640,24 @@
                             <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg></div>
                     <div class="plan-name">Aeira Dynamic</div>
-                    <div class="plan-tagline">Index any corporate data. Hybrid AI search across everything.</div>
+                    <div class="plan-tagline">Self-managed deployment on your own infrastructure.</div>
                     <div class="plan-price">
                         <span class="currency">$</span>
-                        <span class="amount" data-monthly="10" data-annual="8">8</span>
-                        <span class="period">/ seat / month</span>
+                        <span class="amount" data-monthly="18" data-annual="15">15</span>
+                        <span class="period">/ instance / month</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Self-hosted license</div>
+                    <div class="plan-price-note">Billed annually &middot; Self-hosted (VPC)</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Dynamic%20Pilot" class="plan-cta outline">Start Dynamic</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
                         <li class="highlight">Everything in Catalog, plus:</li>
+                        <li><strong>Deployment:</strong> Self-hosted (VPC / on-prem)</li>
+                        <li><strong>Data residency:</strong> 100% in-network</li>
                         <li>Ingest any document &mdash; wikis, runbooks, guides, KB articles, and more</li>
                         <li>Hybrid search (keyword + semantic vector)</li>
                         <li>20 ready-made entity templates + custom types via API</li>
                         <li>4-level ACL (public, department, group, user)</li>
-                        <li>Bulk ingestion API (CSV, YAML, JSON)</li>
+                        <li>Bulk API ingestion (CSV, YAML, JSON)</li>
                         <li>Up to 500K indexed records</li>
                         <li>Operational metrics (Prometheus)</li>
                         <li>10K queries/day included</li>
@@ -669,19 +671,21 @@
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                         </svg></div>
                     <div class="plan-name">Aeira Enhanced</div>
-                    <div class="plan-tagline">Production-scale search with async ingestion and enterprise controls.</div>
+                    <div class="plan-tagline">Private cloud orchestration with enterprise-grade Kafka ingestion.</div>
                     <div class="plan-price">
                         <span class="currency">$</span>
-                        <span class="amount" data-monthly="12" data-annual="10">10</span>
-                        <span class="period">/ seat / month</span>
+                        <span class="amount" data-monthly="55" data-annual="45">45</span>
+                        <span class="period">/ cluster / month</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Enterprise controls</div>
+                    <div class="plan-price-note">Billed annually &middot; Self-hosted (VPC)</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Enhanced%20Inquiry" class="plan-cta primary">Talk to Aeira Team</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
                         <li class="highlight">Everything in Dynamic, plus:</li>
+                        <li><strong>Deployment:</strong> Self-hosted (VPC)</li>
+                        <li><strong>Data residency:</strong> 100% in-network</li>
                         <li>Up to 5M indexed records</li>
-                        <li>Async ingestion pipeline (Kafka, high-throughput)</li>
+                        <li>Async Kafka ingestion pipeline (high-throughput)</li>
                         <li>Per-user daily quotas with soft &amp; hard limits</li>
                         <li>30 QPS rate limiting with burst &amp; sliding window</li>
                         <li>Region-aware ACL filtering</li>
@@ -699,17 +703,17 @@
                             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                         </svg></div>
                     <div class="plan-name">Aeira Federated</div>
-                    <div class="plan-tagline">Custom architecture, dedicated isolation, and roadmap access.</div>
-                    <div class="plan-price">
-                        <span class="currency">$</span>
-                        <span class="amount" data-monthly="15" data-annual="12">12</span>
-                        <span class="period">/ seat / month</span>
+                    <div class="plan-tagline">Dedicated air-gapped architecture or multi-region VPC.</div>
+                    <div class="plan-price data-price">
+                        <span class="data-price-text">Contact Sales</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Minimum annual commit</div>
+                    <div class="plan-price-note">Custom annual contract &middot; Air-gapped / private</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Federated%20Architecture" class="plan-cta warm">Design Federated Plan</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
                         <li class="highlight">Everything in Enhanced, plus:</li>
+                        <li><strong>Deployment:</strong> Air-gapped / private cloud</li>
+                        <li><strong>Data residency:</strong> 100% in-network</li>
                         <li>Negotiated scale limits (millions+ records)</li>
                         <li>Dedicated cluster isolation (not just namespace)</li>
                         <li>Custom QPS and rate-limit profiles</li>
@@ -719,6 +723,17 @@
                         <li>Roadmap influence and early access</li>
                     </ul>
                 </div>
+        </div>
+
+        <!-- DATA SOVEREIGNTY CALLOUT -->
+        <div class="container" style="margin-top: 2rem;">
+            <div style="background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(99,179,237,0.08)); border: 1px solid rgba(52,211,153,0.2); border-radius: 12px; padding: 20px 28px; text-align: center; max-width: 800px; margin: 0 auto;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <strong style="color: #34d399; font-size: 0.95rem; letter-spacing: 0.02em;">Data Sovereignty</strong>
+                </div>
+                <p style="color: var(--text-body, #e2e8f0); font-size: 0.9rem; line-height: 1.6; margin: 0;">Aeira is a self-hosted solution. All data, indexing, and AI retrieval stay within your own security perimeter (VPC/On-prem). No data ever leaves your infrastructure.</p>
+            </div>
         </div>
 
         <!-- AEIRA COMPARISON TABLE -->
@@ -743,9 +758,23 @@
                             <tr>
                                 <td>Price (annual)</td>
                                 <td class="plan-col">Free w/ Bolt</td>
-                                <td class="plan-col">$8/seat</td>
-                                <td class="plan-col">$10/seat</td>
-                                <td class="plan-col">$12/seat</td>
+                                <td class="plan-col">$15/instance</td>
+                                <td class="plan-col">$45/cluster</td>
+                                <td class="plan-col">Contact Sales</td>
+                            </tr>
+                            <tr>
+                                <td>Deployment</td>
+                                <td class="plan-col"><span class="dash">&mdash;</span></td>
+                                <td class="plan-col">Self-Hosted (VPC)</td>
+                                <td class="plan-col">Self-Hosted (VPC)</td>
+                                <td class="plan-col">Air-Gapped / Private</td>
+                            </tr>
+                            <tr>
+                                <td>Data residency</td>
+                                <td class="plan-col"><span class="dash">&mdash;</span></td>
+                                <td class="plan-col">100% in-network</td>
+                                <td class="plan-col">100% in-network</td>
+                                <td class="plan-col">100% in-network</td>
                             </tr>
                             <tr>
                                 <td>What you can index</td>
@@ -776,18 +805,18 @@
                                 <td class="plan-col">Hybrid (keyword + semantic)</td>
                             </tr>
                             <tr>
-                                <td>ACL model</td>
-                                <td class="plan-col">4-level</td>
-                                <td class="plan-col">4-level</td>
-                                <td class="plan-col">4-level + region</td>
-                                <td class="plan-col">4-level + region</td>
+                                <td>Security</td>
+                                <td class="plan-col">4-level ACL</td>
+                                <td class="plan-col">4-level ACL</td>
+                                <td class="plan-col">Region-aware ACL</td>
+                                <td class="plan-col">Dedicated Isolation</td>
                             </tr>
                             <tr>
                                 <td>Ingestion</td>
                                 <td class="plan-col">Manual templates</td>
-                                <td class="plan-col">Bulk API</td>
-                                <td class="plan-col">Bulk + async pipeline</td>
-                                <td class="plan-col">Bulk + async pipeline</td>
+                                <td class="plan-col">Bulk API (Sync)</td>
+                                <td class="plan-col">Async Kafka Pipeline</td>
+                                <td class="plan-col">Custom Topology</td>
                             </tr>
                             <tr>
                                 <td>Query volume</td>
@@ -820,7 +849,7 @@
                             <tr>
                                 <td>Infrastructure</td>
                                 <td class="plan-col">Shared (near-zero cost)</td>
-                                <td class="plan-col">Shared namespace</td>
+                                <td class="plan-col">Customer VPC</td>
                                 <td class="plan-col">Dedicated namespace</td>
                                 <td class="plan-col">Dedicated cluster</td>
                             </tr>

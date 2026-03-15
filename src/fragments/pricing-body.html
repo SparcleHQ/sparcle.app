@@ -588,10 +588,11 @@
         <!-- HERO -->
         <section class="pricing-hero container">
             <h1>Aeira pricing.<br><span class="gradient">Your data. Your infrastructure. Zero compromise.</span></h1>
-            <p>Aeira is a <strong>100% self-hosted</strong> enterprise data plane. All indexing, search,
+            <p style="max-width:680px; margin-left:auto; margin-right:auto; margin-bottom:0.5rem;">Aeira is a <strong>100% self-hosted</strong> enterprise data plane. All indexing, search,
                 and AI retrieval run inside your own security perimeter &mdash; VPC, on-prem, or air-gapped.
                 No data ever leaves your infrastructure. Start free with Bolt Catalog, then scale with
                 <strong>updates, patches, and support included in every tier.</strong></p>
+            <p style="font-size:0.95rem; color:var(--text-muted,#94a3b8); margin-top:0.75rem;">Deploy on <strong style="color:var(--text-body,#e2e8f0)">AWS</strong>, <strong style="color:var(--text-body,#e2e8f0)">Azure</strong>, <strong style="color:var(--text-body,#e2e8f0)">GCP</strong>, or <strong style="color:var(--text-body,#e2e8f0)">On-Prem</strong> &mdash; total control over your AI data infrastructure.</p>
 
             <div class="billing-toggle">
                 <span id="data-monthly-label">Monthly</span>
@@ -646,12 +647,12 @@
                         <span class="amount" data-monthly="18" data-annual="15">15</span>
                         <span class="period">/ instance / month</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Self-hosted (VPC)</div>
+                    <div class="plan-price-note">Billed annually &middot; Private Instance License</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Dynamic%20Pilot" class="plan-cta outline">Start Dynamic</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
                         <li class="highlight">Everything in Catalog, plus:</li>
-                        <li><strong>Deployment:</strong> Self-hosted (VPC / on-prem)</li>
+                        <li><strong>Deployment:</strong> Private instance (VPC / on-prem)</li>
                         <li><strong>Data residency:</strong> 100% in-network</li>
                         <li>Ingest any document &mdash; wikis, runbooks, guides, KB articles, and more</li>
                         <li>Hybrid search (keyword + semantic vector)</li>
@@ -677,12 +678,12 @@
                         <span class="amount" data-monthly="55" data-annual="45">45</span>
                         <span class="period">/ cluster / month</span>
                     </div>
-                    <div class="plan-price-note">Billed annually &middot; Self-hosted (VPC)</div>
+                    <div class="plan-price-note">Billed annually &middot; Private Instance License</div>
                     <a href="mailto:bolt@sparcle.app?subject=Aeira%20Enhanced%20Inquiry" class="plan-cta primary">Talk to Aeira Team</a>
                     <hr class="plan-divider">
                     <ul class="plan-features">
                         <li class="highlight">Everything in Dynamic, plus:</li>
-                        <li><strong>Deployment:</strong> Self-hosted (VPC)</li>
+                        <li><strong>Deployment:</strong> Private cloud (VPC)</li>
                         <li><strong>Data residency:</strong> 100% in-network</li>
                         <li>Up to 5M indexed records</li>
                         <li>Async Kafka ingestion pipeline (high-throughput)</li>
@@ -730,9 +731,9 @@
             <div style="background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(99,179,237,0.08)); border: 1px solid rgba(52,211,153,0.2); border-radius: 12px; padding: 20px 28px; text-align: center; max-width: 800px; margin: 0 auto;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <strong style="color: #34d399; font-size: 0.95rem; letter-spacing: 0.02em;">Data Sovereignty</strong>
+                    <strong style="color: #34d399; font-size: 0.95rem; letter-spacing: 0.02em;">Zero-Knowledge Architecture</strong>
                 </div>
-                <p style="color: var(--text-body, #e2e8f0); font-size: 0.9rem; line-height: 1.6; margin: 0;">Aeira is a self-hosted solution. All data, indexing, and AI retrieval stay within your own security perimeter (VPC/On-prem). No data ever leaves your infrastructure.</p>
+                <p style="color: var(--text-body, #e2e8f0); font-size: 0.9rem; line-height: 1.6; margin: 0;">Aeira is a private-instance solution. All data, indexing, and AI retrieval stay within your own security perimeter (VPC/On-prem). No telemetry, no phone-home, no data ever leaves your infrastructure.</p>
             </div>
         </div>
 
@@ -766,7 +767,7 @@
                                 <td>Deployment</td>
                                 <td class="plan-col"><span class="dash">&mdash;</span></td>
                                 <td class="plan-col">Self-Hosted (VPC)</td>
-                                <td class="plan-col">Self-Hosted (VPC)</td>
+                                <td class="plan-col">Private Cloud (VPC)</td>
                                 <td class="plan-col">Air-Gapped / Private</td>
                             </tr>
                             <tr>

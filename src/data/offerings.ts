@@ -139,8 +139,8 @@ export const aeiraProductContent: ProductPageContent = {
   productHeadline: "Catalog to Federated, same contract and ACL semantics.",
   productIntro:
     "Aeira powers discovery and grounding with a consistent API and authorization model as customers scale from lightweight catalog to high-governance federation.",
-  primaryCtaLabel: "Talk to Data Team",
-  primaryCtaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Data%20Architecture%20Discussion",
+  primaryCtaLabel: "Talk to Aeira Team",
+  primaryCtaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Architecture%20Discussion",
   secondaryCtaLabel: "View Aeira Pricing",
   secondaryCtaHref: "/pricing/aeira.html",
   highlights: [
@@ -329,7 +329,7 @@ export const aeiraPricingContent: PricingPageContent = {
       },
       note: "Self-hosted license · any document type · hybrid search",
       ctaLabel: "Start Dynamic",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Data%20Dynamic",
+      ctaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Dynamic",
       features: [
         "Everything in Catalog",
         "Ingest any document — wikis, runbooks, guides, KB articles, and more",
@@ -351,8 +351,8 @@ export const aeiraPricingContent: PricingPageContent = {
       },
       note: "Enterprise controls · priority support",
       highlight: "Data Leader",
-      ctaLabel: "Talk to Data Team",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Data%20Enhanced",
+      ctaLabel: "Talk to Aeira Team",
+      ctaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Enhanced",
       features: [
         "Everything in Dynamic",
         "Up to 5M indexed records",

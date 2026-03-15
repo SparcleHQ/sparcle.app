@@ -1,0 +1,666 @@
+<div id="deck">
+    <div id="viewport">
+
+        <!-- ═══ SLIDE 1 — HERO ═══ -->
+        <div class="slide hero dark-hero active" data-title="Aeira — ACL-aware Enterprise Index">
+            <div class="hbg"></div>
+            <div class="s-content">
+                <div style="margin-bottom: 2rem;">
+                    <img src="/images/aeira-logo.svg" alt="Aeira" style="width: 80px; height: 80px;" />
+                </div>
+                <div class="s-tag">Aeira · Enterprise Index · 2026</div>
+                <h1 class="s-h" style="font-size:clamp(3rem,7vw,5.5rem)">The <span class="grad">ACL-aware</span><br>Enterprise Index</h1>
+                <p class="s-sub" style="text-align:center;margin:1.25rem auto;max-width:620px">Aeira powers discovery and grounding with a consistent API and authorization model — from lightweight catalog to high-governance federation. One contract. One ACL model. Every scale.</p>
+                <div class="stats" style="justify-content:center">
+                    <div class="stat">
+                        <div class="n">4 Tiers</div>
+                        <div class="l">Catalog → Federated</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">100K+</div>
+                        <div class="l">Records Indexed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">4-Level</div>
+                        <div class="l">ACL Enforcement</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">1 API</div>
+                        <div class="l">Across All Tiers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 2 — PROBLEM ═══ -->
+        <div class="slide" data-title="The Problem">
+            <div class="s-content">
+                <div class="s-tag">The Challenge</div>
+                <h2 class="s-h">Enterprise search is <span class="grad">broken by design</span></h2>
+                <p class="s-sub" style="margin-top:0.5rem;font-size:0.95rem;">Knowledge is trapped in silos, search tools ignore access controls, and every scale upgrade means a costly replatform.</p>
+
+                <div class="roi-callout alert"
+                    style="margin: 0.5rem 0 1rem 0; width: 100%; box-sizing: border-box; padding: 1rem 1.25rem;">
+                    <div><i data-lucide="alert-triangle" style="width:28px;height:28px;color:var(--r)"></i></div>
+                    <div>
+                        <strong style="display:block;color:var(--t);margin-bottom:.2rem;font-size:1.05rem">The Governance Gap</strong>
+                        <span style="color:var(--t2);font-size:0.9rem">Most enterprise search products expose data to users who shouldn't see it. Without ACL enforcement at the index level, every search result is a potential compliance violation.</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="pain">
+                        <div class="pi"><i data-lucide="search-x" style="width:18px;height:18px"></i></div>
+                        <div><strong>Search results that ignore permissions</strong>
+                            <p>Employees see documents they shouldn't access. Confidential HR data, board materials, and financial reports leak through ungoverned search.</p>
+                        </div>
+                    </div>
+                    <div class="pain">
+                        <div class="pi"><i data-lucide="unplug" style="width:18px;height:18px"></i></div>
+                        <div><strong>Every upgrade means a new integration</strong>
+                            <p>Moving from basic search to enterprise scale typically requires a full replatform — new APIs, new auth models, new vendor.</p>
+                        </div>
+                    </div>
+                    <div class="pain">
+                        <div class="pi"><i data-lucide="database" style="width:18px;height:18px"></i></div>
+                        <div><strong>Knowledge scattered with no unified schema</strong>
+                            <p>Wikis, runbooks, KB articles, HR docs — each in a different format. No single index, no single query surface.</p>
+                        </div>
+                    </div>
+                    <div class="pain">
+                        <div class="pi"><i data-lucide="scale" style="width:18px;height:18px"></i></div>
+                        <div><strong>Scale surprises: usage spikes → unexpected costs or downtime</strong>
+                            <p>Without rate limiting, quotas, and clear tier boundaries, production search becomes unpredictable and expensive.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 3 — VISION ═══ -->
+        <div class="slide s-accent" data-title="The Vision">
+            <div class="s-content" style="text-align:center;display:flex;flex-direction:column;align-items:center">
+                <div class="s-tag" style="justify-content:center">The Aeira Vision</div>
+                <h2 class="s-h">One API. One ACL model.<br><span class="grad">Every scale.</span></h2>
+                <p class="s-sub" style="text-align:center;margin:1rem auto">Aeira gives you a single integration contract that stays consistent as you grow — from a curated company directory to a fully governed, high-throughput search platform.</p>
+                <div class="blockquote" style="max-width:680px;text-align:left">
+                    <p>"Start with catalog. Scale to federated. Never rewrite the integration."</p>
+                    <cite>— Aeira Design Principle</cite>
+                </div>
+                <div class="stats" style="margin-top:2rem">
+                    <div class="stat">
+                        <div class="n">Hybrid</div>
+                        <div class="l">Keyword + Semantic</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">Stable</div>
+                        <div class="l">API Contract</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">JWT</div>
+                        <div class="l">Native Auth</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 4 — ARCHITECTURE ═══ -->
+        <div class="slide" data-title="How Aeira Works">
+            <div class="s-content">
+                <div class="s-tag">Architecture</div>
+                <h2 class="s-h">Governed search from <span class="grad">ingestion to query</span></h2>
+                <p class="s-sub">Every request flows through the same ACL-aware pipeline, regardless of tier. Scale changes capacity — never the contract.</p>
+
+                <div class="g2" style="margin-top:1rem; align-items: stretch;">
+                    <div>
+                        <div class="layer"><span class="ln">L1</span><span class="ll">JWT Validation</span><span class="ld">Authenticate every request with org identity</span></div>
+                        <div class="layer"><span class="ln">L2</span><span class="ll">ACL Engine</span><span class="ld">4-level: public · department · group · user</span></div>
+                        <div class="layer"><span class="ln">L3</span><span class="ll">Query Router</span><span class="ld">Keyword, semantic, or hybrid — auto-selected</span></div>
+                        <div class="layer"><span class="ln">L4</span><span class="ll">Index Layer</span><span class="ld">Entity templates + custom types via API</span></div>
+                        <div class="layer"><span class="ln">L5</span><span class="ll">Ingestion Pipeline</span><span class="ld">Bulk API · Async Kafka · CSV/YAML/JSON</span></div>
+                        <div class="layer"><span class="ln">L6</span><span class="ll">Rate Limiting</span><span class="ld">Per-user quotas · sliding window · burst control</span></div>
+                        <div class="layer"><span class="ln">L7</span><span class="ll">Metrics &amp; Monitoring</span><span class="ld">Prometheus-native operational telemetry</span></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:1rem">
+                        <div class="card">
+                            <div class="ci"><i data-lucide="database" style="width:20px;height:20px"></i></div>
+                            <h3>Entity Templates</h3>
+                            <p>20 ready-made templates for common enterprise data. Define custom types via API for anything else — runbooks, KB articles, policies.</p>
+                        </div>
+                        <div class="card">
+                            <div class="ci"><i data-lucide="shield-check" style="width:20px;height:20px"></i></div>
+                            <h3>ACL at the Index Level</h3>
+                            <p>Permissions are enforced at query time — not bolted on after. Users only ever see the data they're authorized to access.</p>
+                            <div class="badges"><span class="badge g">Public</span><span class="badge g">Department</span><span class="badge g">Group</span><span class="badge g">User</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 5 — CATALOG TIER ═══ -->
+        <div class="slide" data-title="Catalog Tier — Included with Bolt">
+            <div class="s-content">
+                <div class="s-tag">Included with Every Bolt Plan</div>
+                <h2 class="s-h">Catalog: Your <span class="grad">company directory</span> out of the box</h2>
+                <p class="s-sub">A curated, ACL-aware directory of the information every employee needs — offices, holidays, benefits, apps, and more. No setup cost. No additional license.</p>
+
+                <div class="g2" style="margin-top:1rem">
+                    <div>
+                        <div class="roi-callout"
+                            style="margin: 0 0 .75rem 0; width: 100%; box-sizing: border-box; padding: .6rem 1rem;">
+                            <div><i data-lucide="gift" style="width:24px;height:24px;color:var(--g)"></i></div>
+                            <div>
+                                <strong style="display:block;color:var(--t);margin-bottom:.1rem;font-size:.95rem">Free with Bolt</strong>
+                                <span style="color:var(--t2);font-size:0.82rem">Catalog is bundled in all Bolt plans. Your team gets governed discovery from day one — zero incremental cost.</span>
+                            </div>
+                        </div>
+
+                        <div class="mcps" style="grid-template-columns: repeat(2, 1fr); gap: .5rem; margin-top: .75rem;">
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>Offices</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>Holidays</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>Benefits</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>Apps &amp; Tools</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>IT Help</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>HR Policies</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>Travel</div>
+                            <div class="mcp" style="padding: .5rem .75rem;"><span class="dot"></span>Security</div>
+                            <div class="mcp" style="padding: .5rem .75rem; border-style: dashed;"><span class="dot" style="background:var(--am)"></span>+ 2 Custom</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card" style="height:100%;display:flex;flex-direction:column;justify-content:center;padding:1.25rem">
+                            <h3 style="font-size:1rem;margin-bottom:.75rem">What's Included</h3>
+                            <ul class="tier-features">
+                                <li>8 core categories + 2 custom</li>
+                                <li>50 records per category (link-centric entries)</li>
+                                <li>4-level ACL (public, department, group, user)</li>
+                                <li>Browse + keyword search with ACL filtering</li>
+                                <li>Import via CSV, JSON, or YAML templates</li>
+                                <li>Integrated with Bolt AI chat</li>
+                                <li>Fair-use query and storage limits</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 6 — DYNAMIC TIER ═══ -->
+        <div class="slide" data-title="Dynamic Tier — $99/mo">
+            <div class="s-content">
+                <div class="s-tag">Index Any Corporate Data</div>
+                <h2 class="s-h">Dynamic: <span class="grad">Hybrid AI search</span> across everything</h2>
+                <p class="s-sub">Go beyond directory. Index wikis, runbooks, KB articles, guides — any corporate data. Hybrid search combines keyword precision with semantic understanding.</p>
+
+                <div class="g2" style="margin-top:1rem">
+                    <div style="display:flex;flex-direction:column;gap:.75rem">
+                        <div class="card" style="padding:1rem">
+                            <div class="ci"><i data-lucide="search" style="width:20px;height:20px"></i></div>
+                            <h3>Hybrid Search</h3>
+                            <p>Keyword + semantic vector search. Find results by exact terms or meaning — Aeira picks the best strategy automatically.</p>
+                        </div>
+                        <div class="card" style="padding:1rem">
+                            <div class="ci"><i data-lucide="file-text" style="width:20px;height:20px"></i></div>
+                            <h3>20 Entity Templates</h3>
+                            <p>Pre-built templates for common enterprise data types. Define custom types via API for anything else.</p>
+                        </div>
+                        <div class="card" style="padding:1rem">
+                            <div class="ci"><i data-lucide="upload" style="width:20px;height:20px"></i></div>
+                            <h3>Bulk Ingestion API</h3>
+                            <p>Import via CSV, YAML, or JSON. Up to 10,000 indexed records with full ACL support.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="tier-card featured" style="height:100%">
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <div class="tier-name">Dynamic</div>
+                                <div class="tier-price">$99 / month</div>
+                            </div>
+                            <p style="font-size:.82rem;color:var(--t2);margin-bottom:.75rem">Private Instance License · Up to 10K records</p>
+                            <ul class="tier-features" style="flex:1">
+                                <li>Everything in Catalog</li>
+                                <li>Ingest any document type</li>
+                                <li>Hybrid search (keyword + semantic)</li>
+                                <li>20 entity templates + custom via API</li>
+                                <li>4-level ACL enforcement</li>
+                                <li>Bulk ingestion API</li>
+                                <li>Up to 10K indexed records</li>
+                                <li>Operational metrics (Prometheus)</li>
+                                <li>Email support (5-day SLA)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 7 — ENHANCED TIER ═══ -->
+        <div class="slide" data-title="Enhanced Tier — $499/mo">
+            <div class="s-content">
+                <div class="s-tag">Production-Scale Enterprise Search</div>
+                <h2 class="s-h">Enhanced: Built for <span class="grad">production workloads</span></h2>
+                <p class="s-sub">Async ingestion, enterprise-grade rate limiting, region-aware ACL, and dedicated namespace isolation. For teams that need scale with governance.</p>
+
+                <div class="g2" style="margin-top:1rem">
+                    <div>
+                        <div class="timeline">
+                            <div class="tl-item" style="margin-bottom:0.4rem">
+                                <div class="tl-num" style="width:26px;height:26px;font-size:0.75rem;">1</div>
+                                <div class="tl-text">
+                                    <h3 style="margin-bottom:0.1rem;font-size:0.85rem;">Async Kafka Ingestion</h3>
+                                    <p style="margin:0;font-size:0.72rem;">High-throughput, guaranteed delivery. Ingest at scale without blocking your pipeline.</p>
+                                </div>
+                            </div>
+                            <div class="tl-item" style="margin-bottom:0.4rem">
+                                <div class="tl-num" style="width:26px;height:26px;font-size:0.75rem;">2</div>
+                                <div class="tl-text">
+                                    <h3 style="margin-bottom:0.1rem;font-size:0.85rem;">Per-User Daily Quotas</h3>
+                                    <p style="margin:0;font-size:0.72rem;">Soft and hard limits prevent abuse. Fair usage across teams without manual monitoring.</p>
+                                </div>
+                            </div>
+                            <div class="tl-item" style="margin-bottom:0.4rem">
+                                <div class="tl-num" style="width:26px;height:26px;font-size:0.75rem;">3</div>
+                                <div class="tl-text">
+                                    <h3 style="margin-bottom:0.1rem;font-size:0.85rem;">30 QPS Rate Limiting</h3>
+                                    <p style="margin:0;font-size:0.72rem;">Burst control with sliding window. Production-grade throttling that protects your infrastructure.</p>
+                                </div>
+                            </div>
+                            <div class="tl-item" style="margin-bottom:0.4rem">
+                                <div class="tl-num" style="width:26px;height:26px;font-size:0.75rem;">4</div>
+                                <div class="tl-text">
+                                    <h3 style="margin-bottom:0.1rem;font-size:0.85rem;">Region-Aware ACL</h3>
+                                    <p style="margin:0;font-size:0.72rem;">Location-based access filtering for multi-region deployments and data sovereignty compliance.</p>
+                                </div>
+                            </div>
+                            <div class="tl-item" style="margin-bottom:0">
+                                <div class="tl-num" style="width:26px;height:26px;font-size:0.75rem;">5</div>
+                                <div class="tl-text">
+                                    <h3 style="margin-bottom:0.1rem;font-size:0.85rem;">Namespace Isolation</h3>
+                                    <p style="margin:0;font-size:0.72rem;">Dedicated namespace per tenant. Complete data isolation with independent scaling.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="tier-card featured" style="height:100%">
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <div class="tier-name">Enhanced</div>
+                                <div class="tier-price">$499 / month</div>
+                            </div>
+                            <div class="badges" style="margin-top:0;margin-bottom:.5rem"><span class="badge g">Data Leader</span></div>
+                            <p style="font-size:.82rem;color:var(--t2);margin-bottom:.75rem">Up to 100K records · Priority support</p>
+                            <ul class="tier-features" style="flex:1">
+                                <li>Everything in Dynamic</li>
+                                <li>Up to 100K indexed records</li>
+                                <li>Async Kafka ingestion</li>
+                                <li>Per-user daily quotas (soft + hard)</li>
+                                <li>30 QPS rate limiting with burst</li>
+                                <li>Region-aware ACL filtering</li>
+                                <li>Dedicated namespace isolation</li>
+                                <li>50K queries/day included</li>
+                                <li>Priority support (1-business-day SLA)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 8 — ACL & SECURITY ═══ -->
+        <div class="slide" data-title="Security & ACL Model">
+            <div class="s-content">
+                <div class="s-tag">Security &amp; Authorization</div>
+                <h2 class="s-h">Permissions enforced <span class="grad">at the index level</span></h2>
+                <p class="s-sub">Aeira doesn't filter results after search — it enforces ACL during query execution. Users never see data they're not authorized to access, regardless of search strategy.</p>
+                <div class="g2">
+                    <div>
+                        <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem">
+                            <i data-lucide="shield-check" style="width:48px;height:48px;color:var(--g);margin-bottom:1rem"></i>
+                            <h3 style="font-size:1.3rem;margin-bottom:.5rem">4-Level ACL</h3>
+                            <p style="color:var(--t2)">Consistent authorization semantics across every tier — from Catalog to Federated.</p>
+                            <div class="badges" style="margin-top:.75rem;justify-content:center">
+                                <span class="badge g">Public</span>
+                                <span class="badge g">Department</span>
+                                <span class="badge g">Group</span>
+                                <span class="badge g">User</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="g2" style="margin-top:0;grid-template-columns:1fr 1fr">
+                            <div class="card"><i data-lucide="key" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
+                                <h3>JWT Native</h3>
+                                <p style="font-size:.78rem">Every request validated via JWT. Identity claims pass through from your IdP.</p>
+                            </div>
+                            <div class="card"><i data-lucide="globe" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
+                                <h3>Region-Aware</h3>
+                                <p style="font-size:.78rem">Enhanced+ tiers add location-based access control for multi-region compliance.</p>
+                            </div>
+                            <div class="card"><i data-lucide="lock" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
+                                <h3>Namespace Isolation</h3>
+                                <p style="font-size:.78rem">Each tenant gets a dedicated namespace with independent access boundaries.</p>
+                            </div>
+                            <div class="card"><i data-lucide="refresh-cw" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
+                                <h3>Consistent Upgrade</h3>
+                                <p style="font-size:.78rem">Same ACL semantics across all tiers. No rewrites when you scale.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 9 — COMPARISON TABLE ═══ -->
+        <div class="slide" data-title="Tier Comparison">
+            <div class="s-content">
+                <div class="s-tag">Tier Comparison</div>
+                <h2 class="s-h">Choose your <span class="grad">scale</span></h2>
+                <p class="s-sub" style="margin-bottom: 1rem;">Same API. Same ACL. Different capacity and governance depth.</p>
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left">Capability</th>
+                            <th>Catalog</th>
+                            <th>Dynamic</th>
+                            <th>Enhanced</th>
+                            <th>Federated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>What you can index</td>
+                            <td>10 directory categories</td>
+                            <td class="ck">Any document or data</td>
+                            <td class="ck">Any document or data</td>
+                            <td class="ck">Any document or data</td>
+                        </tr>
+                        <tr>
+                            <td>Entity templates</td>
+                            <td>8 core + 2 custom</td>
+                            <td class="ck">20 + custom via API</td>
+                            <td class="ck">20 + custom via API</td>
+                            <td class="ck">20 + custom via API</td>
+                        </tr>
+                        <tr>
+                            <td>Records</td>
+                            <td>500 (50/cat)</td>
+                            <td>Up to 10K</td>
+                            <td class="ck hl">Up to 100K</td>
+                            <td class="ck hl">Negotiated</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td>Keyword</td>
+                            <td class="ck">Hybrid</td>
+                            <td class="ck">Hybrid</td>
+                            <td class="ck">Hybrid</td>
+                        </tr>
+                        <tr>
+                            <td>ACL model</td>
+                            <td class="ck">4-level</td>
+                            <td class="ck">4-level</td>
+                            <td class="ck hl">4-level + region</td>
+                            <td class="ck hl">4-level + region</td>
+                        </tr>
+                        <tr>
+                            <td>Ingestion</td>
+                            <td>Manual templates</td>
+                            <td>Bulk API</td>
+                            <td class="ck hl">Bulk + async Kafka</td>
+                            <td class="ck hl">Bulk + async Kafka</td>
+                        </tr>
+                        <tr>
+                            <td>Query volume</td>
+                            <td>Fair-use</td>
+                            <td>10K/day</td>
+                            <td class="ck hl">50K/day</td>
+                            <td class="ck hl">Negotiated</td>
+                        </tr>
+                        <tr>
+                            <td>Price</td>
+                            <td class="ck">Free w/ Bolt</td>
+                            <td>$99/mo</td>
+                            <td>$499/mo</td>
+                            <td>Custom</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══ SLIDE 10 — CTA ═══ -->
+        <div class="slide hero dark-hero" data-title="Get Started">
+            <div class="hbg"></div>
+            <div class="s-content" style="position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center">
+                <div class="s-tag" style="justify-content:center">Ready to Scale</div>
+                <h1 class="s-h" style="font-size:clamp(2.5rem,5.5vw,4.5rem)">Index anything.<br><span class="grad">Find everything.</span></h1>
+                <p class="s-sub" style="text-align:center;margin:1.25rem auto;max-width:580px">Start with Catalog — included free in every Bolt plan. Scale to Dynamic, Enhanced, or Federated as your governance needs grow. Same API. Same ACL. No replatform.</p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.75rem;max-width:700px;width:100%">
+                    <div class="card" style="text-align:center"><i data-lucide="database" style="color:var(--g);width:22px;height:22px;margin-bottom:.4rem"></i>
+                        <h3 style="font-size:.9rem">Catalog</h3>
+                        <p style="font-size:.78rem">Free with Bolt</p>
+                    </div>
+                    <div class="card" style="text-align:center"><i data-lucide="code" style="color:var(--g);width:22px;height:22px;margin-bottom:.4rem"></i>
+                        <h3 style="font-size:.9rem">1 API</h3>
+                        <p style="font-size:.78rem">Across all tiers</p>
+                    </div>
+                    <div class="card" style="text-align:center"><i data-lucide="shield-check" style="color:var(--g);width:22px;height:22px;margin-bottom:.4rem"></i>
+                        <h3 style="font-size:.9rem">4-Level</h3>
+                        <p style="font-size:.78rem">ACL always on</p>
+                    </div>
+                </div>
+                <div class="cta-links">
+                    <a href="#" onclick="openContactModal('Talk to Aeira Team'); return false;" class="btn btn-p"><i data-lucide="mail" style="width:16px;height:16px"></i>Talk to Aeira Team</a>
+                </div>
+                <p style="margin-top:1.5rem;font-size:.75rem;color:var(--t3)">Sparcle LLC · bolt@sparcle.app</p>
+            </div>
+        </div>
+
+    </div><!-- /viewport -->
+
+    <!-- CONTROLS -->
+    <div id="controls">
+        <button class="ctrl-btn" id="btn-prev" title="Previous (←)"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+        <button class="ctrl-btn" id="btn-next" title="Next (→)"><i data-lucide="chevron-right" style="width:18px;height:18px"></i></button>
+        <div id="slide-counter">1 / 10</div>
+        <div id="slides-nav"></div>
+        <div id="progress-track">
+            <div id="progress-bar" style="width:10%"></div>
+        </div>
+        <div id="slide-title-bar" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto;">
+            <img src="/images/aeira-logo.svg" alt="" style="width: 16px; height: 16px;" />
+            <span>Aeira — ACL-aware Enterprise Index</span>
+        </div>
+        <button class="ctrl-btn" id="btn-fs" title="Fullscreen (F)"><i data-lucide="maximize-2" style="width:16px;height:16px"></i></button>
+    </div>
+</div><!-- /deck -->
+
+<script>
+    try { lucide.createIcons(); } catch (e) { console.error("Lucide failed to load", e); }
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    let cur = 0;
+
+    const counter = document.getElementById('slide-counter');
+    const bar = document.getElementById('progress-bar');
+    const titleBar = document.getElementById('slide-title-bar');
+    const nav = document.getElementById('slides-nav');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+
+    // Build nav dots
+    slides.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        d.title = slides[i].dataset.title || '';
+        d.onclick = () => window.location.hash = i;
+        nav.appendChild(d);
+    });
+
+    function renderSlide(n) {
+        if (n < 0 || n >= total || n === cur) return;
+        const dir = n > cur ? 1 : -1;
+
+        slides[cur].classList.remove('active');
+        if (dir > 0) slides[cur].classList.add('out-left');
+        setTimeout(() => {
+            slides.forEach(s => s.classList.remove('out-left'));
+        }, 450);
+
+        cur = n;
+        slides.forEach((s, i) => {
+            s.classList.toggle('active', i === cur);
+        });
+        counter.textContent = `${cur + 1} / ${total}`;
+        bar.style.width = `${((cur + 1) / total) * 100}%`;
+        titleBar.querySelector('span').textContent = slides[cur].dataset.title || '';
+        document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+        btnPrev.disabled = cur === 0;
+        btnNext.disabled = cur === total - 1;
+        try { lucide.createIcons(); } catch (e) { }
+    }
+
+    btnPrev.onclick = () => window.location.hash = cur - 1;
+    btnNext.onclick = () => window.location.hash = cur + 1;
+    btnPrev.disabled = true;
+
+    window.addEventListener('hashchange', () => {
+        const h = parseInt(window.location.hash.replace('#', '')) || 0;
+        if (h !== cur) renderSlide(h);
+    });
+
+    if (window.location.hash) {
+        const h = parseInt(window.location.hash.replace('#', '')) || 0;
+        if (h > 0 && h < total) renderSlide(h);
+    } else {
+        window.history.replaceState(null, '', '#0');
+    }
+
+    document.getElementById('btn-fs').onclick = () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+    };
+
+    // ── CONTROLS AUTO-HIDE ────────────────────────────────────────────────
+    const ctrlEl = document.getElementById('controls');
+    let hideTimer = null;
+    function showControls() {
+        ctrlEl.classList.add('visible');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => ctrlEl.classList.remove('visible'), 3000);
+    }
+    document.addEventListener('mousemove', showControls);
+    document.addEventListener('touchstart', showControls, { passive: true });
+    document.addEventListener('keydown', function ctrlShow() { showControls(); });
+    showControls();
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); window.location.hash = Math.min(cur + 1, total - 1); }
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); window.location.hash = Math.max(cur - 1, 0); }
+        if (e.key === 'f' || e.key === 'F') document.getElementById('btn-fs').click();
+        if (e.key === 'Home') window.location.hash = 0;
+        if (e.key === 'End') window.location.hash = total - 1;
+    });
+
+    // Touch/swipe
+    let tx = 0;
+    document.getElementById('viewport').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+    document.getElementById('viewport').addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - tx;
+        if (Math.abs(dx) > 60) window.location.hash = dx < 0 ? Math.min(cur + 1, total - 1) : Math.max(cur - 1, 0);
+    }, { passive: true });
+
+    // ── AUTOPLAY ──────────────────────────────────────────────────────────
+    const apParam = new URLSearchParams(location.search).get('autoplay');
+    const apDisabled = apParam === '0';
+    const apInterval = apParam && parseInt(apParam) > 0 ? parseInt(apParam) * 1000 : 10000;
+
+    const apBar = document.createElement('div');
+    apBar.id = 'ap-bar';
+    document.getElementById('controls').appendChild(apBar);
+
+    const apBtn = document.createElement('button');
+    apBtn.className = 'ctrl-btn';
+    apBtn.title = 'Toggle autoplay (A)';
+    apBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    apBtn.style.marginLeft = '0.25rem';
+    document.getElementById('controls').insertBefore(apBtn, document.getElementById('btn-prev').nextSibling);
+
+    let apTimer = null;
+    let apAnimFrame = null;
+    let apStart = null;
+    let apPlaying = false;
+
+    function apSetIcon(playing) {
+        apBtn.innerHTML = playing
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    }
+
+    function apStartCountdown() {
+        apBarStop();
+        apStart = performance.now();
+        function tick(now) {
+            const elapsed = now - apStart;
+            const pct = Math.min(elapsed / apInterval * 100, 100);
+            apBar.style.width = pct + '%';
+            if (pct < 100) {
+                apAnimFrame = requestAnimationFrame(tick);
+            }
+        }
+        apAnimFrame = requestAnimationFrame(tick);
+    }
+
+    function apBarStop() {
+        if (apAnimFrame) { cancelAnimationFrame(apAnimFrame); apAnimFrame = null; }
+        apBar.style.width = '0';
+    }
+
+    function apPlay() {
+        if (apPlaying) return;
+        apPlaying = true;
+        apSetIcon(true);
+        apBar.style.display = 'block';
+        apStartCountdown();
+        apTimer = setInterval(() => {
+            if (cur >= total - 1) {
+                apPause();
+            } else {
+                window.location.hash = cur + 1;
+                apStartCountdown();
+            }
+        }, apInterval);
+    }
+
+    function apPause() {
+        if (!apPlaying) return;
+        apPlaying = false;
+        apSetIcon(false);
+        apBarStop();
+        apBar.style.display = 'none';
+        clearInterval(apTimer);
+        apTimer = null;
+    }
+
+    function apToggle() { apPlaying ? apPause() : apPlay(); }
+
+    apBtn.onclick = apToggle;
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#controls, a, button, input, select, textarea')) return;
+        apToggle();
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'a' || e.key === 'A') apToggle();
+    });
+
+    btnPrev.addEventListener('click', apPause, true);
+    btnNext.addEventListener('click', apPause, true);
+
+    if (!apDisabled) {
+        setTimeout(apPlay, 600);
+    }
+    // ── END AUTOPLAY ──────────────────────────────────────────────────────
+</script>

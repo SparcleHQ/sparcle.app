@@ -135,9 +135,28 @@ function renderIcon(iconId: string | undefined): string {
             </div>
             <h1>{secondContent.productHeadline}</h1>
             <p class="offering-intro">{secondContent.productIntro}</p>
+
+            {secondContent.videoUrl && (
+              <div class="product-video-wrap" style="margin-bottom: 2rem;">
+                <video controls preload="metadata">
+                  <source src={secondContent.videoUrl} type="video/mp4" />
+                  Your browser does not support the video element.
+                </video>
+              </div>
+            )}
+
+            {secondContent.slidesUrl && (
+              <div class="product-slides-wrap" style="margin-bottom: 2rem; width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; border: 1px solid rgba(20,184,166,.2); box-shadow: 0 8px 32px rgba(20,184,166,.15);">
+                <iframe src={secondContent.slidesUrl} style="width: 100%; height: 100%; border: none;" loading="lazy" title={`${secondContent.productName} Slides`}></iframe>
+              </div>
+            )}
+
             <div class="hero-actions">
               <a class="btn btn-primary btn-lg" href={secondContent.primaryCtaHref}>{secondContent.primaryCtaLabel}</a>
               <a class="btn btn-secondary btn-lg" href={secondContent.secondaryCtaHref}>{secondContent.secondaryCtaLabel}</a>
+              {secondContent.tertiaryCtaLabel && (
+                <a class="btn btn-secondary btn-lg" href={secondContent.tertiaryCtaHref} target={secondContent.tertiaryCtaTarget || "_self"}>{secondContent.tertiaryCtaLabel}</a>
+              )}
             </div>
           </div>
         </section>

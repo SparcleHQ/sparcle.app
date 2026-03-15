@@ -39,6 +39,7 @@ export interface ProductPageContent {
   tertiaryCtaTarget?: string;
   badge?: string;
   videoUrl?: string;
+  slidesUrl?: string;
   checklistHighlights?: string[];
   highlights: FeaturePoint[];
   faqs: FeaturePoint[];
@@ -143,6 +144,10 @@ export const aeiraProductContent: ProductPageContent = {
   primaryCtaHref: "#contact:Aeira Architecture Discussion",
   secondaryCtaLabel: "Features & Pricing",
   secondaryCtaHref: "/pricing.html#aeira",
+  tertiaryCtaLabel: "Learn More",
+  tertiaryCtaHref: "/aeira-slides.html",
+  tertiaryCtaTarget: "_blank",
+  slidesUrl: "/aeira-slides.html",
   highlights: [
     {
       title: "Included Catalog Baseline",

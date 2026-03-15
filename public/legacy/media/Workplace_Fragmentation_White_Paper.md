@@ -13,7 +13,7 @@ This isn't a "soft" productivity issue—it's a **$450 billion annual drain** on
 
 **The root cause?** Enterprise tool sprawl. The average organization runs **473 SaaS applications**[^6], each one a silo demanding attention, credentials, and cognitive overhead. Employees don't lack intelligence—they lack *unified* intelligence.
 
-**The solution exists:** Platforms that eliminate context switching through proactive awareness, aggressive caching, and cross-system integration. Bolt, leveraging **patent-pending multi-tier caching architecture (US 63/951,582)**, delivers sub-500ms responses with 70-90% cache hit rates, reducing token costs by 10-20x while unifying access to 26+ enterprise systems through a single hotkey.
+**The solution exists:** Platforms that eliminate context switching through proactive awareness, aggressive caching, and cross-system integration. Bolt, leveraging **patent-pending multi-tier caching architecture**, delivers sub-500ms responses with high cache hit rates while unifying access to 26+ enterprise systems through a single hotkey.
 
 This white paper examines the research behind workplace fragmentation, quantifies the true cost, and outlines the architectural requirements for unified intelligence platforms that restore focus, accelerate decisions, and reclaim millions in lost productivity.
 
@@ -203,19 +203,19 @@ Bolt's proactive mode operates **without LLM calls**, using rule-based logic to 
 
 **Solution:** Three-tier caching (Vector RAG → Redis → LLM fallback) designed to achieve **70-90% cache hit rates** and **sub-500ms response times** for most queries.
 
-> **🔒 PATENT PENDING** - US Application No. 63/951,582  
-> *Claim 1: Multi-Tier Caching Architecture for Enterprise AI Assistants*
+> **🔒 PATENT PENDING**  
+> *Multi-Tier Caching Architecture for Enterprise AI Assistants*
 
 **How it works:**
 
-1. **Vector RAG (Tier 1)**: Frequently accessed data (emails, calendar events, recent Jira tickets) is embedded and stored in a vector database. Queries hit this layer first. Cache hit → **<100ms response, zero LLM cost**.
-2. **Redis (Tier 2)**: Structured data (user profiles, org charts, project metadata) cached in Redis with configurable TTLs. Cache hit → **<200ms response, zero LLM cost**.
-3. **LLM Fallback (Tier 3)**: Only novel or complex queries invoke the LLM with full MCP tool orchestration. This represents **10-30% of queries**, keeping token costs predictable.
+1. **Semantic Cache (Tier 1)**: Frequently accessed data (emails, calendar events, recent Jira tickets) is embedded and stored for fast retrieval. Queries hit this layer first. Cache hit → **sub-100ms response, zero LLM cost**.
+2. **Structured Cache (Tier 2)**: Structured data (user profiles, org charts, project metadata) cached with configurable TTLs. Cache hit → **sub-200ms response, zero LLM cost**.
+3. **LLM Fallback (Tier 3)**: Only novel or complex queries invoke the LLM with full MCP tool orchestration. The majority of queries are served from cache, keeping token costs predictable.
 
 **Economic impact:**
 
 - **Token costs scale with employees, not usage**: Unlike per-query models, Bolt's caching means costs remain stable even as usage increases.
-- **10-20x cost reduction** vs. uncached LLM-first architectures.
+- **Significant cost reduction** vs. uncached LLM-first architectures.
 - **Infrastructure independence**: Supports OpenAI, Anthropic, Azure OpenAI, Google Vertex AI, AWS Bedrock, or your own fine-tuned models.
 
 ### 4.3 MCP-First Integration (26+ Systems)
@@ -338,7 +338,7 @@ The research is unambiguous:
 
 **The solution is not more tools—it's unified intelligence.**
 
-Platforms like Bolt, built on **proactive awareness**, **patent-pending multi-tier caching (US 63/951,582)**, and **open-standard MCP integration**, eliminate the need to switch. Employees press a hotkey and instantly see what matters. No queries. No waiting. No fragmentation.
+Platforms like Bolt, built on **proactive awareness**, **patent-pending multi-tier caching**, and **open-standard MCP integration**, eliminate the need to switch. Employees press a hotkey and instantly see what matters. No queries. No waiting. No fragmentation.
 
 The enterprises that win in the next decade won't be those with the *most* tools—they'll be those with the most *unified* intelligence.
 
@@ -350,7 +350,7 @@ The enterprises that win in the next decade won't be those with the *most* tools
 
 **Bolt** is an enterprise AI assistant that eliminates context switching through proactive awareness, multi-tier caching, and unified integration with 26+ business systems. Deployed in your VPC with SSO-based access, Bolt gives employees instant context via Chrome Extension or Progressive Web App—no queries required.
 
-> **🔒 PATENT PENDING** - US Application No. 63/951,582  
+> **🔒 PATENT PENDING**  
 > *Enterprise AI Assistant with Context-Aware Caching and Privacy-Preserving Tool Orchestration*
 
 **Learn more:** [sparle.app](https://sparle.app)  

@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalVideo) {
             modalVideo.currentTime = 0;
             modalVideo.muted = false;
-            modalVideo.play().catch(console.log);
+            modalVideo.play().catch(() => {});
         }
     }
 
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroVideo && !videoModal.classList.contains('active')) {
                 heroVideo.muted = true;
                 heroVideo.currentTime = 0;
-                heroVideo.play().catch(console.log);
+                heroVideo.play().catch(() => {});
                 playOverlay?.classList.add('hidden');
             }
         }, 300);

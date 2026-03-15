@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function playVideo(container, video) {
         container.classList.add('playing');
-        video.play().catch(err => console.log('Play failed:', err));
+        video.play().catch(() => {});
     }
 
     function pauseVideo(container, video) {

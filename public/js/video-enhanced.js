@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalVideo) {
             modalVideo.currentTime = 0;
             modalVideo.muted = false;
-            modalVideo.play().catch(err => console.log('Playback prevented:', err));
+            modalVideo.play().catch(() => {});
         }
 
         // Pause hero video
@@ -73,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (playPromise !== undefined) {
             playPromise.catch(() => {
                 // Autoplay was prevented, show play button
-                console.log('Autoplay prevented - user interaction required');
             });
         }
     }

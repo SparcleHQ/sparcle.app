@@ -439,11 +439,4 @@ document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
 // Performance Monitoring
 // ============================================
 
-// Log page load time
-window.addEventListener('load', () => {
-    if (window.performance) {
-        const perfData = window.performance.timing;
-        const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-        console.log(`Page loaded in ${pageLoadTime}ms`);
-    }
-});
+

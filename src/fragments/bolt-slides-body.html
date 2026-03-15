@@ -904,6 +904,13 @@
 
     apBtn.onclick = apToggle;
 
+    // Click anywhere on slide area toggles autoplay
+    document.addEventListener('click', function(e) {
+        // Skip clicks on interactive elements
+        if (e.target.closest('#controls, a, button, input, select, textarea')) return;
+        apToggle();
+    });
+
     // Keyboard shortcut: A
     document.addEventListener('keydown', e => {
         if (e.key === 'a' || e.key === 'A') apToggle();

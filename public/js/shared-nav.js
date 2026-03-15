@@ -77,7 +77,7 @@
         '        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
         '      </svg>',
         '    </button>',
-        '    <a href="' + href('#contact') + '" class="btn btn-primary btn-sm">Let\'s Talk</a>',
+        '    <a href="#" onclick="openContactModal(); return false;" class="btn btn-primary btn-sm">Let\'s Talk</a>',
         '  </div>',
         '  <!-- Mobile hamburger -->',
         '  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">',
@@ -118,7 +118,7 @@
         '      <div class="footer-col">',
         '        <h5>Company</h5>',
         '        <ul>',
-        '          <li><a href="' + href('#contact') + '">Contact</a></li>',
+        '          <li><a href="#" onclick="openContactModal(); return false;">Contact</a></li>',
         '          <li><a href="/privacy">Privacy Policy</a></li>',
         '          <li><a href="/terms">Terms of Service</a></li>',
         '        </ul>',
@@ -229,5 +229,113 @@
     }());
 
     /* Scrollspy removed — all nav links now go to dedicated pages */
+
+    /* ------------------------------------------------------------------
+       SHARED CONTACT MODAL
+       Only inject if the page doesn't already have one (pricing/index have theirs)
+       ------------------------------------------------------------------ */
+    if (!document.getElementById('contactModalOverlay')) {
+        var modalHTML = [
+            '<div id="contactModalOverlay" class="contact-modal-overlay" role="dialog" aria-modal="true" aria-label="Contact form">',
+            '  <div class="contact-modal">',
+            '    <button class="contact-modal-close" onclick="closeContactModal()" aria-label="Close">&times;</button>',
+            '    <h3 id="contactModalTitle">Get in Touch</h3>',
+            '    <p class="modal-subtitle">We\'ll respond within one business day.</p>',
+            '    <form id="contactForm" autocomplete="on">',
+            '      <div id="contactFormFields">',
+            '        <input type="hidden" id="contactInterest" name="interest" value="">',
+            '        <div class="contact-form-group"><label for="contactName">Name</label><input type="text" id="contactName" name="name" required placeholder="Jane Smith" autocomplete="name"></div>',
+            '        <div class="contact-form-group"><label for="contactEmail">Work Email</label><input type="email" id="contactEmail" name="email" required placeholder="jane@company.com" autocomplete="email"></div>',
+            '        <div class="contact-form-group"><label for="contactCompany">Company</label><input type="text" id="contactCompany" name="company" placeholder="Acme Corp" autocomplete="organization"></div>',
+            '        <div class="contact-form-group"><label for="contactTeamSize">Team Size</label><select id="contactTeamSize" name="teamSize"><option value="">Select\u2026</option><option value="1-10">1\u201310</option><option value="11-50">11\u201350</option><option value="51-200">51\u2013200</option><option value="201-500">201\u2013500</option><option value="500+">500+</option></select></div>',
+            '        <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">Send Request</button>',
+            '      </div>',
+            '      <div id="contactFormStatus" class="contact-form-status"></div>',
+            '    </form>',
+            '  </div>',
+            '</div>'
+        ].join('\n');
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Bind form submit
+        var contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('contactSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending\u2026';
+            var payload = {
+                name: document.getElementById('contactName').value.trim(),
+                email: document.getElementById('contactEmail').value.trim(),
+                company: document.getElementById('contactCompany').value.trim(),
+                teamSize: document.getElementById('contactTeamSize').value,
+                interest: document.getElementById('contactInterest').value
+            };
+            var FORM_URL = 'https://script.google.com/macros/s/AKfycbzYbbgDcMm_9NbNKyKek7BTQT7rzsE4OaaVXNo926hGkxAFD5jOt0IXPXFJVWE7GDGe/exec';
+            fetch(FORM_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(function() {
+                document.getElementById('contactFormFields').style.display = 'none';
+                var st = document.getElementById('contactFormStatus');
+                st.className = 'contact-form-status show';
+                st.innerHTML = '<div class="status-icon">&#10003;</div><h4>Request Sent!</h4><p>We\u2019ll get back to you within one business day.</p>';
+            }).catch(function() {
+                document.getElementById('contactFormFields').style.display = 'none';
+                var st = document.getElementById('contactFormStatus');
+                st.className = 'contact-form-status show';
+                st.innerHTML = '<div class="status-icon">&#9993;</div><h4>Almost there!</h4><p>Please email us directly at <a href="mailto:bolt@sparcle.app" style="color:var(--brand-primary)">bolt@sparcle.app</a></p>';
+            });
+        });
+    }
+
+    // Global open/close — works whether modal was injected here or by the page
+    if (typeof window.openContactModal === 'undefined') {
+        window.openContactModal = function(interest) {
+            var overlay = document.getElementById('contactModalOverlay');
+            if (!overlay) return;
+            document.getElementById('contactInterest').value = interest || 'General Inquiry';
+            document.getElementById('contactModalTitle').textContent = interest || 'Get in Touch';
+            document.getElementById('contactFormFields').style.display = '';
+            var st = document.getElementById('contactFormStatus');
+            st.className = 'contact-form-status';
+            var btn = document.getElementById('contactSubmitBtn');
+            if (btn) { btn.disabled = false; btn.textContent = 'Send Request'; }
+            overlay.classList.add('open');
+            setTimeout(function() { document.getElementById('contactName').focus(); }, 100);
+        };
+        window.closeContactModal = function() {
+            var overlay = document.getElementById('contactModalOverlay');
+            if (overlay) overlay.classList.remove('open');
+            var form = document.getElementById('contactForm');
+            if (form) form.reset();
+        };
+        document.addEventListener('click', function(e) {
+            var overlay = document.getElementById('contactModalOverlay');
+            if (e.target === overlay) window.closeContactModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var overlay = document.getElementById('contactModalOverlay');
+                if (overlay && overlay.classList.contains('open')) window.closeContactModal();
+            }
+        });
+
+        // Intercept any remaining mailto:bolt@sparcle.app links site-wide
+        document.addEventListener('click', function(e) {
+            var link = e.target.closest('a[href^="mailto:bolt@sparcle"]');
+            if (link) {
+                e.preventDefault();
+                var subj = '';
+                try { subj = decodeURIComponent(new URL(link.href).searchParams.get('subject') || ''); } catch(_){}
+                window.openContactModal(subj || 'General Inquiry');
+            }
+            // Also handle #contact: links from offerings.ts
+            var contactLink = e.target.closest('a[href^="#contact:"]');
+            if (contactLink) {
+                e.preventDefault();
+                var interest = contactLink.getAttribute('href').replace('#contact:', '');
+                window.openContactModal(interest);
+            }
+        });
+    }
 
 }());

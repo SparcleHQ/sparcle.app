@@ -74,7 +74,7 @@ export const boltProductContent: ProductPageContent = {
   productIntro:
     "Bolt eliminates app-hopping by grounding answers and actions in your enterprise systems with secure context and policy control.",
   primaryCtaLabel: "Schedule Enterprise Demo",
-  primaryCtaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Demo%20Request",
+  primaryCtaHref: "#contact:Bolt Demo Request",
   secondaryCtaLabel: "Features and Pricing",
   secondaryCtaHref: "/pricing.html#bolt",
   tertiaryCtaLabel: "Learn More",
@@ -140,7 +140,7 @@ export const aeiraProductContent: ProductPageContent = {
   productIntro:
     "Aeira powers discovery and grounding with a consistent API and authorization model as customers scale from lightweight catalog to high-governance federation.",
   primaryCtaLabel: "Talk to Aeira Team",
-  primaryCtaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Architecture%20Discussion",
+  primaryCtaHref: "#contact:Aeira Architecture Discussion",
   secondaryCtaLabel: "Features & Pricing",
   secondaryCtaHref: "/pricing.html#aeira",
   highlights: [
@@ -205,7 +205,7 @@ export const boltPricingContent: PricingPageContent = {
       price: "$10 / seat / month",
       note: "Annual contract",
       ctaLabel: "Request Pilot",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Absolute%20Pilot",
+      ctaHref: "#contact:Bolt Absolute Pilot",
       features: [
         "Self-hosted deployment",
         "BYOK and BYO LLM (private models)",
@@ -220,7 +220,7 @@ export const boltPricingContent: PricingPageContent = {
       note: "Annual contract",
       highlight: "Most popular",
       ctaLabel: "Request Pilot",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Bundled%20Pilot",
+      ctaHref: "#contact:Bolt Bundled Pilot",
       features: [
         "Everything in Absolute",
         "Managed inference and routing",
@@ -234,7 +234,7 @@ export const boltPricingContent: PricingPageContent = {
       price: "$25 / seat / month",
       note: "Annual contract",
       ctaLabel: "Talk to Sales",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Complete%20Inquiry",
+      ctaHref: "#contact:Bolt Complete Inquiry",
       features: [
         "Everything in Bundled",
         "Managed hosting and scaling",
@@ -329,7 +329,7 @@ export const aeiraPricingContent: PricingPageContent = {
       },
       note: "Up to 10K records · Private Instance License",
       ctaLabel: "Start Dynamic",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Dynamic",
+      ctaHref: "#contact:Aeira Dynamic",
       features: [
         "Everything in Catalog",
         "Ingest any document — wikis, runbooks, guides, KB articles, and more",
@@ -352,7 +352,7 @@ export const aeiraPricingContent: PricingPageContent = {
       note: "Up to 100K records · Private Instance License",
       highlight: "Data Leader",
       ctaLabel: "Talk to Aeira Team",
-      ctaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Enhanced",
+      ctaHref: "#contact:Aeira Enhanced",
       features: [
         "Everything in Dynamic",
         "Up to 100K indexed records",

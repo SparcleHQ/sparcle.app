@@ -105,21 +105,18 @@ function renderIcon(iconId: string | undefined): string {
 
       <section class="offering-faq" aria-label={`${content.productName} questions`}>
         <div class="container">
-          <div class="section-title-wrap">
-            <h2>Questions about {content.productName}</h2>
-          </div>
-          <div class="faq-grid">
-            {content.faqs.map((item) => (
-              <article class="faq-card">
-                <button class="faq-toggle" onclick="this.closest('.faq-card').classList.toggle('open')">
-                  <span>{item.title}</span>
-                  <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-                <div class="faq-answer">
+          <div class="faq-section">
+            <div class="section-title">
+              <h2>Questions?</h2>
+            </div>
+            <div class="faq-grid">
+              {content.faqs.map((item) => (
+                <div class="faq-item">
+                  <h3>{item.title}</h3>
                   <p>{item.detail}</p>
                 </div>
-              </article>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -167,21 +164,18 @@ function renderIcon(iconId: string | undefined): string {
 
         <section class="offering-faq" aria-label={`${secondContent.productName} questions`}>
           <div class="container">
-            <div class="section-title-wrap">
-              <h2>Questions about {secondContent.productName}</h2>
-            </div>
-            <div class="faq-grid">
-              {secondContent.faqs.map((item) => (
-                <article class="faq-card">
-                  <button class="faq-toggle" onclick="this.closest('.faq-card').classList.toggle('open')">
-                    <span>{item.title}</span>
-                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                  </button>
-                  <div class="faq-answer">
+            <div class="faq-section">
+              <div class="section-title">
+                <h2>Questions?</h2>
+              </div>
+              <div class="faq-grid">
+                {secondContent.faqs.map((item) => (
+                  <div class="faq-item">
+                    <h3>{item.title}</h3>
                     <p>{item.detail}</p>
                   </div>
-                </article>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>

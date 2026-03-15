@@ -792,6 +792,21 @@
         else document.exitFullscreen();
     };
 
+    // ── CONTROLS AUTO-HIDE ────────────────────────────────────────────────
+    // Show on mouse move / touch / keyboard, hide after 3s idle
+    const ctrlEl = document.getElementById('controls');
+    let hideTimer = null;
+    function showControls() {
+        ctrlEl.classList.add('visible');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => ctrlEl.classList.remove('visible'), 3000);
+    }
+    document.addEventListener('mousemove', showControls);
+    document.addEventListener('touchstart', showControls, { passive: true });
+    document.addEventListener('keydown', function ctrlShow() { showControls(); });
+    // Show briefly on load so users know controls exist
+    showControls();
+
     document.addEventListener('keydown', e => {
         if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); window.location.hash = Math.min(cur + 1, total - 1); }
         if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); window.location.hash = Math.max(cur - 1, 0); }
@@ -813,24 +828,19 @@
     //        bolt-slides.html?autoplay=15      → 15s per slide
     //        bolt-slides.html?autoplay=0       → disabled
     const apParam = new URLSearchParams(location.search).get('autoplay');
-    const apEnabled = apParam !== null;
+    const apDisabled = apParam === '0';
     const apInterval = apParam && parseInt(apParam) > 0 ? parseInt(apParam) * 1000 : 10000;
 
-    // Countdown bar — thin line that drains across the bottom of the viewport
+    // Countdown bar — thin line above controls bar, moves with it
     const apBar = document.createElement('div');
     apBar.id = 'ap-bar';
-    apBar.style.cssText = [
-        'position:absolute', 'bottom:65px', 'left:0', 'height:3px',
-        'background:linear-gradient(90deg,#3B82F6,#a78bfa)',
-        'width:0', 'transition:none', 'z-index:999', 'pointer-events:none'
-    ].join(';');
-    document.getElementById('deck').appendChild(apBar);
+    document.getElementById('controls').appendChild(apBar);
 
     // Play/pause button — injected into controls bar
     const apBtn = document.createElement('button');
     apBtn.className = 'ctrl-btn';
     apBtn.title = 'Toggle autoplay (A)';
-    apBtn.innerHTML = '<i data-lucide="play" style="width:16px;height:16px"></i>';
+    apBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
     apBtn.style.marginLeft = '0.25rem';
     document.getElementById('controls').insertBefore(apBtn, document.getElementById('btn-prev').nextSibling);
 
@@ -841,9 +851,8 @@
 
     function apSetIcon(playing) {
         apBtn.innerHTML = playing
-            ? '<i data-lucide="pause" style="width:16px;height:16px"></i>'
-            : '<i data-lucide="play" style="width:16px;height:16px"></i>';
-        try { lucide.createIcons(); } catch (e) { }
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
     }
 
     function apStartCountdown() {
@@ -908,8 +917,8 @@
     const _origRender = renderSlide;
     // (bar restart is handled inside apPlay interval — no override needed)
 
-    // Auto-start if ?autoplay param present
-    if (apEnabled) {
+    // Auto-start by default (disable with ?autoplay=0)
+    if (!apDisabled) {
         // Small delay so page renders first
         setTimeout(apPlay, 600);
     }

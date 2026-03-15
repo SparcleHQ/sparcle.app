@@ -1,0 +1,19 @@
+---
+interface Props {
+  number: string;    // e.g. "01"
+  title: string;
+  description: string;
+  icon: string;      // raw SVG string
+}
+
+const { number, title, description, icon } = Astro.props;
+---
+
+<div class="pillar">
+  <div class="pillar-number">{number}</div>
+  <div class="pillar-icon">
+    <Fragment set:html={icon} />
+  </div>
+  <h3>{title}</h3>
+  <p>{description}</p>
+</div>

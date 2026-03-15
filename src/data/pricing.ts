@@ -5,7 +5,7 @@ export const plans = [
     price: "$10 / seat / month",
     ctaText: "Request Pilot",
     ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Absolute%20Pilot",
-    features: ["SSO (SAML / OIDC)", "BYO LLM", "60+ Integrations", "Desktop + Web Apps"],
+    features: ["SSO (SAML / OIDC)", "BYOK + BYO LLM", "60+ Integrations", "Desktop + Web Apps"],
   },
   {
     name: "Bolt Bundle",

@@ -1,8 +1,8 @@
 export const faqs = [
   {
-    question: "What does BYO LLM mean?",
+    question: "What does BYOK and BYO LLM mean?",
     answer:
-      "Bring your own model provider and keys, or use managed inference where available.",
+      "BYOK (Bring Your Own Key) lets you plug in API keys from providers like OpenAI, Anthropic, or Google. BYO LLM (Bring Your Own LLM) goes further — run self-hosted or private models in your own environment. Bolt supports both.",
   },
   {
     question: "Where does our data live?",

@@ -11,33 +11,74 @@ interface Props {
 const { content, secondContent, activeProduct } = Astro.props;
 const hasDual = !!secondContent;
 const isSecondActive = activeProduct === 'second';
+
+/* Icon SVG map – Feather-style 24×24 paths */
+const iconPaths: Record<string, string> = {
+  "layers":      '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+  "shield":      '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  "server":      '<rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
+  "trending-up": '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  "database":    '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+  "code":        '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  "lock":        '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  "scale":       '<path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-8.5 8.5"/><path d="M3 3l8.5 8.5"/><path d="M3 21l8.5-8.5"/><path d="M21 21l-8.5-8.5"/>',
+};
+
+const productLogos: Record<string, string> = {
+  "Bolt": "/images/bolt-logo.svg",
+  "Aeira": "/images/aeira-logo.svg",
+};
+
+function renderIcon(iconId: string | undefined): string {
+  if (!iconId || !iconPaths[iconId]) return '';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPaths[iconId]}</svg>`;
+}
 ---
 
 <BaseLayout
   title={hasDual ? "Products | Sparcle" : content.title}
-  description={hasDual ? "Bolt and Bolt Data — two products, one vision for enterprise AI." : content.description}
+  description={hasDual ? "Bolt and Aeira — two products, one vision for enterprise AI." : content.description}
   canonical={content.canonical}
 >
   <main class="offering-page" aria-labelledby="offering-title">
 
     {hasDual && (
-      <div class="product-tab-bar">
+      <div class="product-tab-float">
         <div class="product-tab-switch" role="tablist" aria-label="Product">
-          <button class={`product-tab ${!isSecondActive ? 'active' : ''}`} data-target="product-section-1" role="tab" aria-selected={!isSecondActive ? "true" : "false"} onclick="switchProductPage(this)">{content.productName}</button>
-          <button class={`product-tab ${isSecondActive ? 'active' : ''}`} data-target="product-section-2" role="tab" aria-selected={isSecondActive ? "true" : "false"} onclick="switchProductPage(this)">{secondContent!.productName}</button>
+          <button class={`product-tab ${!isSecondActive ? 'active' : ''}`} data-target="product-section-1" role="tab" aria-selected={!isSecondActive ? "true" : "false"} onclick="switchProductPage(this)"><img src={productLogos[content.productName] || "/images/sparkle-icon.svg"} alt="" class="tab-icon" width="18" height="18" />{content.productName}</button>
+          <button class={`product-tab ${isSecondActive ? 'active' : ''}`} data-target="product-section-2" role="tab" aria-selected={isSecondActive ? "true" : "false"} onclick="switchProductPage(this)"><img src={productLogos[secondContent!.productName] || "/images/sparkle-icon.svg"} alt="" class="tab-icon" width="18" height="18" />{secondContent!.productName}</button>
         </div>
       </div>
     )}
 
+    <!-- ── Product 1 ── -->
     <div id="product-section-1" class={`product-section ${!isSecondActive ? 'active' : ''}`}>
       <section class="offering-hero">
         <div class="container">
-          <p class="eyebrow">{content.productKicker}</p>
+          <div class="offering-hero-header">
+            <img src={productLogos[content.productName] || "/images/sparkle-icon.svg"} alt={`${content.productName} logo`} class="product-logo" width="56" height="56" />
+            <div>
+              <p class="eyebrow">{content.productKicker}</p>
+            </div>
+          </div>
           <h1 id="offering-title">{content.productHeadline}</h1>
-          <p class="intro">{content.productIntro}</p>
+          <p class="offering-intro">{content.productIntro}</p>
+
+          {content.videoUrl && (
+            <div class="product-video-wrap" style="margin-bottom: 2rem;">
+              <video controls preload="metadata">
+                <source src={content.videoUrl} type="video/mp4" />
+                Your browser does not support the video element.
+              </video>
+            </div>
+          )}
+
           <div class="hero-actions">
             <a class="btn btn-primary btn-lg" href={content.primaryCtaHref}>{content.primaryCtaLabel}</a>
             <a class="btn btn-secondary btn-lg" href={content.secondaryCtaHref}>{content.secondaryCtaLabel}</a>
+            {content.tertiaryCtaLabel && (
+              <a class="btn btn-secondary btn-lg" href={content.tertiaryCtaHref} target={content.tertiaryCtaTarget || "_self"}>{content.tertiaryCtaLabel}</a>
+            )}
           </div>
         </div>
       </section>
@@ -45,13 +86,16 @@ const isSecondActive = activeProduct === 'second';
       <section class="offering-highlights" aria-label={`${content.productName} highlights`}>
         <div class="container">
           <div class="section-title-wrap">
-            <h2>{content.productName} highlights</h2>
-            <p>Same visual framework, focused narrative for this product.</p>
+            <h2>Why {content.productName}</h2>
+            <p>Core capabilities that drive measurable enterprise impact.</p>
           </div>
           <div class="card-grid">
             {content.highlights.map((point) => (
               <article class="feature-card">
-                <h3>{point.title}</h3>
+                <div class="feature-card-header">
+                  <div class="feature-icon" set:html={renderIcon(point.icon)} />
+                  <h3>{point.title}</h3>
+                </div>
                 <p>{point.detail}</p>
               </article>
             ))}
@@ -62,13 +106,18 @@ const isSecondActive = activeProduct === 'second';
       <section class="offering-faq" aria-label={`${content.productName} questions`}>
         <div class="container">
           <div class="section-title-wrap">
-            <h2>Questions about {content.productName}?</h2>
+            <h2>Questions about {content.productName}</h2>
           </div>
           <div class="faq-grid">
             {content.faqs.map((item) => (
               <article class="faq-card">
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
+                <button class="faq-toggle" onclick="this.closest('.faq-card').classList.toggle('open')">
+                  <span>{item.title}</span>
+                  <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="faq-answer">
+                  <p>{item.detail}</p>
+                </div>
               </article>
             ))}
           </div>
@@ -76,13 +125,19 @@ const isSecondActive = activeProduct === 'second';
       </section>
     </div>
 
+    <!-- ── Product 2 ── -->
     {secondContent && (
       <div id="product-section-2" class={`product-section ${isSecondActive ? 'active' : ''}`}>
         <section class="offering-hero">
           <div class="container">
-            <p class="eyebrow">{secondContent.productKicker}</p>
+            <div class="offering-hero-header">
+              <img src={productLogos[secondContent.productName] || "/images/sparkle-icon.svg"} alt={`${secondContent.productName} logo`} class="product-logo" width="56" height="56" />
+              <div>
+                <p class="eyebrow">{secondContent.productKicker}</p>
+              </div>
+            </div>
             <h1>{secondContent.productHeadline}</h1>
-            <p class="intro">{secondContent.productIntro}</p>
+            <p class="offering-intro">{secondContent.productIntro}</p>
             <div class="hero-actions">
               <a class="btn btn-primary btn-lg" href={secondContent.primaryCtaHref}>{secondContent.primaryCtaLabel}</a>
               <a class="btn btn-secondary btn-lg" href={secondContent.secondaryCtaHref}>{secondContent.secondaryCtaLabel}</a>
@@ -93,13 +148,16 @@ const isSecondActive = activeProduct === 'second';
         <section class="offering-highlights" aria-label={`${secondContent.productName} highlights`}>
           <div class="container">
             <div class="section-title-wrap">
-              <h2>{secondContent.productName} highlights</h2>
-              <p>Same visual framework, focused narrative for this product.</p>
+              <h2>Why {secondContent.productName}</h2>
+              <p>Core capabilities that drive measurable enterprise impact.</p>
             </div>
             <div class="card-grid">
               {secondContent.highlights.map((point) => (
                 <article class="feature-card">
-                  <h3>{point.title}</h3>
+                  <div class="feature-card-header">
+                    <div class="feature-icon" set:html={renderIcon(point.icon)} />
+                    <h3>{point.title}</h3>
+                  </div>
                   <p>{point.detail}</p>
                 </article>
               ))}
@@ -110,13 +168,18 @@ const isSecondActive = activeProduct === 'second';
         <section class="offering-faq" aria-label={`${secondContent.productName} questions`}>
           <div class="container">
             <div class="section-title-wrap">
-              <h2>Questions about {secondContent.productName}?</h2>
+              <h2>Questions about {secondContent.productName}</h2>
             </div>
             <div class="faq-grid">
               {secondContent.faqs.map((item) => (
                 <article class="faq-card">
-                  <h3>{item.title}</h3>
-                  <p>{item.detail}</p>
+                  <button class="faq-toggle" onclick="this.closest('.faq-card').classList.toggle('open')">
+                    <span>{item.title}</span>
+                    <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <div class="faq-answer">
+                    <p>{item.detail}</p>
+                  </div>
                 </article>
               ))}
             </div>
@@ -127,193 +190,6 @@ const isSecondActive = activeProduct === 'second';
 
   </main>
 </BaseLayout>
-
-<style>
-  .offering-page {
-    padding-top: calc(var(--nav-height) + 2rem);
-  }
-
-  /* Product tab switch */
-  .product-tab-bar {
-    position: sticky;
-    top: var(--nav-height, 80px);
-    z-index: 50;
-    display: flex;
-    justify-content: center;
-    padding: 14px 0;
-    background: var(--bg-body);
-  }
-
-  .product-tab-switch {
-    display: inline-flex;
-    gap: 0;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-    border-radius: 100px;
-    padding: 3px;
-  }
-
-  .product-tab {
-    padding: 7px 28px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    background: transparent;
-    border: none;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: color 0.2s, background 0.2s;
-    white-space: nowrap;
-  }
-
-  .product-tab:hover {
-    color: var(--text-heading);
-  }
-
-  .product-tab.active {
-    color: var(--text-heading);
-    background: var(--bg-muted);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-  }
-
-  .product-section {
-    display: none;
-  }
-
-  .product-section.active {
-    display: block;
-  }
-
-  .offering-hero {
-    padding: 4rem 0 2.5rem;
-    background: radial-gradient(circle at 50% 0%, rgba(99, 179, 237, 0.16), transparent 55%);
-  }
-
-  .eyebrow {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-    color: var(--brand-primary);
-    margin-bottom: 0.85rem;
-  }
-
-  .offering-hero h1 {
-    max-width: 880px;
-    margin-bottom: 1rem;
-  }
-
-  .intro {
-    max-width: 760px;
-    font-size: 1.05rem;
-    line-height: 1.75;
-    color: var(--text-body);
-    margin-bottom: 1.5rem;
-  }
-
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.9rem;
-  }
-
-  .offering-highlights {
-    padding: 2.5rem 0;
-  }
-
-  .section-title-wrap {
-    margin-bottom: 1.4rem;
-  }
-
-  .section-title-wrap h2 {
-    margin-bottom: 0.5rem;
-  }
-
-  .section-title-wrap p {
-    color: var(--text-muted);
-  }
-
-  .card-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .feature-card {
-    border: 1px solid var(--border-default);
-    border-radius: 14px;
-    background: var(--bg-elevated);
-    padding: 1.15rem 1.1rem;
-  }
-
-  .feature-card h3 {
-    font-size: 1.05rem;
-    margin-bottom: 0.45rem;
-  }
-
-  .feature-card p {
-    margin: 0;
-    color: var(--text-body);
-    font-size: 0.93rem;
-  }
-
-  .offering-faq {
-    padding: 2.5rem 0 4rem;
-  }
-
-  .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .faq-card {
-    border: 1px solid var(--border-default);
-    border-radius: 14px;
-    background: var(--bg-elevated);
-    padding: 1rem;
-  }
-
-  .faq-card h3 {
-    font-size: 1rem;
-    margin-bottom: 0.45rem;
-  }
-
-  .faq-card p {
-    font-size: 0.9rem;
-    margin: 0;
-  }
-
-  @media (max-width: 900px) {
-    .card-grid,
-    .faq-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .offering-page {
-      padding-top: calc(var(--nav-height) + 1rem);
-    }
-
-    .offering-hero {
-      padding-top: 3rem;
-    }
-
-    .intro {
-      font-size: 0.97rem;
-    }
-
-    .hero-actions {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .hero-actions .btn {
-      width: 100%;
-    }
-  }
-</style>
 
 <script is:inline>
   function switchProductPage(tab) {
@@ -331,14 +207,14 @@ const isSecondActive = activeProduct === 'second';
     }
     document.getElementById(tab.dataset.target).classList.add('active');
 
-    var hash = tab.dataset.target === 'product-section-2' ? '#bolt-data' : '#bolt';
+    var hash = tab.dataset.target === 'product-section-2' ? '#aeira' : '#bolt';
     history.replaceState(null, '', hash);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   (function() {
     var hash = window.location.hash;
-    if (hash === '#bolt-data') {
+    if (hash === '#aeira') {
       var tab = document.querySelector('[data-target="product-section-2"]');
       if (tab) switchProductPage(tab);
     }

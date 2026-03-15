@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string;
+  text: string;
+  impact: string;
+  icon: string;       // raw SVG string for the icon
+  titleSize?: string;  // e.g. "1.5rem"
+}
+
+const { title, text, impact, icon, titleSize = "1.5rem" } = Astro.props;
+---
+
+<div class="stat-card">
+  <div class="stat-icon">
+    <Fragment set:html={icon} />
+  </div>
+  <div class="stat-number" style={`font-size: ${titleSize};`}>{title}</div>
+  <div class="stat-text">{text}</div>
+  <div class="stat-impact">{impact}</div>
+</div>

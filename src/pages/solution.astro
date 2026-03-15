@@ -1,0 +1,103 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeader from "../components/marketing/SectionHeader.astro";
+import PillarCard from "../components/marketing/PillarCard.astro";
+import StatCard from "../components/marketing/StatCard.astro";
+
+const icons = {
+  bolt: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>',
+  database: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5" /><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" /></svg>',
+  network: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v6m0 6v6m-9-9h6m6 0h6" /></svg>',
+  lock: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>',
+  monitor: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><polyline points="8 21 12 17 16 21" /></svg>',
+  shield: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>',
+  globe: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32" /></svg>',
+  book: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>',
+};
+---
+
+<BaseLayout
+  title="Our Solution | Sparcle — Bolt AI Agent & Aeira Data Plane"
+  description="See how Bolt and Aeira solve enterprise productivity fragmentation: AI agent across 30+ systems, ACL-aware data plane, open MCP integration, and enterprise-grade security."
+  canonical="https://sparcle.app/solution"
+>
+  <!-- ========================================
+       OUR SOLUTION
+       ======================================== -->
+  <section id="solution" class="section-solution section-solution--page">
+    <div class="container">
+      <SectionHeader
+        label="Our Solution"
+        heading="Two Products.<br>One Intelligent Platform."
+        intro="Bolt is the enterprise AI agent that eliminates context switching. Aeira is the data plane that makes every answer grounded, governed, and ACL-aware. Together, they give every knowledge worker instant, secure access to everything your organization knows."
+      />
+
+      <div class="solution-pillars">
+        <PillarCard
+          number="01"
+          title="Bolt — Enterprise AI Operating System"
+          description="Ask in natural language, get answers from 30+ systems in seconds. Bolt queries Gmail, Jira, Slack, GitHub, Calendar, and more — simultaneously — via the open Model Context Protocol (MCP). No app-hopping. No credential juggling."
+          icon={icons.bolt}
+        />
+        <PillarCard
+          number="02"
+          title="Aeira — ACL-aware Enterprise Index"
+          description="Access · Enterprise · Index · Retrieval · Augment. From curated Catalog to full hybrid search with 4-level ACL filtering — Aeira ensures every user and every AI query only sees what they're authorized to access."
+          icon={icons.database}
+        />
+        <PillarCard
+          number="03"
+          title="Open MCP Integration"
+          description="Built on the Model Context Protocol — the open standard for AI tool integration. No proprietary connectors. Any MCP server becomes an instant capability. Your IT team can extend Bolt with custom servers in hours, not months. Patent-pending discovery (US 63/952,804)."
+          icon={icons.network}
+        />
+        <PillarCard
+          number="04"
+          title="Enterprise-First Security"
+          description="8-layer security pipeline: identity validation, PII masking, policy guardrails, rate limiting, audit logging, and zero client token storage. BYOK / BYO LLM. Deploy on-prem, in your VPC, or air-gapped. Your data never leaves your perimeter."
+          icon={icons.lock}
+        />
+      </div>
+
+      <!-- Platform Capabilities sub-section -->
+      <SectionHeader
+        label="Platform Capabilities"
+        heading="Every Surface.<br>Every Workflow."
+        intro="Bolt meets knowledge workers wherever they are — desktop, browser, or mobile. With autonomous execution, ACL-aware retrieval, and an enterprise catalog built in, your team gets instant productivity from day one."
+        class="section-header--spaced"
+      />
+
+      <div class="problem-stats-grid">
+        <StatCard
+          title="Multi-Surface Access"
+          text="macOS · Windows · Linux · Web · Browser Extension · iOS · Android"
+          impact="Native apps, browser extensions, and PWA — Bolt deploys across your entire fleet. One agent, every platform, same experience."
+          icon={icons.monitor}
+        />
+        <StatCard
+          title="ACL-Aware Everything"
+          text="Every query respects your org's access controls"
+          impact="Aeira's 4-level ACL filtering ensures users and AI only see authorized data — org, group, role, and individual permissions enforced in real time."
+          icon={icons.shield}
+        />
+        <StatCard
+          title="Autonomous Execution"
+          text="Multi-step workflows in plain language"
+          impact="Draft emails, file tickets, schedule meetings, summarize threads — Bolt plans and executes complex workflows with human-in-the-loop confirmation."
+          icon={icons.globe}
+        />
+        <StatCard
+          title="Enterprise Catalog"
+          text="Curated company directory — included free"
+          impact="20 entity types: offices, policies, apps, contacts, and more. New hires find the right resource on day one. Scales to Dynamic, Enhanced, and Federated search tiers."
+          icon={icons.book}
+        />
+      </div>
+
+      <div class="section-cta-row">
+        <a href="/products.html" class="btn btn-primary btn-lg">Explore Bolt</a>
+        <a href="/products/aeira.html" class="btn btn-secondary btn-lg">Explore Aeira</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

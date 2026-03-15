@@ -1,0 +1,21 @@
+---
+interface Props {
+  quote: string;
+  citation: string;
+  href?: string;
+}
+
+const { quote, citation, href } = Astro.props;
+---
+
+<blockquote class="research-quote" style="border-left: 3px solid var(--accent); padding: 1.25rem 1.5rem; margin: 2rem 0; background: rgba(99,102,241,0.05); border-radius: 0 8px 8px 0;">
+  <p style="font-style: italic; font-size: 1.1rem; color: var(--text-heading); margin-bottom: 0.5rem;">
+    &ldquo;<Fragment set:html={quote} />&rdquo;
+  </p>
+  <footer style="font-size: 0.9rem; color: var(--text-secondary);">
+    {href
+      ? <a href={href} style="color: var(--accent); text-decoration: none;">&mdash; {citation}</a>
+      : <span>&mdash; {citation}</span>
+    }
+  </footer>
+</blockquote>

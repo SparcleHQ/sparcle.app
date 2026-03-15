@@ -19,6 +19,7 @@ export interface PlanTier {
 export interface FeaturePoint {
   title: string;
   detail: string;
+  icon?: string;
 }
 
 export interface ProductPageContent {
@@ -33,6 +34,12 @@ export interface ProductPageContent {
   primaryCtaHref: string;
   secondaryCtaLabel: string;
   secondaryCtaHref: string;
+  tertiaryCtaLabel?: string;
+  tertiaryCtaHref?: string;
+  tertiaryCtaTarget?: string;
+  badge?: string;
+  videoUrl?: string;
+  checklistHighlights?: string[];
   highlights: FeaturePoint[];
   faqs: FeaturePoint[];
 }
@@ -66,30 +73,46 @@ export const boltProductContent: ProductPageContent = {
   productHeadline: "One intelligence layer above every system your teams use.",
   productIntro:
     "Bolt eliminates app-hopping by grounding answers and actions in your enterprise systems with secure context and policy control.",
-  primaryCtaLabel: "Schedule Bolt Demo",
+  primaryCtaLabel: "Schedule Enterprise Demo",
   primaryCtaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Demo%20Request",
-  secondaryCtaLabel: "View Bolt Pricing",
-  secondaryCtaHref: "/pricing.html",
+  secondaryCtaLabel: "Features and Pricing",
+  secondaryCtaHref: "/pricing.html#bolt",
+  tertiaryCtaLabel: "Learn More",
+  tertiaryCtaHref: "/bolt-slides.html",
+  tertiaryCtaTarget: "_blank",
+  badge: "Enterprise",
+  videoUrl: "/media/BoltSlides_compact.mp4",
+  checklistHighlights: [
+    "<strong>Enterprise integrations</strong> via open protocols (email, calendar, messaging, project management, and more)",
+    "<strong>High cache hit rate</strong> – intelligent multi-tier caching dramatically reduces costs",
+    "<strong>On-prem/VPC deployment</strong> – your data stays in your perimeter",
+    "<strong>BYOL</strong> – use OpenAI, Anthropic, Google, or local models",
+    "<strong>~$3M+ ROI</strong> for 1,000 employees (estimated at $50/hr loaded cost)",
+  ],
   highlights: [
     {
       title: "Unified AI Workspace",
       detail:
         "Search, chat, and automation in one flow across email, calendar, docs, tickets, messaging, and code.",
+      icon: "layers",
     },
     {
       title: "Enterprise Security",
       detail:
         "SSO, audit logging, policy controls, and privacy-first architecture for regulated environments.",
+      icon: "shield",
     },
     {
       title: "Deployment Flexibility",
       detail:
         "Self-host in your perimeter or run with Sparcle-managed AI and hosting, depending on risk profile.",
+      icon: "server",
     },
     {
       title: "Built for ROI",
       detail:
         "Designed to recover deep work time and reduce operational drag from fragmented workflows.",
+      icon: "trending-up",
     },
   ],
   faqs: [
@@ -106,40 +129,44 @@ export const boltProductContent: ProductPageContent = {
   ],
 };
 
-export const boltDataProductContent: ProductPageContent = {
-  title: "Bolt Data Product | Sparcle",
+export const aeiraProductContent: ProductPageContent = {
+  title: "Aeira Product | Sparcle",
   description:
-    "Bolt Data is the governed data plane behind enterprise search and grounding, from included catalog to federated scale.",
-  canonical: "https://sparcle.app/products/bolt-data.html",
-  productName: "Bolt Data",
-  productKicker: "Enterprise Data Plane",
+    "Aeira is the governed data plane behind enterprise search and grounding, from included catalog to federated scale.",
+  canonical: "https://sparcle.app/products/aeira.html",
+  productName: "Aeira",
+  productKicker: "ACL-aware Enterprise Index",
   productHeadline: "Catalog to Federated, same contract and ACL semantics.",
   productIntro:
-    "Bolt Data powers discovery and grounding with a consistent API and authorization model as customers scale from lightweight catalog to high-governance federation.",
+    "Aeira powers discovery and grounding with a consistent API and authorization model as customers scale from lightweight catalog to high-governance federation.",
   primaryCtaLabel: "Talk to Data Team",
   primaryCtaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Data%20Architecture%20Discussion",
-  secondaryCtaLabel: "View Bolt Data Pricing",
-  secondaryCtaHref: "/pricing/bolt-data.html",
+  secondaryCtaLabel: "View Aeira Pricing",
+  secondaryCtaHref: "/pricing/aeira.html",
   highlights: [
     {
       title: "Included Catalog Baseline",
       detail:
-        "Every Bolt plan includes Bolt Data Catalog with 8 core categories and 2 custom categories.",
+        "Every Bolt plan includes Aeira Catalog with 8 core categories and 2 custom categories.",
+      icon: "database",
     },
     {
       title: "Stable API Contract",
       detail:
         "Keep one integration contract while upgrading between Catalog, Dynamic, Enhanced, and Federated.",
+      icon: "code",
     },
     {
       title: "JWT + ACL Compatibility",
       detail:
         "Consistent authorization semantics across tiers for safer rollouts and fewer integration rewrites.",
+      icon: "lock",
     },
     {
       title: "Scale Without Surprises",
       detail:
         "Move from directory-style indexing to larger ingestion and governance profiles with clear guardrails.",
+      icon: "scale",
     },
   ],
   faqs: [
@@ -159,18 +186,18 @@ export const boltDataProductContent: ProductPageContent = {
 export const boltPricingContent: PricingPageContent = {
   title: "Bolt Pricing | Sparcle",
   description:
-    "Bolt pricing for enterprise teams: Absolute, Bundled, and Complete, with included Bolt Data Catalog in every plan.",
+    "Bolt pricing for enterprise teams: Absolute, Bundled, and Complete, with included Aeira Catalog in every plan.",
   canonical: "https://sparcle.app/pricing.html",
   pageKicker: "Bolt Pricing",
   headline: "Simple, transparent pricing for the Bolt platform.",
   intro:
-    "Choose your operating model. Every Bolt plan includes the core platform plus Bolt Data Catalog for governed discovery out of the box.",
+    "Choose your operating model. Every Bolt plan includes the core platform plus Aeira Catalog for governed discovery out of the box.",
   schemaName: "Bolt Pricing",
   schemaDescription:
-    "Bolt platform pricing with three tiers and included Bolt Data Catalog.",
+    "Bolt platform pricing with three tiers and included Aeira Catalog.",
   includesCallout:
-    "Bolt Data Catalog is included in every Bolt plan. Need higher scale or governance? View Bolt Data plans.",
-  includesCalloutHref: "/pricing/bolt-data.html",
+    "Aeira Catalog is included in every Bolt plan. Need higher scale or governance? View Aeira plans.",
+  includesCalloutHref: "/pricing/aeira.html",
   plans: [
     {
       name: "Bolt Absolute",
@@ -181,7 +208,7 @@ export const boltPricingContent: PricingPageContent = {
       ctaHref: "mailto:bolt@sparcle.app?subject=Bolt%20Absolute%20Pilot",
       features: [
         "Self-hosted deployment",
-        "BYO LLM and private models",
+        "BYOK and BYO LLM (private models)",
         "Unified search and AI chat",
         "Desktop and web clients",
       ],
@@ -223,7 +250,7 @@ export const boltPricingContent: PricingPageContent = {
       values: ["Yes", "Yes", "Yes"],
     },
     {
-      feature: "Bolt Data Catalog included",
+      feature: "Aeira Catalog included",
       values: ["Yes", "Yes", "Yes"],
     },
     {
@@ -245,9 +272,9 @@ export const boltPricingContent: PricingPageContent = {
   ],
   faqs: [
     {
-      title: "Is Bolt Data Catalog included?",
+      title: "Is Aeira Catalog included?",
       detail:
-        "Yes. Bolt Data Catalog is included in all Bolt pricing tiers and highlighted as the default data baseline.",
+        "Yes. Aeira Catalog is included in all Bolt pricing tiers and highlighted as the default data baseline.",
     },
     {
       title: "Can we start self-hosted and move to managed later?",
@@ -257,18 +284,18 @@ export const boltPricingContent: PricingPageContent = {
   ],
 };
 
-export const boltDataPricingContent: PricingPageContent = {
-  title: "Bolt Data Pricing | Sparcle",
+export const aeiraPricingContent: PricingPageContent = {
+  title: "Aeira Pricing | Sparcle",
   description:
-    "Bolt Data pricing: free Catalog directory with every Bolt plan, paid tiers for full enterprise search platform — index any corporate data with hybrid AI search.",
-  canonical: "https://sparcle.app/pricing/bolt-data.html",
-  pageKicker: "Bolt Data Pricing",
+    "Aeira pricing: free Catalog directory with every Bolt plan, paid tiers for full enterprise search platform — index any corporate data with hybrid AI search.",
+  canonical: "https://sparcle.app/pricing/aeira.html",
+  pageKicker: "Aeira Pricing",
   headline: "Index anything. Find everything. Your infrastructure.",
   intro:
-    "Start free with Bolt Catalog — a curated company directory included in every Bolt plan. Need to index wiki pages, runbooks, knowledge base articles, or any corporate data? Bolt Data is a full enterprise search platform with hybrid AI search and ACL enforcement.",
-  schemaName: "Bolt Data Pricing",
+    "Start free with Bolt Catalog — a curated company directory included in every Bolt plan. Need to index wiki pages, runbooks, knowledge base articles, or any corporate data? Aeira is a full enterprise search platform with hybrid AI search and ACL enforcement.",
+  schemaName: "Aeira Pricing",
   schemaDescription:
-    "Bolt Data pricing with free Catalog directory and paid enterprise search platform tiers.",
+    "Aeira pricing with free Catalog directory and paid enterprise search platform tiers.",
   toggleLabelLeft: "Monthly",
   toggleLabelRight: "Annual",
   plans: [

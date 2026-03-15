@@ -1,0 +1,21 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient cx="40%" cy="35%" id="bg" r="60%">
+      <stop offset="0%" stop-color="#2a2a3e" />
+      <stop offset="100%" stop-color="#1a1a2e" />
+    </radialGradient>
+  </defs>
+  <!-- Background -->
+  <!-- Star (recessed) -->
+  <!-- A (raised, with cutout hole) -->
+  <!-- A glow edges -->
+  <g class="layer">
+    <title>Layer 1</title>
+    <circle cx="256" cy="255.5" fill="url(#bg)" id="svg_1" r="256"
+      transform="matrix(1 0 0 1 0 0) rotate(0.113233 256 255.5)" />
+    <path d="m41.50003,191.39158l417.49997,-36.89157l-188.50333,149.07207l-23.55405,0.5992z" fill="#000000"
+      fill-opacity="0" id="svg_22" stroke="#5c9cff" stroke-width="13" />
+    <path d="m85.50001,426.7494l187.46866,-403.7494l140.03133,415.49997l-156.77188,-131.56215l-170.7281,119.81159z"
+      fill="#4285F4" id="svg_20" stroke="#5c9cff" stroke-width="14" />
+  </g>
+</svg>

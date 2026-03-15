@@ -33,7 +33,9 @@
     function activeClass(page) {
         if (page === 'research' && path.indexOf('research') !== -1) return ' nav-active';
         if (page === 'pricing' && path.indexOf('pricing') !== -1) return ' nav-active';
-        // On home page, active state is handled dynamically by scrollspy below
+        if (page === 'crisis' && path.indexOf('/crisis') !== -1) return ' nav-active';
+        if (page === 'solution' && path.indexOf('/solution') !== -1) return ' nav-active';
+        if (page === 'why-sparcle' && path.indexOf('/why-sparcle') !== -1) return ' nav-active';
         if (page === 'products' && (path.indexOf('/products') !== -1 || path.indexOf('/bolt') !== -1)) return ' nav-active';
         return '';
     }
@@ -50,13 +52,11 @@
         '    </a>',
         '  </div>',
         '  <ul class="nav-menu" id="navMenu">',
-        '    <li><a href="' + href('#problem') + '" class="nav-link">The Crisis</a></li>',
-        '    <li><a href="' + href('#solution') + '" class="nav-link">Our Solution</a></li>',
-        '    <li><a href="' + href('#products') + '" class="nav-link' + activeClass('products') + '">Products</a></li>',
+        '    <li><a href="/crisis" class="nav-link' + activeClass('crisis') + '">The Crisis</a></li>',
+        '    <li><a href="/solution" class="nav-link' + activeClass('solution') + '">Our Solution</a></li>',
+        '    <li><a href="/why-sparcle" class="nav-link' + activeClass('why-sparcle') + '">Why Sparcle</a></li>',
+        '    <li><a href="/products.html" class="nav-link' + activeClass('products') + '">Products</a></li>',
         '    <li><a href="/pricing.html#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
-        '    <li><a href="' + href('#proof') + '" class="nav-link">Why Sparcle</a></li>',
-        '    <li><a href="/research.html" class="nav-link' + activeClass('research') + '">Research</a></li>',
-        '    <li><a href="' + href('#contact') + '" class="nav-link">Contact</a></li>',
         '  </ul>',
         '  <div class="nav-controls">',
         '    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">',
@@ -103,8 +103,8 @@
         '      <div class="footer-col">',
         '        <h5>Products</h5>',
         '        <ul>',
-        '          <li><a href="/products.html">Bolt Platform</a></li>',
-        '          <li><a href="/products/bolt-data.html">Bolt Data</a></li>',
+        '          <li><a href="/products.html" style="display:inline-flex;align-items:center;gap:0.4rem;"><img src="/images/bolt-logo.svg" alt="" width="16" height="16" style="border-radius:3px;">Bolt</a></li>',
+        '          <li><a href="/products/bolt-data.html" style="display:inline-flex;align-items:center;gap:0.4rem;"><img src="/images/aeira-logo.svg" alt="" width="16" height="16" style="border-radius:3px;">Aeira</a></li>',
         '        </ul>',
         '      </div>',
         '      <div class="footer-col">',
@@ -118,8 +118,7 @@
         '      <div class="footer-col">',
         '        <h5>Company</h5>',
         '        <ul>',
-        '          <li><a href="mailto:bolt@sparcle.app">Contact</a></li>',
-        '          <li><a href="/#problem">The Crisis</a></li>',
+        '          <li><a href="' + href('#contact') + '">Contact</a></li>',
         '          <li><a href="/privacy">Privacy Policy</a></li>',
         '          <li><a href="/terms">Terms of Service</a></li>',
         '        </ul>',
@@ -229,50 +228,6 @@
         });
     }());
 
-    /* ------------------------------------------------------------------
-       SCROLLSPY — highlight nav link for the visible section (home only)
-       ------------------------------------------------------------------ */
-    if (isHome) {
-        var sectionMap = [
-            { id: 'contact',  link: 'Contact' },
-            { id: 'proof',    link: 'Why Sparcle' },
-            { id: 'products', link: 'Products' },
-            { id: 'solution', link: 'Our Solution' },
-            { id: 'problem',  link: 'The Crisis' }
-        ];
-
-        function updateActiveNav() {
-            var scrollY = window.scrollY + 100; // 100px offset for navbar height
-            var active = null;
-
-            for (var i = 0; i < sectionMap.length; i++) {
-                var el = document.getElementById(sectionMap[i].id);
-                if (el && el.offsetTop <= scrollY) {
-                    active = sectionMap[i].link;
-                    break;
-                }
-            }
-
-            // Update nav-active class
-            var links = document.querySelectorAll('#navMenu a.nav-link');
-            links.forEach(function (a) {
-                if (active && a.textContent.trim() === active) {
-                    a.classList.add('nav-active');
-                } else {
-                    a.classList.remove('nav-active');
-                }
-            });
-        }
-
-        // Debounced scroll listener
-        var scrollTimer;
-        window.addEventListener('scroll', function () {
-            clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(updateActiveNav, 50);
-        }, { passive: true });
-
-        // Run once on load
-        updateActiveNav();
-    }
+    /* Scrollspy removed — all nav links now go to dedicated pages */
 
 }());

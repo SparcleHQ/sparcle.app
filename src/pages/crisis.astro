@@ -1,0 +1,79 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeader from "../components/marketing/SectionHeader.astro";
+import StatCard from "../components/marketing/StatCard.astro";
+
+const icons = {
+  grid: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>',
+  clock: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>',
+  pulse: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>',
+  dollar: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>',
+};
+---
+
+<BaseLayout
+  title="The Crisis | Sparcle — Why Modern Work Is Broken"
+  description="Research-backed data on workplace fragmentation: 473 SaaS apps per enterprise, 47-second attention spans, $450B annual productivity loss. The hidden crisis driving Sparcle."
+  canonical="https://sparcle.app/crisis"
+>
+  <section id="crisis" class="section-problem section-problem--page">
+    <div class="container">
+      <SectionHeader
+        label="The Hidden Crisis"
+        heading="Modern Work Is Broken"
+        intro="Dr. Gloria Mark's research at UC Irvine revealed a startling truth: attention spans collapsed from 2.5 minutes to 47 seconds in two decades. Microsoft's Work Trend Index confirms 48% of employees describe work as 'chaotic.' This isn't anecdotal — it's systemic."
+      />
+
+      <div class="problem-stats-grid">
+        <StatCard
+          title="473"
+          text="SaaS apps per enterprise"
+          impact="Each demanding credentials, attention, cognitive overhead"
+          icon={icons.grid}
+          titleSize="2.5rem"
+        />
+        <StatCard
+          title="28%"
+          text="Of workweek on email"
+          impact="Only 39% spent on actual role-specific work (McKinsey)"
+          icon={icons.clock}
+          titleSize="2.5rem"
+        />
+        <StatCard
+          title="47s"
+          text="Average attention span"
+          impact="Down from 2.5 minutes — 'attention residue' reduces capacity"
+          icon={icons.pulse}
+          titleSize="2.5rem"
+        />
+        <StatCard
+          title="$450B"
+          text="Annual U.S. productivity loss"
+          impact="The true cost of workplace fragmentation (Asana Anatomy of Work)"
+          icon={icons.dollar}
+          titleSize="2.5rem"
+        />
+      </div>
+
+      <div class="problem-conclusion">
+        <p>
+          <strong>Existing solutions fall short.</strong> They lock you into their ecosystem.
+          It's by design and that's their core business model. We don't believe in vendor lock-in.
+        </p>
+        <div class="section-cta-row">
+          <a href="/research.html" class="btn btn-secondary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            View Research &amp; Whitepaper
+          </a>
+          <a href="/solution" class="btn btn-primary btn-lg">
+            See Our Solution
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

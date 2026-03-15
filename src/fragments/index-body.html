@@ -1,19 +1,16 @@
 
 
-
     <!-- ========================================
-         HERO - Video + Message Side-by-Side
+         HERO
          ======================================== -->
     <section class="hero" id="hero">
         <div class="hero-bg-gradient"></div>
-        <!-- Animated mesh orbs -->
         <div class="hero-mesh-orb hero-mesh-orb--1"></div>
         <div class="hero-mesh-orb hero-mesh-orb--2"></div>
         <div class="hero-mesh-orb hero-mesh-orb--3"></div>
 
         <div class="container">
             <div class="hero-centered">
-                <!-- Centered Content -->
                 <div class="hero-content-centered">
                     <h1>
                         End App-Hopping.<br>
@@ -21,10 +18,9 @@
                     </h1>
 
                     <p class="hero-description">
-                        Your workforce burns <strong>~5 weeks per year</strong> reorienting after interruptions (Gloria
-                        Mark, UC Irvine).
-                        We built AI that dramatically reduces the cognitive tax of fragmentation—unifying 30+ enterprise
-                        systems into instant, proactive intelligence.
+                        Knowledge workers lose <strong>5 weeks per year</strong> to context switching
+                        (Gloria Mark, UC Irvine). Bolt unifies 30+ enterprise systems into one intelligent
+                        layer — search, act, and automate without leaving the conversation.
                     </p>
 
                     <div class="hero-metrics">
@@ -43,7 +39,7 @@
                     </div>
 
                     <div class="hero-ctas">
-                        <a href="#products" class="btn btn-primary btn-lg">
+                        <a href="/products.html" class="btn btn-primary btn-lg">
                             <span>Explore Solutions</span>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -63,12 +59,12 @@
 
                 <!-- Full-Width Video Below -->
                 <div class="hero-video-full">
-                    <div class="video-wrapper" id="heroVideoWrapper" style="cursor:pointer;" title="Watch demo with audio">
+                    <div class="video-wrapper" id="heroVideoWrapper" title="Watch demo with audio">
                         <video id="heroVideo" autoplay loop muted playsinline preload="metadata">
                             <source src="images/bolt-demo.mp4" type="video/mp4">
                         </video>
-                        <div class="video-controls-overlay" id="heroPlayOverlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);transition:background 0.2s;">
-                            <div style="background:rgba(99,102,241,0.85);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(99,102,241,0.5);">
+                        <div class="video-controls-overlay" id="heroPlayOverlay">
+                            <div class="video-play-btn">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="none">
                                     <polygon points="8,5 20,12 8,19" />
                                 </svg>
@@ -79,9 +75,9 @@
                 </div>
 
                 <!-- Video modal -->
-                <div id="heroVideoModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;">
-                    <button id="heroModalClose" style="position:absolute;top:1.5rem;right:1.5rem;background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;color:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;z-index:10000;" aria-label="Close">&times;</button>
-                    <video id="heroModalVideo" controls playsinline style="max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 0 60px rgba(0,0,0,0.8);">
+                <div id="heroVideoModal" class="hero-video-modal">
+                    <button id="heroModalClose" class="hero-modal-close" aria-label="Close">&times;</button>
+                    <video id="heroModalVideo" controls playsinline class="hero-modal-video">
                         <source src="images/bolt-demo.mp4" type="video/mp4">
                     </video>
                 </div>
@@ -113,7 +109,6 @@
                     modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
                     document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
 
-                    // Hide overlay once hero video is playing (to not obstruct autoplay preview)
                     if (heroVideo) {
                         heroVideo.addEventListener('playing', function() {
                             if (overlay) overlay.style.background = 'rgba(0,0,0,0)';
@@ -129,450 +124,169 @@
     </section>
 
     <!-- ========================================
-         THE PROBLEM - Research-Backed Crisis
+         THE CRISIS — Teaser
          ======================================== -->
-    <section id="problem" class="section-problem">
+    <section id="crisis" class="section-problem">
         <div class="container">
             <div class="section-header">
                 <span class="section-label">The Hidden Crisis</span>
                 <h2>Modern Work Is Broken</h2>
                 <p class="section-intro">
-                    Dr. Gloria Mark's research at UC Irvine revealed a startling truth: attention spans
-                    collapsed from 2.5 minutes to <strong>47 seconds</strong> in two decades. Microsoft's
-                    Work Trend Index confirms 48% of employees describe work as "chaotic." This isn't anecdotal—it's
-                    systemic.
+                    Attention spans collapsed to <strong>47 seconds</strong>. Enterprises run
+                    <strong>473 SaaS apps</strong>. The U.S. loses <strong>$450B annually</strong>
+                    to workplace fragmentation. This isn't anecdotal — it's systemic.
                 </p>
             </div>
-
-            <div class="problem-stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7" />
-                            <rect x="14" y="3" width="7" height="7" />
-                            <rect x="14" y="14" width="7" height="7" />
-                            <rect x="3" y="14" width="7" height="7" />
-                        </svg>
-                    </div>
-                    <div class="stat-number">473</div>
-                    <div class="stat-text">SaaS apps per enterprise</div>
-                    <div class="stat-impact">Each demanding credentials, attention, cognitive overhead</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                    </div>
-                    <div class="stat-number">28%</div>
-                    <div class="stat-text">Of workweek on email</div>
-                    <div class="stat-impact">Only 39% spent on actual role-specific work (McKinsey)</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                        </svg>
-                    </div>
-                    <div class="stat-number">47s</div>
-                    <div class="stat-text">Average attention span</div>
-                    <div class="stat-impact">Down from 2.5 minutes—"attention residue" reduces capacity</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <line x1="12" y1="1" x2="12" y2="23" />
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                        </svg>
-                    </div>
-                    <div class="stat-number">$450B</div>
-                    <div class="stat-text">Annual U.S. productivity loss</div>
-                    <div class="stat-impact">The true cost of workplace fragmentation (Asana Anatomy of Work)</div>
-                </div>
-            </div>
-
-            <div class="problem-conclusion">
-                <p>
-                    <strong>Existing solutions fall short.</strong> They lock you into their ecosystem.
-                    It's by design and that's their core business model. We don't believe in vendor lock-in.
-                </p>
-                <a href="/research.html" class="btn btn-secondary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                    </svg>
-                    View Research &amp; Whitepaper
+            <div class="section-cta-row">
+                <a href="/crisis" class="btn btn-secondary btn-lg">
+                    Explore the Research
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </a>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-         THE SOLUTION - How We Solve It
+         OUR PLATFORM — Bolt + Aeira
          ======================================== -->
-    <section id="solution" class="section-solution">
+    <section id="platform" class="section-solution">
         <div class="container">
             <div class="section-header">
-                <span class="section-label">Our Approach</span>
-                <h2>Unified Intelligence<br>From First Principles</h2>
+                <span class="section-label">Our Platform</span>
+                <h2>Two Products.<br>One Intelligent Platform.</h2>
+                <p class="section-intro">
+                    <strong>Bolt</strong> is the enterprise AI operating system that eliminates context switching.
+                    <strong>Aeira</strong> is the ACL-aware index that makes every answer grounded, governed,
+                    and permission-safe. Together, they give every knowledge worker instant, secure access
+                    to everything your organization knows.
+                </p>
             </div>
 
-            <div class="solution-pillars">
-                <div class="pillar">
-                    <div class="pillar-number">01</div>
-                    <div class="pillar-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 16v-4M12 8h.01" />
-                        </svg>
-                    </div>
-                    <h3>Proactive Awareness</h3>
-                    <p>Surfaces relevant information before you ask. No more searching—intelligence comes to you based
-                        on your context.</p>
-                </div>
-
-                <div class="pillar">
-                    <div class="pillar-number">02</div>
-                    <div class="pillar-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path
-                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                            <line x1="12" y1="22.08" x2="12" y2="12" />
-                        </svg>
-                    </div>
-                    <h3>Patent-Pending optimization</h3>
-                    <p>Multi-tier architecture (US 63/951,582) delivers lightning-fast responses for cached
-                        queries
-                        with significant cost reduction.</p>
-                </div>
-
-                <div class="pillar">
-                    <div class="pillar-number">03</div>
-                    <div class="pillar-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="3" />
-                            <path d="M12 1v6m0 6v6m-9-9h6m6 0h6" />
-                        </svg>
-                    </div>
-                    <h3>Universal Integration</h3>
-                    <p>Enterprise systems via open protocols. Email, calendar, messaging, project management, code—one interface, every tool.
-                        Patent-pending discovery (US 63/952,804).</p>
-                </div>
-
-                <div class="pillar">
-                    <div class="pillar-number">04</div>
-                    <div class="pillar-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                    </div>
-                    <h3>Enterprise-First Security</h3>
-                    <p>On-premises/VPC deployment. PII filtering. Audit trails. BYOL (Bring Your Own LLM). Your data
-                        never leaves your perimeter.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========================================
-         PRODUCTS
-         ======================================== -->
-    <section id="products" class="section-products">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Our Products</span>
-                <h2>Two Products.<br>One Vision.</h2>
-                <p>Built for one enterprise outcome: trusted answers and autonomous execution across your systems.</p>
-            </div>
-
-            <div class="product-tab-switch" role="navigation" aria-label="Focus product card">
-                <a href="#product-bolt" class="product-tab-link active">Bolt</a>
-                <a href="#product-bolt-data" class="product-tab-link">Bolt Data</a>
-            </div>
-
-            <div class="products-showcase">
-                <div class="product-main" id="product-bolt">
-                    <div class="product-badge">Enterprise</div>
+            <div class="products-showcase platform-grid">
+                <div class="product-main">
+                    <span class="product-badge">Enterprise AI Agent</span>
                     <div class="product-header">
                         <img src="images/bolt-logo.svg" alt="Bolt" class="product-logo-img">
                         <div>
-                            <h3><a href="/bolt-slides.html" target="_blank"
-                                    style="color: inherit; text-decoration: none;">Bolt</a></h3>
-                            <p class="product-subtitle">The Enterprise AI Operating System</p>
+                            <h3>Bolt</h3>
+                            <p class="product-subtitle">Enterprise AI Operating System</p>
                         </div>
                     </div>
-
                     <p class="product-intro">
-                        Bolt sits above your entire tech stack, eliminating the "context switching tax."
-                        Ask questions in natural language—get instant answers synthesized from 26+ systems.
+                        Ask questions in natural language — get instant answers synthesized from 30+ systems.
                         No app-hopping. No credential juggling. Just intelligence.
                     </p>
-
-                    <div class="product-features-list">
-                        <div class="feature-item">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            <span><strong>Enterprise integrations</strong> via open protocols (email, calendar, messaging,
-                                project management, and more)</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            <span><strong>High cache hit rate</strong> – intelligent multi-tier caching dramatically
-                                reduces costs</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            <span><strong>On-prem/VPC deployment</strong> – your data stays in your perimeter</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            <span><strong>BYOL</strong> – use OpenAI, Anthropic, Google, or local models</span>
-                        </div>
-                        <div class="feature-item">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            <span><strong>~$3M+ ROI</strong> for 1,000 employees (estimated at $50/hr loaded cost)</span>
-                        </div>
-                    </div>
-
-                    <div class="product-video"
-                        style="margin-top: 1.5rem; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.15); position: relative; cursor: pointer;">
-                        <div class="video-play-overlay" id="boltPlayOverlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;background:rgba(0,0,0,0.25);transition:opacity 0.2s;">
-                            <svg viewBox="0 0 80 80" fill="none" style="width:80px;height:80px;">
-                                <circle cx="40" cy="40" r="38" fill="rgba(255,255,255,0.15)"
-                                    stroke="rgba(255,255,255,0.4)" stroke-width="2" />
-                                <polygon points="32,24 60,40 32,56" fill="white" />
-                            </svg>
-                        </div>
-                        <video id="boltVideo" controls playsinline preload="metadata"
-                            style="width: 100%; display: block; position: relative; z-index: 1;">
-                            <source src="media/BoltSlides_compact.mp4" type="video/mp4">
-                        </video>
-                    </div>
-                    <script>
-                    (function() {
-                        var overlay = document.getElementById('boltPlayOverlay');
-                        var video = document.getElementById('boltVideo');
-                        if (!overlay || !video) return;
-                        overlay.addEventListener('click', function () {
-                            overlay.style.opacity = '0';
-                            overlay.style.pointerEvents = 'none';
-                            video.play().catch(function() {});
-                        });
-                        video.addEventListener('click', function () {
-                            if (overlay.style.pointerEvents !== 'none') {
-                                overlay.style.opacity = '0';
-                                overlay.style.pointerEvents = 'none';
-                                video.play().catch(function() {});
-                            }
-                        });
-                    })();
-                    </script>
-
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem;">
-                        <a href="#contact" class="btn btn-primary btn-lg">Schedule Enterprise Demo</a>
-                        <a href="/bolt-slides.html" target="_blank" class="btn btn-secondary btn-lg">Why Bolt?</a>
-                    </div>
+                    <ul class="product-features-compact">
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+                            30+ systems via MCP
+                        </li>
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                            8-layer security pipeline
+                        </li>
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                            Natural language interface
+                        </li>
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v6m0 6v6m-9-9h6m6 0h6" /></svg>
+                            BYO LLM / on-prem deploy
+                        </li>
+                    </ul>
+                    <a href="/products.html" class="btn btn-primary btn-lg">Explore Bolt</a>
                 </div>
 
-                <div class="product-secondary" id="product-bolt-data">
-                    <div class="product-badge">Data Plane</div>
+                <div class="product-secondary">
+                    <span class="product-badge">Enterprise Search</span>
                     <div class="product-header">
                         <div class="sparcle-app-icon">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <ellipse cx="12" cy="5" rx="8" ry="3" />
                                 <path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
                                 <path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" />
                             </svg>
                         </div>
                         <div>
-                            <h3>Bolt Data</h3>
-                            <p class="product-subtitle">Catalog to Federated, same contract</p>
+                            <h3>Aeira</h3>
+                            <p class="product-subtitle">ACL-aware Enterprise Index</p>
                         </div>
                     </div>
-
                     <p class="product-intro">
-                        Bolt Data is the enterprise data plane behind search and grounding. Start with included Catalog,
-                        then scale to Dynamic, Enhanced, and Federated without changing your app integrations.
+                        The enterprise data plane behind search and grounding. Hybrid search with 4-level ACL
+                        filtering. Start with Catalog, scale to Dynamic and Federated — without changing your integrations.
                     </p>
-
-                    <div class="product-features-compact">
-                        <div class="compact-feature">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                            </svg>
-                            Catalog included in every Bolt plan
-                        </div>
-                        <div class="compact-feature">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                            </svg>
-                            Same API and ACL semantics across tiers
-                        </div>
-                        <div class="compact-feature">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                            </svg>
-                            Dynamic and Enhanced for scale and governance
-                        </div>
-                        <div class="compact-feature">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                            </svg>
-                            Federated for multi-region enterprise programs
-                        </div>
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-start; margin-top: 1.5rem;">
-                        <a href="/pricing.html#bolt-data" class="btn btn-secondary btn-lg">View Bolt Data Plans</a>
-                    </div>
+                    <ul class="product-features-compact">
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5" /></svg>
+                            Hybrid vector + keyword search
+                        </li>
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                            4-level ACL filtering
+                        </li>
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                            1M+ document capacity
+                        </li>
+                        <li class="compact-feature">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v6m0 6v6m-9-9h6m6 0h6" /></svg>
+                            Enterprise Catalog built-in
+                        </li>
+                    </ul>
+                    <a href="/products/aeira.html" class="btn btn-secondary btn-lg">Explore Aeira</a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ========================================
-         AGENTIC AI CAPABILITIES
+         WHY SPARCLE — Teaser
          ======================================== -->
-    <section id="agentic" class="section-problem" style="background: var(--bg-body);">
+    <section id="why-sparcle" class="section-proof">
         <div class="container">
             <div class="section-header">
-                <span class="section-label">Sparcle.app</span>
-                <h2>Agentic AI Capabilities</h2>
+                <span class="section-label">Why Sparcle</span>
+                <h2>Driven by a Mission<br>to Reclaim Your Time.</h2>
                 <p class="section-intro">
-                    Sparcle.app brings autonomous AI directly to macOS — launch anywhere, understand context, and
-                    execute complex workflows without ever leaving your flow state.
+                    Sparcle exists to help organizations reclaim the time and money lost to workplace
+                    fragmentation. Every product decision traces back to a single question: how do we give knowledge
+                    workers their focus back?
                 </p>
             </div>
 
-            <div class="problem-stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                        </svg>
-                    </div>
-                    <div class="stat-number" style="font-size: 1.5rem;">Instant Access</div>
-                    <div class="stat-text">Launch anywhere with a global hotkey</div>
-                    <div class="stat-impact">Your AI assistant is always one keystroke away — no app switching required.
-                    </div>
-                </div>
+            <blockquote class="home-blockquote">
+                <p>
+                    &ldquo;Your workforce burns <strong>~5 weeks per year</strong> reorienting after interruptions.&rdquo;
+                </p>
+                <footer>
+                    <a href="/research.html">&mdash; Gloria Mark, UC Irvine &mdash; Attention Span</a>
+                </footer>
+            </blockquote>
 
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="3" />
-                            <path d="M12 1v6m0 6v6m-9-9h6m6 0h6" />
-                        </svg>
-                    </div>
-                    <div class="stat-number" style="font-size: 1.5rem;">Context Aware</div>
-                    <div class="stat-text">Understands your screen, apps &amp; workflow</div>
-                    <div class="stat-impact">Reads your active context to provide intelligent, relevant assistance — not
-                        generic answers.</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="3" width="20" height="14" rx="2" />
-                            <polyline points="8 21 12 17 16 21" />
-                        </svg>
-                    </div>
-                    <div class="stat-number" style="font-size: 1.5rem;">AI Terminal</div>
-                    <div class="stat-text">Integrated shell with AI guidance</div>
-                    <div class="stat-impact">Execute commands, get AI-powered suggestions, and watch the AI use your
-                        native shell as a tool.</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <path
-                                d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32" />
-                        </svg>
-                    </div>
-                    <div class="stat-number" style="font-size: 1.5rem;">Autonomous Actions</div>
-                    <div class="stat-text">Complex workflows executed automatically</div>
-                    <div class="stat-impact">Describe your intent in plain language. Sparcle.app plans and executes
-                        multi-step workflows autonomously.</div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section id="proof" class="section-proof">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Built & Deployed</span>
-                <h2>Real Product. <br> Real Metrics.</h2>
-            </div>
-
-            <div class="proof-grid">
-                <div class="proof-card">
-                    <div class="proof-metric">6</div>
-                    <div class="proof-label">Active Security Layers</div>
-                    <p>Pre-LLM guardrails, output filtering, PII masking, GDPR logging, rate limiting, request
-                        tracking—defense in depth.</p>
-                </div>
-
-                <div class="proof-card">
-                    <div class="proof-metric">18</div>
-                    <div class="proof-label">Policy Categories</div>
-                    <p>Automated blocking across 18 policy categories, 14 PII pattern types detected and protected.</p>
-                </div>
-
+            <div class="proof-grid proof-grid--compact">
                 <div class="proof-card">
                     <div class="proof-metric">30+</div>
-                    <div class="proof-label">Enterprise Integrations</div>
-                    <p>Email, Calendar, Tasks, Contacts, Files, Confluence, GitLab, Jira, ServiceNow—one interface for
-                        everything.</p>
+                    <div class="proof-label">Systems Connected</div>
+                    <p>Via open MCP, not proprietary APIs.</p>
                 </div>
-
                 <div class="proof-card">
                     <div class="proof-metric">3</div>
                     <div class="proof-label">Patents Pending</div>
-                    <p>Multi-tier caching (US 63/951,582), dynamic MCP discovery (63/952,804), adaptive UI (63/952,801).
-                    </p>
+                    <p>Caching, MCP discovery, priority engine.</p>
                 </div>
+                <div class="proof-card">
+                    <div class="proof-metric">&lt;1hr</div>
+                    <div class="proof-label">To Deploy</div>
+                    <p>Cloud, VPC, or air-gapped.</p>
+                </div>
+            </div>
+
+            <div class="section-cta-row">
+                <a href="/why-sparcle" class="btn btn-secondary btn-lg">
+                    Our Mission &amp; Story
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </a>
             </div>
         </div>
     </section>
@@ -583,10 +297,11 @@
     <section id="contact" class="section-cta">
         <div class="container">
             <div class="cta-box">
-                <h2>Let's Have a Conversation</h2>
+                <h2>See What Unified Intelligence Looks Like</h2>
                 <p>
-                    We partner with forward-thinking enterprises solving real productivity crises.
-                    If you're ready to measure the true cost of fragmentation—and eliminate it—let's talk.
+                    Schedule a 30-minute technical walkthrough with our team.
+                    We'll show you how Bolt and Aeira work with your existing systems —
+                    no slides, just a live demo.
                 </p>
 
                 <div class="cta-actions">
@@ -625,6 +340,5 @@
     </section>
 
     <!-- ========================================
-         FOOTER
+         FOOTER (injected by shared-nav.js)
          ======================================== -->
-    

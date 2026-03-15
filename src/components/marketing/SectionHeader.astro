@@ -1,0 +1,20 @@
+---
+interface Props {
+  label?: string;
+  heading?: string;  // raw HTML for h2 — supports <br> etc.
+  intro?: string;
+  class?: string;
+  style?: string;
+}
+
+const { label, heading, intro, class: className, style } = Astro.props;
+---
+
+<div class:list={["section-header", className]} style={style}>
+  {label && <span class="section-label">{label}</span>}
+  {heading
+    ? <h2 set:html={heading} />
+    : <h2><slot /></h2>
+  }
+  {intro && <p class="section-intro">{intro}</p>}
+</div>

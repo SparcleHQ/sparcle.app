@@ -5,10 +5,10 @@
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "What does \"BYO LLM\" mean?",
+      "name": "What do BYOK and BYO LLM mean?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Bring Your Own LLM — you supply API keys from OpenAI, Anthropic, Google, Azure, or even run local models. You control the model, the cost, and the data flow. Available on all plans. Bundled and Complete also include managed AI if you prefer zero setup."
+        "text": "BYOK (Bring Your Own Key) lets you plug in API keys from providers like OpenAI, Anthropic, or Google. BYO LLM (Bring Your Own LLM) goes further — run self-hosted or private models in your own environment. Bolt supports both. You control the model, the cost, and the data flow. Available on all plans. Bundled and Complete also include managed AI if you prefer zero setup."
       }
     },
     {
@@ -48,12 +48,12 @@
       "name": "Can we switch plans later?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Start with Absolute (BYO LLM) and upgrade to Bundled or Complete anytime. Your data, integrations, and configuration carry over seamlessly."
+        "text": "Yes. Start with Absolute (BYOK / BYO LLM) and upgrade to Bundled or Complete anytime. Your data, integrations, and configuration carry over seamlessly."
       }
     },
     {
       "@type": "Question",
-      "name": "Is Bolt Data Catalog really free?",
+      "name": "Is Aeira Catalog really free?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes. Catalog is a curated company directory included with every Bolt plan — 8 core categories plus 2 custom, 50 records each. It helps employees find the right office, policy, app, or contact on day one. You only pay when you need the full search platform (Dynamic+)."
@@ -61,7 +61,7 @@
     },
     {
       "@type": "Question",
-      "name": "How do I get data into Bolt Data?",
+      "name": "How do I get data into Aeira?",
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "All paid tiers support bulk ingestion via REST API — push CSV, JSON, or YAML documents directly. Enhanced and Federated tiers add high-throughput async ingestion via Kafka. We publish SDKs, CLI tools, and example scripts to help you build ingestion pipelines for your data sources."
@@ -119,60 +119,6 @@
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.7;
-        }
-
-        /* ─── STICKY PRODUCT TAB BAR ─ */
-        .product-tab-bar {
-            position: sticky;
-            top: var(--nav-height, 80px);
-            z-index: 50;
-            display: flex;
-            justify-content: center;
-            padding: 14px 0;
-            background: var(--bg-body);
-            border-bottom: none;
-        }
-
-        .product-tab-switch {
-            display: inline-flex;
-            gap: 0;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-default);
-            border-radius: 100px;
-            padding: 3px;
-        }
-
-        .product-tab {
-            padding: 7px 28px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            background: transparent;
-            border: none;
-            border-radius: 100px;
-            cursor: pointer;
-            transition: color 0.2s, background 0.2s;
-            white-space: nowrap;
-            letter-spacing: 0;
-        }
-
-        .product-tab:hover {
-            color: var(--text-heading);
-        }
-
-        .product-tab.active {
-            color: var(--text-heading);
-            background: var(--bg-muted);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-        }
-
-        /* ─── PRODUCT SECTIONS ──────── */
-        .product-section {
-            display: none;
-        }
-
-        .product-section.active {
-            display: block;
         }
 
         /* ─── DATA PRICE TEXT ────────── */

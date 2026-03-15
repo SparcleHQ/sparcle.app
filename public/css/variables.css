@@ -35,6 +35,7 @@
     --bg-surface-solid: #0f172a;
     --bg-surface-glass: rgba(15, 23, 42, 0.7);
     --bg-elevated: rgba(30, 41, 59, 0.8);
+    --bg-elevated-rgb: 22, 27, 40;
     --bg-muted: rgba(15, 23, 42, 0.4);
 
     --text-heading: #ffffff;
@@ -102,6 +103,7 @@
     --bg-surface-solid: #ffffff;
     --bg-surface-glass: rgba(255, 255, 255, 0.9);
     --bg-elevated: rgba(255, 255, 255, 0.95);
+    --bg-elevated-rgb: 255, 255, 255;
     --bg-muted: rgba(226, 235, 248, 0.72);
 
     --text-heading: #0b1220;

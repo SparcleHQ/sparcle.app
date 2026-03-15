@@ -141,7 +141,7 @@ export const aeiraProductContent: ProductPageContent = {
     "Aeira powers discovery and grounding with a consistent API and authorization model as customers scale from lightweight catalog to high-governance federation.",
   primaryCtaLabel: "Talk to Aeira Team",
   primaryCtaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Architecture%20Discussion",
-  secondaryCtaLabel: "View Aeira Pricing",
+  secondaryCtaLabel: "Features & Pricing",
   secondaryCtaHref: "/pricing.html#aeira",
   highlights: [
     {
@@ -324,10 +324,10 @@ export const aeiraPricingContent: PricingPageContent = {
       name: "Dynamic",
       tagline: "Index any corporate data. Hybrid AI search across everything.",
       prices: {
-        selfHosted: "$8 / seat / month (annual)",
-        managed: "$10 / seat / month",
+        selfHosted: "$99 / month",
+        managed: "$99 / month",
       },
-      note: "Self-hosted license · any document type · hybrid search",
+      note: "Up to 10K records · Private Instance License",
       ctaLabel: "Start Dynamic",
       ctaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Dynamic",
       features: [
@@ -337,32 +337,32 @@ export const aeiraPricingContent: PricingPageContent = {
         "20 ready-made entity templates + custom types via API",
         "4-level ACL (public, department, group, user)",
         "Bulk ingestion API (CSV, YAML, JSON)",
-        "Up to 500K indexed records",
+        "Up to 10K indexed records",
         "Operational metrics (Prometheus)",
-        "10K queries/day included",
+        "Email support (5-day SLA)",
       ],
     },
     {
       name: "Enhanced",
       tagline: "Production-scale search with async ingestion and enterprise controls",
       prices: {
-        selfHosted: "$10 / seat / month (annual)",
-        managed: "$12 / seat / month",
+        selfHosted: "$499 / month",
+        managed: "$499 / month",
       },
-      note: "Enterprise controls · priority support",
+      note: "Up to 100K records · Private Instance License",
       highlight: "Data Leader",
       ctaLabel: "Talk to Aeira Team",
       ctaHref: "mailto:bolt@sparcle.app?subject=Aeira%20Enhanced",
       features: [
         "Everything in Dynamic",
-        "Up to 5M indexed records",
-        "Async ingestion pipeline (Kafka, high-throughput)",
+        "Up to 100K indexed records",
+        "Async Kafka ingestion — high-throughput, guaranteed delivery",
         "Per-user daily quotas with soft & hard limits",
         "30 QPS rate limiting with burst & sliding window",
         "Region-aware ACL filtering",
         "Dedicated namespace isolation",
         "50K queries/day included",
-        "Priority support + data advisory",
+        "Priority support (1-business-day SLA)",
       ],
     },
   ],
@@ -378,7 +378,7 @@ export const aeiraPricingContent: PricingPageContent = {
     },
     {
       feature: "Records",
-      values: ["500 (50/cat)", "Up to 500K", "Up to 5M", "Negotiated"],
+      values: ["500 (50/cat)", "Up to 10K", "Up to 100K", "Negotiated"],
     },
     {
       feature: "Search",
@@ -398,7 +398,7 @@ export const aeiraPricingContent: PricingPageContent = {
     },
     {
       feature: "Rate limiting",
-      values: ["—", "Basic", "30 QPS + burst", "Custom profile"],
+      values: ["—", "30 QPS", "30 QPS + burst", "Custom profile"],
     },
     {
       feature: "Per-user quotas",

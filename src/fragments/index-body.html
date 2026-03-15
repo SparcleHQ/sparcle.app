@@ -198,7 +198,7 @@
                             BYO LLM / on-prem deploy
                         </li>
                     </ul>
-                    <a href="/products.html" class="btn btn-primary btn-lg">Explore Bolt</a>
+                    <a href="/products.html" class="btn btn-primary btn-lg"><img src="/images/bolt-logo.svg" alt="" width="22" height="22" style="vertical-align:-4px;margin-right:6px;">Explore Bolt</a>
                 </div>
 
                 <div class="product-secondary">
@@ -232,7 +232,7 @@
                             Enterprise Catalog built-in
                         </li>
                     </ul>
-                    <a href="/products/aeira.html" class="btn btn-secondary btn-lg">Explore Aeira</a>
+                    <a href="/products/aeira.html" class="btn btn-secondary btn-lg"><img src="/images/aeira-logo.svg" alt="" width="22" height="22" style="vertical-align:-4px;margin-right:6px;">Explore Aeira</a>
                 </div>
             </div>
         </div>
@@ -303,14 +303,14 @@
                 </p>
 
                 <div class="cta-actions">
-                    <a href="mailto:bolt@sparcle.app?subject=Enterprise%20Pilot%20Inquiry"
+                    <a href="#" onclick="openContactModal('Enterprise Pilot Inquiry'); return false;"
                         class="btn btn-primary btn-xl">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                             <polyline points="22,6 12,13 2,6" />
                         </svg>
-                        <span>bolt@sparcle.app</span>
+                        <span>Schedule a Demo</span>
                     </a>
                 </div>
 
@@ -336,6 +336,117 @@
             </div>
         </div>
     </section>
+    <!-- Contact Modal -->
+    <div id="contactModalOverlay" class="contact-modal-overlay" role="dialog" aria-modal="true" aria-label="Contact form">
+        <div class="contact-modal">
+            <button class="contact-modal-close" onclick="closeContactModal()" aria-label="Close">&times;</button>
+            <h3 id="contactModalTitle">Get in Touch</h3>
+            <p class="modal-subtitle">We’ll respond within one business day.</p>
+            <form id="contactForm" autocomplete="on">
+                <div id="contactFormFields">
+                    <input type="hidden" id="contactInterest" name="interest" value="">
+                    <div class="contact-form-group">
+                        <label for="contactName">Name</label>
+                        <input type="text" id="contactName" name="name" required placeholder="Jane Smith" autocomplete="name">
+                    </div>
+                    <div class="contact-form-group">
+                        <label for="contactEmail">Work Email</label>
+                        <input type="email" id="contactEmail" name="email" required placeholder="jane@company.com" autocomplete="email">
+                    </div>
+                    <div class="contact-form-group">
+                        <label for="contactCompany">Company</label>
+                        <input type="text" id="contactCompany" name="company" placeholder="Acme Corp" autocomplete="organization">
+                    </div>
+                    <div class="contact-form-group">
+                        <label for="contactTeamSize">Team Size</label>
+                        <select id="contactTeamSize" name="teamSize">
+                            <option value="">Select…</option>
+                            <option value="1-10">1–10</option>
+                            <option value="11-50">11–50</option>
+                            <option value="51-200">51–200</option>
+                            <option value="201-500">201–500</option>
+                            <option value="500+">500+</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">Send Request</button>
+                </div>
+                <div id="contactFormStatus" class="contact-form-status"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var contactOverlay = document.getElementById('contactModalOverlay');
+        var contactForm    = document.getElementById('contactForm');
+        var contactFields  = document.getElementById('contactFormFields');
+        var contactStatus  = document.getElementById('contactFormStatus');
+        var contactInterest = document.getElementById('contactInterest');
+        var contactSubmit  = document.getElementById('contactSubmitBtn');
+        var contactTitle   = document.getElementById('contactModalTitle');
+
+        window.openContactModal = function(interest) {
+            contactInterest.value = interest || 'General Inquiry';
+            contactTitle.textContent = interest || 'Get in Touch';
+            contactFields.style.display = '';
+            contactStatus.className = 'contact-form-status';
+            contactSubmit.disabled = false;
+            contactSubmit.textContent = 'Send Request';
+            contactOverlay.classList.add('open');
+            setTimeout(function() { document.getElementById('contactName').focus(); }, 100);
+        };
+
+        window.closeContactModal = function() {
+            contactOverlay.classList.remove('open');
+            contactForm.reset();
+        };
+
+        contactOverlay.addEventListener('click', function(e) {
+            if (e.target === contactOverlay) closeContactModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && contactOverlay.classList.contains('open')) closeContactModal();
+        });
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            contactSubmit.disabled = true;
+            contactSubmit.textContent = 'Sending…';
+
+            var payload = {
+                name: document.getElementById('contactName').value.trim(),
+                email: document.getElementById('contactEmail').value.trim(),
+                company: document.getElementById('contactCompany').value.trim(),
+                teamSize: document.getElementById('contactTeamSize').value,
+                interest: contactInterest.value
+            };
+
+            var FORM_URL = 'https://script.google.com/macros/s/AKfycbzNqgqye15z-BzB6vQyciBp0-5HoGI8TtphENSpYxpWDk_5EB5amv30VDEgOhI58nBTbQ/exec';
+
+            fetch(FORM_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(function() {
+                contactFields.style.display = 'none';
+                contactStatus.className = 'contact-form-status show';
+                contactStatus.innerHTML =
+                    '<div class="status-icon">&#10003;</div>' +
+                    '<h4>Request Sent!</h4>' +
+                    '<p>We\u2019ll get back to you within one business day.</p>';
+            }).catch(function() {
+                contactFields.style.display = 'none';
+                contactStatus.className = 'contact-form-status show';
+                contactStatus.innerHTML =
+                    '<div class="status-icon">&#9993;</div>' +
+                    '<h4>Almost there!</h4>' +
+                    '<p>Please email us directly at <a href="mailto:bolt@sparcle.app" style="color:var(--brand-primary)">bolt@sparcle.app</a></p>';
+            });
+        });
+    })();
+    </script>
 
     <!-- ========================================
          FOOTER (injected by shared-nav.js)

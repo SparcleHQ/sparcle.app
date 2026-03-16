@@ -94,6 +94,15 @@ const {
     <link rel="stylesheet" href="/css/sparkle-animation.css" />
     <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
 
+    <!-- Google Analytics 4 -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-Z5BBF4KVH3"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Z5BBF4KVH3');
+    </script>
+
     <slot name="head" />
   </head>
 

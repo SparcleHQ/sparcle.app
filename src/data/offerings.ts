@@ -110,6 +110,12 @@ export const boltProductContent: ProductPageContent = {
       icon: "server",
     },
     {
+      title: "BYOK Economics",
+      detail:
+        "Bring your Azure OpenAI or AWS Bedrock keys. Burn down existing cloud commits with zero token markups.",
+      icon: "dollar-sign",
+    },
+    {
       title: "Built for ROI",
       detail:
         "Designed to recover deep work time and reduce operational drag from fragmented workflows.",

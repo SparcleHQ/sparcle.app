@@ -1830,25 +1830,25 @@ h3 {
     pointer-events: auto;
     display: inline-flex;
     gap: 0;
-    background: rgba(var(--bg-elevated-rgb, 22, 27, 40), 0.85);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border: 1px solid var(--border-default);
+    background: linear-gradient(135deg, rgba(59,130,246,0.18) 0%, rgba(34,211,238,0.12) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(59,130,246,0.4);
     border-radius: 100px;
     padding: 3px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 24px -4px rgba(59,130,246,0.35), 0 4px 20px rgba(0,0,0,0.25);
 }
 
 .product-tab {
     padding: 7px 28px;
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--blue-300, #93c5fd);
     background: transparent;
     border: none;
     border-radius: 100px;
     cursor: pointer;
-    transition: color 0.2s, background 0.2s;
+    transition: color 0.25s, background 0.25s, box-shadow 0.25s;
     white-space: nowrap;
     letter-spacing: 0;
     display: inline-flex;
@@ -1867,25 +1867,15 @@ h3 {
     position: relative;
 }
 
-.product-tab+.product-tab::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 20%;
-    height: 60%;
-    width: 1px;
-    background: var(--text-muted, #6b7280);
-    opacity: 0.4;
-}
-
 .product-tab:hover {
-    color: var(--text-heading);
+    color: #ffffff;
+    background: rgba(59,130,246,0.12);
 }
 
 .product-tab.active {
-    color: var(--text-heading);
-    background: var(--bg-muted);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--brand-gradient-start, #3b82f6), var(--brand-gradient-end, #60a5fa));
+    box-shadow: 0 2px 12px rgba(59,130,246,0.4);
 }
 
 .product-section {

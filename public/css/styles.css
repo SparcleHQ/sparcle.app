@@ -881,7 +881,7 @@ section {
 
 .proof-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
 }
 
@@ -2057,6 +2057,83 @@ h3 {
     line-height: 1.65;
 }
 
+/* ── Agentic Section ── */
+.offering-agentic {
+    padding: 4rem 0 3rem;
+    background: var(--bg-surface, rgba(15, 18, 30, 0.4));
+}
+
+.offering-agentic .card-grid,
+.offering-highlights-bolt .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.agent-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    max-width: 100%;
+}
+
+.comparison-card {
+    padding: 1.75rem;
+    border-radius: var(--radius-xl, 16px);
+    border: 1px solid;
+}
+
+.comparison-bad {
+    background: rgba(248, 113, 113, 0.04);
+    border-color: rgba(248, 113, 113, 0.2);
+}
+
+.comparison-good {
+    background: rgba(34, 211, 160, 0.04);
+    border-color: rgba(34, 211, 160, 0.2);
+}
+
+.comparison-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.comparison-bad .comparison-label {
+    color: #f87171;
+}
+
+.comparison-good .comparison-label {
+    color: #22d3a0;
+}
+
+.comparison-text {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--text-body);
+    font-style: italic;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .offering-agentic .card-grid,
+    .offering-highlights-bolt .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .offering-agentic .card-grid,
+    .offering-highlights-bolt .card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agent-comparison {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ── FAQ Accordion ── */
 .offering-faq {
     padding: 3rem 0 5rem;
@@ -2132,7 +2209,7 @@ h3 {
 /* ── Product page responsive ── */
 @media (min-width: 1100px) {
     .card-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

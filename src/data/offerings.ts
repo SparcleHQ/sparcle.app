@@ -42,6 +42,7 @@ export interface ProductPageContent {
   slidesUrl?: string;
   checklistHighlights?: string[];
   highlights: FeaturePoint[];
+  agenticActions?: FeaturePoint[];
   faqs: FeaturePoint[];
 }
 
@@ -70,10 +71,10 @@ export const boltProductContent: ProductPageContent = {
     "Bolt is the enterprise AI operating system that unifies search, chat, and actions across your tool stack.",
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
-  productKicker: "Enterprise AI Operating System",
-  productHeadline: "One intelligence layer above every system your teams use.",
+  productKicker: "Enterprise AI Agent",
+  productHeadline: "Your AI agent. Across every system. On every device.",
   productIntro:
-    "Bolt eliminates app-hopping by grounding answers and actions in your enterprise systems with secure context and policy control.",
+    "Bolt doesn't just search — it takes action. Send emails, schedule meetings, manage tasks, control your desktop — all through natural language. Connected to 30+ enterprise systems.",
   primaryCtaLabel: "Schedule Enterprise Demo",
   primaryCtaHref: "#contact:Bolt Demo Request",
   secondaryCtaLabel: "Features and Pricing",
@@ -84,18 +85,24 @@ export const boltProductContent: ProductPageContent = {
   badge: "Enterprise",
   videoUrl: "/media/BoltSlides_compact.mp4",
   checklistHighlights: [
-    "<strong>Enterprise integrations</strong> via open protocols (email, calendar, messaging, project management, and more)",
-    "<strong>High cache hit rate</strong> – intelligent multi-tier caching dramatically reduces costs",
-    "<strong>On-prem/VPC deployment</strong> – your data stays in your perimeter",
-    "<strong>BYOL</strong> – use OpenAI, Anthropic, Google, or local models",
-    "<strong>~$3M+ ROI</strong> for 1,000 employees (estimated at $50/hr loaded cost)",
+    "<strong>Agentic actions</strong> — send emails, schedule meetings, manage tasks, all via natural language",
+    "<strong>Desktop agent</strong> — browse files, run commands, control apps on your local machine",
+    "<strong>Phone → Desktop bridge</strong> — access your work computer from anywhere via encrypted tunnel",
+    "<strong>On-prem/VPC deployment</strong> — your data stays in your perimeter",
+    "<strong>BYOL</strong> — use OpenAI, Anthropic, Google, or local models",
   ],
   highlights: [
     {
       title: "Unified AI Workspace",
       detail:
-        "Search, chat, and automation in one flow across email, calendar, docs, tickets, messaging, and code.",
+        "Search, chat, and actions in one flow across email, calendar, docs, tickets, messaging, and code.",
       icon: "layers",
+    },
+    {
+      title: "Desktop Agent",
+      detail:
+        "Browse local files, run terminal commands, open apps — Bolt's native agent gives AI access to your machine, sandboxed and permission-controlled.",
+      icon: "monitor",
     },
     {
       title: "Enterprise Security",
@@ -104,22 +111,60 @@ export const boltProductContent: ProductPageContent = {
       icon: "shield",
     },
     {
+      title: "Phone → Desktop Bridge",
+      detail:
+        "Access your work computer from your phone via encrypted tunnel. Run builds, find files, check logs — from anywhere.",
+      icon: "smartphone",
+    },
+    {
       title: "Deployment Flexibility",
       detail:
         "Self-host in your perimeter or run with Sparcle-managed AI and hosting, depending on risk profile.",
       icon: "server",
     },
     {
-      title: "BYOK Economics",
-      detail:
-        "Bring your Azure OpenAI or AWS Bedrock keys. Burn down existing cloud commits with zero token markups.",
-      icon: "dollar-sign",
-    },
-    {
       title: "Built for ROI",
       detail:
         "Designed to recover deep work time and reduce operational drag from fragmented workflows.",
       icon: "trending-up",
+    },
+  ],
+  agenticActions: [
+    {
+      title: "Send & Reply to Emails",
+      detail:
+        "\"Reply to John's proposal and CC the legal team.\" Bolt reads the thread, drafts contextual replies, and sends via Gmail or Outlook — with your confirmation.",
+      icon: "mail",
+    },
+    {
+      title: "Schedule Meetings",
+      detail:
+        "\"Set up a 30-min sync with Sarah tomorrow at 2pm.\" Bolt prepares the event, adds attendees, generates a video link, and presents the invite for your approval.",
+      icon: "calendar",
+    },
+    {
+      title: "Manage Tasks",
+      detail:
+        "\"Mark the auth PR task as done and create a follow-up for testing.\" Bolt stages the updates across Jira, Linear, or Tasks — you confirm and it executes.",
+      icon: "check-square",
+    },
+    {
+      title: "Control Your Desktop",
+      detail:
+        "Browse local files, run terminal commands, open applications — Bolt's native desktop agent gives AI direct access to your machine, sandboxed and permission-controlled.",
+      icon: "monitor",
+    },
+    {
+      title: "Phone → Desktop Bridge",
+      detail:
+        "On the train? Ask Bolt on your phone to find a file on your office MacBook, run a build, or check logs. Secure encrypted tunnel keeps your desktop connected.",
+      icon: "smartphone",
+    },
+    {
+      title: "Multi-Machine Routing",
+      detail:
+        "\"On my Windows PC, find the contract PDF.\" Bolt intelligently routes to the right machine when you have multiple computers connected.",
+      icon: "shuffle",
     },
   ],
   faqs: [

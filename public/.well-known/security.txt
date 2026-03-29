@@ -1,0 +1,7 @@
+# Sparcle Security Contact (RFC 9116)
+# https://securitytxt.org/
+
+Contact: mailto:security@sparcle.app
+Expires: 2027-03-29T00:00:00.000Z
+Preferred-Languages: en
+Policy: https://sparcle.app/privacy.html

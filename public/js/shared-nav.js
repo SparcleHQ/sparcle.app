@@ -373,12 +373,23 @@
             }
         });
 
-        // Auto-open contact modal if URL hash is #contact: or #contact
+        // Auto-open contact modal if URL hash is #contact or #contact:Interest
         (function checkHash() {
             var hash = window.location.hash;
             if (hash && hash.indexOf('#contact') === 0) {
-                var interest = hash.startsWith('#contact:') ? decodeURIComponent(hash.replace('#contact:', '')) : 'Get in Touch';
-                setTimeout(function() { window.openContactModal(interest); }, 100);
+                var interest = (hash.charAt(8) === ':')
+                    ? decodeURIComponent(hash.slice(9))
+                    : 'Get in Touch';
+                // Use DOMContentLoaded-safe delay so the modal overlay is in the DOM
+                function tryOpen() {
+                    var overlay = document.getElementById('contactModalOverlay');
+                    if (overlay) {
+                        window.openContactModal(interest);
+                    } else {
+                        setTimeout(tryOpen, 100);
+                    }
+                }
+                setTimeout(tryOpen, 50);
             }
         }());
     }

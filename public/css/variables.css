@@ -101,7 +101,7 @@
     --bg-body-gradient: linear-gradient(180deg, #f5f8ff 0%, #ecf2fb 52%, #e2ebf8 100%);
     --bg-surface: rgba(255, 255, 255, 0.82);
     --bg-surface-solid: #ffffff;
-    --bg-surface-glass: rgba(255, 255, 255, 0.9);
+    --bg-surface-glass: rgba(255, 255, 255, 0.55);
     --bg-elevated: rgba(255, 255, 255, 0.95);
     --bg-elevated-rgb: 255, 255, 255;
     --bg-muted: rgba(226, 235, 248, 0.72);

@@ -72,9 +72,9 @@ export const boltProductContent: ProductPageContent = {
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
   productKicker: "Enterprise AI Agent",
-  productHeadline: "Your AI agent. Across every system. On every device.",
+  productHeadline: "Your AI agent. Inside your walls. Across every system.",
   productIntro:
-    "Bolt doesn't just search — it takes action. Send emails, schedule meetings, manage tasks, control your desktop — all through natural language. Connected to 30+ enterprise systems.",
+    "Bolt doesn't just search — it takes action. Send emails, schedule meetings, manage tasks, control your desktop — all through natural language. Connected to 30+ enterprise systems via open MCP. Deployed on your infrastructure, with your own AI model, and with your IP and data protected at every layer.",
   primaryCtaLabel: "Schedule Enterprise Demo",
   primaryCtaHref: "#contact:Bolt Demo Request",
   secondaryCtaLabel: "Features and Pricing",
@@ -89,7 +89,9 @@ export const boltProductContent: ProductPageContent = {
     "<strong>Desktop agent</strong> — browse files, run commands, control apps on your local machine",
     "<strong>Phone → Desktop bridge</strong> — access your work computer from anywhere via encrypted tunnel",
     "<strong>On-prem/VPC deployment</strong> — your data stays in your perimeter",
-    "<strong>BYOL</strong> — use OpenAI, Anthropic, Google, or local models",
+    "<strong>BYO LLM</strong> — use OpenAI, Anthropic, Ollama, NVIDIA NIM, or your own fine-tuned model",
+    "<strong>Your IP and data stay protected</strong> — use Bolt with any AI model, anywhere, with confidence nothing leaks",
+    "<strong>Switch AI models anytime</strong> — your employees see zero change, your data governance posture doesn't move",
   ],
   highlights: [
     {
@@ -121,6 +123,12 @@ export const boltProductContent: ProductPageContent = {
       detail:
         "Self-host in your perimeter or run with Sparcle-managed AI and hosting, depending on risk profile.",
       icon: "server",
+    },
+    {
+      title: "Use Any AI Model. Trust Every Conversation.",
+      detail:
+        "Your employees' data, your customers' information, and your organization's intellectual property stay protected — regardless of which AI model is running underneath. Switch providers, upgrade models, or run locally. From an employee's perspective, nothing changes. From a security perspective, nothing leaks.",
+      icon: "lock",
     },
     {
       title: "Built for ROI",

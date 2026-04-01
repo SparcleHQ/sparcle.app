@@ -25,20 +25,26 @@ const {
     <script is:inline>
       (function () {
         try {
-          var t = localStorage.getItem("theme") || "dark";
-          document.documentElement.setAttribute("data-theme", t);
+          var t = localStorage.getItem("theme");
+          var sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.setAttribute("data-theme",
+            t === "dark" || t === "light" ? t : (sysDark ? "dark" : "light"));
         } catch {
           document.documentElement.setAttribute("data-theme", "dark");
         }
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="author" content="Sparcle, LLC" />
     <meta name="rating" content="general" />
     <meta name="category" content="technology" />
     <meta name="classification" content="Business" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020617" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#edf2fb" />
 
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:type" content="website" />
@@ -56,31 +62,59 @@ const {
     <meta name="twitter:description" content={ogDescription} />
     <meta name="twitter:image" content={ogImage} />
 
-    <script type="application/ld+json" is:inline set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Sparcle, LLC",
-      "legalName": "Sparcle, LLC",
-      "url": "https://sparcle.app",
-      "logo": "https://sparcle.app/images/bolt-logo.svg",
-      "description": "Enterprise AI platform unifying productivity tools. Bolt connects 30+ systems via MCP for instant, proactive intelligence.",
-      "foundingDate": "2024",
-      "email": "bolt@sparcle.app",
-      "sameAs": [
-        "https://sparcle.app",
-        "https://www.linkedin.com/company/sparcle"
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
+    <script type="application/ld+json" is:inline set:html={JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sparcle, LLC",
+        "legalName": "Sparcle, LLC",
+        "url": "https://sparcle.app",
+        "logo": "https://sparcle.app/images/bolt-logo.svg",
+        "description": "Sparcle builds sovereign AI infrastructure for regulated enterprises — deploy on-prem, bring your own LLM, protect your IP and data at every layer.",
+        "foundingDate": "2024",
         "email": "bolt@sparcle.app",
-        "contactType": "sales",
-        "availableLanguage": "English"
+        "sameAs": [
+          "https://sparcle.app",
+          "https://www.linkedin.com/company/sparcle"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "bolt@sparcle.app",
+          "contactType": "sales",
+          "availableLanguage": "English"
+        }
       },
-      "offers": {
-        "@type": "Offer",
-        "description": "Enterprise AI productivity platform — Bolt"
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Bolt",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Windows, macOS, Linux, iOS, Android, Web",
+        "description": "Sovereign enterprise AI agent — deploy on-prem or VPC, bring your own LLM, connect 30+ systems via MCP. IP and PII protected regardless of AI model.",
+        "url": "https://sparcle.app/products.html",
+        "offers": {
+          "@type": "Offer",
+          "price": "10",
+          "priceCurrency": "USD",
+          "name": "Bolt Absolute",
+          "description": "$10/seat/month — self-hosted, BYO LLM, full Bolt platform"
+        },
+        "provider": {
+          "@type": "Organization",
+          "name": "Sparcle, LLC",
+          "url": "https://sparcle.app"
+        },
+        "featureList": [
+          "Self-hosted / on-prem / VPC / air-gapped deployment",
+          "Bring your own LLM — OpenAI, Anthropic, Ollama, NVIDIA NIM",
+          "IP and PII protection regardless of AI model",
+          "30+ enterprise system integrations via open MCP",
+          "8-layer security pipeline",
+          "Agentic actions — email, calendar, tasks, desktop",
+          "HIPAA, SOX, ITAR, GDPR deployable"
+        ]
       }
-    })} />
+    ])} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -107,7 +141,9 @@ const {
   </head>
 
   <body>
-    <slot />
+    <main id="main-content">
+      <slot />
+    </main>
     <script is:inline src="/js/shared-nav.js"></script>
   </body>
 </html>

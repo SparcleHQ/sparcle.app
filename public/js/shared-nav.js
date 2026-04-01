@@ -45,6 +45,7 @@
        ------------------------------------------------------------------ */
     var navHTML = [
         '<nav class="navbar" id="navbar">',
+        '  <div class="nav-inner">',
         '  <div class="nav-logo">',
         '    <a href="/" style="display:flex;align-items:center;gap:0.75rem;">',
         '      <img src="/images/sparkle-icon.svg" alt="Sparcle" width="32" height="32" style="width:32px;height:32px;">',
@@ -59,12 +60,16 @@
         '    <li><a href="/pricing.html#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
         '  </ul>',
         '  <div class="nav-controls">',
-        '    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">',
-        '      <!-- moon (shown in dark mode) -->',
+        '    <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark theme" data-mode="auto">',
+        '      <!-- half-filled circle: left=light, right=dark — auto/system theme -->',
+        '      <svg class="icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+        '        <path d="M12 3A9 9 0 0 0 12 21Z" fill="currentColor" stroke="none"/>',
+        '        <circle cx="12" cy="12" r="9"/>',
+        '      </svg>',
         '      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
         '        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
         '      </svg>',
-        '      <!-- sun (shown in light mode) -->',
+        '      <!-- sun (light mode) -->',
         '      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
         '        <circle cx="12" cy="12" r="5"/>',
         '        <line x1="12" y1="1" x2="12" y2="3"/>',
@@ -83,6 +88,7 @@
         '  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">',
         '    <span></span><span></span><span></span>',
         '  </button>',
+        '  </div>',
         '</nav>'
     ].join('\n');
 
@@ -94,10 +100,10 @@
         '  <div class="container">',
         '    <div class="footer-grid">',
         '      <div class="footer-brand">',
-        '        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">',
-        '          <img src="/images/sparkle-icon.svg" alt="" style="height:32px;">',
+        '        <a href="/" style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;text-decoration:none;color:inherit;">',
+        '          <img src="/images/sparkle-icon.svg" alt="Sparcle" style="height:32px;">',
         '          <span style="font-size:1.25rem;font-weight:700;">Sparcle</span>',
-        '        </div>',
+        '        </a>',
         '        <p>Building unified intelligence for the modern enterprise.</p>',
         '      </div>',
         '      <div class="footer-col">',
@@ -142,6 +148,14 @@
     } else {
         document.body.insertAdjacentHTML('afterbegin', navHTML);
     }
+    // Skip link must be first child for a11y — insert after nav injection
+    if (!document.querySelector('.skip-link')) {
+        var skip = document.createElement('a');
+        skip.className = 'skip-link';
+        skip.href = '#main-content';
+        skip.textContent = 'Skip to main content';
+        document.body.insertAdjacentElement('afterbegin', skip);
+    }
 
     /* ------------------------------------------------------------------
        INJECT FOOTER
@@ -159,22 +173,44 @@
        ------------------------------------------------------------------ */
     (function initTheme() {
         var root = document.documentElement;
-        // Apply saved or system preference immediately (anti-flash)
         var saved = localStorage.getItem('theme');
-        var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        root.setAttribute('data-theme', saved || (systemDark ? 'dark' : 'light'));
+        var mode = (saved === 'dark' || saved === 'light') ? saved : 'auto';
+        var labels = { auto: 'Switch to dark theme', dark: 'Switch to light theme', light: 'Use system theme' };
+        var cycles = { auto: 'dark', dark: 'light', light: 'auto' };
+
+        function applyMode(m) {
+            if (m === 'auto') {
+                var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                root.setAttribute('data-theme', sysDark ? 'dark' : 'light');
+            } else {
+                root.setAttribute('data-theme', m);
+            }
+        }
+
+        function updateBtn(btn, m) {
+            btn.setAttribute('data-mode', m);
+            btn.setAttribute('aria-label', labels[m]);
+        }
+
+        applyMode(mode);
 
         var btn = document.getElementById('themeToggle');
         if (btn) {
+            updateBtn(btn, mode);
             btn.addEventListener('click', function () {
-                var current = root.getAttribute('data-theme') || 'dark';
-                var next = current === 'dark' ? 'light' : 'dark';
-                root.setAttribute('data-theme', next);
-                localStorage.setItem('theme', next);
+                var current = btn.getAttribute('data-mode') || 'auto';
+                var next = cycles[current];
+                if (next === 'auto') {
+                    localStorage.removeItem('theme');
+                } else {
+                    localStorage.setItem('theme', next);
+                }
+                applyMode(next);
+                updateBtn(btn, next);
             });
         }
 
-        // Sync with OS changes (only if user hasn't pinned a preference)
+        // Sync with OS changes when in auto mode
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
             if (!localStorage.getItem('theme')) {
                 root.setAttribute('data-theme', e.matches ? 'dark' : 'light');

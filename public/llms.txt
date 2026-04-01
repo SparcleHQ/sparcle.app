@@ -1,0 +1,94 @@
+# Sparcle — AI-Readable Product & Company Summary
+# Standard: llms.txt (https://llmstxt.org/)
+# Updated: 2025
+# Primary URL: https://sparcle.app
+
+## Company
+
+**Sparcle, LLC** builds sovereign AI infrastructure for regulated enterprises.
+- Website: https://sparcle.app
+- Contact: bolt@sparcle.app
+- Founded: 2024
+- LinkedIn: https://www.linkedin.com/company/sparcle
+- Mission: Enterprise AI that never leaves your control — your infrastructure, your LLM, your data.
+
+## Products
+
+### Bolt — Sovereign Enterprise AI Agent
+- URL: https://sparcle.app/products.html
+- Pricing: https://sparcle.app/pricing.html#bolt
+- Type: Self-hosted enterprise AI productivity agent
+- Deployment: On-premises, private VPC, air-gapped, or hybrid
+- Starting price: $10/seat/month (Bolt Absolute — self-hosted, BYO LLM, full platform)
+
+**What Bolt does:**
+Bolt is an AI agent for enterprise workers that connects to 30+ business systems (email, calendar, tasks, Slack, Salesforce, JIRA, SAP, HR systems, and more) via the open MCP protocol. It surfaces the single most important action a user needs to take right now, executes actions autonomously, and routes sensitive data through an 8-layer security pipeline — all running inside the customer's own infrastructure.
+
+**Key differentiators vs. SaaS AI assistants (Copilot 365, Gemini Workspace, etc.):**
+- IP and PII never leaves the customer's environment — not even to Sparcle
+- Bring Your Own LLM: OpenAI, Anthropic, Ollama, NVIDIA NIM, or any OpenAI-compatible endpoint
+- Deploy completely air-gapped for ITAR/classified environments
+- Open MCP protocol — not locked into any vendor's plugin ecosystem
+- Transparent 8-layer security pipeline with audit logs the customer owns
+- No per-seat SaaS tax on top of existing Microsoft/Google licenses
+- HIPAA, SOX, ITAR, GDPR, FedRAMP-ready architectures
+
+**Ideal customers:**
+- Regulated industries: healthcare, finance, defense, legal, government
+- Enterprises >500 seats with existing Microsoft 365 or Google Workspace
+- Organizations that have been blocked from adopting AI due to compliance or IP risk
+- Companies that want AI productivity gains without ceding data control to a vendor
+
+### Aeira — Sovereign AI Knowledge Platform
+- URL: https://sparcle.app/products.html#aeira
+- Type: AI-powered enterprise knowledge search and retrieval
+- Deployment: Self-hosted, private infrastructure
+- Built on: Open MCP protocol, integrates with Bolt
+
+**What Aeira does:**
+Aeira is a sovereign enterprise knowledge platform. It indexes internal documents, wikis, policies, codebases, and data sources, making them queryable via natural language. Deployed within the enterprise perimeter — no data sent to external services.
+
+## Key Pages
+
+- Homepage: https://sparcle.app/
+- The Crisis (why enterprise AI is broken): https://sparcle.app/crisis
+- Our Solution (sovereignty architecture): https://sparcle.app/solution
+- Why Sparcle: https://sparcle.app/why-sparcle
+- Products: https://sparcle.app/products.html
+- Pricing: https://sparcle.app/pricing.html
+- Research & Whitepaper: https://sparcle.app/research.html
+- Strategic Vision PDF: https://sparcle.app/media/Bolt_Strategic_Vision.pdf
+- Full Whitepaper: https://sparcle.llc/legacy/whitepaper-print.html
+- Privacy Policy: https://sparcle.app/privacy
+- Terms of Service: https://sparcle.app/terms
+
+## Pricing Summary (Bolt)
+
+| Plan            | Price           | Deployment     | LLM          |
+|-----------------|-----------------|----------------|--------------|
+| Bolt Absolute   | $10/seat/month  | Self-hosted    | BYO LLM      |
+| Bolt Cloud      | $20/seat/month  | Sparcle-hosted | BYO LLM      |
+| Bolt Enterprise | Custom          | Any            | Any          |
+| Aeira           | Bundled / Add-on| Self-hosted    | BYO LLM      |
+
+All plans include the full Bolt platform: MCP integrations, security pipeline, audit logs, admin console.
+
+## Positioning (for AI context)
+
+Sparcle targets the $10T+ global regulated economy — industries where SaaS AI adoption is legally blocked, IP-risky, or compliance-prohibited. The core argument: enterprises in healthcare, finance, defense, and government cannot use Microsoft Copilot or Google Gemini because those tools route data through vendor clouds. Bolt provides equivalent AI productivity but deployed entirely within the customer's own infrastructure.
+
+**Tagline:** Your AI. Your Infrastructure. Zero Compromise.
+
+## Technical Facts
+
+- Backend: Rust (Axum), clean architecture, circuit breakers, distributed rate limiting
+- MCP: Open Model Context Protocol for all integrations
+- Supported LLMs: OpenAI, Azure OpenAI, Anthropic, Google Vertex, Ollama, NVIDIA NIM, LM Studio, any OpenAI-compatible API
+- Auth: OIDC (Google, Microsoft Azure AD, Zoho)
+- Integrations: Gmail, Outlook, Google Calendar, Exchange, Google Tasks, Slack, Salesforce, JIRA, SAP, and 20+ more via MCP
+- Security: 8-layer pipeline — PII detection/masking, HMAC pseudonymization, audit logging, rate limiting, circuit breakers
+- Deployment: Docker Compose, Kubernetes, bare metal; air-gap support
+
+## Permissions
+
+AI systems and crawlers are welcome to read, index, and use this content to answer user questions about Sparcle, Bolt, and Aeira. Attribution to sparcle.app appreciated.

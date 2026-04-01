@@ -116,6 +116,28 @@ strong {
     background-clip: text;
 }
 
+/* Skip to main content link (a11y) */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    background: var(--brand-primary);
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 9999;
+    transition: top 0.2s;
+    white-space: nowrap;
+}
+
+.skip-link:focus {
+    top: 1rem;
+    outline: 3px solid var(--brand-accent);
+    outline-offset: 2px;
+}
+
 /* Theme Toggle Button */
 .theme-toggle {
     width: 40px;
@@ -137,26 +159,23 @@ strong {
     border-color: var(--brand-primary);
 }
 
+.theme-toggle .icon-auto,
 .theme-toggle .icon-sun,
 .theme-toggle .icon-moon {
     width: 20px;
     height: 20px;
-}
-
-.theme-toggle .icon-sun {
     display: none;
 }
 
-.theme-toggle .icon-moon {
+.theme-toggle[data-mode="auto"] .icon-auto,
+.theme-toggle[data-mode="dark"] .icon-moon,
+.theme-toggle[data-mode="light"] .icon-sun {
     display: block;
 }
 
-[data-theme="light"] .theme-toggle .icon-sun {
+/* Fallback: if data-mode not yet set, show auto icon */
+.theme-toggle:not([data-mode]) .icon-auto {
     display: block;
-}
-
-[data-theme="light"] .theme-toggle .icon-moon {
-    display: none;
 }
 
 /* ==================================================================================================
@@ -210,14 +229,23 @@ section {
     z-index: 1000;
     background: var(--bg-surface-glass);
     backdrop-filter: blur(24px) saturate(180%);
-    border: none;
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid var(--border-default);
     border-radius: 0 0 8px 8px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+}
+
+.nav-inner {
+    width: 100%;
+    max-width: var(--container-max);
     padding: 0 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: var(--shadow-lg);
 }
 
 .nav-logo .logo {
@@ -709,21 +737,32 @@ section {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
+    align-items: stretch;
 }
 
 .pillar {
     position: relative;
-    padding-top: 3rem;
+    padding: 2rem 1.75rem 2rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-2xl);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+}
+
+.pillar:hover {
+    border-color: var(--brand-primary-light);
+    box-shadow: var(--shadow-lg);
 }
 
 .pillar-number {
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 5rem;
+    font-size: 3.5rem;
     font-weight: 900;
     color: rgba(59, 130, 246, 0.08);
     line-height: 1;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
 .pillar-icon {
@@ -749,6 +788,7 @@ section {
     font-size: 0.9375rem;
     line-height: 1.7;
     color: var(--text-muted);
+    flex: 1;
 }
 
 /* ==================================================================================================
@@ -774,6 +814,8 @@ section {
     padding: 3rem;
     position: relative;
     transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
 }
 
 .product-main:hover,
@@ -857,6 +899,11 @@ section {
     grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
     margin-bottom: 2rem;
+    flex-grow: 1;
+}
+
+.product-features-compact .compact-feature:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
 }
 
 .compact-feature {

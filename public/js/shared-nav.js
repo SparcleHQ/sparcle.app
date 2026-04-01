@@ -372,6 +372,15 @@
                 window.openContactModal(interest);
             }
         });
+
+        // Auto-open contact modal if URL hash is #contact: or #contact
+        (function checkHash() {
+            var hash = window.location.hash;
+            if (hash && hash.indexOf('#contact') === 0) {
+                var interest = hash.startsWith('#contact:') ? decodeURIComponent(hash.replace('#contact:', '')) : 'Get in Touch';
+                setTimeout(function() { window.openContactModal(interest); }, 100);
+            }
+        }());
     }
 
 }());

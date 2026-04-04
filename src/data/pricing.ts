@@ -1,5 +1,14 @@
 export const plans = [
   {
+    name: "Bolt Personal",
+    tagline: "Private AI chat with your own key.",
+    price: "Free",
+    ctaText: "Download",
+    ctaHref: "/download",
+    ctaInterest: "Bolt Personal Download",
+    features: ["No login or account needed", "BYO AI key (Gemini free tier works)", "AI chat, search, summarization", "Runs locally — data stays on device"],
+  },
+  {
     name: "Bolt Absolute",
     tagline: "Your infra. Your model stack.",
     price: "$10 / seat / month",

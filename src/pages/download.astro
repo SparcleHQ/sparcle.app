@@ -1,0 +1,402 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeader from "../components/marketing/SectionHeader.astro";
+---
+
+<BaseLayout
+  title="Download Bolt | Sparcle"
+  description="Download Bolt Personal (free, no login) or Bolt Enterprise Trial (7-day, full platform). macOS, Linux, and Windows."
+  canonical="https://sparcle.app/download"
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "Bolt",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "macOS, Linux, Windows",
+      description: "Sovereign AI agent for enterprise productivity. Available in Personal (free) and Enterprise Trial editions.",
+      url: "https://sparcle.app/download",
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Bolt Personal",
+          price: "0",
+          priceCurrency: "USD",
+          description: "Free forever — private AI chat with your own API key, no login required.",
+        },
+        {
+          "@type": "Offer",
+          name: "Bolt Enterprise Trial",
+          price: "0",
+          priceCurrency: "USD",
+          description: "7-day free trial of the full enterprise platform. Bring your own IDP, email, and LLM.",
+        },
+      ],
+      provider: {
+        "@type": "Organization",
+        name: "Sparcle, LLC",
+        url: "https://sparcle.app",
+      },
+    })} />
+  </Fragment>
+
+  <section class="section-download section-download--page">
+    <div class="container">
+      <SectionHeader
+        label="Download"
+        heading="Get Bolt"
+        intro="Choose the edition that fits your needs. Both run on your machine — your data never leaves your device."
+      />
+
+      <!-- Edition Cards -->
+      <div class="products-showcase platform-grid">
+
+          <!-- ── Personal Edition ── -->
+          <div class="product-main">
+            <span class="product-badge" style="background:#059669;color:#fff;">Free Forever</span>
+            <div class="product-header">
+              <img src="/images/bolt-logo.svg" alt="Bolt Personal" class="product-logo-img" width="56" height="56">
+              <div>
+                <h3>Bolt Personal</h3>
+                <p class="product-subtitle">Private AI Chat</p>
+              </div>
+            </div>
+            <p class="product-intro">
+              Private AI chat with your own API key. No login, no account, no data
+              collection. Just download, add a key, and start chatting. Free forever.
+            </p>
+            <ul class="product-features-compact">
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                No account or sign-in needed
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
+                BYO AI key (Gemini free tier works)
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Private &amp; local &mdash; nothing leaves your machine
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                AI chat, search, and summarization
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                macOS &middot; Linux &middot; Windows
+              </li>
+            </ul>
+
+            <div class="download-section">
+              <p class="dl-coming-soon">Coming Soon</p>
+              <div class="dl-row">
+                <div class="dl-row-label">
+                  <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
+                  <span class="dl-platform-name">macOS</span>
+                </div>
+                <div class="dl-row-links">
+                  <span class="dl-link dl-link--disabled">Apple Silicon</span>
+                  <span class="dl-link dl-link--disabled">Intel Mac</span>
+                </div>
+              </div>
+              <div class="dl-row">
+                <div class="dl-row-label">
+                  <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a2.1 2.1 0 0 0-.084-.006c-.393 0-.777.158-1.048.473-.611.71-.354 1.884.482 2.497-.184.373-.27.77-.27 1.163 0 .63.259 1.248.867 1.687-.186.37-.275.758-.275 1.142 0 .838.537 1.591 1.541 1.846.305 1.166 1.451 2.344 2.527 2.344.348 0 .685-.113.978-.349.328.24.729.349 1.137.349.844 0 1.535-.479 1.879-1.219.417.102.862.155 1.316.155.455 0 .9-.054 1.316-.155.344.74 1.035 1.219 1.879 1.219.408 0 .809-.109 1.137-.349.293.236.63.349.978.349 1.076 0 2.222-1.178 2.527-2.344 1.004-.255 1.541-1.008 1.541-1.846 0-.384-.089-.771-.275-1.142.608-.439.867-1.057.867-1.687 0-.393-.086-.79-.27-1.163.836-.613 1.093-1.787.482-2.497-.271-.315-.655-.473-1.048-.473-.029 0-.057.003-.084.006.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298A5.1 5.1 0 0 0 12.504 0z"/></svg></div>
+                  <span class="dl-platform-name">Linux</span>
+                </div>
+                <div class="dl-row-links">
+                  <span class="dl-link dl-link--disabled">AppImage</span>
+                  <span class="dl-link dl-link--disabled">.deb</span>
+                </div>
+              </div>
+              <div class="dl-row">
+                <div class="dl-row-label">
+                  <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg></div>
+                  <span class="dl-platform-name">Windows</span>
+                </div>
+                <div class="dl-row-links">
+                  <span class="dl-link dl-link--disabled">Installer (.exe)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Enterprise Trial Edition ── -->
+          <div class="product-secondary">
+            <span class="product-badge">7-Day Trial</span>
+            <div class="product-header">
+              <img src="/images/bolt-logo.svg" alt="Bolt Enterprise" class="product-logo-img" width="56" height="56">
+              <div>
+                <h3>Bolt Enterprise</h3>
+                <p class="product-subtitle">Full Platform &mdash; BYO Everything</p>
+              </div>
+            </div>
+            <p class="product-intro">
+              The full enterprise platform. Bring your own identity provider, email, calendar,
+              and AI backend. Built for IT admins, CIOs, and CEOs to evaluate with real
+              org credentials. All features unlocked for 7&nbsp;days.
+              <strong>Includes instant demo mode</strong> &mdash; preview the full platform with sample data before configuring anything.
+            </p>
+            <ul class="product-features-compact">
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                Bring your own Google, Microsoft, Okta, or any OIDC
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Email, calendar, and task sync
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Agentic actions &mdash; send emails, schedule meetings
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Priority scoring, smart summaries, One Thing&#x2122;
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                8-layer security pipeline
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
+                30+ systems via MCP
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                All enterprise features unlocked during trial
+              </li>
+              <li class="compact-feature">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Instant demo mode &mdash; preview with sample data
+              </li>
+            </ul>
+
+            <div class="download-section">
+              <p class="dl-coming-soon">Coming Soon</p>
+              <div class="dl-row">
+                <div class="dl-row-label">
+                  <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
+                  <span class="dl-platform-name">macOS</span>
+                </div>
+                <div class="dl-row-links">
+                  <span class="dl-link dl-link--disabled">Apple Silicon</span>
+                  <span class="dl-link dl-link--disabled">Intel Mac</span>
+                </div>
+              </div>
+              <div class="dl-row">
+                <div class="dl-row-label">
+                  <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a2.1 2.1 0 0 0-.084-.006c-.393 0-.777.158-1.048.473-.611.71-.354 1.884.482 2.497-.184.373-.27.77-.27 1.163 0 .63.259 1.248.867 1.687-.186.37-.275.758-.275 1.142 0 .838.537 1.591 1.541 1.846.305 1.166 1.451 2.344 2.527 2.344.348 0 .685-.113.978-.349.328.24.729.349 1.137.349.844 0 1.535-.479 1.879-1.219.417.102.862.155 1.316.155.455 0 .9-.054 1.316-.155.344.74 1.035 1.219 1.879 1.219.408 0 .809-.109 1.137-.349.293.236.63.349.978.349 1.076 0 2.222-1.178 2.527-2.344 1.004-.255 1.541-1.008 1.541-1.846 0-.384-.089-.771-.275-1.142.608-.439.867-1.057.867-1.687 0-.393-.086-.79-.27-1.163.836-.613 1.093-1.787.482-2.497-.271-.315-.655-.473-1.048-.473-.029 0-.057.003-.084.006.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298A5.1 5.1 0 0 0 12.504 0z"/></svg></div>
+                  <span class="dl-platform-name">Linux</span>
+                </div>
+                <div class="dl-row-links">
+                  <span class="dl-link dl-link--disabled">AppImage</span>
+                  <span class="dl-link dl-link--disabled">.deb</span>
+                </div>
+              </div>
+              <div class="dl-row">
+                <div class="dl-row-label">
+                  <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg></div>
+                  <span class="dl-platform-name">Windows</span>
+                </div>
+                <div class="dl-row-links">
+                  <span class="dl-link dl-link--disabled">Installer (.exe)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- FAQ -->
+      <SectionHeader heading="Questions?" class="section-header--spaced" />
+        <div class="faq-grid">
+          <article class="faq-item">
+            <h3>Do I need an account to use Bolt Personal?</h3>
+            <p>No. Bolt Personal runs entirely on your machine with no login. Just download, add an AI API key, and start chatting.</p>
+          </article>
+          <article class="faq-item">
+            <h3>What happens after the 7-day Enterprise trial?</h3>
+            <p>The app stops connecting to enterprise features (email, calendar, agentic actions). Your local data remains. Contact us to purchase a license or switch to Personal edition.</p>
+          </article>
+          <article class="faq-item">
+            <h3>What AI keys work?</h3>
+            <p>Any OpenAI-compatible API &mdash; OpenAI, Anthropic, Google Gemini (has a free tier), Ollama (local), Groq, Together, or your own endpoint.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Does Bolt send my data anywhere?</h3>
+            <p>No. Both editions run fully on your device. AI requests go directly from your machine to your chosen provider &mdash; nothing routes through Sparcle.</p>
+          </article>
+          <article class="faq-item">
+            <h3>What IDP credentials do I need for Enterprise Trial?</h3>
+            <p>Your organization's OAuth Client ID and Secret for Google Workspace, Microsoft Entra ID, Okta, or any OIDC provider. The setup wizard walks you through it step by step.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Can I upgrade from Personal to Enterprise?</h3>
+            <p>Yes. Download the Enterprise edition, enter your IDP and productivity credentials, and you're set. Your Personal data stays separate.</p>
+          </article>
+          <article class="faq-item">
+            <h3>What is demo mode?</h3>
+            <p>Enterprise Trial includes a one-click demo that loads sample data (emails, meetings, tasks) so you can explore the full platform instantly &mdash; no credentials needed. It resets when you quit the app.</p>
+          </article>
+        </div>
+
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Page-level modifier — matches .section-solution--page pattern for nav clearance */
+  .section-download--page {
+    padding-top: 8rem;
+  }
+
+  /* Download CTA section inside product cards */
+  .download-section {
+    border-top: 1px solid var(--border-default);
+    padding-top: 1.5rem;
+    margin-top: auto;
+  }
+
+  .dl-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+  }
+
+  .dl-row + .dl-row {
+    border-top: 1px solid var(--border-default);
+  }
+
+  .dl-row-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+
+  .dl-row-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .dl-platform-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--brand-primary, #3b82f6);
+    flex-shrink: 0;
+  }
+
+  .dl-platform-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-body);
+  }
+
+  .dl-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-body);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .dl-link:hover {
+    color: #fff;
+    border-color: var(--brand-primary, #3b82f6);
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  .dl-link--primary {
+    background: var(--brand-primary, #3b82f6);
+    border-color: var(--brand-primary, #3b82f6);
+    color: #fff;
+  }
+
+  .dl-link--primary:hover {
+    background: var(--brand-primary-hover, #2563eb);
+    border-color: var(--brand-primary-hover, #2563eb);
+  }
+
+  .dl-link--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .dl-coming-soon {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--brand-primary, #3b82f6);
+    margin: 0 0 0.25rem;
+  }
+
+  @media (max-width: 480px) {
+    .dl-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .dl-row-links {
+      justify-content: flex-start;
+      width: 100%;
+    }
+  }
+
+  /* FAQ items — same pattern as PricingPageTemplate */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .faq-item {
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    padding: 1.25rem;
+  }
+
+  .faq-item h3 {
+    font-size: 1rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .faq-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .section-download--page {
+      padding-top: 5rem;
+    }
+
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

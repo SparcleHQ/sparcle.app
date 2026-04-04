@@ -900,6 +900,7 @@ section {
     gap: 0.75rem;
     margin-bottom: 2rem;
     flex-grow: 1;
+    align-content: start;
 }
 
 .product-features-compact .compact-feature:last-child:nth-child(odd) {
@@ -1809,6 +1810,7 @@ h3 {
 /* Dedicated page sections — extra top padding for nav clearance */
 .section-problem--page,
 .section-solution--page,
+.section-download--page,
 .section-proof--page {
     padding-top: 8rem;
 }

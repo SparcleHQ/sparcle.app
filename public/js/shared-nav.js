@@ -33,6 +33,7 @@
     function activeClass(page) {
         if (page === 'research' && path.indexOf('research') !== -1) return ' nav-active';
         if (page === 'pricing' && path.indexOf('pricing') !== -1) return ' nav-active';
+        if (page === 'download' && path.indexOf('/download') !== -1) return ' nav-active';
         if (page === 'crisis' && path.indexOf('/crisis') !== -1) return ' nav-active';
         if (page === 'solution' && path.indexOf('/solution') !== -1) return ' nav-active';
         if (page === 'why-sparcle' && path.indexOf('/why-sparcle') !== -1) return ' nav-active';
@@ -58,6 +59,7 @@
         '    <li><a href="/why-sparcle" class="nav-link' + activeClass('why-sparcle') + '">Why Sparcle</a></li>',
         '    <li><a href="/products.html" class="nav-link' + activeClass('products') + '">Products</a></li>',
         '    <li><a href="/pricing.html#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
+        '    <li><a href="/download" class="nav-link' + activeClass('download') + '">Download</a></li>',
         '  </ul>',
         '  <div class="nav-controls">',
         '    <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark theme" data-mode="auto">',

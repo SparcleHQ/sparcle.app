@@ -1,9 +1,10 @@
 name: Deploy Astro site to GitHub Pages
 
+# DISABLED — manual builds only for now. Re-enable by changing branch back to 'main'.
 on:
   push:
     branches:
-      - main
+      - disabled-auto-deploy
   workflow_dispatch:
 
 permissions:

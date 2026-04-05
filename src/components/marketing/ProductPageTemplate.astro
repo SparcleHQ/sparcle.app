@@ -282,5 +282,20 @@ function renderIcon(iconId: string | undefined): string {
       var tab = document.querySelector('[data-target="product-section-2"]');
       if (tab) switchProductPage(tab);
     }
+    // Arrow key navigation for tabs (WCAG)
+    var tablist = document.querySelector('.product-tab-switch');
+    if (tablist) {
+      tablist.addEventListener('keydown', function(e) {
+        var tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        var idx = tabs.indexOf(document.activeElement);
+        if (idx < 0) return;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          var next = e.key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+          tabs[next].focus();
+          switchProductPage(tabs[next]);
+        }
+      });
+    }
   })();
 </script>

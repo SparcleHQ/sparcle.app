@@ -351,9 +351,16 @@
             if (e.target === overlay) window.closeContactModal();
         });
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                var overlay = document.getElementById('contactModalOverlay');
-                if (overlay && overlay.classList.contains('open')) window.closeContactModal();
+            var overlay = document.getElementById('contactModalOverlay');
+            if (!overlay || !overlay.classList.contains('open')) return;
+            if (e.key === 'Escape') { window.closeContactModal(); return; }
+            // Focus trap
+            if (e.key === 'Tab') {
+                var focusables = overlay.querySelectorAll('input,select,textarea,button,[tabindex]:not([tabindex="-1"])');
+                if (!focusables.length) return;
+                var first = focusables[0], last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         });
 

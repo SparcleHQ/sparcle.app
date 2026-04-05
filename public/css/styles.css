@@ -201,7 +201,7 @@ section {
 
 .section-label {
     display: inline-block;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 700;
     color: var(--brand-primary);
     text-transform: uppercase;
@@ -423,7 +423,7 @@ section {
 .hero-bg-gradient {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(59, 130, 246, 0.15), transparent);
+    background: radial-gradient(ellipse 80% 50% at 50% 20%, var(--brand-primary-light), transparent);
     pointer-events: none;
 }
 
@@ -440,7 +440,7 @@ section {
 .hero-mesh-orb--1 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--brand-primary) 40%, transparent) 0%, transparent 70%);
     top: -10%;
     left: -5%;
     animation: meshFloat1 8s ease-in-out infinite;
@@ -449,7 +449,7 @@ section {
 .hero-mesh-orb--2 {
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--brand-accent) 30%, transparent) 0%, transparent 70%);
     top: 20%;
     right: -10%;
     animation: meshFloat2 10s ease-in-out infinite;
@@ -458,7 +458,7 @@ section {
 .hero-mesh-orb--3 {
     width: 350px;
     height: 350px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--color-info-bg) 0%, transparent 70%);
     bottom: 10%;
     left: 30%;
     animation: meshFloat3 12s ease-in-out infinite;
@@ -1510,11 +1510,15 @@ h3 {
 
 @media (max-width: 768px) {
     section {
-        padding: 5rem 0;
+        padding: 3rem 0;
     }
 
     .container {
-        padding: 0 1.5rem;
+        padding: 0 1.25rem;
+    }
+
+    .section-header {
+        margin-bottom: 2.5rem;
     }
 
     .navbar {
@@ -1524,6 +1528,7 @@ h3 {
         justify-content: flex-start;
         gap: 0.5rem;
         border-radius: 0;
+        height: 64px;
     }
 
     .nav-logo {
@@ -1608,11 +1613,18 @@ h3 {
     }
 
     .hero {
-        padding-top: calc(var(--nav-height) + 4rem);
+        min-height: auto;
+        padding-top: calc(64px + 2.5rem);
+        padding-bottom: 2.5rem;
     }
 
     .hero-metrics {
         gap: 1.5rem;
+    }
+
+    .metric {
+        min-width: 0;
+        flex: 1 1 auto;
     }
 
     .problem-stats-grid {
@@ -1663,6 +1675,11 @@ h3 {
         align-items: center;
     }
 
+    .hero-ctas .btn {
+        width: 100%;
+        max-width: 320px;
+    }
+
     .footer-bottom {
         flex-direction: column;
         text-align: center;
@@ -1670,6 +1687,102 @@ h3 {
 
     .hero-mesh-orb {
         display: none;
+    }
+
+    /* Card padding reduction */
+    .stat-card {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .pillar {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .pillar-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .proof-card {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .proof-metric {
+        font-size: 2.25rem;
+    }
+
+    .product-badge {
+        position: static;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .product-main,
+    .product-secondary {
+        padding: 1.75rem 1.5rem;
+    }
+
+    .product-header {
+        gap: 1rem;
+    }
+
+    .product-logo-img {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Page section top spacing */
+    .section-problem--page,
+    .section-solution--page,
+    .section-download--page,
+    .section-proof--page {
+        padding-top: 5.5rem;
+    }
+
+    .section-header--spaced {
+        margin-top: 2rem;
+    }
+
+    .section-cta-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Offering pages */
+    .offering-hero {
+        padding: 3rem 0 2rem;
+    }
+
+    .offering-highlights {
+        padding: 2.5rem 0 2rem;
+    }
+
+    .offering-faq {
+        padding: 2rem 0 3rem;
+    }
+
+    .feature-card {
+        padding: 1.25rem;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 3rem 0 2rem;
+    }
+
+    .footer-grid {
+        gap: 2rem;
+        margin-bottom: 2rem;
     }
 }
 
@@ -2132,13 +2245,13 @@ h3 {
 }
 
 .comparison-bad {
-    background: rgba(248, 113, 113, 0.04);
-    border-color: rgba(248, 113, 113, 0.2);
+    background: var(--color-danger-bg);
+    border-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
 }
 
 .comparison-good {
-    background: rgba(34, 211, 160, 0.04);
-    border-color: rgba(34, 211, 160, 0.2);
+    background: var(--color-success-bg);
+    border-color: color-mix(in srgb, var(--color-success) 20%, transparent);
 }
 
 .comparison-label {
@@ -2150,11 +2263,11 @@ h3 {
 }
 
 .comparison-bad .comparison-label {
-    color: #f87171;
+    color: var(--color-danger);
 }
 
 .comparison-good .comparison-label {
-    color: #22d3a0;
+    color: var(--color-success);
 }
 
 .comparison-text {
@@ -2349,14 +2462,14 @@ h3 {
     display: inline-flex;
     align-items: center;
     padding: 0.3rem 0.9rem;
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--brand-primary, #3b82f6);
-    border: 1px solid var(--brand-primary, #3b82f6);
+    color: var(--brand-primary);
+    border: 1px solid var(--brand-primary);
     border-radius: 100px;
-    background: rgba(59, 130, 246, 0.08);
+    background: var(--brand-primary-light);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -2649,5 +2762,50 @@ h3 {
 @media (max-width: 500px) {
     .contact-modal {
         padding: 28px 20px 20px;
+    }
+}
+
+/* Extra-small screens (iPhone SE, narrow phones) */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    section {
+        padding: 2.5rem 0;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.35rem;
+    }
+
+    .hero {
+        padding-top: calc(64px + 2rem);
+        padding-bottom: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .btn-lg {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .product-main,
+    .product-secondary {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .section-problem--page,
+    .section-solution--page,
+    .section-download--page,
+    .section-proof--page {
+        padding-top: 4.5rem;
     }
 }

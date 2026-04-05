@@ -69,12 +69,12 @@ const icons = {
           That's the market existing AI vendors are ignoring. It's the market we're building for.
         </p>
 
-        <h3 style="margin:2.5rem 0 0.5rem;font-size:1.1rem;font-weight:700;">Bolt vs. Copilot 365 &amp; Gemini Workspace</h3>
-        <p style="font-size:0.875rem;color:var(--text-muted,#6b7280);margin-bottom:1.5rem;">Microsoft Copilot 365 is a $30/seat add-on charged <em>on top of</em> existing M365 licenses ($12–22/seat), totaling $42–52/seat — and requires your data to route through Microsoft's Azure OpenAI cloud. Gemini Workspace similarly processes your documents externally.</p>
+        <h3 class="cmp-heading">Bolt vs. Copilot 365 &amp; Gemini Workspace</h3>
+        <p class="cmp-subtext">Microsoft Copilot 365 is a $30/seat add-on charged <em>on top of</em> existing M365 licenses ($12–22/seat), totaling $42–52/seat — and requires your data to route through Microsoft's Azure OpenAI cloud. Gemini Workspace similarly processes your documents externally.</p>
 
         <style>
-          .cmp-wrap { overflow-x: auto; margin: 0 0 3rem; }
-          .cmp { width: 100%; border-collapse: collapse; font-size: 1rem; }
+          .cmp-wrap { overflow-x: auto; margin: 0 0 3rem; -webkit-overflow-scrolling: touch; }
+          .cmp { width: 100%; min-width: 580px; border-collapse: collapse; font-size: 1rem; }
           .cmp colgroup col:first-child { width: 55%; }
           .cmp colgroup col:not(:first-child) { width: 22.5%; }
           .cmp thead tr { border-bottom: 2px solid var(--border-strong, rgba(255,255,255,0.12)); }
@@ -87,13 +87,15 @@ const icons = {
           .cmp td { padding: 1rem 1.25rem; font-size: 0.9375rem; line-height: 1.5; vertical-align: middle; }
           .cmp td:first-child { text-align: left; color: var(--text-body); }
           .cmp td:not(:first-child) { text-align: center; }
-          .cmp-yes { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(22,163,74,0.15); color: #4ade80; }
-          .cmp-no { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(220,38,38,0.12); color: #f87171; }
-          .cmp-partial { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(234,179,8,0.12); color: #facc15; }
-          .cmp-note { display: block; font-size: 0.8125rem; color: var(--text-muted, #9ca3af); margin-top: 0.25rem; font-weight: 400; }
-          .cmp-hero-val { font-size: 1.25rem; font-weight: 800; color: #4ade80; }
+          .cmp-heading { margin: 2.5rem 0 0.5rem; font-size: 1.1rem; font-weight: 700; }
+          .cmp-subtext { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+          .cmp-yes { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-success-bg); color: var(--color-success); }
+          .cmp-no { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-danger-bg); color: var(--color-danger); }
+          .cmp-partial { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-warning-bg); color: var(--color-warning); }
+          .cmp-note { display: block; font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem; font-weight: 400; }
+          .cmp-hero-val { font-size: 1.25rem; font-weight: 800; color: var(--color-success); }
           .cmp-th-ours { color: var(--brand-primary, #818cf8); }
-          .cmp-section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted, #9ca3af); padding: 1.25rem 1.25rem 0.25rem; }
+          .cmp-section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); padding: 1.25rem 1.25rem 0.25rem; }
         </style>
 
         <div class="cmp-wrap">

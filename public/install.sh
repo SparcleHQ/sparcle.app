@@ -9,7 +9,7 @@
 #   1. Detects your Mac architecture (Apple Silicon / Intel)
 #   2. Downloads the correct DMG from GitHub Releases
 #   3. Mounts, installs to /Applications
-#   4. Marks the app as trusted so macOS opens it without warnings
+#   4. Marks the app as trusted for macOS to launch safely
 #   5. Launches the app
 #
 # Safe to re-run — overwrites previous installation.
@@ -102,7 +102,7 @@ rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null || true
 cp -R "${SOURCE_APP}" /Applications/
 ok "Installed to /Applications/${APP_NAME}.app"
 
-# ── Trust the app (allow macOS to open it without warnings) ──────────────────
+# ── Mark as trusted for macOS to launch safely ──────────────────────────────
 info "Marking ${APP_NAME} as trusted..."
 xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null || true
 ok "App trusted — ready to launch"

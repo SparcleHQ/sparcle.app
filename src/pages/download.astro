@@ -94,16 +94,6 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
             </ul>
 
             <div class="download-section">
-              <div class="dl-install-cmd">
-                <p class="dl-install-label">Install with one command:</p>
-                <div class="dl-code-block">
-                  <code>curl -fsSL https://sparcle.app/install.sh | sh</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh')" title="Copy to clipboard">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  </button>
-                </div>
-                <p class="dl-install-note">Detects your Mac automatically &middot; Downloads, installs, and launches</p>
-              </div>
               <div class="dl-row">
                 <div class="dl-row-label">
                   <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
@@ -111,8 +101,22 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
                   <span class="dl-platform-arch">Apple Silicon &amp; Intel</span>
                 </div>
                 <div class="dl-row-links">
-                  <span class="dl-link dl-link--available">✓ Available</span>
+                  <button class="dl-link dl-link--install" onclick="const c=this.closest('.dl-row').nextElementSibling;c.hidden=!c.hidden;this.classList.toggle('dl-link--active')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Install
+                  </button>
                 </div>
+              </div>
+              <div class="dl-cmd" hidden>
+                <p class="dl-cmd-hint">Run in Terminal:</p>
+                <div class="dl-code-block">
+                  <code>curl -fsSL https://sparcle.app/install.sh | sh</code>
+                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>Copy</span>
+                  </button>
+                </div>
+                <p class="dl-cmd-note">Auto-detects your Mac &middot; downloads, installs, and launches Bolt</p>
               </div>
               <div class="dl-row">
                 <div class="dl-row-label">
@@ -187,16 +191,6 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
             </ul>
 
             <div class="download-section">
-              <div class="dl-install-cmd">
-                <p class="dl-install-label">Install with one command:</p>
-                <div class="dl-code-block">
-                  <code>curl -fsSL https://sparcle.app/install.sh | sh -s -- trial</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh -s -- trial')" title="Copy to clipboard">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  </button>
-                </div>
-                <p class="dl-install-note">Detects your Mac automatically &middot; Downloads, installs, and launches</p>
-              </div>
               <div class="dl-row">
                 <div class="dl-row-label">
                   <div class="dl-platform-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg></div>
@@ -204,8 +198,22 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
                   <span class="dl-platform-arch">Apple Silicon &amp; Intel</span>
                 </div>
                 <div class="dl-row-links">
-                  <span class="dl-link dl-link--available">✓ Available</span>
+                  <button class="dl-link dl-link--install" onclick="const c=this.closest('.dl-row').nextElementSibling;c.hidden=!c.hidden;this.classList.toggle('dl-link--active')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Install
+                  </button>
                 </div>
+              </div>
+              <div class="dl-cmd" hidden>
+                <p class="dl-cmd-hint">Run in Terminal:</p>
+                <div class="dl-code-block">
+                  <code>curl -fsSL https://sparcle.app/install.sh | sh -s -- trial</code>
+                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh -s -- trial');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>Copy</span>
+                  </button>
+                </div>
+                <p class="dl-cmd-note">Auto-detects your Mac &middot; downloads, installs, and launches Bolt</p>
               </div>
               <div class="dl-row">
                 <div class="dl-row-label">
@@ -368,54 +376,56 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
     margin: 0 0 0.25rem;
   }
 
-  /* Install command block */
-  .dl-install-cmd {
-    margin-bottom: 1.25rem;
+  /* Expandable install command panel */
+  .dl-cmd {
+    padding: 0.75rem 0 0.25rem;
   }
 
-  .dl-install-label {
-    font-size: 0.8rem;
-    font-weight: 700;
+  .dl-cmd-hint {
+    font-size: 0.7rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-body);
-    margin: 0 0 0.5rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted, #888);
+    margin: 0 0 0.4rem;
   }
 
   .dl-code-block {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     background: #1e1e2e;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     padding: 0.75rem 1rem;
     font-family: "SF Mono", "Fira Code", "JetBrains Mono", monospace;
-    overflow-x: auto;
   }
 
   .dl-code-block code {
     flex: 1;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #a6e3a1;
-    white-space: nowrap;
+    white-space: pre-wrap;
+    word-break: break-all;
     user-select: all;
     line-height: 1.5;
   }
 
   .dl-copy-btn {
     flex-shrink: 0;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
     border: none;
     border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     transition: all var(--transition-fast);
+    white-space: nowrap;
   }
 
   .dl-copy-btn:hover {
@@ -423,24 +433,26 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
     color: #fff;
   }
 
-  .dl-install-note {
-    font-size: 0.75rem;
+  .dl-cmd-note {
+    font-size: 0.72rem;
     color: var(--text-muted, #888);
-    margin: 0.5rem 0 0;
+    margin: 0.4rem 0 0;
   }
 
-  /* Platform availability indicator */
-  .dl-link--available {
-    color: #16a34a;
+  /* Install button */
+  .dl-link--install {
+    background: #16a34a;
     border-color: #16a34a;
-    background: rgba(22, 163, 74, 0.08);
-    cursor: default;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
   }
 
-  .dl-link--available:hover {
-    color: #16a34a;
-    border-color: #16a34a;
-    background: rgba(22, 163, 74, 0.12);
+  .dl-link--install:hover,
+  .dl-link--active {
+    background: #15803d;
+    border-color: #15803d;
+    color: #fff;
   }
 
   .dl-platform-arch {

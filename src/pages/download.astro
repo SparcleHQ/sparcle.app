@@ -117,7 +117,7 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
                     <span>Copy</span>
                   </button>
                 </div>
-                <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt</p>
+                <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt Personal</p>
               </div>
               <div class="dl-panel" data-platform="linux" hidden>
                 <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
@@ -128,7 +128,7 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
                     <span>Copy</span>
                   </button>
                 </div>
-                <p class="dl-cmd-note">Same script, auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
+                <p class="dl-cmd-note">Auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
               </div>
               <div class="dl-panel" data-platform="windows" hidden>
                 <p class="dl-cmd-hint">Run in PowerShell &middot; x86_64</p>
@@ -213,8 +213,8 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
               <div class="dl-panel" data-platform="macos">
                 <p class="dl-cmd-hint">Run in Terminal &middot; Apple Silicon &amp; Intel</p>
                 <div class="dl-code-block">
-                  <code>curl -fsSL https://sparcle.app/install.sh | sh -s -- trial</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh -s -- trial');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                  <code>curl -fsSL https://sparcle.app/trial.sh | sh</code>
+                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/trial.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     <span>Copy</span>
                   </button>
@@ -224,19 +224,19 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
               <div class="dl-panel" data-platform="linux" hidden>
                 <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
                 <div class="dl-code-block">
-                  <code>curl -fsSL https://sparcle.app/install.sh | sh -s -- trial</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh -s -- trial');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                  <code>curl -fsSL https://sparcle.app/trial.sh | sh</code>
+                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/trial.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     <span>Copy</span>
                   </button>
                 </div>
-                <p class="dl-cmd-note">Same script, auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
+                <p class="dl-cmd-note">Auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
               </div>
               <div class="dl-panel" data-platform="windows" hidden>
                 <p class="dl-cmd-hint">Run in PowerShell &middot; x86_64</p>
                 <div class="dl-code-block">
-                  <code>&amp; ([scriptblock]::Create((irm https://sparcle.app/install.ps1))) trial</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('& ([scriptblock]::Create((irm https://sparcle.app/install.ps1))) trial');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                  <code>irm https://sparcle.app/trial.ps1 | iex</code>
+                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('irm https://sparcle.app/trial.ps1 | iex');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     <span>Copy</span>
                   </button>
@@ -299,6 +299,7 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
 
     document.addEventListener('DOMContentLoaded', function() {
       var platform = detectPlatform();
+
       document.querySelectorAll('.download-section').forEach(function(section) {
         selectTab(section, platform);
         section.querySelectorAll('.dl-tab').forEach(function(tab) {
@@ -400,7 +401,8 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
     font-size: 0.8rem;
     color: #a6e3a1;
     white-space: pre-wrap;
-    word-break: break-all;
+    overflow-wrap: break-word;
+    word-break: normal;
     user-select: all;
     line-height: 1.5;
   }

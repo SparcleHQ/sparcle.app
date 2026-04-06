@@ -9,7 +9,8 @@
 #
 # What this does:
 #   1. Detects your OS and architecture
-#   2. Downloads the correct installer from GitHub Releases
+#   2. Fetches the latest release version from GitHub
+#   3. Downloads the correct installer from GitHub Releases
 #   3. Installs to /Applications (macOS) or ~/.local/bin (Linux)
 #   4. Marks the app as trusted for your OS to launch safely
 #   5. Launches the app
@@ -18,9 +19,8 @@
 set -e
 
 # ── Config ───────────────────────────────────────────────────────────────────
-VERSION="0.1.0"
+FALLBACK_VERSION="0.1.0"
 GITHUB_REPO="Sparcle-LLC/sparcle.app"
-BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
@@ -37,6 +37,19 @@ case "$OS" in
 esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
+
+# ── Fetch latest version from GitHub ─────────────────────────────────────────
+VERSION="$FALLBACK_VERSION"
+LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
+if TAG=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/'); then
+  V=$(echo "$TAG" | sed 's/^v//')
+  if [ -n "$V" ]; then
+    VERSION="$V"
+  fi
+else
+  warn "Could not fetch latest version — using v${VERSION}"
+fi
+BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
 
 # ── Parse edition argument ───────────────────────────────────────────────────
 EDITION="${1:-personal}"
@@ -126,6 +139,29 @@ install_macos() {
 # Linux: install AppImage → make executable → launch
 # ══════════════════════════════════════════════════════════════════════════════
 install_linux() {
+  # AppImage requires FUSE — detect and install if missing
+  if ! command -v fusermount >/dev/null 2>&1 && ! command -v fusermount3 >/dev/null 2>&1; then
+    warn "FUSE not found — AppImage needs it to run."
+    if command -v apt-get >/dev/null 2>&1; then
+      info "Detected Ubuntu/Debian — installing libfuse2..."
+      sudo apt-get update -qq && sudo apt-get install -y -qq libfuse2 \
+        && ok "libfuse2 installed" \
+        || warn "Could not install libfuse2. You may need to run: sudo apt install libfuse2"
+    elif command -v dnf >/dev/null 2>&1; then
+      info "Detected Fedora/RHEL — installing fuse-libs..."
+      sudo dnf install -y -q fuse-libs \
+        && ok "fuse-libs installed" \
+        || warn "Could not install fuse-libs. You may need to run: sudo dnf install fuse-libs"
+    elif command -v pacman >/dev/null 2>&1; then
+      info "Detected Arch — installing fuse2..."
+      sudo pacman -S --noconfirm fuse2 \
+        && ok "fuse2 installed" \
+        || warn "Could not install fuse2. You may need to run: sudo pacman -S fuse2"
+    else
+      warn "Could not detect package manager. Install FUSE manually for AppImage support."
+    fi
+  fi
+
   INSTALL_DIR="${HOME}/.local/bin"
   mkdir -p "${INSTALL_DIR}"
 

@@ -1,23 +1,25 @@
 #!/bin/sh
 # Bolt Installer — https://sparcle.app/install.sh
+# Works on macOS and Linux.
+#
 # Usage:
 #   curl -fsSL https://sparcle.app/install.sh | sh                  # Personal edition (default)
 #   curl -fsSL https://sparcle.app/install.sh | sh -s -- trial      # Enterprise Trial
 #   curl -fsSL https://sparcle.app/install.sh | sh -s -- personal   # Personal (explicit)
 #
 # What this does:
-#   1. Detects your Mac architecture (Apple Silicon / Intel)
-#   2. Downloads the correct DMG from GitHub Releases
-#   3. Mounts, installs to /Applications
-#   4. Marks the app as trusted for macOS to launch safely
+#   1. Detects your OS and architecture
+#   2. Downloads the correct installer from GitHub Releases
+#   3. Installs to /Applications (macOS) or ~/.local/bin (Linux)
+#   4. Marks the app as trusted for your OS to launch safely
 #   5. Launches the app
 #
-# Safe to re-run — overwrites previous installation.
+# No password required. Safe to re-run — overwrites previous installation.
 set -e
 
 # ── Config ───────────────────────────────────────────────────────────────────
 VERSION="0.1.0"
-GITHUB_REPO="Sparcle-LLC/bolt-native"
+GITHUB_REPO="Sparcle-LLC/sparcle.app"
 BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -27,7 +29,12 @@ warn()  { printf '\033[1;33m ⚠ \033[0m %s\n' "$1"; }
 fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
 
 # ── Pre-flight checks ───────────────────────────────────────────────────────
-[ "$(uname)" = "Darwin" ] || fail "This installer is for macOS only. Visit https://sparcle.app/download for other platforms."
+OS="$(uname)"
+case "$OS" in
+  Darwin) PLATFORM="macos" ;;
+  Linux)  PLATFORM="linux" ;;
+  *)      fail "Unsupported OS: $OS. Visit https://sparcle.app/download" ;;
+esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
 
@@ -36,12 +43,12 @@ EDITION="${1:-personal}"
 case "$EDITION" in
   personal)
     APP_NAME="Bolt Personal"
-    DMG_PREFIX="Bolt-Personal"
+    FILE_PREFIX="Bolt-Personal"
     ;;
   trial|enterprise)
     EDITION="trial"
     APP_NAME="Bolt Enterprise"
-    DMG_PREFIX="Bolt-Enterprise-Trial"
+    FILE_PREFIX="Bolt-Enterprise-Trial"
     ;;
   *)
     fail "Unknown edition: $EDITION. Use 'personal' or 'trial'."
@@ -50,70 +57,108 @@ esac
 
 # ── Detect architecture ─────────────────────────────────────────────────────
 ARCH=$(uname -m)
-case "$ARCH" in
-  arm64)  RUST_TRIPLE="aarch64-apple-darwin" ;;
-  x86_64) RUST_TRIPLE="x86_64-apple-darwin"  ;;
-  *)      fail "Unsupported architecture: $ARCH" ;;
+case "$PLATFORM-$ARCH" in
+  macos-arm64)   RUST_TRIPLE="aarch64-apple-darwin"  ; EXT="dmg" ;;
+  macos-x86_64)  RUST_TRIPLE="x86_64-apple-darwin"   ; EXT="dmg" ;;
+  linux-x86_64)  RUST_TRIPLE="x86_64-unknown-linux-gnu" ; EXT="AppImage" ;;
+  linux-aarch64) RUST_TRIPLE="aarch64-unknown-linux-gnu" ; EXT="AppImage" ;;
+  *)             fail "Unsupported platform: $PLATFORM $ARCH" ;;
 esac
 
-DMG_NAME="${DMG_PREFIX}-${VERSION}-${RUST_TRIPLE}.dmg"
-DMG_URL="${BASE_URL}/${DMG_NAME}"
+FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${EXT}"
+FILE_URL="${BASE_URL}/${FILE_NAME}"
 
 echo ""
 echo "  ⚡ Bolt Installer"
 echo "  ─────────────────────────────────────"
 echo "  Edition:       ${APP_NAME}"
 echo "  Version:       ${VERSION}"
-echo "  Architecture:  ${ARCH}"
+echo "  Platform:      ${PLATFORM} (${ARCH})"
 echo ""
 
 # ── Download ─────────────────────────────────────────────────────────────────
 TMPDIR_DL=$(mktemp -d)
-DMG_PATH="${TMPDIR_DL}/${DMG_NAME}"
+DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
 
-info "Downloading ${DMG_NAME}..."
-HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DMG_PATH}" "${DMG_URL}" 2>/dev/null) || true
+info "Downloading ${FILE_NAME}..."
+HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/null) || true
 
-if [ ! -f "${DMG_PATH}" ] || [ "$(wc -c < "${DMG_PATH}" | tr -d ' ')" -lt 1000 ]; then
+if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
   rm -rf "${TMPDIR_DL}"
   fail "Download failed (HTTP ${HTTP_CODE}). Check https://sparcle.app/download for available versions."
 fi
 
-ok "Downloaded $(du -h "${DMG_PATH}" | cut -f1 | tr -d ' ')"
+ok "Downloaded $(du -h "${DL_PATH}" | cut -f1 | tr -d ' ')"
 
-# ── Mount & Install ──────────────────────────────────────────────────────────
-MOUNT_POINT="${TMPDIR_DL}/bolt-mount"
-mkdir -p "${MOUNT_POINT}"
+# ══════════════════════════════════════════════════════════════════════════════
+# macOS: mount DMG → copy .app → trust → launch
+# ══════════════════════════════════════════════════════════════════════════════
+install_macos() {
+  MOUNT_POINT="${TMPDIR_DL}/bolt-mount"
+  mkdir -p "${MOUNT_POINT}"
 
-info "Installing ${APP_NAME} to /Applications..."
-hdiutil attach "${DMG_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
-  || fail "Failed to mount DMG. The download may be corrupted — try again."
+  info "Installing ${APP_NAME} to /Applications..."
+  hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
+    || fail "Failed to mount DMG. The download may be corrupted — try again."
 
-# Find the .app inside the mounted DMG
-SOURCE_APP=$(find "${MOUNT_POINT}" -maxdepth 1 -name "*.app" | head -1)
-[ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }
+  SOURCE_APP=$(find "${MOUNT_POINT}" -maxdepth 1 -name "*.app" | head -1)
+  [ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }
 
-# Kill running instance if any
-pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
-sleep 1
+  pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
+  sleep 1
 
-# Copy to /Applications (overwrites previous)
-rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null || true
-cp -R "${SOURCE_APP}" /Applications/
-ok "Installed to /Applications/${APP_NAME}.app"
+  rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null || true
+  cp -R "${SOURCE_APP}" /Applications/
+  ok "Installed to /Applications/${APP_NAME}.app"
 
-# ── Mark as trusted for macOS to launch safely ──────────────────────────────
-info "Marking ${APP_NAME} as trusted..."
-xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null || true
-ok "App trusted — ready to launch"
+  info "Marking ${APP_NAME} as trusted..."
+  xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null || true
+  ok "App trusted — ready to launch"
 
-# ── Cleanup ──────────────────────────────────────────────────────────────────
-hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null || true
-rm -rf "${TMPDIR_DL}"
+  hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null || true
+  rm -rf "${TMPDIR_DL}"
 
-# ── Launch ───────────────────────────────────────────────────────────────────
-info "Launching ${APP_NAME}..."
-open "/Applications/${APP_NAME}.app"
+  info "Launching ${APP_NAME}..."
+  open "/Applications/${APP_NAME}.app"
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Linux: install AppImage → make executable → launch
+# ══════════════════════════════════════════════════════════════════════════════
+install_linux() {
+  INSTALL_DIR="${HOME}/.local/bin"
+  mkdir -p "${INSTALL_DIR}"
+
+  APP_FILE_NAME=$(echo "${APP_NAME}" | tr ' ' '-')
+  DEST="${INSTALL_DIR}/${APP_FILE_NAME}.AppImage"
+
+  info "Installing ${APP_NAME} to ${DEST}..."
+
+  # Stop running instance if any
+  pkill -f "${APP_FILE_NAME}" 2>/dev/null || true
+  sleep 1
+
+  mv "${DL_PATH}" "${DEST}"
+  chmod +x "${DEST}"
+  ok "Installed to ${DEST}"
+
+  rm -rf "${TMPDIR_DL}"
+
+  # Add to PATH hint if not already there
+  case ":${PATH}:" in
+    *":${INSTALL_DIR}:"*) ;;
+    *) warn "${INSTALL_DIR} is not in your PATH. Add it: export PATH=\"\${HOME}/.local/bin:\${PATH}\"" ;;
+  esac
+
+  info "Launching ${APP_NAME}..."
+  nohup "${DEST}" >/dev/null 2>&1 &
+}
+
+# ── Run platform installer ───────────────────────────────────────────────────
+case "$PLATFORM" in
+  macos) install_macos ;;
+  linux) install_linux ;;
+esac
 
 echo ""
 echo "  ✅  ${APP_NAME} is running!"

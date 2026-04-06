@@ -11,9 +11,9 @@
 #   1. Detects your OS and architecture
 #   2. Fetches the latest release version from GitHub
 #   3. Downloads the correct installer from GitHub Releases
-#   3. Installs to /Applications (macOS) or ~/.local/bin (Linux)
-#   4. Marks the app as trusted for your OS to launch safely
-#   5. Launches the app
+#   4. Installs to /Applications (macOS) or ~/.local/bin (Linux)
+#   5. Marks the app as trusted for your OS to launch safely
+#   6. Launches the app
 #
 # No password required. Safe to re-run — overwrites previous installation.
 set -e
@@ -28,6 +28,29 @@ ok()    { printf '\033[1;32m ✓ \033[0m %s\n' "$1"; }
 warn()  { printf '\033[1;33m ⚠ \033[0m %s\n' "$1"; }
 fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
 
+stop_running_linux_app() {
+  target_path="$1"
+
+  command -v pgrep >/dev/null 2>&1 || return 0
+
+  pgrep -f -- "$target_path" 2>/dev/null | while IFS= read -r pid; do
+    [ -n "$pid" ] || continue
+    [ "$pid" = "$$" ] && continue
+
+    exe_path=$(readlink -f "/proc/$pid/exe" 2>/dev/null || true)
+    exe_name=$(basename "$exe_path" 2>/dev/null || printf '')
+
+    case "$exe_name" in
+      sh|dash|bash|zsh|curl|wget|env|nohup|pkill|pgrep)
+        continue
+        ;;
+    esac
+
+    kill "$pid" 2>/dev/null || true
+  done
+
+  sleep 1
+}
 # ── Pre-flight checks ───────────────────────────────────────────────────────
 OS="$(uname)"
 case "$OS" in
@@ -71,8 +94,8 @@ esac
 # ── Detect architecture ─────────────────────────────────────────────────────
 ARCH=$(uname -m)
 case "$PLATFORM-$ARCH" in
-  macos-arm64)   RUST_TRIPLE="aarch64-apple-darwin"  ; EXT="dmg" ;;
-  macos-x86_64)  RUST_TRIPLE="x86_64-apple-darwin"   ; EXT="dmg" ;;
+  macos-arm64)   RUST_TRIPLE="aarch64-apple-darwin" ; EXT="dmg" ;;
+  macos-x86_64)  RUST_TRIPLE="x86_64-apple-darwin" ; EXT="dmg" ;;
   linux-x86_64)  RUST_TRIPLE="x86_64-unknown-linux-gnu" ; EXT="AppImage" ;;
   linux-aarch64) RUST_TRIPLE="aarch64-unknown-linux-gnu" ; EXT="AppImage" ;;
   *)             fail "Unsupported platform: $PLATFORM $ARCH" ;;
@@ -139,7 +162,6 @@ install_macos() {
 # Linux: install AppImage → make executable → launch
 # ══════════════════════════════════════════════════════════════════════════════
 install_linux() {
-  # AppImage requires FUSE — detect and install if missing
   if ! command -v fusermount >/dev/null 2>&1 && ! command -v fusermount3 >/dev/null 2>&1; then
     warn "FUSE not found — AppImage needs it to run."
     if command -v apt-get >/dev/null 2>&1; then
@@ -170,9 +192,7 @@ install_linux() {
 
   info "Installing ${APP_NAME} to ${DEST}..."
 
-  # Stop running instance if any
-  pkill -f "${APP_FILE_NAME}" 2>/dev/null || true
-  sleep 1
+  stop_running_linux_app "${DEST}"
 
   mv "${DL_PATH}" "${DEST}"
   chmod +x "${DEST}"
@@ -180,7 +200,6 @@ install_linux() {
 
   rm -rf "${TMPDIR_DL}"
 
-  # Add to PATH hint if not already there
   case ":${PATH}:" in
     *":${INSTALL_DIR}:"*) ;;
     *) warn "${INSTALL_DIR} is not in your PATH. Add it: export PATH=\"\${HOME}/.local/bin:\${PATH}\"" ;;

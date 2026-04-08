@@ -124,8 +124,8 @@
     --text-muted: #3f5168;
     --text-on-primary: #ffffff;
 
-    --border-default: rgba(15, 23, 42, 0.16);
-    --border-strong: rgba(15, 23, 42, 0.24);
+    --border-default: rgba(15, 23, 42, 0.22);
+    --border-strong: rgba(15, 23, 42, 0.32);
     --border-subtle: rgba(15, 23, 42, 0.08);
 
     --brand-primary: #2563eb;

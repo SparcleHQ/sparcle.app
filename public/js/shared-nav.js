@@ -127,6 +127,7 @@
         '        <h5>Company</h5>',
         '        <ul>',
         '          <li><a href="#" onclick="openContactModal(); return false;">Contact</a></li>',
+        '          <li><a href="/careers">Careers</a></li>',
         '          <li><a href="/privacy">Privacy Policy</a></li>',
         '          <li><a href="/terms">Terms of Service</a></li>',
         '        </ul>',
@@ -365,9 +366,10 @@
         });
 
         // Intercept any remaining mailto:bolt@sparcle.app links site-wide
+        // (skip links with data-no-modal, e.g. careers apply links)
         document.addEventListener('click', function(e) {
             var link = e.target.closest('a[href^="mailto:bolt@sparcle"]');
-            if (link) {
+            if (link && !link.hasAttribute('data-no-modal')) {
                 e.preventDefault();
                 var subj = '';
                 try { subj = decodeURIComponent(new URL(link.href).searchParams.get('subject') || ''); } catch(_){}

@@ -1,0 +1,255 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeader from "../components/marketing/SectionHeader.astro";
+import ProofCard from "../components/marketing/ProofCard.astro";
+---
+
+<BaseLayout
+  title="Careers | Sparcle — Join the Sovereign AI Movement"
+  description="Join Sparcle and help enterprises reclaim control of their AI infrastructure. We're hiring a Fractional Head of Enterprise Sales and a Contract QA/Test Engineer."
+  canonical="https://sparcle.app/careers"
+>
+  <script type="application/ld+json" set:html={JSON.stringify([
+    {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": "Head of Enterprise Sales",
+      "description": "Seasoned enterprise sales leader to open doors at mid-market and large organizations — especially in healthcare, financial services, defense, and legal. Fractional (10–20 hrs/week) with retainer + significant commission on closed deals.",
+      "datePosted": "2026-04-08",
+      "employmentType": "CONTRACTOR",
+      "jobLocationType": "TELECOMMUTE",
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": "Sparcle, LLC",
+        "sameAs": "https://sparcle.app",
+        "logo": "https://sparcle.app/images/sparcle-logo.svg"
+      },
+      "applicantLocationRequirements": { "@type": "Country", "name": "US" },
+      "jobBenefits": "Equity vesting tied to revenue milestones, flexible hours, fully remote",
+      "skills": "Enterprise sales, B2B SaaS, regulated verticals, AI/ML, compliance"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": "QA / Test Engineer",
+      "description": "Detail-oriented QA engineer to manually test Bolt end-to-end on macOS, Windows, and Linux — desktop app, PWA, and browser extension. Configure and break OIDC/OAuth2 flows, validate MCP integrations, and ensure enterprise-grade quality.",
+      "datePosted": "2026-04-08",
+      "employmentType": "CONTRACTOR",
+      "jobLocationType": "TELECOMMUTE",
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": "Sparcle, LLC",
+        "sameAs": "https://sparcle.app",
+        "logo": "https://sparcle.app/images/sparcle-logo.svg"
+      },
+      "applicantLocationRequirements": { "@type": "Country", "name": "US" },
+      "jobBenefits": "Flexible hours, fully remote, competitive hourly rate",
+      "skills": "QA testing, OIDC/OAuth2, cross-platform desktop testing, Playwright, MCP"
+    }
+  ])} />
+
+  <!-- ══════════════════════════════════════════
+       HERO / INTRO
+       ══════════════════════════════════════════ -->
+  <section class="section-solution section-solution--page">
+    <div class="container">
+      <SectionHeader
+        label="Careers"
+        heading="Build the Future of<br>Enterprise AI"
+        intro="We're a small, focused team building sovereign AI infrastructure for regulated enterprises. We ship fast, think deeply, and believe great software sells itself — but great people make it unstoppable."
+      />
+
+      <!-- ══════════════════════════════════════
+           OPEN ROLES
+           ══════════════════════════════════════ -->
+      <div class="careers-roles">
+
+        <!-- ── Role 1 ──────────────────────── -->
+        <article class="careers-role-card">
+          <div class="careers-role-top">
+            <div class="careers-role-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+            </div>
+            <div>
+              <h3>Head of Enterprise Sales</h3>
+              <span class="careers-role-tags">Fractional · Remote · Commission-Heavy</span>
+            </div>
+          </div>
+
+          <p class="careers-role-summary">
+            Seasoned enterprise sales leader to open doors at mid-market and large organizations
+            — especially in healthcare, financial services, defense, and legal. 10–20 hrs/week
+            with retainer + significant commission on closed deals.
+          </p>
+
+          <div class="careers-role-sections">
+            <div class="careers-role-section">
+              <h4>What you'll do</h4>
+              <ul>
+                <li>Identify and qualify enterprise prospects for Bolt and Aeira</li>
+                <li>Run discovery calls, demos, and POC engagements end-to-end</li>
+                <li>Navigate procurement, InfoSec, and compliance review cycles</li>
+                <li>Build a repeatable enterprise sales process from scratch</li>
+                <li>Provide market feedback that shapes product and pricing</li>
+              </ul>
+            </div>
+            <div class="careers-role-section">
+              <h4>What we're looking for</h4>
+              <ul>
+                <li>5+ years selling enterprise software (B2B SaaS, on-prem, or hybrid)</li>
+                <li>Experience with $50K–$500K+ ARR deals and 3–9 month sales cycles</li>
+                <li>Existing relationships in regulated verticals</li>
+                <li>Comfort with early-stage ambiguity</li>
+                <li>Strong understanding of AI/ML and compliance landscapes</li>
+              </ul>
+            </div>
+            <div class="careers-role-section">
+              <h4>Compensation</h4>
+              <ul>
+                <li>Monthly retainer + uncapped commission on closed revenue</li>
+                <li>Equity vesting tied to revenue milestones — for the right candidate</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="careers-role-section careers-how-to-apply">
+            <h4>How to apply</h4>
+            <p>Write to <strong>bolt@sparcle.app</strong> with subject <em>"Application: Head of Enterprise Sales"</em> and include:</p>
+            <ul>
+              <li>Your name and LinkedIn profile</li>
+              <li>Years of enterprise sales experience</li>
+              <li>Largest deal closed (approx. ARR)</li>
+              <li>Industries where you have active relationships</li>
+              <li>Why sovereign AI interests you</li>
+              <li>Availability (hrs/week) and compensation expectations</li>
+              <li>Resume or link to past work</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- ── Role 2 ──────────────────────── -->
+        <article class="careers-role-card">
+          <div class="careers-role-top">
+            <div class="careers-role-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>
+            </div>
+            <div>
+              <h3>QA / Test Engineer</h3>
+              <span class="careers-role-tags">Freelance / Contract · Remote · Part-Time</span>
+            </div>
+          </div>
+
+          <p class="careers-role-summary">
+            Detail-oriented QA engineer to manually test Bolt end-to-end on macOS, Windows, and Linux
+            — desktop app, PWA, and browser extension. Configure and break OIDC/OAuth2 flows,
+            validate MCP integrations, and ensure enterprise-grade quality across every surface.
+            ~20 hrs/week with room to grow as we scale.
+          </p>
+
+          <div class="careers-role-sections">
+            <div class="careers-role-section">
+              <h4>What you'll do</h4>
+              <ul>
+                <li>Test Bolt desktop app end-to-end on macOS, Windows, and Linux</li>
+                <li>Test the PWA and browser extension across Chrome, Firefox, Safari, and Edge</li>
+                <li>Configure and test OIDC/OAuth2 flows (Google Workspace, Microsoft Entra ID, Zoho)</li>
+                <li>Set up and validate MCP server integrations in corporate environments</li>
+                <li>Test enterprise deployment scenarios — SSO, directory sync, token lifecycle</li>
+                <li>Write and maintain automated tests (Playwright, integration tests)</li>
+                <li>Report and track bugs with structured reports — steps to reproduce, expected vs. actual, screen recordings or screencasts of the issue</li>
+              </ul>
+            </div>
+            <div class="careers-role-section">
+              <h4>What we're looking for</h4>
+              <ul>
+                <li>3+ years in QA/test engineering for web or desktop applications</li>
+                <li>Access to macOS, Windows, and Linux machines (or willingness to set up VMs)</li>
+                <li>Hands-on experience configuring OIDC/OAuth2 providers (Google, Microsoft, Okta, etc.)</li>
+                <li>Experience testing cross-platform desktop apps (installers, updates, OS-specific issues)</li>
+                <li>Familiarity with enterprise identity — SSO, SCIM, directory services</li>
+                <li>Experience with Playwright, Cypress, or similar test frameworks</li>
+                <li>Bonus: experience with MCP servers or AI-powered product testing</li>
+              </ul>
+            </div>
+            <div class="careers-role-section">
+              <h4>Compensation</h4>
+              <ul>
+                <li>Competitive hourly rate based on experience</li>
+                <li>Flexible hours, fully remote</li>
+                <li>Freelancers and independent QA consultants welcome</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="careers-role-section careers-how-to-apply">
+            <h4>How to apply</h4>
+            <p>Write to <strong>bolt@sparcle.app</strong> with subject <em>"Application: QA / Test Engineer"</em> and include:</p>
+            <ul>
+              <li>Your name and LinkedIn or GitHub profile</li>
+              <li>Years of QA/test engineering experience</li>
+              <li>Testing frameworks you've used</li>
+              <li>Which operating systems do you have access to (macOS, Windows, Linux)?</li>
+              <li>Have you configured OIDC/OAuth2 providers (Google, Microsoft, Okta, etc.)?</li>
+              <li>Experience with MCP servers or enterprise identity (SSO, SCIM)?</li>
+              <li>Availability (hrs/week), hourly rate expectation (USD), and timezone</li>
+              <li>Resume or link to past work</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       WHY JOIN US
+       ══════════════════════════════════════════ -->
+  <section class="section-proof">
+    <div class="container">
+      <SectionHeader
+        label="Why Join Us"
+        heading="Early Stage.<br>Real Product."
+      />
+
+      <div class="proof-grid">
+        <ProofCard
+          metric="Real"
+          label="Working Product"
+          description="Bolt and Aeira are built and working — you'll be testing and shipping real software, not prototypes."
+        />
+        <ProofCard
+          metric="Day 1"
+          label="Early-Stage Upside"
+          description="Join before the growth curve. Shape the product, the culture, and the company trajectory."
+        />
+        <ProofCard
+          metric="10T+"
+          label="Mission That Matters"
+          description="Help regulated organizations in a $10T+ economy adopt AI without surrendering data sovereignty."
+        />
+        <ProofCard
+          metric="<5"
+          label="No Bureaucracy"
+          description="Small team, direct access to founders, fast decisions. Your ideas ship in days, not quarters."
+        />
+        <ProofCard
+          metric="Any"
+          label="Remote-First"
+          description="Work from anywhere. We care about output, not hours. Async-friendly, timezone-flexible."
+        />
+        <ProofCard
+          metric="OIDC"
+          label="Enterprise-Grade"
+          description="SSO, MCP integrations, directory sync — work on real enterprise infrastructure problems."
+        />
+      </div>
+
+      <div class="section-cta-row" style="margin-top:3rem;">
+        <p class="section-intro" style="text-align:center;">
+          Don't see a perfect fit? We're always open to hearing from exceptional people.<br>
+          Write to <strong>bolt@sparcle.app</strong> with your background and what interests you.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

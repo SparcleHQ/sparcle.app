@@ -51,6 +51,39 @@ stop_running_linux_app() {
 
   sleep 1
 }
+
+launch_linux_app() {
+  app_path="$1"
+  app_name="$2"
+  launch_log=$(mktemp)
+
+  nohup "$app_path" >"$launch_log" 2>&1 &
+  launch_pid=$!
+  sleep 2
+
+  if kill -0 "$launch_pid" 2>/dev/null; then
+    rm -f "$launch_log"
+    return 0
+  fi
+
+  if grep -qi 'Cannot mount AppImage' "$launch_log"; then
+    warn "Direct AppImage launch failed on this machine — retrying without FUSE."
+    APPIMAGE_EXTRACT_AND_RUN=1 nohup "$app_path" >"$launch_log" 2>&1 &
+    launch_pid=$!
+    sleep 2
+    if kill -0 "$launch_pid" 2>/dev/null; then
+      rm -f "$launch_log"
+      ok "Launched ${app_name} using extract-and-run fallback"
+      return 0
+    fi
+  fi
+
+  warn "${app_name} did not stay running after launch."
+  warn "Try manually: APPIMAGE_EXTRACT_AND_RUN=1 ${app_path}"
+  sed 's/^/   /' "$launch_log" | head -20
+  rm -f "$launch_log"
+  return 1
+}
 # ── Pre-flight checks ───────────────────────────────────────────────────────
 OS="$(uname)"
 case "$OS" in
@@ -206,7 +239,7 @@ install_linux() {
   esac
 
   info "Launching ${APP_NAME}..."
-  nohup "${DEST}" >/dev/null 2>&1 &
+  launch_linux_app "${DEST}" "${APP_NAME}" || return 1
 }
 
 # ── Run platform installer ───────────────────────────────────────────────────

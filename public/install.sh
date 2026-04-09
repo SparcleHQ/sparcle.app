@@ -85,37 +85,11 @@ launch_linux_app() {
   return 1
 }
 
-launch_linux_binary() {
-  binary_path="$1"
-  app_name="$2"
-  process_name="$3"
-  launch_log=$(mktemp)
-  existing_pids=" $(pgrep -x "$process_name" 2>/dev/null | tr '\n' ' ') "
-
-  nohup "$binary_path" >"$launch_log" 2>&1 &
-  launch_pid=$!
-  sleep 2
-
-  if kill -0 "$launch_pid" 2>/dev/null; then
-    rm -f "$launch_log"
-    return 0
-  fi
-
-  current_pids=$(pgrep -x "$process_name" 2>/dev/null | tr '\n' ' ')
-  for pid in $current_pids; do
-    case "$existing_pids" in
-      *" $pid "*) ;;
-      *)
-        rm -f "$launch_log"
-        return 0
-        ;;
-    esac
-  done
-
-  warn "${app_name} did not stay running after launch."
-  sed 's/^/   /' "$launch_log" | head -20
-  rm -f "$launch_log"
-  return 1
+cleanup_legacy_linux_native_install() {
+  app_file_name="$1"
+  rm -rf "${HOME}/.local/opt/${app_file_name}" 2>/dev/null || true
+  rm -f "${HOME}/.local/bin/${app_file_name}" 2>/dev/null || true
+  rm -f "${HOME}/.local/share/applications/${app_file_name}.desktop" 2>/dev/null || true
 }
 # ── Pre-flight checks ───────────────────────────────────────────────────────
 OS="$(uname)"
@@ -166,10 +140,6 @@ case "$PLATFORM-$ARCH" in
   linux-aarch64) RUST_TRIPLE="aarch64-unknown-linux-gnu" ; EXT="AppImage" ;;
   *)             fail "Unsupported platform: $PLATFORM $ARCH" ;;
 esac
-
-if [ "$PLATFORM" = "linux" ] && [ "$ARCH" = "x86_64" ] && command -v dpkg-deb >/dev/null 2>&1; then
-  EXT="deb"
-fi
 
 FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${EXT}"
 FILE_URL="${BASE_URL}/${FILE_NAME}"
@@ -229,63 +199,9 @@ install_macos() {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Linux: prefer native .deb install when available, otherwise AppImage
+# Linux: install AppImage → make executable → launch
 # ══════════════════════════════════════════════════════════════════════════════
-install_linux_deb() {
-  INSTALL_DIR="${HOME}/.local/bin"
-  APP_FILE_NAME=$(echo "${APP_NAME}" | tr ' ' '-')
-  INSTALL_ROOT="${HOME}/.local/opt/${APP_FILE_NAME}"
-  LAUNCHER_PATH="${INSTALL_DIR}/${APP_FILE_NAME}"
-  DESKTOP_DIR="${HOME}/.local/share/applications"
-  DESKTOP_PATH="${DESKTOP_DIR}/${APP_FILE_NAME}.desktop"
-
-  mkdir -p "${INSTALL_DIR}" "${DESKTOP_DIR}"
-
-  info "Installing ${APP_NAME} native package to ${INSTALL_ROOT}..."
-
-  stop_running_linux_app "${INSTALL_ROOT}"
-  rm -rf "${INSTALL_ROOT}"
-  mkdir -p "${INSTALL_ROOT}"
-  dpkg-deb -x "${DL_PATH}" "${INSTALL_ROOT}" || fail "Failed to extract Debian package"
-
-  cat > "${LAUNCHER_PATH}" <<EOF
-#!/bin/sh
-exec "${INSTALL_ROOT}/usr/bin/bolt" "\$@"
-EOF
-  chmod +x "${LAUNCHER_PATH}"
-
-  cat > "${DESKTOP_PATH}" <<EOF
-[Desktop Entry]
-Type=Application
-Name=${APP_NAME}
-Comment=Enterprise AI agent
-Exec=${LAUNCHER_PATH} %U
-Icon=${INSTALL_ROOT}/usr/share/icons/hicolor/128x128/apps/bolt.png
-Terminal=false
-Categories=Office;Utility;
-StartupNotify=true
-EOF
-
-  ok "Installed native package to ${INSTALL_ROOT}"
-  ok "Created launcher ${LAUNCHER_PATH}"
-
-  rm -rf "${TMPDIR_DL}"
-
-  case ":${PATH}:" in
-    *":${INSTALL_DIR}:"*) ;;
-    *) warn "${INSTALL_DIR} is not in your PATH. Add it: export PATH=\"\${HOME}/.local/bin:\${PATH}\"" ;;
-  esac
-
-  info "Launching ${APP_NAME}..."
-  launch_linux_binary "${LAUNCHER_PATH}" "${APP_NAME}" "bolt" || return 1
-}
-
 install_linux() {
-  if [ "${EXT}" = "deb" ]; then
-    install_linux_deb
-    return
-  fi
-
   if ! command -v fusermount >/dev/null 2>&1 && ! command -v fusermount3 >/dev/null 2>&1; then
     warn "FUSE not found — AppImage needs it to run."
     if command -v apt-get >/dev/null 2>&1; then
@@ -316,6 +232,7 @@ install_linux() {
 
   info "Installing ${APP_NAME} to ${DEST}..."
 
+  cleanup_legacy_linux_native_install "${APP_FILE_NAME}"
   stop_running_linux_app "${DEST}"
 
   mv "${DL_PATH}" "${DEST}"

@@ -57,25 +57,34 @@ launch_linux_app() {
   app_name="$2"
   launch_log=$(mktemp)
 
-  nohup "$app_path" >"$launch_log" 2>&1 &
-  launch_pid=$!
-  sleep 2
-
-  if kill -0 "$launch_pid" 2>/dev/null; then
-    rm -f "$launch_log"
-    return 0
-  fi
-
-  if grep -qi 'Cannot mount AppImage' "$launch_log"; then
-    warn "Direct AppImage launch failed on this machine — retrying without FUSE."
-    APPIMAGE_EXTRACT_AND_RUN=1 nohup "$app_path" >"$launch_log" 2>&1 &
+  # If FUSE is usable, try native AppImage launch first.
+  if fuse_usable; then
+    nohup "$app_path" >"$launch_log" 2>&1 &
     launch_pid=$!
     sleep 2
     if kill -0 "$launch_pid" 2>/dev/null; then
       rm -f "$launch_log"
-      ok "Launched ${app_name} using extract-and-run fallback"
       return 0
     fi
+    # FUSE appeared available but launch still failed — check if it's a
+    # FUSE mount error (user namespaces disabled, etc.) before giving up.
+    if ! grep -qi 'fuse\|Cannot mount AppImage\|user namespace' "$launch_log"; then
+      warn "${app_name} did not stay running after launch."
+      warn "Try manually: ${app_path}"
+      sed 's/^/   /' "$launch_log" | head -20
+      rm -f "$launch_log"
+      return 1
+    fi
+  fi
+
+  # FUSE not available (or FUSE mount failed) — use extract-and-run.
+  # This is transparent to the user; the app runs identically.
+  APPIMAGE_EXTRACT_AND_RUN=1 nohup "$app_path" >"$launch_log" 2>&1 &
+  launch_pid=$!
+  sleep 2
+  if kill -0 "$launch_pid" 2>/dev/null; then
+    rm -f "$launch_log"
+    return 0
   fi
 
   warn "${app_name} did not stay running after launch."
@@ -90,6 +99,29 @@ cleanup_legacy_linux_native_install() {
   rm -rf "${HOME}/.local/opt/${app_file_name}" 2>/dev/null || true
   rm -f "${HOME}/.local/bin/${app_file_name}" 2>/dev/null || true
   rm -f "${HOME}/.local/share/applications/${app_file_name}.desktop" 2>/dev/null || true
+}
+
+# Returns 0 if FUSE is usable for AppImage mounting, 1 otherwise.
+# Checks: /dev/fuse exists, is readable by the current user, and fusermount is in PATH.
+fuse_usable() {
+  [ -e /dev/fuse ] && [ -r /dev/fuse ] && command -v fusermount >/dev/null 2>&1
+}
+
+# Idempotently add a directory to PATH in common shell rc files.
+add_to_path() {
+  dir="$1"
+  line="export PATH=\"${dir}:\${PATH}\""
+  added=0
+  for rc in "${HOME}/.bashrc" "${HOME}/.zshrc" "${HOME}/.profile"; do
+    [ -f "$rc" ] || continue
+    grep -qF "${dir}" "$rc" 2>/dev/null && continue
+    printf '\n# Added by Bolt installer\n%s\n' "$line" >> "$rc"
+    ok "Added ${dir} to PATH in $(basename "$rc") — restart shell or: source $rc"
+    added=1
+  done
+  if [ "$added" -eq 0 ]; then
+    warn "${dir} is not in your PATH. Add it: ${line}"
+  fi
 }
 # ── Pre-flight checks ───────────────────────────────────────────────────────
 OS="$(uname)"
@@ -243,7 +275,7 @@ install_linux() {
 
   case ":${PATH}:" in
     *":${INSTALL_DIR}:"*) ;;
-    *) warn "${INSTALL_DIR} is not in your PATH. Add it: export PATH=\"\${HOME}/.local/bin:\${PATH}\"" ;;
+    *) add_to_path "${INSTALL_DIR}" ;;
   esac
 
   info "Launching ${APP_NAME}..."

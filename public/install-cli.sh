@@ -1,6 +1,6 @@
 #!/bin/sh
 # Bolt CLI Installer — https://sparcle.app/install-cli.sh
-# Installs the `bolt` command-line tool on macOS and Linux.
+# Installs the `bolt-cli` command-line tool on macOS and Linux.
 #
 # Usage:
 #   curl -fsSL https://sparcle.app/install-cli.sh | sh
@@ -8,12 +8,12 @@
 # What this does:
 #   1. Detects your OS and architecture
 #   2. Fetches the latest release version from GitHub
-#   3. Downloads the correct bolt binary
+#   3. Downloads the correct bolt-cli binary
 #   4. Installs to ~/.local/bin (works without sudo on macOS and Linux)
 #   5. Adds ~/.local/bin to PATH in your shell rc if needed
 #
 # After install, run:
-#   bolt connect --token <TOKEN>
+#   bolt-cli connect --token <TOKEN>
 set -e
 
 FALLBACK_VERSION="0.1.0"
@@ -55,7 +55,7 @@ else
   warn "Could not fetch latest version — using v${VERSION}"
 fi
 
-FILE_NAME="bolt-${VERSION}-${RUST_TRIPLE}"
+FILE_NAME="bolt-cli-${VERSION}-${RUST_TRIPLE}"
 FILE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}/${FILE_NAME}"
 
 echo ""
@@ -67,9 +67,9 @@ echo ""
 
 # ── Download ─────────────────────────────────────────────────────────────────
 TMPDIR_DL=$(mktemp -d)
-DL_PATH="${TMPDIR_DL}/bolt"
+DL_PATH="${TMPDIR_DL}/bolt-cli"
 
-info "Downloading bolt CLI..."
+info "Downloading bolt-cli..."
 HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/null) || true
 
 if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 10000 ]; then
@@ -85,8 +85,8 @@ chmod +x "${DL_PATH}"
 # safe to run in piped (non-interactive) shells, and no TTY required.
 INSTALL_DIR="${HOME}/.local/bin"
 mkdir -p "${INSTALL_DIR}"
-mv "${DL_PATH}" "${INSTALL_DIR}/bolt"
-ok "Installed to ${INSTALL_DIR}/bolt"
+mv "${DL_PATH}" "${INSTALL_DIR}/bolt-cli"
+ok "Installed to ${INSTALL_DIR}/bolt-cli"
 
 # Persist to PATH in shell rc files (takes effect on next login).
 case ":${PATH}:" in
@@ -106,8 +106,8 @@ esac
 rm -rf "${TMPDIR_DL}"
 
 echo ""
-echo "  ✅  bolt CLI installed!"
+echo "  ✅  bolt-cli installed!"
 echo ""
-echo "  Usage:  bolt connect --token <TOKEN>"
+echo "  Usage:  bolt-cli connect --token <TOKEN>"
 echo "  Help:   https://sparcle.app/docs/cli"
 echo ""

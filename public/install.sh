@@ -136,11 +136,10 @@ command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
 # ── Fetch latest version from GitHub ─────────────────────────────────────────
 VERSION="$FALLBACK_VERSION"
 LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
-if TAG=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/'); then
-  V=$(echo "$TAG" | sed 's/^v//')
-  if [ -n "$V" ]; then
-    VERSION="$V"
-  fi
+API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
+V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//')
+if [ -n "$V" ]; then
+  VERSION="$V"
 else
   warn "Could not fetch latest version — using v${VERSION}"
 fi

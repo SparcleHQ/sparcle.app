@@ -102,9 +102,10 @@ cleanup_legacy_linux_native_install() {
 }
 
 # Returns 0 if FUSE is usable for AppImage mounting, 1 otherwise.
-# Checks: /dev/fuse exists, is readable by the current user, and fusermount is in PATH.
+# Checks: /dev/fuse exists, is readable by the current user, and fusermount/fusermount3 is in PATH.
 fuse_usable() {
-  [ -e /dev/fuse ] && [ -r /dev/fuse ] && command -v fusermount >/dev/null 2>&1
+  [ -e /dev/fuse ] && [ -r /dev/fuse ] && \
+    { command -v fusermount >/dev/null 2>&1 || command -v fusermount3 >/dev/null 2>&1; }
 }
 
 # Idempotently add a directory to PATH in common shell rc files.
@@ -133,11 +134,24 @@ esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
 
+# ── Cleanup trap ─────────────────────────────────────────────────────────────
+TMPDIR_DL=""
+cleanup() {
+  if [ -n "${TMPDIR_DL}" ] && [ -d "${TMPDIR_DL}" ]; then
+    # Detach any mounted DMG on macOS
+    if [ "$PLATFORM" = "macos" ] && [ -d "${TMPDIR_DL}/bolt-mount" ]; then
+      hdiutil detach "${TMPDIR_DL}/bolt-mount" -quiet 2>/dev/null || true
+    fi
+    rm -rf "${TMPDIR_DL}"
+  fi
+}
+trap cleanup EXIT
+
 # ── Fetch latest version from GitHub ─────────────────────────────────────────
 VERSION="$FALLBACK_VERSION"
 LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
 API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
-V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//')
+V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//' || true)
 if [ -n "$V" ]; then
   VERSION="$V"
 else
@@ -184,7 +198,7 @@ echo "  Platform:      ${PLATFORM} (${ARCH})"
 echo ""
 
 # ── Download ─────────────────────────────────────────────────────────────────
-TMPDIR_DL=$(mktemp -d)
+TMPDIR_DL=$(mktemp -d)  # cleaned up by EXIT trap
 DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
 
 info "Downloading ${FILE_NAME}..."
@@ -214,16 +228,32 @@ install_macos() {
   pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
   sleep 1
 
-  rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null || true
-  cp -R "${SOURCE_APP}" /Applications/
+  if ! rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null; then
+    sudo rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null < /dev/tty || true
+  fi
+
+  if ! cp -R "${SOURCE_APP}" /Applications/ 2>/dev/null; then
+    info "Password may be required to write to /Applications..."
+    sudo cp -R "${SOURCE_APP}" /Applications/ < /dev/tty \
+      || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "Failed to install to /Applications."; }
+  fi
   ok "Installed to /Applications/${APP_NAME}.app"
 
   info "Marking ${APP_NAME} as trusted..."
-  xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null || true
+  if ! xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null; then
+    sudo xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null < /dev/tty || true
+  fi
   ok "App trusted — ready to launch"
 
+  # Link CLI
+  mkdir -p "${HOME}/.local/bin"
+  ln -sf "/Applications/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" "${HOME}/.local/bin/bolt" 2>/dev/null || true
+  case ":${PATH}:" in
+    *":${HOME}/.local/bin:"*) ;;
+    *) add_to_path "${HOME}/.local/bin" ;;
+  esac
+
   hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null || true
-  rm -rf "${TMPDIR_DL}"
 
   info "Launching ${APP_NAME}..."
   open "/Applications/${APP_NAME}.app"
@@ -237,17 +267,18 @@ install_linux() {
     warn "FUSE not found — AppImage needs it to run."
     if command -v apt-get >/dev/null 2>&1; then
       info "Detected Ubuntu/Debian — installing libfuse2..."
-      sudo apt-get update -qq && sudo apt-get install -y -qq libfuse2 \
+      sudo apt-get update -qq < /dev/tty || true
+      sudo apt-get install -y -qq libfuse2 < /dev/tty \
         && ok "libfuse2 installed" \
         || warn "Could not install libfuse2. You may need to run: sudo apt install libfuse2"
     elif command -v dnf >/dev/null 2>&1; then
       info "Detected Fedora/RHEL — installing fuse-libs..."
-      sudo dnf install -y -q fuse-libs \
+      sudo dnf install -y -q fuse-libs < /dev/tty \
         && ok "fuse-libs installed" \
         || warn "Could not install fuse-libs. You may need to run: sudo dnf install fuse-libs"
     elif command -v pacman >/dev/null 2>&1; then
       info "Detected Arch — installing fuse2..."
-      sudo pacman -S --noconfirm fuse2 \
+      sudo pacman -S --noconfirm fuse2 < /dev/tty \
         && ok "fuse2 installed" \
         || warn "Could not install fuse2. You may need to run: sudo pacman -S fuse2"
     else
@@ -270,8 +301,6 @@ install_linux() {
   chmod +x "${DEST}"
   ok "Installed to ${DEST}"
 
-  rm -rf "${TMPDIR_DL}"
-
   case ":${PATH}:" in
     *":${INSTALL_DIR}:"*) ;;
     *) add_to_path "${INSTALL_DIR}" ;;
@@ -284,7 +313,7 @@ install_linux() {
 # ── Run platform installer ───────────────────────────────────────────────────
 case "$PLATFORM" in
   macos) install_macos ;;
-  linux) install_linux ;;
+  linux) install_linux || { echo ""; fail "Installation succeeded but ${APP_NAME} failed to launch. See above for details."; } ;;
 esac
 
 echo ""
@@ -297,4 +326,5 @@ else
   echo "  Next: Try instant demo mode, or configure your own IDP + LLM"
   echo "  Trial: 7 days, all features unlocked"
 fi
+echo ""
 echo ""

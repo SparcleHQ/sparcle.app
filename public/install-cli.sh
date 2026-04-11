@@ -48,7 +48,7 @@ esac
 VERSION="$FALLBACK_VERSION"
 LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
 API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
-V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//')
+V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//' || true)
 if [ -n "$V" ]; then
   VERSION="$V"
 else

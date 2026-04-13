@@ -60,9 +60,14 @@ switch ($Edition.ToLower()) {
 }
 
 # ── Detect architecture ────────────────────────────────────────────────────
+$RealArch = $env:PROCESSOR_ARCHITECTURE
 $Arch = if ([Environment]::Is64BitOperatingSystem) {
-  if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "aarch64-pc-windows-msvc" }
-  else { "x86_64-pc-windows-msvc" }
+  if ($RealArch -eq "ARM64") {
+    # x86_64 MSI runs fine on Windows ARM64 via built-in emulation
+    "x86_64-pc-windows-msvc"
+  } else {
+    "x86_64-pc-windows-msvc"
+  }
 } else {
   Fail "32-bit Windows is not supported."
 }
@@ -89,7 +94,7 @@ try {
   Invoke-WebRequest -Uri $FileUrl -OutFile $DlPath -UseBasicParsing
 } catch {
   Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
-  Fail "Download failed. Check https://sparcle.app/download for available versions."
+  Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
 }
 
 $Size = [math]::Round((Get-Item $DlPath).Length / 1MB, 1)

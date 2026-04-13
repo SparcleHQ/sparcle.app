@@ -99,6 +99,7 @@ cleanup_legacy_linux_native_install() {
   rm -rf "${HOME}/.local/opt/${app_file_name}" 2>/dev/null || true
   rm -f "${HOME}/.local/bin/${app_file_name}" 2>/dev/null || true
   rm -f "${HOME}/.local/share/applications/${app_file_name}.desktop" 2>/dev/null || true
+  rm -f "${HOME}/.local/share/icons/hicolor/256x256/apps/${app_file_name}.png" 2>/dev/null || true
 }
 
 # Returns 0 if FUSE is usable for AppImage mounting, 1 otherwise.
@@ -182,9 +183,16 @@ case "$PLATFORM-$ARCH" in
   macos-arm64)   RUST_TRIPLE="aarch64-apple-darwin" ; EXT="dmg" ;;
   macos-x86_64)  RUST_TRIPLE="x86_64-apple-darwin" ; EXT="dmg" ;;
   linux-x86_64)  RUST_TRIPLE="x86_64-unknown-linux-gnu" ; EXT="AppImage" ;;
-  linux-aarch64) RUST_TRIPLE="aarch64-unknown-linux-gnu" ; EXT="AppImage" ;;
-  *)             fail "Unsupported platform: $PLATFORM $ARCH" ;;
+  linux-aarch64) fail "Bolt desktop is not yet available for Linux ARM64.\n  The CLI tool is available: curl -fsSL https://sparcle.app/install-cli.sh | sh" ;;
+  *)             fail "Unsupported platform: $PLATFORM $ARCH. Visit https://sparcle.app/download" ;;
 esac
+
+# ── Prefer .deb on Debian/Ubuntu (better desktop integration) ────────────
+USE_DEB=0
+if [ "$PLATFORM" = "linux" ] && command -v dpkg >/dev/null 2>&1; then
+  USE_DEB=1
+  EXT="deb"
+fi
 
 FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${EXT}"
 FILE_URL="${BASE_URL}/${FILE_NAME}"
@@ -195,6 +203,7 @@ echo "  ────────────────────────
 echo "  Edition:       ${APP_NAME}"
 echo "  Version:       ${VERSION}"
 echo "  Platform:      ${PLATFORM} (${ARCH})"
+echo "  Format:        .${EXT}"
 echo ""
 
 # ── Download ─────────────────────────────────────────────────────────────────
@@ -206,7 +215,23 @@ HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/nul
 
 if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
   rm -rf "${TMPDIR_DL}"
-  fail "Download failed (HTTP ${HTTP_CODE}). Check https://sparcle.app/download for available versions."
+  # On Linux with .deb, retry with AppImage before giving up
+  if [ "$USE_DEB" -eq 1 ]; then
+    warn ".deb package not available — falling back to AppImage..."
+    USE_DEB=0
+    EXT="AppImage"
+    FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${EXT}"
+    FILE_URL="${BASE_URL}/${FILE_NAME}"
+    TMPDIR_DL=$(mktemp -d)
+    DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
+    HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/null) || true
+    if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
+      rm -rf "${TMPDIR_DL}"
+      fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
+    fi
+  else
+    fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
+  fi
 fi
 
 ok "Downloaded $(du -h "${DL_PATH}" | cut -f1 | tr -d ' ')"
@@ -260,9 +285,50 @@ install_macos() {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Linux: install AppImage → make executable → launch
+# Linux (.deb): install via dpkg → launch
 # ══════════════════════════════════════════════════════════════════════════════
-install_linux() {
+install_linux_deb() {
+  APP_FILE_NAME=$(echo "${APP_NAME}" | tr ' ' '-')
+
+  info "Installing ${APP_NAME} via .deb package..."
+
+  cleanup_legacy_linux_native_install "${APP_FILE_NAME}"
+
+  # Stop any running instance
+  APPIMAGE_PATH="${HOME}/.local/bin/${APP_FILE_NAME}.AppImage"
+  stop_running_linux_app "${APPIMAGE_PATH}"
+  pkill -f "${APP_FILE_NAME}" 2>/dev/null || true
+  sleep 1
+
+  # Remove old AppImage if switching to .deb
+  rm -f "${APPIMAGE_PATH}" 2>/dev/null || true
+
+  sudo dpkg -i "${DL_PATH}" < /dev/tty \
+    || { sudo apt-get install -f -y < /dev/tty 2>/dev/null || true; sudo dpkg -i "${DL_PATH}" < /dev/tty; } \
+    || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"
+  ok "Installed ${APP_NAME} via dpkg"
+
+  # Find and launch the installed binary
+  LAUNCH_BIN=""
+  for candidate in "/usr/bin/${APP_FILE_NAME}" "/usr/local/bin/${APP_FILE_NAME}"; do
+    [ -x "$candidate" ] && LAUNCH_BIN="$candidate" && break
+  done
+  if [ -z "$LAUNCH_BIN" ]; then
+    LAUNCH_BIN=$(dpkg -L "${DL_PATH##*/}" 2>/dev/null | grep '/usr.*/bin/' | head -1 || true)
+  fi
+
+  if [ -n "$LAUNCH_BIN" ] && [ -x "$LAUNCH_BIN" ]; then
+    info "Launching ${APP_NAME}..."
+    nohup "$LAUNCH_BIN" >/dev/null 2>&1 &
+  else
+    info "Installed — launch ${APP_NAME} from your application menu."
+  fi
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Linux (AppImage): install AppImage → make executable → launch
+# ══════════════════════════════════════════════════════════════════════════════
+install_linux_appimage() {
   if ! command -v fusermount >/dev/null 2>&1 && ! command -v fusermount3 >/dev/null 2>&1; then
     warn "FUSE not found — AppImage needs it to run."
     if command -v apt-get >/dev/null 2>&1; then
@@ -301,6 +367,39 @@ install_linux() {
   chmod +x "${DEST}"
   ok "Installed to ${DEST}"
 
+  # ── Desktop integration: .desktop file + icon ──────────────────────────────
+  ICON_DIR="${HOME}/.local/share/icons/hicolor/256x256/apps"
+  ICON_PATH="${ICON_DIR}/${APP_FILE_NAME}.png"
+  DESKTOP_DIR="${HOME}/.local/share/applications"
+  DESKTOP_FILE="${DESKTOP_DIR}/${APP_FILE_NAME}.desktop"
+
+  mkdir -p "${ICON_DIR}" "${DESKTOP_DIR}"
+
+  # Extract icon from AppImage (Tauri embeds .DirIcon as PNG)
+  EXTRACT_TMP=$(mktemp -d)
+  if cd "${EXTRACT_TMP}" && "${DEST}" --appimage-extract "*.png" >/dev/null 2>&1; then
+    EXTRACTED_ICON=$(find "${EXTRACT_TMP}/squashfs-root" -name "*.png" -type f 2>/dev/null | head -1)
+    if [ -n "${EXTRACTED_ICON}" ]; then
+      cp "${EXTRACTED_ICON}" "${ICON_PATH}" 2>/dev/null && ok "Icon installed"
+    fi
+  fi
+  rm -rf "${EXTRACT_TMP}"
+  cd "${INSTALL_DIR}" 2>/dev/null || true
+
+  cat > "${DESKTOP_FILE}" <<DESKTOP_EOF
+[Desktop Entry]
+Type=Application
+Name=${APP_NAME}
+Exec=${DEST}
+Icon=${APP_FILE_NAME}
+Comment=Bolt — AI-powered productivity
+Categories=Office;Productivity;
+Terminal=false
+StartupNotify=true
+DESKTOP_EOF
+  chmod +x "${DESKTOP_FILE}"
+  ok "Desktop shortcut created — ${APP_NAME} will appear in your application menu"
+
   case ":${PATH}:" in
     *":${INSTALL_DIR}:"*) ;;
     *) add_to_path "${INSTALL_DIR}" ;;
@@ -308,6 +407,17 @@ install_linux() {
 
   info "Launching ${APP_NAME}..."
   launch_linux_app "${DEST}" "${APP_NAME}" || return 1
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Linux: dispatch to .deb or AppImage installer
+# ══════════════════════════════════════════════════════════════════════════════
+install_linux() {
+  if [ "$USE_DEB" -eq 1 ]; then
+    install_linux_deb
+  else
+    install_linux_appimage
+  fi
 }
 
 # ── Run platform installer ───────────────────────────────────────────────────

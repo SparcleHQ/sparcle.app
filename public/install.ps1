@@ -42,6 +42,15 @@ $BaseUrl = "https://github.com/$GitHubRepo/releases/download/v$Version"
 function Info($msg)  { Write-Host "  ==> " -ForegroundColor Blue -NoNewline; Write-Host $msg }
 function Ok($msg)    { Write-Host "   ✓  " -ForegroundColor Green -NoNewline; Write-Host $msg }
 function Fail($msg)  { Write-Host "   ✗  " -ForegroundColor Red -NoNewline; Write-Host $msg; exit 1 }
+function Is-Administrator {
+  try {
+    $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+  } catch {
+    return $false
+  }
+}
 
 # ── Parse edition ───────────────────────────────────────────────────────────
 switch ($Edition.ToLower()) {
@@ -107,12 +116,28 @@ Ok "Installer trusted — no SmartScreen warnings"
 
 # ── Install (silent MSI) ───────────────────────────────────────────────────
 Info "Installing $AppName..."
-$msiArgs = "/i `"$DlPath`" /quiet /norestart"
-$proc = Start-Process msiexec.exe -ArgumentList $msiArgs -Wait -PassThru
-if ($proc.ExitCode -ne 0) {
+$isAdmin = Is-Administrator
+
+# Prefer per-user install so non-admin users can install successfully.
+$perUserArgs = "/i `"$DlPath`" /quiet /norestart ALLUSERS=2 MSIINSTALLPERUSER=1"
+$proc = Start-Process msiexec.exe -ArgumentList $perUserArgs -Wait -PassThru
+
+if ($proc.ExitCode -eq 0) {
+  Ok "Installed successfully (single-user mode)"
+} elseif ($proc.ExitCode -eq 1925 -and $isAdmin) {
+  # If elevated context still hits permission edge-cases, try machine-wide mode.
+  Info "Per-user install failed in admin context, retrying machine-wide install..."
+  $machineArgs = "/i `"$DlPath`" /quiet /norestart ALLUSERS=1"
+  $proc = Start-Process msiexec.exe -ArgumentList $machineArgs -Wait -PassThru
+  if ($proc.ExitCode -ne 0) {
+    Fail "Installation failed (exit code $($proc.ExitCode))."
+  }
+  Ok "Installed successfully (all-users mode)"
+} elseif ($proc.ExitCode -in 1603, 1925) {
+  Fail "Installation failed (exit code $($proc.ExitCode)).`n  This usually means Windows blocked all-users MSI install privileges.`n  Re-run the same command in an Administrator PowerShell, or contact IT to allow per-user MSI installs."
+} else {
   Fail "Installation failed (exit code $($proc.ExitCode))."
 }
-Ok "Installed successfully"
 
 # ── Cleanup ────────────────────────────────────────────────────────────────
 Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
@@ -120,7 +145,20 @@ Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
 # ── Launch ─────────────────────────────────────────────────────────────────
 $ExeName = ($AppName -replace ' ', '-') + ".exe"
 $ProgramFiles = $env:ProgramFiles
-$ExePath = Get-ChildItem -Path "$ProgramFiles\$AppName" -Filter $ExeName -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+$LocalPrograms = Join-Path $env:LOCALAPPDATA "Programs"
+$SearchRoots = @(
+  (Join-Path $ProgramFiles $AppName),
+  (Join-Path $LocalPrograms $AppName),
+  $ProgramFiles,
+  $LocalPrograms
+)
+$ExePath = $null
+foreach ($root in $SearchRoots) {
+  if (Test-Path $root) {
+    $ExePath = Get-ChildItem -Path $root -Filter $ExeName -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($ExePath) { break }
+  }
+}
 
 if ($ExePath) {
   Info "Launching $AppName..."

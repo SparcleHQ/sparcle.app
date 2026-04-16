@@ -18,6 +18,10 @@
 (function () {
     'use strict';
 
+    // Idempotency guard: avoid duplicate global listeners if script is loaded twice.
+    if (window.__sparcleSharedNavInitialized) return;
+    window.__sparcleSharedNavInitialized = true;
+
     /* ------------------------------------------------------------------
        DETECT PAGE CONTEXT
        ------------------------------------------------------------------ */
@@ -58,7 +62,7 @@
         '    <li><a href="/solution" class="nav-link' + activeClass('solution') + '">Our Solution</a></li>',
         '    <li><a href="/why-sparcle" class="nav-link' + activeClass('why-sparcle') + '">Why Sparcle</a></li>',
         '    <li><a href="/products.html" class="nav-link' + activeClass('products') + '">Products</a></li>',
-        '    <li><a href="/pricing.html#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
+        '    <li><a href="/pricing#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
         '    <li><a href="/download" class="nav-link' + activeClass('download') + '">Download</a></li>',
         '  </ul>',
         '  <div class="nav-controls">',

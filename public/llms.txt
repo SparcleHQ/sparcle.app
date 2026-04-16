@@ -16,7 +16,7 @@
 
 ### Bolt — Sovereign Enterprise AI Agent
 - URL: https://sparcle.app/products.html
-- Pricing: https://sparcle.app/pricing.html#bolt
+- Pricing: https://sparcle.app/pricing#bolt
 - Type: Self-hosted enterprise AI productivity agent
 - Deployment: On-premises, private VPC, air-gapped, or hybrid
 - Starting price: $10/seat/month (Bolt Absolute — self-hosted, BYO LLM, full platform)
@@ -55,7 +55,7 @@ Aeira is a sovereign enterprise knowledge platform. It indexes internal document
 - Our Solution (sovereignty architecture): https://sparcle.app/solution
 - Why Sparcle: https://sparcle.app/why-sparcle
 - Products: https://sparcle.app/products.html
-- Pricing: https://sparcle.app/pricing.html
+- Pricing: https://sparcle.app/pricing
 - Research & Whitepaper: https://sparcle.app/research.html
 - Strategic Vision PDF: https://sparcle.app/media/Bolt_Strategic_Vision.pdf
 - Full Whitepaper: https://sparcle.llc/legacy/whitepaper-print.html
@@ -67,8 +67,8 @@ Aeira is a sovereign enterprise knowledge platform. It indexes internal document
 | Plan            | Price           | Deployment     | LLM          |
 |-----------------|-----------------|----------------|--------------|
 | Bolt Absolute   | $10/seat/month  | Self-hosted    | BYO LLM      |
-| Bolt Cloud      | $20/seat/month  | Sparcle-hosted | BYO LLM      |
-| Bolt Enterprise | Custom          | Any            | Any          |
+| Bolt Bundled    | $20/seat/month  | Self-hosted    | Managed AI   |
+| Bolt Complete   | $25/seat/month  | Sparcle-hosted | Managed AI   |
 | Aeira           | Bundled / Add-on| Self-hosted    | BYO LLM      |
 
 All plans include the full Bolt platform: MCP integrations, security pipeline, audit logs, admin console.

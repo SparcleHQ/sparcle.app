@@ -4,7 +4,7 @@ export const navLinks = [
   { label: "Our Solution", href: "/solution" },
   { label: "Why Sparcle", href: "/why-sparcle" },
   { label: "Products", href: "/products.html" },
-  { label: "Pricing", href: "/pricing.html#bolt" },
+  { label: "Pricing", href: "/pricing#bolt" },
   { label: "Download", href: "/download" },
   { label: "Research", href: "/research.html" },
 ];

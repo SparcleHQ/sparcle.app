@@ -78,7 +78,7 @@ export const boltProductContent: ProductPageContent = {
   primaryCtaLabel: "Schedule Enterprise Demo",
   primaryCtaHref: "#contact:Bolt Demo Request",
   secondaryCtaLabel: "Features and Pricing",
-  secondaryCtaHref: "/pricing.html#bolt",
+  secondaryCtaHref: "/pricing#bolt",
   tertiaryCtaLabel: "Learn More",
   tertiaryCtaHref: "/bolt-slides.html",
   tertiaryCtaTarget: "_blank",
@@ -251,7 +251,7 @@ export const boltPricingContent: PricingPageContent = {
   title: "Bolt Pricing | Sparcle",
   description:
     "Bolt pricing for enterprise teams: Absolute, Bundled, and Complete, with included Aeira Catalog in every plan.",
-  canonical: "https://sparcle.app/pricing.html",
+  canonical: "https://sparcle.app/pricing",
   pageKicker: "Bolt Pricing",
   headline: "Simple, transparent pricing for the Bolt platform.",
   intro:

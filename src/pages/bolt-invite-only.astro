@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Redirecting | Early Partners"
+  description="Redirecting to the Early Partners page."
+  canonical="https://sparcle.app/early-partners"
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="refresh" content="0; url=/early-partners" />
+    <script is:inline>
+      window.location.replace('/early-partners');
+    </script>
+  </Fragment>
+
+  <section class="section-solution section-solution--page">
+    <div class="container" style="text-align: center;">
+      <h1 style="font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 0.8rem;">Redirecting to Early Partners...</h1>
+      <p>If you are not redirected, <a href="/early-partners" style="color: var(--brand-primary); text-decoration: underline;">open the page here</a>.</p>
+    </div>
+  </section>
+</BaseLayout>

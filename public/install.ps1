@@ -26,6 +26,8 @@ $ErrorActionPreference = "Stop"
 # ── Config ──────────────────────────────────────────────────────────────────
 $FallbackVersion = "0.1.0"
 $GitHubRepo      = "Sparcle-LLC/sparcle.app"
+$DefaultBoltPgReleasesUrl = "https://github.com/theseus-rs/postgresql-binaries"
+$DefaultBoltPgFallbackReleasesUrl = ""
 
 # ── Fetch latest version from GitHub ────────────────────────────────────────
 try {
@@ -42,6 +44,23 @@ $BaseUrl = "https://github.com/$GitHubRepo/releases/download/v$Version"
 function Info($msg)  { Write-Host "  ==> " -ForegroundColor Blue -NoNewline; Write-Host $msg }
 function Ok($msg)    { Write-Host "   ✓  " -ForegroundColor Green -NoNewline; Write-Host $msg }
 function Fail($msg)  { Write-Host "   ✗  " -ForegroundColor Red -NoNewline; Write-Host $msg; exit 1 }
+function Configure-PgRuntimeSources {
+  # Keep any user-provided env vars unchanged; only set defaults when absent.
+  if (-not $env:BOLT_PG_RELEASES_URL) {
+    $env:BOLT_PG_RELEASES_URL = $DefaultBoltPgReleasesUrl
+  }
+
+  if (-not $env:BOLT_PG_FALLBACK_RELEASES_URL -and $DefaultBoltPgFallbackReleasesUrl) {
+    $env:BOLT_PG_FALLBACK_RELEASES_URL = $DefaultBoltPgFallbackReleasesUrl
+  }
+
+  Info "PostgreSQL source (primary): $($env:BOLT_PG_RELEASES_URL)"
+  if ($env:BOLT_PG_FALLBACK_RELEASES_URL) {
+    Info "PostgreSQL source (fallback): $($env:BOLT_PG_FALLBACK_RELEASES_URL)"
+  } else {
+    Info "PostgreSQL source (fallback): <not configured>"
+  }
+}
 function Is-Administrator {
   try {
     $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -99,6 +118,8 @@ switch ($Edition.ToLower()) {
     Fail "Unknown edition: $Edition. Use 'personal' or 'trial'."
   }
 }
+
+Configure-PgRuntimeSources
 
 # ── Detect architecture ────────────────────────────────────────────────────
 $RealArch = $env:PROCESSOR_ARCHITECTURE

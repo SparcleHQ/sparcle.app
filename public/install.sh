@@ -21,12 +21,32 @@ set -e
 # ── Config ───────────────────────────────────────────────────────────────────
 FALLBACK_VERSION="0.1.0"
 GITHUB_REPO="Sparcle-LLC/sparcle.app"
+DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
+DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL=""
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
 ok()    { printf '\033[1;32m ✓ \033[0m %s\n' "$1"; }
 warn()  { printf '\033[1;33m ⚠ \033[0m %s\n' "$1"; }
 fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
+
+configure_pg_runtime_sources() {
+  # Allow operators to override via exported env vars before running installer.
+  if [ -z "${BOLT_PG_RELEASES_URL:-}" ]; then
+    export BOLT_PG_RELEASES_URL="$DEFAULT_BOLT_PG_RELEASES_URL"
+  fi
+
+  if [ -z "${BOLT_PG_FALLBACK_RELEASES_URL:-}" ] && [ -n "$DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL" ]; then
+    export BOLT_PG_FALLBACK_RELEASES_URL="$DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL"
+  fi
+
+  info "PostgreSQL source (primary): ${BOLT_PG_RELEASES_URL}"
+  if [ -n "${BOLT_PG_FALLBACK_RELEASES_URL:-}" ]; then
+    info "PostgreSQL source (fallback): ${BOLT_PG_FALLBACK_RELEASES_URL}"
+  else
+    info "PostgreSQL source (fallback): <not configured>"
+  fi
+}
 
 stop_running_linux_app() {
   target_path="$1"
@@ -165,6 +185,7 @@ case "$OS" in
 esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
+configure_pg_runtime_sources
 
 # ── Cleanup trap ─────────────────────────────────────────────────────────────
 TMPDIR_DL=""

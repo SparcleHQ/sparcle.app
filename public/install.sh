@@ -206,6 +206,28 @@ prewarm_embedded_postgres() {
 
   rm -f "$prewarm_log"
 }
+
+resolve_macos_executable() {
+  app_path="$1"
+  plist_path="$app_path/Contents/Info.plist"
+  macos_dir="$app_path/Contents/MacOS"
+
+  if [ -f "$plist_path" ]; then
+    exec_name=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$plist_path" 2>/dev/null || true)
+    if [ -n "$exec_name" ] && [ -x "$macos_dir/$exec_name" ]; then
+      echo "$macos_dir/$exec_name"
+      return 0
+    fi
+  fi
+
+  first_exec=$(find "$macos_dir" -maxdepth 1 -type f -perm -111 2>/dev/null | head -1 || true)
+  if [ -n "$first_exec" ]; then
+    echo "$first_exec"
+    return 0
+  fi
+
+  echo "$macos_dir/bolt"
+}
 # ── Pre-flight checks ───────────────────────────────────────────────────────
 OS="$(uname)"
 case "$OS" in
@@ -357,7 +379,8 @@ install_macos() {
     APP_IDENTIFIER="app.sparcle.bolt.enterprise"
   fi
   persist_pg_runtime_sources "$APP_IDENTIFIER"
-  prewarm_embedded_postgres "/Applications/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" "$APP_IDENTIFIER"
+  APP_EXECUTABLE=$(resolve_macos_executable "/Applications/${APP_NAME}.app")
+  prewarm_embedded_postgres "$APP_EXECUTABLE" "$APP_IDENTIFIER"
 
   # Link CLI
   mkdir -p "${HOME}/.local/bin"

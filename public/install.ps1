@@ -52,16 +52,48 @@ function Is-Administrator {
   }
 }
 
+function Invoke-PostgresPrewarm {
+  param(
+    [string]$ExecutablePath,
+    [string]$AppIdentifier
+  )
+
+  if (-not (Test-Path $ExecutablePath)) {
+    Write-Host "  ⚠  Skipping PostgreSQL prewarm: executable not found at $ExecutablePath" -ForegroundColor Yellow
+    return
+  }
+
+  Info "Prewarming embedded PostgreSQL (user-space, one-time setup)..."
+  $previous = [Environment]::GetEnvironmentVariable("BOLT_APP_IDENTIFIER", "Process")
+  try {
+    [Environment]::SetEnvironmentVariable("BOLT_APP_IDENTIFIER", $AppIdentifier, "Process")
+    $proc = Start-Process -FilePath $ExecutablePath -ArgumentList "prewarm-postgres" -WindowStyle Hidden -PassThru -Wait
+    if ($proc.ExitCode -eq 0) {
+      Ok "Embedded PostgreSQL prewarm complete"
+    } else {
+      Write-Host "  ⚠  Embedded PostgreSQL prewarm failed (app will retry on first launch) [exit $($proc.ExitCode)]" -ForegroundColor Yellow
+    }
+  }
+  catch {
+    Write-Host "  ⚠  Embedded PostgreSQL prewarm failed (app will retry on first launch): $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+  finally {
+    [Environment]::SetEnvironmentVariable("BOLT_APP_IDENTIFIER", $previous, "Process")
+  }
+}
+
 # ── Parse edition ───────────────────────────────────────────────────────────
 switch ($Edition.ToLower()) {
   "personal" {
     $AppName    = "Bolt Personal"
     $FilePrefix = "Bolt-Personal"
+    $AppIdentifier = "app.sparcle.bolt.personal"
   }
   { $_ -in "trial", "enterprise" } {
     $Edition    = "trial"
     $AppName    = "Bolt Enterprise"
     $FilePrefix = "Bolt-Enterprise-Trial"
+    $AppIdentifier = "app.sparcle.bolt.enterprise"
   }
   default {
     Fail "Unknown edition: $Edition. Use 'personal' or 'trial'."
@@ -161,6 +193,8 @@ foreach ($root in $SearchRoots) {
 }
 
 if ($ExePath) {
+  Invoke-PostgresPrewarm -ExecutablePath $ExePath.FullName -AppIdentifier $AppIdentifier
+
   Info "Launching $AppName..."
   Start-Process $ExePath.FullName
 } else {

@@ -125,6 +125,37 @@ add_to_path() {
     warn "${dir} is not in your PATH. Add it: ${line}"
   fi
 }
+
+prewarm_embedded_postgres() {
+  app_bin="$1"
+  app_identifier="$2"
+
+  [ -x "$app_bin" ] || {
+    warn "Skipping PostgreSQL prewarm: executable not found at ${app_bin}"
+    return 0
+  }
+
+  info "Prewarming embedded PostgreSQL (user-space, one-time setup)..."
+  prewarm_log=$(mktemp)
+
+  if [ "${PLATFORM}" = "linux" ] && echo "$app_bin" | grep -q '\.AppImage$'; then
+    if BOLT_APP_IDENTIFIER="$app_identifier" APPIMAGE_EXTRACT_AND_RUN=1 "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
+      ok "Embedded PostgreSQL prewarm complete"
+    else
+      warn "Embedded PostgreSQL prewarm failed (app will retry on first launch)"
+      sed 's/^/   /' "$prewarm_log" | tail -20
+    fi
+  else
+    if BOLT_APP_IDENTIFIER="$app_identifier" "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
+      ok "Embedded PostgreSQL prewarm complete"
+    else
+      warn "Embedded PostgreSQL prewarm failed (app will retry on first launch)"
+      sed 's/^/   /' "$prewarm_log" | tail -20
+    fi
+  fi
+
+  rm -f "$prewarm_log"
+}
 # ── Pre-flight checks ───────────────────────────────────────────────────────
 OS="$(uname)"
 case "$OS" in
@@ -270,6 +301,12 @@ install_macos() {
   fi
   ok "App trusted — ready to launch"
 
+  APP_IDENTIFIER="app.sparcle.bolt.personal"
+  if [ "$EDITION" = "trial" ]; then
+    APP_IDENTIFIER="app.sparcle.bolt.enterprise"
+  fi
+  prewarm_embedded_postgres "/Applications/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" "$APP_IDENTIFIER"
+
   # Link CLI
   mkdir -p "${HOME}/.local/bin"
   ln -sf "/Applications/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" "${HOME}/.local/bin/bolt" 2>/dev/null || true
@@ -318,6 +355,12 @@ install_linux_deb() {
   fi
 
   if [ -n "$LAUNCH_BIN" ] && [ -x "$LAUNCH_BIN" ]; then
+    APP_IDENTIFIER="app.sparcle.bolt.personal"
+    if [ "$EDITION" = "trial" ]; then
+      APP_IDENTIFIER="app.sparcle.bolt.enterprise"
+    fi
+    prewarm_embedded_postgres "$LAUNCH_BIN" "$APP_IDENTIFIER"
+
     info "Launching ${APP_NAME}..."
     nohup "$LAUNCH_BIN" >/dev/null 2>&1 &
   else
@@ -404,6 +447,12 @@ DESKTOP_EOF
     *":${INSTALL_DIR}:"*) ;;
     *) add_to_path "${INSTALL_DIR}" ;;
   esac
+
+  APP_IDENTIFIER="app.sparcle.bolt.personal"
+  if [ "$EDITION" = "trial" ]; then
+    APP_IDENTIFIER="app.sparcle.bolt.enterprise"
+  fi
+  prewarm_embedded_postgres "$DEST" "$APP_IDENTIFIER"
 
   info "Launching ${APP_NAME}..."
   launch_linux_app "${DEST}" "${APP_NAME}" || return 1

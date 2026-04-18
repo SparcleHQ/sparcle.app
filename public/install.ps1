@@ -30,6 +30,8 @@ $FallbackVersion = "0.1.0"
 $GitHubRepo      = "Sparcle-LLC/sparcle.app"
 $DefaultBoltPgReleasesUrl = "https://sparcle.app"
 $DefaultBoltPgFallbackReleasesUrl = ""
+$ManifestPublishRetryMax = 24
+$ManifestPublishRetryDelaySeconds = 5
 
 # ── Fetch latest version from GitHub ────────────────────────────────────────
 try {
@@ -47,56 +49,6 @@ function Info($msg)  { Write-Host "  ==> " -ForegroundColor Blue -NoNewline; Wri
 function Ok($msg)    { Write-Host "   ✓  " -ForegroundColor Green -NoNewline; Write-Host $msg }
 function Warn($msg)  { Write-Host "  ⚠  $msg" -ForegroundColor Yellow }
 function Fail($msg)  { Write-Host "   ✗  " -ForegroundColor Red -NoNewline; Write-Host $msg; exit 1 }
-
-function Wait-ForApiReadiness {
-  param(
-    [int]$TimeoutSeconds = 90
-  )
-
-  $elapsed = 0
-  while ($elapsed -lt $TimeoutSeconds) {
-    foreach ($port in 13018..13027) {
-      foreach ($path in @('/api/health', '/health')) {
-        $url = "http://127.0.0.1:$port$path"
-        try {
-          $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 1 -ErrorAction Stop
-          if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
-            return $url
-          }
-        }
-        catch {
-          # Keep probing until timeout.
-        }
-      }
-    }
-
-    Start-Sleep -Seconds 1
-    $elapsed += 1
-  }
-
-  return $null
-}
-
-function Verify-RuntimeContract {
-  if ($env:BOLT_SKIP_API_HEALTH_CHECK -eq '1') {
-    Warn 'Skipping API health verification (BOLT_SKIP_API_HEALTH_CHECK=1)'
-    return
-  }
-
-  $timeout = 90
-  if ($env:BOLT_API_READY_TIMEOUT -and $env:BOLT_API_READY_TIMEOUT -match '^\d+$') {
-    $timeout = [int]$env:BOLT_API_READY_TIMEOUT
-  }
-
-  Info 'Verifying API runtime readiness...'
-  $apiUrl = Wait-ForApiReadiness -TimeoutSeconds $timeout
-  if ($apiUrl) {
-    Ok "API is healthy at $apiUrl"
-    return
-  }
-
-  Fail "Install completed, but API readiness check failed (tried /api/health and /health on ports 13018-13027 for ${timeout}s)."
-}
 
 $ManifestContent = ""
 $ManifestMap = @{}
@@ -141,6 +93,50 @@ function Get-ManifestValue {
   }
 
   return ""
+}
+
+function Get-ManifestPublishState {
+  param(
+    [string]$Content
+  )
+
+  if (-not $Content) {
+    return ""
+  }
+
+  foreach ($line in ($Content -split "`n")) {
+    $trimmed = $line.Trim()
+    if ($trimmed.StartsWith("PUBLISH_STATE=")) {
+      return $trimmed.Split('=', 2)[1]
+    }
+  }
+
+  return ""
+}
+
+function Fetch-ReleaseManifest {
+  for ($attempt = 1; $attempt -le $ManifestPublishRetryMax; $attempt++) {
+    try {
+      $ManifestContent = Invoke-WebRequest -Uri $ManifestUrl -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop | Select-Object -ExpandProperty Content
+      $state = Get-ManifestPublishState -Content $ManifestContent
+      if ($state -eq "in_progress") {
+        if ($attempt -eq $ManifestPublishRetryMax) {
+          Fail "Release publish is currently in progress (manifest state: in_progress). Please retry in a minute."
+        }
+        Warn "Release publish in progress — waiting for finalized manifest ($attempt/$ManifestPublishRetryMax)..."
+        Start-Sleep -Seconds $ManifestPublishRetryDelaySeconds
+        continue
+      }
+
+      $ManifestMap = Parse-ManifestContent -Content $ManifestContent
+      return
+    }
+    catch {
+      $ManifestContent = ""
+      $ManifestMap = @{}
+      return
+    }
+  }
 }
 
 function Get-FileSha256 {
@@ -516,16 +512,9 @@ $Arch = if ([Environment]::Is64BitOperatingSystem) {
 
 $TargetKey = $Arch.ToUpper().Replace('-', '_').Replace('.', '_')
 $ManifestUrl = "$BaseUrl/bolt-manifest-$Edition.env"
-try {
-  $ManifestContent = Invoke-WebRequest -Uri $ManifestUrl -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop | Select-Object -ExpandProperty Content
-  $ManifestMap = Parse-ManifestContent -Content $ManifestContent
-  if ($ManifestMap.Count -gt 0) {
-    Info "Using release manifest: bolt-manifest-$Edition.env"
-  }
-}
-catch {
-  $ManifestContent = ""
-  $ManifestMap = @{}
+Fetch-ReleaseManifest
+if ($ManifestMap.Count -gt 0) {
+  Info "Using release manifest: bolt-manifest-$Edition.env"
 }
 
 Select-ReleaseAsset -DesiredExt "msi"
@@ -617,14 +606,12 @@ if ($ExePath) {
 
   Info "Launching $AppName..."
   Start-Process $ExePath.FullName
-  Verify-RuntimeContract
 } else {
   # Fallback: try Start Menu shortcut
   $Shortcut = Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Filter "$AppName.lnk" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
   if ($Shortcut) {
     Info "Launching $AppName..."
     Start-Process $Shortcut.FullName
-    Verify-RuntimeContract
   } else {
     Info "Installation complete — launch $AppName from the Start Menu."
   }

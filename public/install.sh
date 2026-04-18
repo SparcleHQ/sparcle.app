@@ -25,6 +25,8 @@ DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/Sparcle-LLC/sparcle.app"
 DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
 DEFAULT_BOLT_PG_PREWARM_REQUIRED="1"
 DEFAULT_BOLT_PG_VERSION="18.3.0"
+MANIFEST_PUBLISH_RETRY_MAX="24"
+MANIFEST_PUBLISH_RETRY_DELAY="5"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
@@ -73,6 +75,34 @@ verify_runtime_contract() {
 manifest_get() {
   key="$1"
   printf '%s\n' "$MANIFEST_CONTENT" | grep "^${key}=" | head -1 | cut -d= -f2-
+}
+
+manifest_state_from_content() {
+  content="$1"
+  printf '%s\n' "$content" | grep '^PUBLISH_STATE=' | head -1 | cut -d= -f2-
+}
+
+fetch_release_manifest() {
+  retry=1
+  while [ "$retry" -le "$MANIFEST_PUBLISH_RETRY_MAX" ]; do
+    MANIFEST_CONTENT=$(curl -fsSL --max-time 5 "$MANIFEST_URL" 2>/dev/null || true)
+    if [ -z "$MANIFEST_CONTENT" ]; then
+      return 0
+    fi
+
+    state=$(manifest_state_from_content "$MANIFEST_CONTENT")
+    if [ "$state" = "in_progress" ]; then
+      if [ "$retry" -eq "$MANIFEST_PUBLISH_RETRY_MAX" ]; then
+        fail "Release publish is currently in progress (manifest state: in_progress). Please retry in a minute."
+      fi
+      warn "Release publish in progress — waiting for finalized manifest (${retry}/${MANIFEST_PUBLISH_RETRY_MAX})..."
+      sleep "$MANIFEST_PUBLISH_RETRY_DELAY"
+      retry=$((retry + 1))
+      continue
+    fi
+
+    return 0
+  done
 }
 
 select_release_asset() {
@@ -825,7 +855,7 @@ fi
 
 TARGET_KEY=$(printf '%s' "$RUST_TRIPLE" | tr '[:lower:]-.' '[:upper:]__')
 MANIFEST_URL="${BASE_URL}/bolt-manifest-${EDITION}.env"
-MANIFEST_CONTENT=$(curl -fsSL --max-time 5 "$MANIFEST_URL" 2>/dev/null || true)
+fetch_release_manifest
 if [ -n "$MANIFEST_CONTENT" ]; then
   info "Using release manifest: bolt-manifest-${EDITION}.env"
 fi

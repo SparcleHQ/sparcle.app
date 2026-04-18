@@ -11,7 +11,7 @@
 #   1. Detects your OS and architecture
 #   2. Fetches the latest release version from GitHub
 #   3. Downloads the correct installer from GitHub Releases
-#   4. Installs to /Applications (macOS) or ~/.local/bin (Linux)
+#   4. Installs to /Applications (admin macOS) or ~/Applications (non-admin macOS), and ~/.local/bin on Linux
 #   5. Marks the app as trusted for your OS to launch safely
 #   6. Launches the app
 #
@@ -27,6 +27,8 @@ DEFAULT_BOLT_PG_PREWARM_REQUIRED="1"
 DEFAULT_BOLT_PG_VERSION="18.3.0"
 MANIFEST_PUBLISH_RETRY_MAX="24"
 MANIFEST_PUBLISH_RETRY_DELAY="5"
+DEFAULT_BOLT_API_PORT_BASE="13018"
+DEFAULT_BOLT_API_PORT_RANGE="10"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
@@ -36,11 +38,14 @@ fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
 
 wait_for_api_readiness() {
   timeout_seconds="${1:-90}"
+  port_base="${BOLT_API_PORT_BASE:-$DEFAULT_BOLT_API_PORT_BASE}"
+  port_range="${BOLT_API_PORT_RANGE:-$DEFAULT_BOLT_API_PORT_RANGE}"
+  port_end=$((port_base + port_range - 1))
   api_url=""
   elapsed=0
 
   while [ "$elapsed" -lt "$timeout_seconds" ]; do
-    for port in $(seq 13018 13027); do
+    for port in $(seq "$port_base" "$port_end"); do
       for path in /api/health /health; do
         if curl -fsS --max-time 1 "http://127.0.0.1:${port}${path}" >/dev/null 2>&1; then
           api_url="http://127.0.0.1:${port}${path}"
@@ -58,6 +63,9 @@ wait_for_api_readiness() {
 
 verify_runtime_contract() {
   timeout_seconds="${BOLT_API_READY_TIMEOUT:-90}"
+  port_base="${BOLT_API_PORT_BASE:-$DEFAULT_BOLT_API_PORT_BASE}"
+  port_range="${BOLT_API_PORT_RANGE:-$DEFAULT_BOLT_API_PORT_RANGE}"
+  port_end=$((port_base + port_range - 1))
   if [ "${BOLT_SKIP_API_HEALTH_CHECK:-0}" = "1" ]; then
     warn "Skipping API health verification (BOLT_SKIP_API_HEALTH_CHECK=1)"
     return 0
@@ -69,7 +77,7 @@ verify_runtime_contract() {
     return 0
   fi
 
-  fail "Install completed, but API readiness check failed (tried /api/health and /health on ports 13018-13027 for ${timeout_seconds}s)."
+  fail "Install completed, but API readiness check failed (tried /api/health and /health on ports ${port_base}-${port_end} for ${timeout_seconds}s)."
 }
 
 manifest_get() {
@@ -908,7 +916,7 @@ install_macos() {
   MOUNT_POINT="${TMPDIR_DL}/bolt-mount"
   mkdir -p "${MOUNT_POINT}"
 
-  info "Installing ${APP_NAME} to /Applications..."
+  info "Installing ${APP_NAME}..."
   hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
     || fail "Failed to mount DMG. The download may be corrupted — try again."
 
@@ -918,20 +926,45 @@ install_macos() {
   pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
   sleep 1
 
-  if ! rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null; then
-    sudo rm -rf "/Applications/${APP_NAME}.app" 2>/dev/null < /dev/tty || true
+  INSTALL_BASE="/Applications"
+  INSTALL_APP_PATH="${INSTALL_BASE}/${APP_NAME}.app"
+  installed=0
+
+  # First try system Applications without elevation.
+  rm -rf "${INSTALL_APP_PATH}" 2>/dev/null || true
+  if cp -R "${SOURCE_APP}" "${INSTALL_BASE}/" 2>/dev/null; then
+    installed=1
   fi
 
-  if ! cp -R "${SOURCE_APP}" /Applications/ 2>/dev/null; then
+  # If needed, try sudo only when a tty is available.
+  if [ "$installed" -ne 1 ] && [ -r /dev/tty ]; then
     info "Password may be required to write to /Applications..."
-    sudo cp -R "${SOURCE_APP}" /Applications/ < /dev/tty \
-      || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "Failed to install to /Applications."; }
+    sudo rm -rf "${INSTALL_APP_PATH}" 2>/dev/null < /dev/tty || true
+    if sudo cp -R "${SOURCE_APP}" "${INSTALL_BASE}/" < /dev/tty; then
+      installed=1
+    fi
   fi
-  ok "Installed to /Applications/${APP_NAME}.app"
+
+  # Non-admin fallback: per-user Applications folder.
+  if [ "$installed" -ne 1 ]; then
+    INSTALL_BASE="${HOME}/Applications"
+    INSTALL_APP_PATH="${INSTALL_BASE}/${APP_NAME}.app"
+    info "Falling back to per-user install location: ${INSTALL_BASE}"
+    mkdir -p "${INSTALL_BASE}" || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "Failed to create ${INSTALL_BASE}."; }
+    rm -rf "${INSTALL_APP_PATH}" 2>/dev/null || true
+    cp -R "${SOURCE_APP}" "${INSTALL_BASE}/" \
+      || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "Failed to install to ${INSTALL_BASE}."; }
+    installed=1
+  fi
+
+  [ "$installed" -eq 1 ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "Failed to install ${APP_NAME}."; }
+  ok "Installed to ${INSTALL_APP_PATH}"
 
   info "Marking ${APP_NAME} as trusted..."
-  if ! xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null; then
-    sudo xattr -cr "/Applications/${APP_NAME}.app" 2>/dev/null < /dev/tty || true
+  if ! xattr -cr "${INSTALL_APP_PATH}" 2>/dev/null; then
+    if [ -r /dev/tty ]; then
+      sudo xattr -cr "${INSTALL_APP_PATH}" 2>/dev/null < /dev/tty || true
+    fi
   fi
   ok "App trusted — ready to launch"
 
@@ -945,12 +978,12 @@ install_macos() {
   persist_release_tuple "$APP_IDENTIFIER"
   install_optional_api_component "$APP_IDENTIFIER"
   install_optional_pwa_component "$APP_IDENTIFIER"
-  APP_EXECUTABLE=$(resolve_macos_executable "/Applications/${APP_NAME}.app")
+  APP_EXECUTABLE=$(resolve_macos_executable "${INSTALL_APP_PATH}")
   prewarm_embedded_postgres "$APP_EXECUTABLE" "$APP_IDENTIFIER"
 
   # Link CLI
   mkdir -p "${HOME}/.local/bin"
-  ln -sf "/Applications/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" "${HOME}/.local/bin/bolt" 2>/dev/null || true
+  ln -sf "${INSTALL_APP_PATH}/Contents/MacOS/${APP_NAME}" "${HOME}/.local/bin/bolt" 2>/dev/null || true
   case ":${PATH}:" in
     *":${HOME}/.local/bin:"*) ;;
     *) add_to_path "${HOME}/.local/bin" ;;
@@ -959,7 +992,7 @@ install_macos() {
   hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null || true
 
   info "Launching ${APP_NAME}..."
-  open "/Applications/${APP_NAME}.app"
+  open "${INSTALL_APP_PATH}"
   verify_runtime_contract
 }
 

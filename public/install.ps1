@@ -6,9 +6,11 @@
 # What this does:
 #   1. Fetches the latest release version from GitHub
 #   2. Downloads the correct installer from GitHub Releases
-#   2. Marks the file as trusted for Windows to run safely
-#   3. Runs the installer silently
-#   4. Launches the app
+#   3. Verifies checksums when manifest metadata is available
+#   4. Marks the file as trusted for Windows to run safely
+#   5. Runs the installer silently
+#   6. Installs optional runtime API/PWA components when available
+#   7. Launches the app
 #
 # No admin required. Safe to re-run.
 
@@ -26,7 +28,7 @@ $ErrorActionPreference = "Stop"
 # ── Config ──────────────────────────────────────────────────────────────────
 $FallbackVersion = "0.1.0"
 $GitHubRepo      = "Sparcle-LLC/sparcle.app"
-$DefaultBoltPgReleasesUrl = "https://github.com/theseus-rs/postgresql-binaries"
+$DefaultBoltPgReleasesUrl = "https://sparcle.app"
 $DefaultBoltPgFallbackReleasesUrl = ""
 
 # ── Fetch latest version from GitHub ────────────────────────────────────────
@@ -43,7 +45,162 @@ $BaseUrl = "https://github.com/$GitHubRepo/releases/download/v$Version"
 # ── Helpers ─────────────────────────────────────────────────────────────────
 function Info($msg)  { Write-Host "  ==> " -ForegroundColor Blue -NoNewline; Write-Host $msg }
 function Ok($msg)    { Write-Host "   ✓  " -ForegroundColor Green -NoNewline; Write-Host $msg }
+function Warn($msg)  { Write-Host "  ⚠  $msg" -ForegroundColor Yellow }
 function Fail($msg)  { Write-Host "   ✗  " -ForegroundColor Red -NoNewline; Write-Host $msg; exit 1 }
+
+function Wait-ForApiReadiness {
+  param(
+    [int]$TimeoutSeconds = 90
+  )
+
+  $elapsed = 0
+  while ($elapsed -lt $TimeoutSeconds) {
+    foreach ($port in 13018..13027) {
+      foreach ($path in @('/api/health', '/health')) {
+        $url = "http://127.0.0.1:$port$path"
+        try {
+          $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 1 -ErrorAction Stop
+          if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
+            return $url
+          }
+        }
+        catch {
+          # Keep probing until timeout.
+        }
+      }
+    }
+
+    Start-Sleep -Seconds 1
+    $elapsed += 1
+  }
+
+  return $null
+}
+
+function Verify-RuntimeContract {
+  if ($env:BOLT_SKIP_API_HEALTH_CHECK -eq '1') {
+    Warn 'Skipping API health verification (BOLT_SKIP_API_HEALTH_CHECK=1)'
+    return
+  }
+
+  $timeout = 90
+  if ($env:BOLT_API_READY_TIMEOUT -and $env:BOLT_API_READY_TIMEOUT -match '^\d+$') {
+    $timeout = [int]$env:BOLT_API_READY_TIMEOUT
+  }
+
+  Info 'Verifying API runtime readiness...'
+  $apiUrl = Wait-ForApiReadiness -TimeoutSeconds $timeout
+  if ($apiUrl) {
+    Ok "API is healthy at $apiUrl"
+    return
+  }
+
+  Fail "Install completed, but API readiness check failed (tried /api/health and /health on ports 13018-13027 for ${timeout}s)."
+}
+
+$ManifestContent = ""
+$ManifestMap = @{}
+$ManifestUrl = ""
+$ExpectedSha256 = ""
+$ResolvedDesktopAsset = ""
+$ResolvedDesktopSha = ""
+$TargetKey = ""
+
+function Parse-ManifestContent {
+  param(
+    [string]$Content
+  )
+
+  $map = @{}
+  if (-not $Content) {
+    return $map
+  }
+
+  foreach ($line in ($Content -split "`n")) {
+    $trimmed = $line.Trim()
+    if (-not $trimmed -or $trimmed.StartsWith("#")) {
+      continue
+    }
+
+    $parts = $trimmed.Split('=', 2)
+    if ($parts.Count -eq 2) {
+      $map[$parts[0]] = $parts[1]
+    }
+  }
+
+  return $map
+}
+
+function Get-ManifestValue {
+  param(
+    [string]$Key
+  )
+
+  if ($ManifestMap.ContainsKey($Key)) {
+    return [string]$ManifestMap[$Key]
+  }
+
+  return ""
+}
+
+function Get-FileSha256 {
+  param(
+    [string]$Path
+  )
+
+  return (Get-FileHash -Path $Path -Algorithm SHA256).Hash.ToLower()
+}
+
+function Verify-DownloadChecksum {
+  param(
+    [string]$Path,
+    [string]$Expected,
+    [string]$Label
+  )
+
+  if (-not $Expected) {
+    return
+  }
+
+  $actual = Get-FileSha256 -Path $Path
+  if ($actual -ne $Expected.ToLower()) {
+    Fail "Checksum mismatch for $Label. Expected $Expected, got $actual."
+  }
+
+  Ok "Checksum verified"
+}
+
+function Select-ReleaseAsset {
+  param(
+    [string]$DesiredExt
+  )
+
+  $desiredKey = $DesiredExt.ToUpper()
+  $assetName = ""
+  $assetSha = ""
+
+  if ($ManifestMap.Count -gt 0) {
+    $assetName = Get-ManifestValue -Key "DESKTOP_ASSET_${TargetKey}_${desiredKey}"
+    $assetSha = Get-ManifestValue -Key "DESKTOP_SHA256_${TargetKey}_${desiredKey}"
+
+    if (-not $assetName) {
+      $assetName = Get-ManifestValue -Key "DESKTOP_ASSET_${TargetKey}"
+      $assetSha = Get-ManifestValue -Key "DESKTOP_SHA256_${TargetKey}"
+    }
+  }
+
+  if (-not $assetName) {
+    $assetName = "$FilePrefix-$Version-$Arch.$DesiredExt"
+    $assetSha = ""
+  }
+
+  $script:FileName = $assetName
+  $script:FileUrl = "$BaseUrl/$assetName"
+  $script:ExpectedSha256 = $assetSha
+  $script:ResolvedDesktopAsset = $assetName
+  $script:ResolvedDesktopSha = $assetSha
+}
+
 function Configure-PgRuntimeSources {
   # Keep any user-provided env vars unchanged; only set defaults when absent.
   if (-not $env:BOLT_PG_RELEASES_URL) {
@@ -83,6 +240,207 @@ function Save-PgRuntimeSources {
   Set-Content -Path $configFile -Value $lines -Encoding UTF8
   Info "Persisted PostgreSQL sources config: $configFile"
 }
+
+function Persist-ReleaseTuple {
+  param(
+    [string]$AppIdentifier
+  )
+
+  $tupleDir = Join-Path $env:APPDATA $AppIdentifier
+  New-Item -ItemType Directory -Force -Path $tupleDir | Out-Null
+  $tupleFile = Join-Path $tupleDir "release-tuple.env"
+
+  $releaseTag = Get-ManifestValue -Key "RELEASE_TAG"
+  $releaseVersion = Get-ManifestValue -Key "RELEASE_VERSION"
+  $runtimeTupleId = Get-ManifestValue -Key "RUNTIME_TUPLE_ID"
+  $apiVersion = Get-ManifestValue -Key "API_VERSION"
+  $apiSha = Get-ManifestValue -Key "API_SHA"
+  $pwaVersion = Get-ManifestValue -Key "PWA_VERSION"
+  $pwaSha = Get-ManifestValue -Key "PWA_SHA"
+  $nativeVersion = Get-ManifestValue -Key "NATIVE_VERSION"
+  $nativeSha = Get-ManifestValue -Key "NATIVE_SHA"
+
+  if (-not $releaseTag) { $releaseTag = "v$Version" }
+  if (-not $releaseVersion) { $releaseVersion = $Version }
+
+  $lines = @(
+    "# Generated by Bolt installer",
+    "MANIFEST_URL=$ManifestUrl",
+    "RELEASE_TAG=$releaseTag",
+    "RELEASE_VERSION=$releaseVersion",
+    "EDITION=$Edition",
+    "RUST_TRIPLE=$Arch",
+    "RUNTIME_TUPLE_ID=$runtimeTupleId",
+    "RESOLVED_DESKTOP_ASSET=$ResolvedDesktopAsset",
+    "RESOLVED_DESKTOP_SHA256=$ResolvedDesktopSha",
+    "API_VERSION=$apiVersion",
+    "API_SHA=$apiSha",
+    "PWA_VERSION=$pwaVersion",
+    "PWA_SHA=$pwaSha",
+    "NATIVE_VERSION=$nativeVersion",
+    "NATIVE_SHA=$nativeSha"
+  )
+
+  Set-Content -Path $tupleFile -Value $lines -Encoding UTF8
+  Info "Persisted release tuple metadata: $tupleFile"
+}
+
+function Upsert-TupleValue {
+  param(
+    [string]$TupleFile,
+    [string]$Key,
+    [string]$Value
+  )
+
+  $content = @()
+  if (Test-Path $TupleFile) {
+    $content = Get-Content -Path $TupleFile -ErrorAction SilentlyContinue
+  }
+
+  $filtered = @()
+  foreach ($line in $content) {
+    if (-not $line.StartsWith("$Key=")) {
+      $filtered += $line
+    }
+  }
+  $filtered += "$Key=$Value"
+
+  Set-Content -Path $TupleFile -Value $filtered -Encoding UTF8
+}
+
+function Install-OptionalPwaComponent {
+  param(
+    [string]$AppIdentifier
+  )
+
+  $pwaAsset = Get-ManifestValue -Key "PWA_ASSET"
+  if (-not $pwaAsset) {
+    return
+  }
+
+  $pwaSha = Get-ManifestValue -Key "PWA_SHA"
+  $pwaChecksum = Get-ManifestValue -Key "PWA_SHA256"
+  $componentSuffix = if ($pwaSha) { $pwaSha } else { $Version }
+
+  $componentBase = Join-Path $env:APPDATA "$AppIdentifier\components\pwa"
+  $targetDir = Join-Path $componentBase $componentSuffix
+  $markerFile = Join-Path $targetDir ".installed"
+  $tupleFile = Join-Path (Join-Path $env:APPDATA $AppIdentifier) "release-tuple.env"
+
+  if ((Test-Path $markerFile) -and (Test-Path (Join-Path $targetDir "index.html"))) {
+    Upsert-TupleValue -TupleFile $tupleFile -Key "RUNTIME_PWA_DIR" -Value $targetDir
+    return
+  }
+
+  New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+  $tmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+  $pwaTar = Join-Path $tmpDir $pwaAsset
+  $pwaUrl = "$BaseUrl/$pwaAsset"
+
+  Info "Downloading optional PWA component: $pwaAsset"
+  try {
+    Invoke-WebRequest -Uri $pwaUrl -OutFile $pwaTar -UseBasicParsing
+  }
+  catch {
+    Warn "Could not download PWA component $pwaAsset. Continuing with bundled assets."
+    Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+    return
+  }
+
+  if ($pwaChecksum) {
+    Verify-DownloadChecksum -Path $pwaTar -Expected $pwaChecksum -Label $pwaAsset
+  }
+
+  try {
+    tar -xzf $pwaTar -C $targetDir
+  }
+  catch {
+    Warn "Failed to extract PWA component $pwaAsset. Continuing with bundled assets."
+    Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+    return
+  }
+
+  if (-not (Test-Path (Join-Path $targetDir "index.html"))) {
+    Warn "Extracted PWA component is missing index.html. Continuing with bundled assets."
+    Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+    return
+  }
+
+  Set-Content -Path $markerFile -Value ([DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")) -Encoding UTF8
+  Upsert-TupleValue -TupleFile $tupleFile -Key "RUNTIME_PWA_DIR" -Value $targetDir
+  Upsert-TupleValue -TupleFile $tupleFile -Key "RESOLVED_PWA_ASSET" -Value $pwaAsset
+  Ok "Installed optional PWA component into $targetDir"
+  Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+}
+
+function Install-OptionalApiComponent {
+  param(
+    [string]$AppIdentifier
+  )
+
+  $apiAsset = Get-ManifestValue -Key "API_ASSET_${TargetKey}"
+  if (-not $apiAsset) {
+    return
+  }
+
+  $apiSha = Get-ManifestValue -Key "API_SHA"
+  $apiChecksum = Get-ManifestValue -Key "API_SHA256_${TargetKey}"
+  $componentSuffix = if ($apiSha) { $apiSha } else { $Version }
+
+  $componentBase = Join-Path $env:APPDATA "$AppIdentifier\components\api"
+  $targetDir = Join-Path $componentBase $componentSuffix
+  $runtimeBin = Join-Path $targetDir "bolt-api.exe"
+  $markerFile = Join-Path $targetDir ".installed"
+  $tupleFile = Join-Path (Join-Path $env:APPDATA $AppIdentifier) "release-tuple.env"
+
+  if ((Test-Path $markerFile) -and (Test-Path $runtimeBin)) {
+    Upsert-TupleValue -TupleFile $tupleFile -Key "RUNTIME_API_BIN" -Value $runtimeBin
+    return
+  }
+
+  New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+  $tmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+  $apiTar = Join-Path $tmpDir $apiAsset
+  $apiUrl = "$BaseUrl/$apiAsset"
+
+  Info "Downloading optional API component: $apiAsset"
+  try {
+    Invoke-WebRequest -Uri $apiUrl -OutFile $apiTar -UseBasicParsing
+  }
+  catch {
+    Warn "Could not download API component $apiAsset. Continuing with bundled sidecar."
+    Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+    return
+  }
+
+  if ($apiChecksum) {
+    Verify-DownloadChecksum -Path $apiTar -Expected $apiChecksum -Label $apiAsset
+  }
+
+  try {
+    tar -xzf $apiTar -C $targetDir
+  }
+  catch {
+    Warn "Failed to extract API component $apiAsset. Continuing with bundled sidecar."
+    Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+    return
+  }
+
+  if (-not (Test-Path $runtimeBin)) {
+    Warn "Extracted API component is missing bolt-api.exe. Continuing with bundled sidecar."
+    Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+    return
+  }
+
+  Set-Content -Path $markerFile -Value ([DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")) -Encoding UTF8
+  Upsert-TupleValue -TupleFile $tupleFile -Key "RUNTIME_API_BIN" -Value $runtimeBin
+  Upsert-TupleValue -TupleFile $tupleFile -Key "RESOLVED_API_ASSET" -Value $apiAsset
+  Ok "Installed optional API component into $targetDir"
+  Remove-Item -Recurse -Force $tmpDir -ErrorAction SilentlyContinue
+}
+
 function Is-Administrator {
   try {
     $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -156,8 +514,21 @@ $Arch = if ([Environment]::Is64BitOperatingSystem) {
   Fail "32-bit Windows is not supported."
 }
 
-$FileName = "$FilePrefix-$Version-$Arch.msi"
-$FileUrl  = "$BaseUrl/$FileName"
+$TargetKey = $Arch.ToUpper().Replace('-', '_').Replace('.', '_')
+$ManifestUrl = "$BaseUrl/bolt-manifest-$Edition.env"
+try {
+  $ManifestContent = Invoke-WebRequest -Uri $ManifestUrl -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop | Select-Object -ExpandProperty Content
+  $ManifestMap = Parse-ManifestContent -Content $ManifestContent
+  if ($ManifestMap.Count -gt 0) {
+    Info "Using release manifest: bolt-manifest-$Edition.env"
+  }
+}
+catch {
+  $ManifestContent = ""
+  $ManifestMap = @{}
+}
+
+Select-ReleaseAsset -DesiredExt "msi"
 
 Write-Host ""
 Write-Host "  ⚡ Bolt Installer" -ForegroundColor Cyan
@@ -180,6 +551,8 @@ try {
   Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
   Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
 }
+
+Verify-DownloadChecksum -Path $DlPath -Expected $ExpectedSha256 -Label $FileName
 
 $Size = [math]::Round((Get-Item $DlPath).Length / 1MB, 1)
 Ok "Downloaded ${Size}MB"
@@ -216,6 +589,10 @@ if ($proc.ExitCode -eq 0) {
 
 # ── Cleanup ────────────────────────────────────────────────────────────────
 Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
+Save-PgRuntimeSources -AppIdentifier $AppIdentifier
+Persist-ReleaseTuple -AppIdentifier $AppIdentifier
+Install-OptionalApiComponent -AppIdentifier $AppIdentifier
+Install-OptionalPwaComponent -AppIdentifier $AppIdentifier
 
 # ── Launch ─────────────────────────────────────────────────────────────────
 $ExeName = ($AppName -replace ' ', '-') + ".exe"
@@ -236,17 +613,18 @@ foreach ($root in $SearchRoots) {
 }
 
 if ($ExePath) {
-  Save-PgRuntimeSources -AppIdentifier $AppIdentifier
   Invoke-PostgresPrewarm -ExecutablePath $ExePath.FullName -AppIdentifier $AppIdentifier
 
   Info "Launching $AppName..."
   Start-Process $ExePath.FullName
+  Verify-RuntimeContract
 } else {
   # Fallback: try Start Menu shortcut
   $Shortcut = Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Filter "$AppName.lnk" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
   if ($Shortcut) {
     Info "Launching $AppName..."
     Start-Process $Shortcut.FullName
+    Verify-RuntimeContract
   } else {
     Info "Installation complete — launch $AppName from the Start Menu."
   }

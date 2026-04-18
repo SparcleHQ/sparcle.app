@@ -21,14 +21,129 @@ set -e
 # ── Config ───────────────────────────────────────────────────────────────────
 FALLBACK_VERSION="0.1.0"
 GITHUB_REPO="Sparcle-LLC/sparcle.app"
-DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
-DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL=""
+DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/Sparcle-LLC/sparcle.app"
+DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
+DEFAULT_BOLT_PG_PREWARM_REQUIRED="1"
+DEFAULT_BOLT_PG_VERSION="18.3.0"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
 ok()    { printf '\033[1;32m ✓ \033[0m %s\n' "$1"; }
 warn()  { printf '\033[1;33m ⚠ \033[0m %s\n' "$1"; }
 fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
+
+wait_for_api_readiness() {
+  timeout_seconds="${1:-90}"
+  api_url=""
+  elapsed=0
+
+  while [ "$elapsed" -lt "$timeout_seconds" ]; do
+    for port in $(seq 13018 13027); do
+      for path in /api/health /health; do
+        if curl -fsS --max-time 1 "http://127.0.0.1:${port}${path}" >/dev/null 2>&1; then
+          api_url="http://127.0.0.1:${port}${path}"
+          printf '%s\n' "$api_url"
+          return 0
+        fi
+      done
+    done
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  return 1
+}
+
+verify_runtime_contract() {
+  timeout_seconds="${BOLT_API_READY_TIMEOUT:-90}"
+  if [ "${BOLT_SKIP_API_HEALTH_CHECK:-0}" = "1" ]; then
+    warn "Skipping API health verification (BOLT_SKIP_API_HEALTH_CHECK=1)"
+    return 0
+  fi
+
+  info "Verifying API runtime readiness..."
+  if api_url=$(wait_for_api_readiness "$timeout_seconds"); then
+    ok "API is healthy at ${api_url}"
+    return 0
+  fi
+
+  fail "Install completed, but API readiness check failed (tried /api/health and /health on ports 13018-13027 for ${timeout_seconds}s)."
+}
+
+manifest_get() {
+  key="$1"
+  printf '%s\n' "$MANIFEST_CONTENT" | grep "^${key}=" | head -1 | cut -d= -f2-
+}
+
+select_release_asset() {
+  desired_ext="$1"
+  desired_key=$(printf '%s' "$desired_ext" | tr '[:lower:]' '[:upper:]')
+  asset_name=""
+  asset_sha=""
+
+  if [ -n "${MANIFEST_CONTENT:-}" ]; then
+    asset_name=$(manifest_get "DESKTOP_ASSET_${TARGET_KEY}_${desired_key}")
+    asset_sha=$(manifest_get "DESKTOP_SHA256_${TARGET_KEY}_${desired_key}")
+
+    if [ -z "$asset_name" ]; then
+      asset_name=$(manifest_get "DESKTOP_ASSET_${TARGET_KEY}")
+      asset_sha=$(manifest_get "DESKTOP_SHA256_${TARGET_KEY}")
+    fi
+  fi
+
+  if [ -z "$asset_name" ]; then
+    asset_name="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${desired_ext}"
+    asset_sha=""
+  fi
+
+  FILE_NAME="$asset_name"
+  FILE_URL="${BASE_URL}/${FILE_NAME}"
+  EXT="${FILE_NAME##*.}"
+  EXPECTED_SHA256="$asset_sha"
+}
+
+verify_download_checksum() {
+  [ -n "${EXPECTED_SHA256:-}" ] || return 0
+
+  if command -v shasum >/dev/null 2>&1; then
+    ACTUAL_SHA256=$(shasum -a 256 "${DL_PATH}" | awk '{print $1}')
+  elif command -v sha256sum >/dev/null 2>&1; then
+    ACTUAL_SHA256=$(sha256sum "${DL_PATH}" | awk '{print $1}')
+  else
+    warn "No SHA256 tool found (shasum/sha256sum). Skipping checksum verification."
+    return 0
+  fi
+
+  if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+    fail "Checksum mismatch for ${FILE_NAME}. Expected ${EXPECTED_SHA256}, got ${ACTUAL_SHA256}."
+  fi
+
+  ok "Checksum verified"
+}
+
+verify_checksum_for_file() {
+  file_path="$1"
+  expected_sha="$2"
+  label="$3"
+
+  [ -n "$expected_sha" ] || return 0
+
+  if command -v shasum >/dev/null 2>&1; then
+    actual_sha=$(shasum -a 256 "$file_path" | awk '{print $1}')
+  elif command -v sha256sum >/dev/null 2>&1; then
+    actual_sha=$(sha256sum "$file_path" | awk '{print $1}')
+  else
+    warn "No SHA256 tool found (shasum/sha256sum). Skipping checksum verification for ${label}."
+    return 0
+  fi
+
+  if [ "$actual_sha" != "$expected_sha" ]; then
+    warn "Checksum mismatch for ${label}. Expected ${expected_sha}, got ${actual_sha}."
+    return 1
+  fi
+
+  return 0
+}
 
 configure_pg_runtime_sources() {
   # Allow operators to override via exported env vars before running installer.
@@ -76,6 +191,397 @@ persist_pg_runtime_sources() {
   } > "$config_file"
 
   info "Persisted PostgreSQL sources config: ${config_file}"
+}
+
+persist_database_runtime_config() {
+  app_identifier="$1"
+  config_dir=""
+
+  case "$PLATFORM" in
+    macos)
+      config_dir="${HOME}/Library/Application Support/${app_identifier}"
+      ;;
+    linux)
+      config_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  mkdir -p "$config_dir" 2>/dev/null || return 0
+  config_file="${config_dir}/database.env"
+
+  if [ "${BOLT_DATABASE_MODE:-}" != "external" ] && [ "${BOLT_SKIP_EMBEDDED_PG:-}" != "1" ]; then
+    rm -f "$config_file" 2>/dev/null || true
+    return 0
+  fi
+
+  [ -n "${APP__DATABASE__POSTGRES__HOST:-}" ] || fail "External DB mode requires APP__DATABASE__POSTGRES__HOST"
+  [ -n "${APP__DATABASE__POSTGRES__PORT:-}" ] || fail "External DB mode requires APP__DATABASE__POSTGRES__PORT"
+  [ -n "${APP__DATABASE__POSTGRES__DATABASE:-}" ] || fail "External DB mode requires APP__DATABASE__POSTGRES__DATABASE"
+  [ -n "${APP__DATABASE__POSTGRES__USERNAME:-}" ] || fail "External DB mode requires APP__DATABASE__POSTGRES__USERNAME"
+  [ -n "${DATABASE_PASSWORD:-}" ] || fail "External DB mode requires DATABASE_PASSWORD"
+
+  {
+    echo "# Generated by Bolt installer"
+    echo "BOLT_DATABASE_MODE=external"
+    echo "BOLT_SKIP_EMBEDDED_PG=1"
+    echo "APP__DATABASE__POSTGRES__HOST=${APP__DATABASE__POSTGRES__HOST}"
+    echo "APP__DATABASE__POSTGRES__PORT=${APP__DATABASE__POSTGRES__PORT}"
+    echo "APP__DATABASE__POSTGRES__DATABASE=${APP__DATABASE__POSTGRES__DATABASE}"
+    echo "APP__DATABASE__POSTGRES__USERNAME=${APP__DATABASE__POSTGRES__USERNAME}"
+    echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}"
+    if [ -n "${APP__DATABASE__POSTGRES__SSL_MODE:-}" ]; then
+      echo "APP__DATABASE__POSTGRES__SSL_MODE=${APP__DATABASE__POSTGRES__SSL_MODE}"
+    fi
+  } > "$config_file"
+
+  chmod 600 "$config_file" 2>/dev/null || true
+  info "Persisted external database config: ${config_file}"
+}
+
+runtime_asset_triple() {
+  case "$RUST_TRIPLE" in
+    aarch64-apple-darwin) echo "aarch64-apple-darwin" ;;
+    x86_64-apple-darwin) echo "x86_64-apple-darwin" ;;
+    x86_64-unknown-linux-gnu) echo "x86_64-unknown-linux-gnu" ;;
+    *) echo "" ;;
+  esac
+}
+
+runtime_repo_from_url() {
+  url="$1"
+  repo=$(printf '%s' "$url" | sed -E 's#^https?://(www\.)?github\.com/##' | sed -E 's#/$##')
+  owner=$(printf '%s' "$repo" | cut -d/ -f1)
+  name=$(printf '%s' "$repo" | cut -d/ -f2)
+  if [ -n "$owner" ] && [ -n "$name" ] && [ "$owner" != "$repo" ]; then
+    echo "$owner/$name"
+  else
+    echo ""
+  fi
+}
+
+seed_embedded_postgres_runtime() {
+  app_identifier="$1"
+
+  if [ "${BOLT_DATABASE_MODE:-}" = "external" ] || [ "${BOLT_SKIP_EMBEDDED_PG:-}" = "1" ]; then
+    return 0
+  fi
+
+  runtime_version="${BOLT_PG_VERSION:-$DEFAULT_BOLT_PG_VERSION}"
+  triple=$(runtime_asset_triple)
+  [ -n "$triple" ] || return 0
+
+  case "$PLATFORM" in
+    macos)
+      base_dir="${HOME}/Library/Application Support/${app_identifier}"
+      ;;
+    linux)
+      base_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  install_root="${base_dir}/embedded-postgres/installation"
+  target_dir="${install_root}/${runtime_version}"
+  pg_ctl_path="${target_dir}/bin/pg_ctl"
+
+  if [ -x "$pg_ctl_path" ]; then
+    info "Embedded PostgreSQL runtime already present: ${target_dir}"
+    return 0
+  fi
+
+  mkdir -p "$install_root"
+  tmp_dir=$(mktemp -d)
+  asset="postgresql-${runtime_version}-${triple}.tar.gz"
+
+  primary_repo=$(runtime_repo_from_url "${BOLT_PG_RELEASES_URL}")
+  fallback_repo=$(runtime_repo_from_url "${BOLT_PG_FALLBACK_RELEASES_URL:-}")
+
+  c1=""
+  c2=""
+  c3=""
+  c4=""
+  if [ -n "$primary_repo" ]; then
+    c1="https://github.com/${primary_repo}/releases/download/v${runtime_version}/${asset}"
+    c2="https://github.com/${primary_repo}/releases/download/${runtime_version}/${asset}"
+  fi
+  if [ -n "$fallback_repo" ]; then
+    c3="https://github.com/${fallback_repo}/releases/download/v${runtime_version}/${asset}"
+    c4="https://github.com/${fallback_repo}/releases/download/${runtime_version}/${asset}"
+  fi
+
+  archive_path="${tmp_dir}/${asset}"
+  downloaded=0
+  for url in "$c1" "$c2" "$c3" "$c4"; do
+    [ -n "$url" ] || continue
+    info "Seeding PostgreSQL runtime from ${url}"
+    if curl -fSL -o "$archive_path" "$url" 2>/dev/null; then
+      downloaded=1
+      break
+    fi
+  done
+
+  if [ "$downloaded" -ne 1 ]; then
+    rm -rf "$tmp_dir"
+    warn "Could not pre-seed PostgreSQL runtime archive. Prewarm will attempt runtime download."
+    return 0
+  fi
+
+  staging_dir="${install_root}/.seed-${runtime_version}-$$"
+  rm -rf "$staging_dir"
+  mkdir -p "$staging_dir"
+
+  if ! tar -xzf "$archive_path" -C "$staging_dir"; then
+    rm -rf "$tmp_dir" "$staging_dir"
+    warn "Failed to extract PostgreSQL runtime archive during pre-seed."
+    return 0
+  fi
+
+  if [ ! -x "${staging_dir}/bin/pg_ctl" ]; then
+    chmod -R u+rwX "$staging_dir" 2>/dev/null || true
+    chmod 755 "${staging_dir}/bin"/* 2>/dev/null || true
+  fi
+
+  if [ "$PLATFORM" = "macos" ]; then
+    libpq_path="${staging_dir}/lib/postgresql/libpq.5.dylib"
+    if [ -f "$libpq_path" ]; then
+      install_name_tool -id "$libpq_path" "$libpq_path" >/dev/null 2>&1 || true
+      for target in "${staging_dir}/bin"/* "${staging_dir}/lib/postgresql"/*.dylib; do
+        [ -f "$target" ] || continue
+        install_name_tool -change "/opt/homebrew/Cellar/postgresql@18/18.3/lib/postgresql/libpq.5.dylib" "$libpq_path" "$target" >/dev/null 2>&1 || true
+        install_name_tool -change "/opt/homebrew/opt/postgresql@18/lib/postgresql/libpq.5.dylib" "$libpq_path" "$target" >/dev/null 2>&1 || true
+      done
+    fi
+  fi
+
+  if [ "$PLATFORM" = "macos" ]; then
+    xattr -cr "$staging_dir" 2>/dev/null || true
+    find "$staging_dir" -type f \( -name "*.dylib" -o -path "*/bin/*" \) -print0 | \
+      xargs -0 -I{} /usr/bin/codesign --force --sign - "{}" >/dev/null 2>&1 || true
+  fi
+
+  rm -rf "$target_dir"
+  mv "$staging_dir" "$target_dir"
+  rm -rf "$tmp_dir"
+  info "Pre-seeded embedded PostgreSQL runtime: ${target_dir}"
+}
+
+persist_release_tuple() {
+  app_identifier="$1"
+  tuple_dir=""
+
+  case "$PLATFORM" in
+    macos)
+      tuple_dir="${HOME}/Library/Application Support/${app_identifier}"
+      ;;
+    linux)
+      tuple_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  mkdir -p "$tuple_dir" 2>/dev/null || return 0
+  tuple_file="${tuple_dir}/release-tuple.env"
+
+  release_tag=$(manifest_get "RELEASE_TAG")
+  release_version=$(manifest_get "RELEASE_VERSION")
+  runtime_tuple_id=$(manifest_get "RUNTIME_TUPLE_ID")
+  api_version=$(manifest_get "API_VERSION")
+  api_sha=$(manifest_get "API_SHA")
+  pwa_version=$(manifest_get "PWA_VERSION")
+  pwa_sha=$(manifest_get "PWA_SHA")
+  native_version=$(manifest_get "NATIVE_VERSION")
+  native_sha=$(manifest_get "NATIVE_SHA")
+
+  [ -n "$release_tag" ] || release_tag="v${VERSION}"
+  [ -n "$release_version" ] || release_version="${VERSION}"
+
+  {
+    echo "# Generated by Bolt installer"
+    echo "MANIFEST_URL=${MANIFEST_URL:-}"
+    echo "RELEASE_TAG=${release_tag}"
+    echo "RELEASE_VERSION=${release_version}"
+    echo "EDITION=${EDITION}"
+    echo "RUST_TRIPLE=${RUST_TRIPLE}"
+    echo "RUNTIME_TUPLE_ID=${runtime_tuple_id}"
+    echo "RESOLVED_DESKTOP_ASSET=${FILE_NAME}"
+    echo "RESOLVED_DESKTOP_SHA256=${EXPECTED_SHA256:-}"
+    echo "API_VERSION=${api_version}"
+    echo "API_SHA=${api_sha}"
+    echo "PWA_VERSION=${pwa_version}"
+    echo "PWA_SHA=${pwa_sha}"
+    echo "NATIVE_VERSION=${native_version}"
+    echo "NATIVE_SHA=${native_sha}"
+  } > "$tuple_file"
+
+  info "Persisted release tuple metadata: ${tuple_file}"
+}
+
+upsert_tuple_value() {
+  tuple_file="$1"
+  key="$2"
+  value="$3"
+
+  tmp_file="${tuple_file}.tmp"
+  if [ -f "$tuple_file" ]; then
+    grep -v "^${key}=" "$tuple_file" > "$tmp_file" 2>/dev/null || true
+  else
+    : > "$tmp_file"
+  fi
+  echo "${key}=${value}" >> "$tmp_file"
+  mv "$tmp_file" "$tuple_file"
+}
+
+install_optional_pwa_component() {
+  app_identifier="$1"
+  pwa_asset=$(manifest_get "PWA_ASSET")
+  [ -n "$pwa_asset" ] || return 0
+
+  pwa_sha=$(manifest_get "PWA_SHA")
+  pwa_checksum=$(manifest_get "PWA_SHA256")
+  component_suffix="$pwa_sha"
+  [ -n "$component_suffix" ] || component_suffix="${VERSION}"
+
+  case "$PLATFORM" in
+    macos)
+      component_base="${HOME}/Library/Application Support/${app_identifier}/components/pwa"
+      tuple_file="${HOME}/Library/Application Support/${app_identifier}/release-tuple.env"
+      ;;
+    linux)
+      component_base="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}/components/pwa"
+      tuple_file="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}/release-tuple.env"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  target_dir="${component_base}/${component_suffix}"
+  marker_file="${target_dir}/.installed"
+  if [ -f "$marker_file" ]; then
+    upsert_tuple_value "$tuple_file" "RUNTIME_PWA_DIR" "$target_dir"
+    return 0
+  fi
+
+  mkdir -p "$target_dir"
+  tmp_dir=$(mktemp -d)
+  pwa_url="${BASE_URL}/${pwa_asset}"
+  pwa_tar="${tmp_dir}/${pwa_asset}"
+
+  info "Downloading optional PWA component: ${pwa_asset}"
+  if ! curl -fSL -o "$pwa_tar" "$pwa_url" 2>/dev/null; then
+    warn "Could not download PWA component ${pwa_asset}. Continuing with bundled assets."
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+
+  if [ -n "$pwa_checksum" ]; then
+    if ! verify_checksum_for_file "$pwa_tar" "$pwa_checksum" "$pwa_asset"; then
+      warn "Checksum verification failed for optional PWA component ${pwa_asset}. Continuing with bundled assets."
+      rm -rf "$tmp_dir"
+      return 0
+    fi
+  fi
+
+  if ! tar -xzf "$pwa_tar" -C "$target_dir"; then
+    warn "Failed to extract PWA component ${pwa_asset}. Continuing with bundled assets."
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+
+  if [ ! -f "${target_dir}/index.html" ]; then
+    warn "Extracted PWA component is missing index.html. Continuing with bundled assets."
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+
+  date -u +%Y-%m-%dT%H:%M:%SZ > "$marker_file"
+  upsert_tuple_value "$tuple_file" "RUNTIME_PWA_DIR" "$target_dir"
+  upsert_tuple_value "$tuple_file" "RESOLVED_PWA_ASSET" "$pwa_asset"
+  ok "Installed optional PWA component into ${target_dir}"
+  rm -rf "$tmp_dir"
+}
+
+install_optional_api_component() {
+  app_identifier="$1"
+  api_asset=$(manifest_get "API_ASSET_${TARGET_KEY}")
+  [ -n "$api_asset" ] || return 0
+
+  api_sha=$(manifest_get "API_SHA")
+  api_checksum=$(manifest_get "API_SHA256_${TARGET_KEY}")
+  component_suffix="$api_sha"
+  [ -n "$component_suffix" ] || component_suffix="${VERSION}"
+
+  case "$PLATFORM" in
+    macos)
+      component_base="${HOME}/Library/Application Support/${app_identifier}/components/api"
+      tuple_file="${HOME}/Library/Application Support/${app_identifier}/release-tuple.env"
+      runtime_bin_name="bolt-api"
+      ;;
+    linux)
+      component_base="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}/components/api"
+      tuple_file="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}/release-tuple.env"
+      runtime_bin_name="bolt-api"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  target_dir="${component_base}/${component_suffix}"
+  runtime_bin="${target_dir}/${runtime_bin_name}"
+  marker_file="${target_dir}/.installed"
+
+  if [ -f "$marker_file" ] && [ -f "$runtime_bin" ]; then
+    chmod +x "$runtime_bin" 2>/dev/null || true
+    upsert_tuple_value "$tuple_file" "RUNTIME_API_BIN" "$runtime_bin"
+    return 0
+  fi
+
+  mkdir -p "$target_dir"
+  tmp_dir=$(mktemp -d)
+  api_url="${BASE_URL}/${api_asset}"
+  api_tar="${tmp_dir}/${api_asset}"
+
+  info "Downloading optional API component: ${api_asset}"
+  if ! curl -fSL -o "$api_tar" "$api_url" 2>/dev/null; then
+    warn "Could not download API component ${api_asset}. Continuing with bundled sidecar."
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+
+  if [ -n "$api_checksum" ]; then
+    if ! verify_checksum_for_file "$api_tar" "$api_checksum" "$api_asset"; then
+      warn "Checksum verification failed for optional API component ${api_asset}. Continuing with bundled sidecar."
+      rm -rf "$tmp_dir"
+      return 0
+    fi
+  fi
+
+  if ! tar -xzf "$api_tar" -C "$target_dir"; then
+    warn "Failed to extract API component ${api_asset}. Continuing with bundled sidecar."
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+
+  if [ ! -f "$runtime_bin" ]; then
+    warn "Extracted API component is missing ${runtime_bin_name}. Continuing with bundled sidecar."
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+
+  chmod +x "$runtime_bin" 2>/dev/null || true
+  date -u +%Y-%m-%dT%H:%M:%SZ > "$marker_file"
+  upsert_tuple_value "$tuple_file" "RUNTIME_API_BIN" "$runtime_bin"
+  upsert_tuple_value "$tuple_file" "RESOLVED_API_ASSET" "$api_asset"
+  ok "Installed optional API component into ${target_dir}"
+  rm -rf "$tmp_dir"
 }
 
 stop_running_linux_app() {
@@ -180,6 +686,13 @@ prewarm_embedded_postgres() {
   app_bin="$1"
   app_identifier="$2"
 
+  if [ "${BOLT_DATABASE_MODE:-}" = "external" ] || [ "${BOLT_SKIP_EMBEDDED_PG:-}" = "1" ]; then
+    info "Skipping embedded PostgreSQL prewarm (external database mode enabled)"
+    return 0
+  fi
+
+  prewarm_required="${BOLT_PG_PREWARM_REQUIRED:-$DEFAULT_BOLT_PG_PREWARM_REQUIRED}"
+
   [ -x "$app_bin" ] || {
     warn "Skipping PostgreSQL prewarm: executable not found at ${app_bin}"
     return 0
@@ -192,6 +705,12 @@ prewarm_embedded_postgres() {
     if BOLT_APP_IDENTIFIER="$app_identifier" APPIMAGE_EXTRACT_AND_RUN=1 "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
       ok "Embedded PostgreSQL prewarm complete"
     else
+      if [ "$prewarm_required" = "1" ] || [ "$prewarm_required" = "true" ] || [ "$prewarm_required" = "TRUE" ] || [ "$prewarm_required" = "yes" ] || [ "$prewarm_required" = "YES" ]; then
+        warn "Embedded PostgreSQL prewarm failed (strict mode enabled)"
+        sed 's/^/   /' "$prewarm_log" | tail -40
+        rm -f "$prewarm_log"
+        fail "Embedded PostgreSQL prewarm failed. Fix network/runtime source and re-run installer."
+      fi
       warn "Embedded PostgreSQL prewarm failed (app will retry on first launch)"
       sed 's/^/   /' "$prewarm_log" | tail -20
     fi
@@ -199,6 +718,12 @@ prewarm_embedded_postgres() {
     if BOLT_APP_IDENTIFIER="$app_identifier" "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
       ok "Embedded PostgreSQL prewarm complete"
     else
+      if [ "$prewarm_required" = "1" ] || [ "$prewarm_required" = "true" ] || [ "$prewarm_required" = "TRUE" ] || [ "$prewarm_required" = "yes" ] || [ "$prewarm_required" = "YES" ]; then
+        warn "Embedded PostgreSQL prewarm failed (strict mode enabled)"
+        sed 's/^/   /' "$prewarm_log" | tail -40
+        rm -f "$prewarm_log"
+        fail "Embedded PostgreSQL prewarm failed. Fix network/runtime source and re-run installer."
+      fi
       warn "Embedded PostgreSQL prewarm failed (app will retry on first launch)"
       sed 's/^/   /' "$prewarm_log" | tail -20
     fi
@@ -298,8 +823,14 @@ if [ "$PLATFORM" = "linux" ] && command -v dpkg >/dev/null 2>&1; then
   EXT="deb"
 fi
 
-FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${EXT}"
-FILE_URL="${BASE_URL}/${FILE_NAME}"
+TARGET_KEY=$(printf '%s' "$RUST_TRIPLE" | tr '[:lower:]-.' '[:upper:]__')
+MANIFEST_URL="${BASE_URL}/bolt-manifest-${EDITION}.env"
+MANIFEST_CONTENT=$(curl -fsSL --max-time 5 "$MANIFEST_URL" 2>/dev/null || true)
+if [ -n "$MANIFEST_CONTENT" ]; then
+  info "Using release manifest: bolt-manifest-${EDITION}.env"
+fi
+
+select_release_asset "$EXT"
 
 echo ""
 echo "  ⚡ Bolt Installer"
@@ -323,9 +854,7 @@ if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; 
   if [ "$USE_DEB" -eq 1 ]; then
     warn ".deb package not available — falling back to AppImage..."
     USE_DEB=0
-    EXT="AppImage"
-    FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${EXT}"
-    FILE_URL="${BASE_URL}/${FILE_NAME}"
+    select_release_asset "AppImage"
     TMPDIR_DL=$(mktemp -d)
     DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
     HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/null) || true
@@ -337,6 +866,8 @@ if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; 
     fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
   fi
 fi
+
+verify_download_checksum
 
 ok "Downloaded $(du -h "${DL_PATH}" | cut -f1 | tr -d ' ')"
 
@@ -379,6 +910,11 @@ install_macos() {
     APP_IDENTIFIER="app.sparcle.bolt.enterprise"
   fi
   persist_pg_runtime_sources "$APP_IDENTIFIER"
+  seed_embedded_postgres_runtime "$APP_IDENTIFIER"
+  persist_database_runtime_config "$APP_IDENTIFIER"
+  persist_release_tuple "$APP_IDENTIFIER"
+  install_optional_api_component "$APP_IDENTIFIER"
+  install_optional_pwa_component "$APP_IDENTIFIER"
   APP_EXECUTABLE=$(resolve_macos_executable "/Applications/${APP_NAME}.app")
   prewarm_embedded_postgres "$APP_EXECUTABLE" "$APP_IDENTIFIER"
 
@@ -394,6 +930,7 @@ install_macos() {
 
   info "Launching ${APP_NAME}..."
   open "/Applications/${APP_NAME}.app"
+  verify_runtime_contract
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -435,10 +972,16 @@ install_linux_deb() {
       APP_IDENTIFIER="app.sparcle.bolt.enterprise"
     fi
     persist_pg_runtime_sources "$APP_IDENTIFIER"
+    seed_embedded_postgres_runtime "$APP_IDENTIFIER"
+    persist_database_runtime_config "$APP_IDENTIFIER"
+    persist_release_tuple "$APP_IDENTIFIER"
+    install_optional_api_component "$APP_IDENTIFIER"
+    install_optional_pwa_component "$APP_IDENTIFIER"
     prewarm_embedded_postgres "$LAUNCH_BIN" "$APP_IDENTIFIER"
 
     info "Launching ${APP_NAME}..."
     nohup "$LAUNCH_BIN" >/dev/null 2>&1 &
+    verify_runtime_contract
   else
     info "Installed — launch ${APP_NAME} from your application menu."
   fi
@@ -529,10 +1072,16 @@ DESKTOP_EOF
     APP_IDENTIFIER="app.sparcle.bolt.enterprise"
   fi
   persist_pg_runtime_sources "$APP_IDENTIFIER"
+  seed_embedded_postgres_runtime "$APP_IDENTIFIER"
+  persist_database_runtime_config "$APP_IDENTIFIER"
+  persist_release_tuple "$APP_IDENTIFIER"
+  install_optional_api_component "$APP_IDENTIFIER"
+  install_optional_pwa_component "$APP_IDENTIFIER"
   prewarm_embedded_postgres "$DEST" "$APP_IDENTIFIER"
 
   info "Launching ${APP_NAME}..."
   launch_linux_app "${DEST}" "${APP_NAME}" || return 1
+  verify_runtime_contract
 }
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -24,6 +24,7 @@ GITHUB_REPO="Sparcle-LLC/sparcle.app"
 DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/Sparcle-LLC/sparcle.app"
 DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
 DEFAULT_BOLT_PG_PREWARM_REQUIRED="1"
+# Must match the embedded runtime expected by the currently shipped desktop app.
 DEFAULT_BOLT_PG_VERSION="18.3.0"
 MANIFEST_PUBLISH_RETRY_MAX="24"
 MANIFEST_PUBLISH_RETRY_DELAY="5"

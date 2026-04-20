@@ -31,6 +31,13 @@ $DefaultBoltPgReleasesUrl = "https://sparcle.app"
 $DefaultBoltPgFallbackReleasesUrl = ""
 $ManifestPublishRetryMax = 24
 $ManifestPublishRetryDelaySeconds = 5
+$DownloadRetryMax = 5
+$DownloadRetryDelaySeconds = 2
+$BoltApiReadyTimeoutSeconds = 120
+$BoltApiPortBase = 13018
+$BoltApiPortRange = 10
+$PrewarmRetryAttempts = 3
+$PrewarmRetryDelaySeconds = 2
 
 # ── Fetch latest version from GitHub ────────────────────────────────────────
 try {
@@ -163,6 +170,72 @@ function Verify-DownloadChecksum {
   Ok "Checksum verified"
 }
 
+function Invoke-DownloadWithRetry {
+  param(
+    [string]$Url,
+    [string]$OutFile,
+    [string]$Label
+  )
+
+  for ($attempt = 1; $attempt -le $DownloadRetryMax; $attempt++) {
+    try {
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+      Invoke-WebRequest -Uri $Url -OutFile $OutFile -UseBasicParsing -TimeoutSec 60 -ErrorAction Stop
+      return
+    }
+    catch {
+      if ($attempt -eq $DownloadRetryMax) {
+        throw
+      }
+      Warn "Download retry $attempt/$DownloadRetryMax failed for $Label. Retrying..."
+      Start-Sleep -Seconds $DownloadRetryDelaySeconds
+    }
+  }
+}
+
+function Wait-ApiReadiness {
+  param(
+    [int]$TimeoutSeconds = 120
+  )
+
+  $portEnd = $BoltApiPortBase + $BoltApiPortRange - 1
+  $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+  while ($stopwatch.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
+    for ($port = $BoltApiPortBase; $port -le $portEnd; $port++) {
+      foreach ($path in @("/api/health", "/health")) {
+        try {
+          $response = Invoke-WebRequest -Uri "http://127.0.0.1:$port$path" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+          if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
+            return "http://127.0.0.1:$port$path"
+          }
+        }
+        catch {
+          # keep probing
+        }
+      }
+    }
+    Start-Sleep -Seconds 1
+  }
+
+  return $null
+}
+
+function Verify-RuntimeContract {
+  if ($env:BOLT_SKIP_API_HEALTH_CHECK -eq "1") {
+    Warn "Skipping API health verification (BOLT_SKIP_API_HEALTH_CHECK=1)"
+    return
+  }
+
+  Info "Verifying API runtime readiness..."
+  $readyUrl = Wait-ApiReadiness -TimeoutSeconds $BoltApiReadyTimeoutSeconds
+  if ($readyUrl) {
+    Ok "API is healthy at $readyUrl"
+    return
+  }
+
+  Fail "Install completed, but API readiness check failed (tried /api/health and /health on ports $BoltApiPortBase-$($BoltApiPortBase + $BoltApiPortRange - 1) for ${BoltApiReadyTimeoutSeconds}s)."
+}
+
 function Select-ReleaseAsset {
   param(
     [string]$DesiredExt
@@ -257,11 +330,19 @@ function Invoke-PostgresPrewarm {
   $previous = [Environment]::GetEnvironmentVariable("BOLT_APP_IDENTIFIER", "Process")
   try {
     [Environment]::SetEnvironmentVariable("BOLT_APP_IDENTIFIER", $AppIdentifier, "Process")
-    $proc = Start-Process -FilePath $ExecutablePath -ArgumentList "prewarm-postgres" -WindowStyle Hidden -PassThru -Wait
-    if ($proc.ExitCode -eq 0) {
-      Ok "Embedded PostgreSQL prewarm complete"
-    } else {
-      Write-Host "  ⚠  Embedded PostgreSQL prewarm failed (app will retry on first launch) [exit $($proc.ExitCode)]" -ForegroundColor Yellow
+    for ($attempt = 1; $attempt -le $PrewarmRetryAttempts; $attempt++) {
+      $proc = Start-Process -FilePath $ExecutablePath -ArgumentList "prewarm-postgres" -WindowStyle Hidden -PassThru -Wait
+      if ($proc.ExitCode -eq 0) {
+        Ok "Embedded PostgreSQL prewarm complete"
+        return
+      }
+
+      if ($attempt -lt $PrewarmRetryAttempts) {
+        Warn "Embedded PostgreSQL prewarm attempt $attempt/$PrewarmRetryAttempts failed (exit $($proc.ExitCode)); retrying..."
+        Start-Sleep -Seconds $PrewarmRetryDelaySeconds
+      } else {
+        Write-Host "  ⚠  Embedded PostgreSQL prewarm failed after $PrewarmRetryAttempts attempts (app will retry on first launch) [exit $($proc.ExitCode)]" -ForegroundColor Yellow
+      }
     }
   }
   catch {
@@ -326,8 +407,7 @@ $DlPath  = Join-Path $TmpDir $FileName
 
 Info "Downloading $FileName..."
 try {
-  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-  Invoke-WebRequest -Uri $FileUrl -OutFile $DlPath -UseBasicParsing
+  Invoke-DownloadWithRetry -Url $FileUrl -OutFile $DlPath -Label $FileName
 } catch {
   Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
   Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
@@ -395,12 +475,14 @@ if ($ExePath) {
 
   Info "Launching $AppName..."
   Start-Process $ExePath.FullName
+  Verify-RuntimeContract
 } else {
   # Fallback: try Start Menu shortcut
   $Shortcut = Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Filter "$AppName.lnk" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
   if ($Shortcut) {
     Info "Launching $AppName..."
     Start-Process $Shortcut.FullName
+    Verify-RuntimeContract
   } else {
     Info "Installation complete — launch $AppName from the Start Menu."
   }

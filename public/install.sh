@@ -29,6 +29,8 @@ MANIFEST_PUBLISH_RETRY_MAX="24"
 MANIFEST_PUBLISH_RETRY_DELAY="5"
 DEFAULT_BOLT_API_PORT_BASE="13018"
 DEFAULT_BOLT_API_PORT_RANGE="10"
+DOWNLOAD_RETRY_MAX="5"
+DOWNLOAD_RETRY_DELAY="2"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
@@ -642,7 +644,15 @@ TMPDIR_DL=$(mktemp -d)  # cleaned up by EXIT trap
 DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
 
 info "Downloading ${FILE_NAME}..."
-HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/null) || true
+HTTP_CODE=$(curl -fSL \
+  --retry "${DOWNLOAD_RETRY_MAX}" \
+  --retry-all-errors \
+  --retry-delay "${DOWNLOAD_RETRY_DELAY}" \
+  --connect-timeout 15 \
+  --max-time 300 \
+  -w '%{http_code}' \
+  -o "${DL_PATH}" \
+  "${FILE_URL}" 2>/dev/null) || true
 
 if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
   rm -rf "${TMPDIR_DL}"
@@ -653,7 +663,15 @@ if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; 
     select_release_asset "AppImage"
     TMPDIR_DL=$(mktemp -d)
     DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
-    HTTP_CODE=$(curl -fSL -w '%{http_code}' -o "${DL_PATH}" "${FILE_URL}" 2>/dev/null) || true
+    HTTP_CODE=$(curl -fSL \
+      --retry "${DOWNLOAD_RETRY_MAX}" \
+      --retry-all-errors \
+      --retry-delay "${DOWNLOAD_RETRY_DELAY}" \
+      --connect-timeout 15 \
+      --max-time 300 \
+      -w '%{http_code}' \
+      -o "${DL_PATH}" \
+      "${FILE_URL}" 2>/dev/null) || true
     if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
       rm -rf "${TMPDIR_DL}"
       fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."

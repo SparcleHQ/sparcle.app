@@ -40,25 +40,40 @@
 
                 </div>
 
-                <!-- Full-Width Video Below -->
+                <!-- Two-video interactive demo section -->
                 <div class="hero-video-full">
-                    <div class="video-wrapper" id="heroVideoWrapper" title="Watch demo with audio">
-                        <video id="heroVideo" autoplay loop muted playsinline preload="metadata">
-                            <source src="media/Bolt-Walkthrough.mp4" type="video/mp4">
-                        </video>
-                        <div class="video-controls-overlay" id="heroPlayOverlay">
-                            <div class="video-play-btn" title="Watch with audio">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <!-- Play triangle -->
-                                    <polygon points="6,4 6,20 16,12" fill="white" stroke="none" />
-                                    <!-- Sound waves -->
-                                    <path d="M18 8.5c1.2 1 2 2.2 2 3.5s-.8 2.5-2 3.5" opacity="0.7" />
-                                    <path d="M20 6c2 1.5 3 3.5 3 6s-1 4.5-3 6" opacity="0.4" />
-                                </svg>
+                    <div class="hero-video-grid" id="heroVideoGrid">
+                        <div class="hero-video-card" data-video-src="media/Bolt-Walkthrough.mp4" data-video-title="Bolt Walkthrough" role="button" tabindex="0" aria-label="Open Bolt Walkthrough with audio">
+                            <video class="hero-preview-video" muted playsinline preload="metadata" loop autoplay>
+                                <source src="media/Bolt-Walkthrough.mp4" type="video/mp4">
+                            </video>
+                            <div class="video-controls-overlay video-preview-overlay">
+                                <div class="video-play-btn" title="Preview on hover, click for audio">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="6,4 6,20 16,12" fill="white" stroke="none" />
+                                        <path d="M18 8.5c1.2 1 2 2.2 2 3.5s-.8 2.5-2 3.5" opacity="0.7" />
+                                        <path d="M20 6c2 1.5 3 3.5 3 6s-1 4.5-3 6" opacity="0.4" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hero-video-card" data-video-src="media/Bolt-pure-intelligent-execution.mp4" data-video-title="Bolt Pure Intelligent Execution" role="button" tabindex="0" aria-label="Open Bolt Pure Intelligent Execution with audio">
+                            <video class="hero-preview-video" muted playsinline preload="metadata" loop>
+                                <source src="media/Bolt-pure-intelligent-execution.mp4" type="video/mp4">
+                            </video>
+                            <div class="video-controls-overlay video-preview-overlay">
+                                <div class="video-play-btn" title="Preview on hover, click for audio">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="6,4 6,20 16,12" fill="white" stroke="none" />
+                                        <path d="M18 8.5c1.2 1 2 2.2 2 3.5s-.8 2.5-2 3.5" opacity="0.7" />
+                                        <path d="M20 6c2 1.5 3 3.5 3 6s-1 4.5-3 6" opacity="0.4" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <p class="video-caption">Click to watch the full demo with audio</p>
+                    <p class="video-caption">Hover to zoom and preview muted. Click any video to watch full view with audio.</p>
                 </div>
 
                 <div class="hero-ctas">
@@ -82,45 +97,150 @@
                 <!-- Video modal -->
                 <div id="heroVideoModal" class="hero-video-modal">
                     <button id="heroModalClose" class="hero-modal-close" aria-label="Close">&times;</button>
-                    <video id="heroModalVideo" controls playsinline class="hero-modal-video">
-                        <source src="media/Bolt-Walkthrough.mp4" type="video/mp4">
-                    </video>
+                    <video id="heroModalVideo" controls playsinline class="hero-modal-video"></video>
                 </div>
                 <script>
                 (function() {
-                    var wrapper = document.getElementById('heroVideoWrapper');
-                    var heroVideo = document.getElementById('heroVideo');
-                    var overlay = document.getElementById('heroPlayOverlay');
+                    var grid = document.getElementById('heroVideoGrid');
+                    var cards = document.querySelectorAll('.hero-video-card');
+                    var leftCard = cards[0] || null;
+                    var rightCard = cards[1] || null;
                     var modal = document.getElementById('heroVideoModal');
                     var modalVideo = document.getElementById('heroModalVideo');
                     var closeBtn = document.getElementById('heroModalClose');
-                    if (!wrapper || !modal) return;
+                    if (!grid || !cards.length || !modal || !modalVideo) return;
 
-                    function openModal() {
+                    function playLeftPreview() {
+                        if (!leftCard) return;
+                        var leftPreview = leftCard.querySelector('.hero-preview-video');
+                        if (!leftPreview) return;
+                        leftPreview.muted = true;
+                        leftPreview.play().catch(function(){});
+                    }
+
+                    function pauseAllPreviews() {
+                        cards.forEach(function(card) {
+                            var preview = card.querySelector('.hero-preview-video');
+                            card.classList.remove('is-active');
+                            if (!preview) return;
+                            preview.pause();
+                            preview.currentTime = 0;
+                        });
+                    }
+
+                    function activateRightCard() {
+                        if (!rightCard) return;
+                        var card = rightCard;
+                        var preview = card.querySelector('.hero-preview-video');
+                        if (!preview) return;
+                        card.classList.add('is-active');
+                        preview.muted = true;
+                        preview.currentTime = 0;
+                        preview.play().catch(function(){});
+                    }
+
+                    function deactivateRightCard() {
+                        if (!rightCard) return;
+                        var card = rightCard;
+                        var preview = card.querySelector('.hero-preview-video');
+                        if (!preview) return;
+                        preview.pause();
+                        preview.currentTime = 0;
+                        card.classList.remove('is-active');
+                    }
+
+                    function setVideoParam(slug) {
+                        var url = new URL(window.location.href);
+                        if (slug) {
+                            url.searchParams.set('video', slug);
+                        } else {
+                            url.searchParams.delete('video');
+                        }
+                        window.history.replaceState({}, '', url.toString());
+                    }
+
+                    function getDeepLinkedVideoSlug() {
+                        var params = new URLSearchParams(window.location.search);
+                        var queryValue = (params.get('video') || '').toLowerCase();
+                        if (queryValue) return queryValue;
+
+                        var hash = (window.location.hash || '').replace('#', '').trim().toLowerCase();
+                        if (!hash) return '';
+                        if (hash.indexOf('video=') === 0) return hash.slice(6);
+                        if (hash === 'left' || hash === 'right' || hash === 'walkthrough' || hash === 'pure') return hash;
+                        return '';
+                    }
+
+                    function slugToCard(slug) {
+                        if (!slug) return null;
+                        if (slug === 'left' || slug === 'why-bolt' || slug === 'walkthrough' || slug === 'bolt-walkthrough' || slug === 'demo') {
+                            return leftCard;
+                        }
+                        if (slug === 'right' || slug === 'how-bolt' || slug === 'pure' || slug === 'intelligent' || slug === 'bolt-pure-intelligent-execution') {
+                            return rightCard;
+                        }
+                        return null;
+                    }
+
+                    function openModal(videoSrc, slug, syncUrl) {
+                        if (!videoSrc) return;
                         modal.style.display = 'flex';
                         document.body.style.overflow = 'hidden';
-                        if (heroVideo) heroVideo.pause();
-                        if (modalVideo) { modalVideo.currentTime = 0; modalVideo.play().catch(function(){}); }
+                        pauseAllPreviews();
+                        if (syncUrl) setVideoParam(slug);
+                        modalVideo.src = videoSrc;
+                        modalVideo.muted = false;
+                        modalVideo.currentTime = 0;
+                        modalVideo.play().catch(function(){});
                     }
-                    function closeModal() {
+
+                    function closeModal(clearUrlParam) {
                         modal.style.display = 'none';
                         document.body.style.overflow = '';
-                        if (modalVideo) modalVideo.pause();
-                        if (heroVideo) heroVideo.play().catch(function(){});
+                        modalVideo.pause();
+                        modalVideo.removeAttribute('src');
+                        modalVideo.load();
+                        if (clearUrlParam) setVideoParam('');
+                        playLeftPreview();
                     }
 
-                    wrapper.addEventListener('click', openModal);
-                    closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeModal(); });
-                    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
-                    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+                    if (rightCard) {
+                        rightCard.addEventListener('mouseenter', activateRightCard);
+                        rightCard.addEventListener('focus', activateRightCard);
+                        rightCard.addEventListener('mouseleave', deactivateRightCard);
+                        rightCard.addEventListener('blur', deactivateRightCard);
+                    }
 
-                    if (heroVideo) {
-                        heroVideo.addEventListener('playing', function() {
-                            if (overlay) overlay.style.background = 'rgba(0,0,0,0)';
+                    cards.forEach(function(card) {
+                        var src = card.getAttribute('data-video-src');
+                        var slug = card === leftCard ? 'why-bolt' : 'how-bolt';
+
+                        card.addEventListener('click', function() {
+                            openModal(src, slug, true);
                         });
-                        heroVideo.addEventListener('pause', function() {
-                            if (overlay) overlay.style.background = 'rgba(0,0,0,0.15)';
+
+                        card.addEventListener('keydown', function(e) {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openModal(src, slug, true);
+                            }
                         });
+                    });
+
+                    closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeModal(true); });
+                    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(true); });
+                    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(true); });
+
+                    var deepLinkedSlug = getDeepLinkedVideoSlug();
+                    var deepLinkedCard = slugToCard(deepLinkedSlug);
+                    if (deepLinkedCard) {
+                        var deepLinkedSrc = deepLinkedCard.getAttribute('data-video-src');
+                        var normalizedSlug = deepLinkedCard === leftCard ? 'why-bolt' : 'how-bolt';
+                        openModal(deepLinkedSrc, normalizedSlug, true);
+                    }
+
+                    if (modal.style.display !== 'flex') {
+                        playLeftPreview();
                     }
                 })();
                 </script>

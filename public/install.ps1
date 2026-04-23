@@ -29,8 +29,6 @@ $FallbackVersion = "0.1.0"
 $GitHubRepo      = "Sparcle-LLC/sparcle.app"
 $DefaultBoltPgReleasesUrl = "https://sparcle.app"
 $DefaultBoltPgFallbackReleasesUrl = ""
-$ManifestPublishRetryMax = 24
-$ManifestPublishRetryDelaySeconds = 5
 $DownloadRetryMax = 5
 $DownloadRetryDelaySeconds = 2
 $BoltApiReadyTimeoutSeconds = 120
@@ -55,120 +53,6 @@ function Info($msg)  { Write-Host "  ==> " -ForegroundColor Blue -NoNewline; Wri
 function Ok($msg)    { Write-Host "   ✓  " -ForegroundColor Green -NoNewline; Write-Host $msg }
 function Warn($msg)  { Write-Host "  ⚠  $msg" -ForegroundColor Yellow }
 function Fail($msg)  { Write-Host "   ✗  " -ForegroundColor Red -NoNewline; Write-Host $msg; exit 1 }
-
-$ManifestContent = ""
-$ManifestMap = @{}
-$ManifestUrl = ""
-$ExpectedSha256 = ""
-$TargetKey = ""
-
-function Parse-ManifestContent {
-  param(
-    [string]$Content
-  )
-
-  $map = @{}
-  if (-not $Content) {
-    return $map
-  }
-
-  foreach ($line in ($Content -split "`n")) {
-    $trimmed = $line.Trim()
-    if (-not $trimmed -or $trimmed.StartsWith("#")) {
-      continue
-    }
-
-    $parts = $trimmed.Split('=', 2)
-    if ($parts.Count -eq 2) {
-      $map[$parts[0]] = $parts[1]
-    }
-  }
-
-  return $map
-}
-
-function Get-ManifestValue {
-  param(
-    [string]$Key
-  )
-
-  if ($ManifestMap.ContainsKey($Key)) {
-    return [string]$ManifestMap[$Key]
-  }
-
-  return ""
-}
-
-function Get-ManifestPublishState {
-  param(
-    [string]$Content
-  )
-
-  if (-not $Content) {
-    return ""
-  }
-
-  foreach ($line in ($Content -split "`n")) {
-    $trimmed = $line.Trim()
-    if ($trimmed.StartsWith("PUBLISH_STATE=")) {
-      return $trimmed.Split('=', 2)[1]
-    }
-  }
-
-  return ""
-}
-
-function Fetch-ReleaseManifest {
-  for ($attempt = 1; $attempt -le $ManifestPublishRetryMax; $attempt++) {
-    try {
-      $ManifestContent = Invoke-WebRequest -Uri $ManifestUrl -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop | Select-Object -ExpandProperty Content
-      $state = Get-ManifestPublishState -Content $ManifestContent
-      if ($state -eq "in_progress") {
-        if ($attempt -eq $ManifestPublishRetryMax) {
-          Fail "The latest release is still being prepared. Please retry in a minute."
-        }
-        Warn "Latest release is still being prepared — waiting ($attempt/$ManifestPublishRetryMax)..."
-        Start-Sleep -Seconds $ManifestPublishRetryDelaySeconds
-        continue
-      }
-
-      $ManifestMap = Parse-ManifestContent -Content $ManifestContent
-      return
-    }
-    catch {
-      $ManifestContent = ""
-      $ManifestMap = @{}
-      return
-    }
-  }
-}
-
-function Get-FileSha256 {
-  param(
-    [string]$Path
-  )
-
-  return (Get-FileHash -Path $Path -Algorithm SHA256).Hash.ToLower()
-}
-
-function Verify-DownloadChecksum {
-  param(
-    [string]$Path,
-    [string]$Expected,
-    [string]$Label
-  )
-
-  if (-not $Expected) {
-    return
-  }
-
-  $actual = Get-FileSha256 -Path $Path
-  if ($actual -ne $Expected.ToLower()) {
-    Fail "Checksum mismatch for $Label. Expected $Expected, got $actual."
-  }
-
-  Ok "Checksum verified"
-}
 
 function Invoke-DownloadWithRetry {
   param(
@@ -241,28 +125,8 @@ function Select-ReleaseAsset {
     [string]$DesiredExt
   )
 
-  $desiredKey = $DesiredExt.ToUpper()
-  $assetName = ""
-  $assetSha = ""
-
-  if ($ManifestMap.Count -gt 0) {
-    $assetName = Get-ManifestValue -Key "DESKTOP_ASSET_${TargetKey}_${desiredKey}"
-    $assetSha = Get-ManifestValue -Key "DESKTOP_SHA256_${TargetKey}_${desiredKey}"
-
-    if (-not $assetName) {
-      $assetName = Get-ManifestValue -Key "DESKTOP_ASSET_${TargetKey}"
-      $assetSha = Get-ManifestValue -Key "DESKTOP_SHA256_${TargetKey}"
-    }
-  }
-
-  if (-not $assetName) {
-    $assetName = "$FilePrefix-$Version-$Arch.$DesiredExt"
-    $assetSha = ""
-  }
-
-  $script:FileName = $assetName
-  $script:FileUrl = "$BaseUrl/$assetName"
-  $script:ExpectedSha256 = $assetSha
+  $script:FileName = "$FilePrefix-$Version-$Arch.$DesiredExt"
+  $script:FileUrl = "$BaseUrl/$($script:FileName)"
 }
 
 function Configure-PgRuntimeSources {
@@ -386,10 +250,6 @@ $Arch = if ([Environment]::Is64BitOperatingSystem) {
   Fail "32-bit Windows is not supported."
 }
 
-$TargetKey = $Arch.ToUpper().Replace('-', '_').Replace('.', '_')
-$ManifestUrl = "$BaseUrl/bolt-manifest-$Edition.env"
-Fetch-ReleaseManifest
-
 Select-ReleaseAsset -DesiredExt "msi"
 
 Write-Host ""
@@ -412,8 +272,6 @@ try {
   Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
   Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
 }
-
-Verify-DownloadChecksum -Path $DlPath -Expected $ExpectedSha256 -Label $FileName
 
 $Size = [math]::Round((Get-Item $DlPath).Length / 1MB, 1)
 Ok "Downloaded ${Size}MB"

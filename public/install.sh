@@ -25,8 +25,6 @@ DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/Sparcle-LLC/sparcle.app"
 DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
 DEFAULT_BOLT_PG_PREWARM_REQUIRED="1"
 DEFAULT_BOLT_PG_VERSION="18.3.0"
-MANIFEST_PUBLISH_RETRY_MAX="24"
-MANIFEST_PUBLISH_RETRY_DELAY="5"
 DEFAULT_BOLT_API_PORT_BASE="13018"
 DEFAULT_BOLT_API_PORT_RANGE="10"
 DOWNLOAD_RETRY_MAX="5"
@@ -82,83 +80,11 @@ verify_runtime_contract() {
   fail "Install completed, but API readiness check failed (tried /api/health and /health on ports ${port_base}-${port_end} for ${timeout_seconds}s)."
 }
 
-manifest_get() {
-  key="$1"
-  printf '%s\n' "$MANIFEST_CONTENT" | grep "^${key}=" | head -1 | cut -d= -f2-
-}
-
-manifest_state_from_content() {
-  content="$1"
-  printf '%s\n' "$content" | grep '^PUBLISH_STATE=' | head -1 | cut -d= -f2-
-}
-
-fetch_release_manifest() {
-  retry=1
-  while [ "$retry" -le "$MANIFEST_PUBLISH_RETRY_MAX" ]; do
-    MANIFEST_CONTENT=$(curl -fsSL --max-time 5 "$MANIFEST_URL" 2>/dev/null || true)
-    if [ -z "$MANIFEST_CONTENT" ]; then
-      return 0
-    fi
-
-    state=$(manifest_state_from_content "$MANIFEST_CONTENT")
-    if [ "$state" = "in_progress" ]; then
-      if [ "$retry" -eq "$MANIFEST_PUBLISH_RETRY_MAX" ]; then
-        fail "The latest release is still being prepared. Please retry in a minute."
-      fi
-      warn "Latest release is still being prepared — waiting (${retry}/${MANIFEST_PUBLISH_RETRY_MAX})..."
-      sleep "$MANIFEST_PUBLISH_RETRY_DELAY"
-      retry=$((retry + 1))
-      continue
-    fi
-
-    return 0
-  done
-}
-
 select_release_asset() {
   desired_ext="$1"
-  desired_key=$(printf '%s' "$desired_ext" | tr '[:lower:]' '[:upper:]')
-  asset_name=""
-  asset_sha=""
-
-  if [ -n "${MANIFEST_CONTENT:-}" ]; then
-    asset_name=$(manifest_get "DESKTOP_ASSET_${TARGET_KEY}_${desired_key}")
-    asset_sha=$(manifest_get "DESKTOP_SHA256_${TARGET_KEY}_${desired_key}")
-
-    if [ -z "$asset_name" ]; then
-      asset_name=$(manifest_get "DESKTOP_ASSET_${TARGET_KEY}")
-      asset_sha=$(manifest_get "DESKTOP_SHA256_${TARGET_KEY}")
-    fi
-  fi
-
-  if [ -z "$asset_name" ]; then
-    asset_name="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${desired_ext}"
-    asset_sha=""
-  fi
-
-  FILE_NAME="$asset_name"
+  FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${desired_ext}"
   FILE_URL="${BASE_URL}/${FILE_NAME}"
   EXT="${FILE_NAME##*.}"
-  EXPECTED_SHA256="$asset_sha"
-}
-
-verify_download_checksum() {
-  [ -n "${EXPECTED_SHA256:-}" ] || return 0
-
-  if command -v shasum >/dev/null 2>&1; then
-    ACTUAL_SHA256=$(shasum -a 256 "${DL_PATH}" | awk '{print $1}')
-  elif command -v sha256sum >/dev/null 2>&1; then
-    ACTUAL_SHA256=$(sha256sum "${DL_PATH}" | awk '{print $1}')
-  else
-    warn "No SHA256 tool found (shasum/sha256sum). Skipping checksum verification."
-    return 0
-  fi
-
-  if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
-    fail "Checksum mismatch for ${FILE_NAME}. Expected ${EXPECTED_SHA256}, got ${ACTUAL_SHA256}."
-  fi
-
-  ok "Checksum verified"
 }
 
 configure_pg_runtime_sources() {
@@ -625,10 +551,6 @@ if [ "$PLATFORM" = "linux" ] && command -v dpkg >/dev/null 2>&1; then
   EXT="deb"
 fi
 
-TARGET_KEY=$(printf '%s' "$RUST_TRIPLE" | tr '[:lower:]-.' '[:upper:]__')
-MANIFEST_URL="${BASE_URL}/bolt-manifest-${EDITION}.env"
-fetch_release_manifest
-
 select_release_asset "$EXT"
 
 echo ""
@@ -680,8 +602,6 @@ if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; 
     fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
   fi
 fi
-
-verify_download_checksum
 
 ok "Downloaded $(du -h "${DL_PATH}" | cut -f1 | tr -d ' ')"
 

@@ -250,7 +250,16 @@ $Arch = if ([Environment]::Is64BitOperatingSystem) {
   Fail "32-bit Windows is not supported."
 }
 
-Select-ReleaseAsset -DesiredExt "msi"
+# Prefer the NSIS .exe installer for consumer `irm | iex` flows: it ships with
+# a UAC manifest, so Windows triggers the elevation prompt automatically when
+# launched unelevated (which is exactly how `iex` lands). The MSI is the
+# fallback — and only works when already running elevated, because Tauri's
+# MSI is built perMachine-only (no per-user MSI variant in Tauri v2).
+# If $env:BOLT_INSTALL_MSI is set (or the .exe download 404s), we fall through
+# to the MSI path with self-elevation.
+$PreferMsi = [bool]$env:BOLT_INSTALL_MSI
+$InstallerExt = if ($PreferMsi) { "msi" } else { "exe" }
+Select-ReleaseAsset -DesiredExt $InstallerExt
 
 Write-Host ""
 Write-Host "  ⚡ Bolt Installer" -ForegroundColor Cyan
@@ -258,6 +267,7 @@ Write-Host "  ──────────────────────
 Write-Host "  Edition:       $AppName"
 Write-Host "  Version:       $Version"
 Write-Host "  Architecture:  $Arch"
+Write-Host "  Installer:     $InstallerExt"
 Write-Host ""
 
 # ── Download ────────────────────────────────────────────────────────────────
@@ -269,8 +279,23 @@ Info "Downloading $FileName..."
 try {
   Invoke-DownloadWithRetry -Url $FileUrl -OutFile $DlPath -Label $FileName
 } catch {
-  Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
-  Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
+  if ($InstallerExt -eq "exe") {
+    # NSIS .exe is a newer artifact — fall back to MSI if the server doesn't
+    # have it (e.g. a release from before we shipped NSIS alongside MSI).
+    Warn "NSIS .exe not available for v$Version — falling back to MSI..."
+    $InstallerExt = "msi"
+    Select-ReleaseAsset -DesiredExt $InstallerExt
+    $DlPath  = Join-Path $TmpDir $FileName
+    try {
+      Invoke-DownloadWithRetry -Url $FileUrl -OutFile $DlPath -Label $FileName
+    } catch {
+      Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
+      Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
+    }
+  } else {
+    Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
+    Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
+  }
 }
 
 $Size = [math]::Round((Get-Item $DlPath).Length / 1MB, 1)
@@ -281,29 +306,51 @@ Info "Marking $AppName as trusted..."
 Unblock-File -Path $DlPath -ErrorAction SilentlyContinue
 Ok "Installer trusted — no SmartScreen warnings"
 
-# ── Install (silent MSI) ───────────────────────────────────────────────────
+# ── Install ─────────────────────────────────────────────────────────────────
 Info "Installing $AppName..."
 $isAdmin = Is-Administrator
 
-# Prefer per-user install so non-admin users can install successfully.
-$perUserArgs = "/i `"$DlPath`" /quiet /norestart ALLUSERS=2 MSIINSTALLPERUSER=1"
-$proc = Start-Process msiexec.exe -ArgumentList $perUserArgs -Wait -PassThru
+if ($InstallerExt -eq "exe") {
+  # NSIS installer — /S for silent, UAC manifest auto-elevates via OS prompt.
+  # Start-Process -Wait returns the process exit code from the setup.exe,
+  # which NSIS maps to a non-zero value on user-cancelled UAC.
+  $proc = Start-Process -FilePath $DlPath -ArgumentList "/S" -Wait -PassThru
+  if ($proc.ExitCode -eq 0) {
+    Ok "Installed successfully"
+  } elseif ($proc.ExitCode -eq 1223) {
+    Fail "Installation cancelled (you clicked No on the UAC prompt)."
+  } else {
+    Fail "Installation failed (exit code $($proc.ExitCode)).`n  Try running the installer manually: $DlPath"
+  }
+} else {
+  # Prefer per-user install so non-admin users can install successfully;
+  # but Tauri MSIs are perMachine and will reject ALLUSERS=2 with code 1625.
+  # On that, relaunch this install step elevated via UAC.
+  $perUserArgs = "/i `"$DlPath`" /quiet /norestart ALLUSERS=2 MSIINSTALLPERUSER=1"
+  $proc = Start-Process msiexec.exe -ArgumentList $perUserArgs -Wait -PassThru
 
-if ($proc.ExitCode -eq 0) {
-  Ok "Installed successfully (single-user mode)"
-} elseif ($proc.ExitCode -eq 1925 -and $isAdmin) {
-  # If elevated context still hits permission edge-cases, try machine-wide mode.
-  Info "Per-user install failed in admin context, retrying machine-wide install..."
-  $machineArgs = "/i `"$DlPath`" /quiet /norestart ALLUSERS=1"
-  $proc = Start-Process msiexec.exe -ArgumentList $machineArgs -Wait -PassThru
-  if ($proc.ExitCode -ne 0) {
+  if ($proc.ExitCode -eq 0) {
+    Ok "Installed successfully (single-user mode)"
+  } elseif ($proc.ExitCode -in 1625, 1603, 1925 -and -not $isAdmin) {
+    # Tauri MSIs are perMachine-only — Windows rejected the per-user install
+    # attempt. Self-elevate and retry as machine-wide. UAC prompts once.
+    Info "Per-user MSI rejected (exit $($proc.ExitCode)); retrying as Administrator via UAC..."
+    $elevProc = Start-Process msiexec.exe -Verb RunAs -ArgumentList "/i `"$DlPath`" /passive /norestart ALLUSERS=1" -Wait -PassThru
+    if ($elevProc.ExitCode -ne 0) {
+      Fail "Elevated install failed (exit code $($elevProc.ExitCode)). Try: msiexec /i `"$DlPath`" /passive"
+    }
+    Ok "Installed successfully (all-users mode via UAC)"
+  } elseif ($proc.ExitCode -eq 1925 -and $isAdmin) {
+    Info "Per-user install failed in admin context, retrying machine-wide..."
+    $machineArgs = "/i `"$DlPath`" /quiet /norestart ALLUSERS=1"
+    $proc = Start-Process msiexec.exe -ArgumentList $machineArgs -Wait -PassThru
+    if ($proc.ExitCode -ne 0) {
+      Fail "Installation failed (exit code $($proc.ExitCode))."
+    }
+    Ok "Installed successfully (all-users mode)"
+  } else {
     Fail "Installation failed (exit code $($proc.ExitCode))."
   }
-  Ok "Installed successfully (all-users mode)"
-} elseif ($proc.ExitCode -in 1603, 1925) {
-  Fail "Installation failed (exit code $($proc.ExitCode)).`n  This usually means Windows blocked all-users MSI install privileges.`n  Re-run the same command in an Administrator PowerShell, or contact IT to allow per-user MSI installs."
-} else {
-  Fail "Installation failed (exit code $($proc.ExitCode))."
 }
 
 # ── Cleanup ────────────────────────────────────────────────────────────────

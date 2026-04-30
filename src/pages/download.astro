@@ -46,112 +46,15 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
       <SectionHeader
         label="Download"
         heading="Get Bolt"
-        intro="Choose the edition that fits your needs. Both run on your machine — your data never leaves your device."
+        intro="Start with the 7-day Enterprise Trial to evaluate the full platform with your own org credentials. Bolt Personal is the free local version — same desktop suite, no enterprise integrations."
       />
 
-      <!-- Edition Cards -->
-      <div class="products-showcase platform-grid">
+      <!-- Edition Cards: Enterprise primary on top, Personal secondary below -->
+      <div class="download-editions">
 
-          <!-- ── Personal Edition ── -->
-          <div class="product-main">
-            <span class="product-badge" style="background:#16a34a;color:#fff;border-color:#16a34a;">FREE FOREVER</span>
-            <div class="product-header">
-              <img src="/images/bolt-logo.svg" alt="Bolt Personal" class="product-logo-img" width="56" height="56">
-              <div>
-                <h3>Bolt Personal</h3>
-                <p class="product-subtitle">AI-Powered Desktop Suite</p>
-              </div>
-            </div>
-            <p class="product-intro">
-              A full AI desktop suite &mdash; not just a chatbot. App launcher, clipboard history,
-              file browser, terminal, and an AI agent that works with your files. No login, no
-              account, no data collection. BYO AI key and go. Free forever.
-            </p>
-            <ul class="product-features-compact">
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                App launcher &mdash; Spotlight-class fuzzy search
-              </li>
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                Clipboard history &mdash; searchable, 1000 entries
-              </li>
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                File browser &amp; built-in terminal
-              </li>
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                AI chat, search, web lookup, and summarization
-              </li>
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
-                BYO AI key (Gemini free tier works)
-              </li>
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Private &amp; local &mdash; no account, no data collection
-              </li>
-              <li class="compact-feature">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                macOS &middot; Linux &middot; Windows
-              </li>
-            </ul>
-
-            <div class="download-section">
-              <div class="dl-tabs">
-                <button class="dl-tab dl-tab--active" data-platform="macos">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                  macOS
-                </button>
-                <button class="dl-tab" data-platform="linux">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a2.1 2.1 0 0 0-.084-.006c-.393 0-.777.158-1.048.473-.611.71-.354 1.884.482 2.497-.184.373-.27.77-.27 1.163 0 .63.259 1.248.867 1.687-.186.37-.275.758-.275 1.142 0 .838.537 1.591 1.541 1.846.305 1.166 1.451 2.344 2.527 2.344.348 0 .685-.113.978-.349.328.24.729.349 1.137.349.844 0 1.535-.479 1.879-1.219.417.102.862.155 1.316.155.455 0 .9-.054 1.316-.155.344.74 1.035 1.219 1.879 1.219.408 0 .809-.109 1.137-.349.293.236.63.349.978.349 1.076 0 2.222-1.178 2.527-2.344 1.004-.255 1.541-1.008 1.541-1.846 0-.384-.089-.771-.275-1.142.608-.439.867-1.057.867-1.687 0-.393-.086-.79-.27-1.163.836-.613 1.093-1.787.482-2.497-.271-.315-.655-.473-1.048-.473-.029 0-.057.003-.084.006.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298A5.1 5.1 0 0 0 12.504 0z"/></svg>
-                  Linux
-                </button>
-                <button class="dl-tab" data-platform="windows">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
-                  Windows
-                </button>
-              </div>
-              <div class="dl-panel" data-platform="macos">
-                <p class="dl-cmd-hint">Run in Terminal &middot; Apple Silicon &amp; Intel</p>
-                <div class="dl-code-block">
-                  <code>curl -fsSL https://sparcle.app/install.sh | sh</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <span>Copy</span>
-                  </button>
-                </div>
-                <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt Personal</p>
-              </div>
-              <div class="dl-panel" data-platform="linux" hidden>
-                <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
-                <div class="dl-code-block">
-                  <code>curl -fsSL https://sparcle.app/install.sh | sh</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <span>Copy</span>
-                  </button>
-                </div>
-                <p class="dl-cmd-note">Auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
-              </div>
-              <div class="dl-panel" data-platform="windows" hidden>
-                <p class="dl-cmd-hint">Run in PowerShell &middot; x86_64</p>
-                <div class="dl-code-block">
-                  <code>irm https://sparcle.app/install.ps1 | iex</code>
-                  <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('irm https://sparcle.app/install.ps1 | iex');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    <span>Copy</span>
-                  </button>
-                </div>
-                <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- ── Enterprise Trial Edition ── -->
-          <div class="product-secondary">
-            <span class="product-badge">7-Day Trial</span>
+          <!-- ── Bolt Enterprise Trial (PRIMARY) ── -->
+          <div class="product-main download-edition--primary">
+            <span class="product-badge product-badge--accent">7-Day Trial &middot; Recommended</span>
             <div class="product-header">
               <img src="/images/bolt-logo.svg" alt="Bolt Enterprise" class="product-logo-img" width="56" height="56">
               <div>
@@ -188,7 +91,7 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
               </li>
               <li class="compact-feature">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
-                30+ systems via MCP
+                60+ systems via MCP
               </li>
               <li class="compact-feature">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -247,6 +150,85 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
                   </button>
                 </div>
                 <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt Enterprise</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Bolt Personal (SECONDARY, smaller, below) ── -->
+          <div class="product-secondary download-edition--secondary">
+            <div class="download-edition-secondary-row">
+              <div class="download-edition-secondary-info">
+                <span class="product-badge" style="background:#16a34a;color:#fff;border-color:#16a34a;">FREE FOREVER</span>
+                <div class="product-header">
+                  <img src="/images/bolt-logo.svg" alt="Bolt Personal" class="product-logo-img" width="44" height="44">
+                  <div>
+                    <h3>Bolt Personal</h3>
+                    <p class="product-subtitle">Local AI desktop suite &mdash; no login, no cloud, BYO API key</p>
+                  </div>
+                </div>
+                <p class="product-intro">
+                  App launcher, clipboard history, file browser, terminal, and an AI agent that
+                  works with your files. Same desktop suite as Enterprise, minus the org-wide
+                  integrations. Free forever.
+                </p>
+                <ul class="download-edition-inline-features">
+                  <li>App launcher</li>
+                  <li>Clipboard history</li>
+                  <li>File browser + terminal</li>
+                  <li>AI chat &amp; web lookup</li>
+                  <li>BYO API key (Gemini free tier works)</li>
+                  <li>macOS &middot; Linux &middot; Windows</li>
+                </ul>
+              </div>
+
+              <div class="download-edition-secondary-cta download-section">
+                <div class="dl-tabs">
+                  <button class="dl-tab dl-tab--active" data-platform="macos">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    macOS
+                  </button>
+                  <button class="dl-tab" data-platform="linux">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a2.1 2.1 0 0 0-.084-.006c-.393 0-.777.158-1.048.473-.611.71-.354 1.884.482 2.497-.184.373-.27.77-.27 1.163 0 .63.259 1.248.867 1.687-.186.37-.275.758-.275 1.142 0 .838.537 1.591 1.541 1.846.305 1.166 1.451 2.344 2.527 2.344.348 0 .685-.113.978-.349.328.24.729.349 1.137.349.844 0 1.535-.479 1.879-1.219.417.102.862.155 1.316.155.455 0 .9-.054 1.316-.155.344.74 1.035 1.219 1.879 1.219.408 0 .809-.109 1.137-.349.293.236.63.349.978.349 1.076 0 2.222-1.178 2.527-2.344 1.004-.255 1.541-1.008 1.541-1.846 0-.384-.089-.771-.275-1.142.608-.439.867-1.057.867-1.687 0-.393-.086-.79-.27-1.163.836-.613 1.093-1.787.482-2.497-.271-.315-.655-.473-1.048-.473-.029 0-.057.003-.084.006.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298A5.1 5.1 0 0 0 12.504 0z"/></svg>
+                    Linux
+                  </button>
+                  <button class="dl-tab" data-platform="windows">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                    Windows
+                  </button>
+                </div>
+                <div class="dl-panel" data-platform="macos">
+                  <p class="dl-cmd-hint">Run in Terminal &middot; Apple Silicon &amp; Intel</p>
+                  <div class="dl-code-block">
+                    <code>curl -fsSL https://sparcle.app/install.sh | sh</code>
+                    <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span>Copy</span>
+                    </button>
+                  </div>
+                  <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt Personal</p>
+                </div>
+                <div class="dl-panel" data-platform="linux" hidden>
+                  <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
+                  <div class="dl-code-block">
+                    <code>curl -fsSL https://sparcle.app/install.sh | sh</code>
+                    <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/install.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span>Copy</span>
+                    </button>
+                  </div>
+                  <p class="dl-cmd-note">Auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
+                </div>
+                <div class="dl-panel" data-platform="windows" hidden>
+                  <p class="dl-cmd-hint">Run in PowerShell &middot; x86_64</p>
+                  <div class="dl-code-block">
+                    <code>irm https://sparcle.app/install.ps1 | iex</code>
+                    <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('irm https://sparcle.app/install.ps1 | iex');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span>Copy</span>
+                    </button>
+                  </div>
+                  <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt</p>
+                </div>
               </div>
             </div>
           </div>
@@ -327,6 +309,104 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
   /* Page-level modifier — matches .section-solution--page pattern for nav clearance */
   .section-download--page {
     padding-top: 8rem;
+  }
+
+  /* Stacked editions — Enterprise primary on top, Personal secondary below */
+  .download-editions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Primary card: Enterprise. Brand-blue accent, raised feel, full prominence. */
+  .download-edition--primary {
+    border-color: var(--brand-primary-light);
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.12);
+    position: relative;
+  }
+  .download-edition--primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0) 60%);
+  }
+  .download-edition--primary > * {
+    position: relative;
+  }
+  .product-badge--accent {
+    background: var(--brand-primary) !important;
+    color: #fff !important;
+    border-color: var(--brand-primary) !important;
+  }
+
+  /* Secondary card: Personal. Compact two-column at desktop, info left + CTA right.
+     Visually de-emphasized: no accent shadow, smaller typography, neutral border. */
+  .download-edition--secondary {
+    padding: 1.75rem 2rem;
+    background: var(--bg-surface);
+    border-color: var(--border-subtle);
+  }
+  .download-edition-secondary-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem 2.5rem;
+    align-items: stretch;
+  }
+  .download-edition-secondary-info {
+    flex: 1 1 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .download-edition-secondary-info .product-header {
+    margin: 0;
+  }
+  .download-edition-secondary-info h3 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+  .download-edition-secondary-info .product-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0.15rem 0 0;
+  }
+  .download-edition-secondary-info .product-intro {
+    font-size: 0.9rem;
+    color: var(--text-body);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .download-edition-inline-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .download-edition-inline-features li {
+    padding: 0.25rem 0.6rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    line-height: 1.3;
+  }
+  .download-edition-secondary-cta {
+    flex: 1 1 320px;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  @media (max-width: 720px) {
+    .download-edition--secondary { padding: 1.5rem 1.25rem; }
+    .download-edition-secondary-row { gap: 1.25rem; }
   }
 
   /* Download CTA section inside product cards */
@@ -457,14 +537,15 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
     }
   }
 
-  /* FAQ items — same pattern as PricingPageTemplate */
+  /* FAQ items — smart elastic grid: orphans expand to fill row width */
   .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
   }
 
   .faq-item {
+    flex: 1 1 360px;
     border: 1px solid var(--border-default);
     border-radius: 14px;
     background: var(--bg-elevated);
@@ -500,8 +581,8 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
       padding-top: 5rem;
     }
 
-    .faq-grid {
-      grid-template-columns: 1fr;
+    .faq-item {
+      flex-basis: 100%;
     }
   }
 </style>

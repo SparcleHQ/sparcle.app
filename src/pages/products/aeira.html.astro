@@ -1,6 +1,10 @@
 ---
+// Premium pass: Aeira gets its own canonical URL with no tab switcher
+// or hidden Bolt content. Aeira is content[0] (the page's primary)
+// rather than a secondContent variant — the template renders just one
+// product cleanly when no secondContent is passed.
 import ProductPageTemplate from "../../components/marketing/ProductPageTemplate.astro";
-import { boltProductContent, aeiraProductContent } from "../../data/offerings";
+import { aeiraProductContent } from "../../data/offerings";
 ---
 
-<ProductPageTemplate content={boltProductContent} secondContent={aeiraProductContent} activeProduct="second" />
+<ProductPageTemplate content={aeiraProductContent} />

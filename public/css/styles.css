@@ -30,6 +30,10 @@ body {
     font-family: var(--font-sans);
     background: var(--bg-body);
     color: var(--text-body);
+    /* Premium pass: bumped to 17px for serious reading comfort.
+       Matches Anthropic, Stripe, and most "platform" sites. 16px reads
+       as default-template; 17px reads as deliberate content rhythm. */
+    font-size: 17px;
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -59,6 +63,29 @@ button {
     cursor: pointer;
 }
 
+/* Premium pass — site-wide accessible focus ring.
+   Covers keyboard-tab traversal across links, buttons, and form
+   controls with a high-contrast brand-blue ring. Only fires on
+   keyboard focus (`:focus-visible`), not mouse clicks, so the visual
+   polish is preserved for pointer users. WCAG 2.4.7 (Focus Visible). */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* Suppress the default :focus ring on mouse interactions where
+   :focus-visible is supported (keeping it for keyboard users only). */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
 /* ==================================================================================================
    TYPOGRAPHY
    ================================================================================================== */
@@ -69,9 +96,11 @@ h4,
 h5,
 h6 {
     color: var(--text-heading);
-    font-weight: 800;
+    /* Premium pass: reduced from 800 → 700. Heavyweight headers read
+       energetic-startup; 700 reads serious-platform. */
+    font-weight: 700;
     line-height: 1.15;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 }
 
 h1,
@@ -82,11 +111,15 @@ h4 {
 }
 
 h1 {
-    font-weight: 900;
-    line-height: 1.1;
+    /* Premium pass: reduced from 900 → 700. Tighter letter-spacing.
+       Outfit-900 is ultra-bold which reads "shouty SaaS hero" — premium
+       enterprise headlines are 600-700 with tight tracking. */
+    font-weight: 700;
+    line-height: 1.08;
     color: var(--text-heading);
     font-size: clamp(2.75rem, 6vw, 4.5rem);
     margin-bottom: 1.5rem;
+    letter-spacing: -0.03em;
 }
 
 h2 {
@@ -114,11 +147,16 @@ strong {
     font-weight: 600;
 }
 
+/* Premium pass: replaced two-color gradient text with solid brand color.
+   Gradient-filled headlines read "AI SaaS template" — solid color reads
+   serious. The class name is preserved so existing markup keeps working;
+   only the visual treatment changed. */
 .text-gradient {
-    background: linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-end) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--brand-primary);
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: currentColor;
+    background-clip: initial;
 }
 
 /* Skip to main content link (a11y) */
@@ -194,7 +232,11 @@ strong {
 }
 
 section {
-    padding: 4rem 0;
+    /* Premium vertical rhythm — single token tunes all sections.
+       Bumped from 4rem to var(--space-section) (default 6rem) so
+       sections breathe; with the larger 17px body it reads as
+       "platform" rather than "default Tailwind template". */
+    padding: var(--space-section) 0;
     position: relative;
 }
 
@@ -204,14 +246,22 @@ section {
     margin: 0 auto 5rem;
 }
 
-.section-label {
-    display: inline-block;
-    font-size: 0.875rem;
-    font-weight: 700;
+/* Canonical eyebrow / section label.
+   Three classes (.section-label, .eyebrow, .section-eyebrow) all
+   resolve to the same premium pattern: small caps in brand blue, tight
+   tracking, weight 600. Pages can use any of the three names — the
+   rendering stays consistent. */
+.section-label,
+.eyebrow,
+.section-eyebrow {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
     color: var(--brand-primary);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 1.25rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    text-align: center;
 }
 
 .section-intro {
@@ -324,6 +374,13 @@ section {
     transform: rotate(180deg);
 }
 
+/* Positioning anchor for the absolute-positioned submenu — without this
+   the submenu computes against the next non-static ancestor (typically
+   <body>) and lands in the top-left corner of the page. */
+.nav-item-has-submenu {
+    position: relative;
+}
+
 .nav-submenu {
     position: absolute;
     top: calc(100% + 0.4rem);
@@ -336,6 +393,8 @@ section {
     box-shadow: var(--shadow-lg);
     display: none;
     z-index: 1200;
+    list-style: none;
+    margin: 0;
 }
 
 .nav-submenu .nav-link {
@@ -373,15 +432,19 @@ section {
     white-space: nowrap;
 }
 
+/* Premium pass: solid brand color instead of two-stop gradient.
+   Removed colored glow shadow — neutral elevation only. Premium
+   buttons read confident, not decorative. */
 .btn-primary {
-    background: linear-gradient(135deg, var(--brand-gradient-start), var(--brand-gradient-end));
+    background: var(--brand-primary);
     color: var(--text-on-primary);
-    box-shadow: var(--shadow-md), var(--shadow-glow);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg), var(--shadow-glow-strong);
+    background: var(--brand-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
@@ -415,6 +478,11 @@ section {
    HERO - Centered Layout with Full-Width Video
    ================================================================================================== */
 .hero {
+    /* Restored to original sizing — with the two-video grid present,
+       min-height:100vh + center alignment gives the hero proper visual
+       weight and the layout reads balanced (matches the live site).
+       The earlier "fix" was over-correcting for a hero that had been
+       artificially thinned out by removing one of the two videos. */
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -432,14 +500,13 @@ section {
     pointer-events: none;
 }
 
-/* Animated gradient mesh orbs */
+/* Premium pass: animated mesh orbs hidden site-wide. They are the
+   strongest "AI SaaS template" visual signature and read as 2024
+   startup-marketing, not as serious enterprise platform. Markup is left
+   intact (the divs still render) so we can re-enable selectively if
+   needed; the visual is suppressed here. */
 .hero-mesh-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.3;
-    pointer-events: none;
-    will-change: transform;
+    display: none;
 }
 
 .hero-mesh-orb--1 {
@@ -591,6 +658,65 @@ section {
     flex-wrap: wrap;
 }
 
+/* Hero tertiary link — demoted Personal-free path.
+   Premium positioning: Personal stays available but is not visually
+   competing with the two enterprise CTAs. Sits as plain text below the
+   buttons, in muted color, only the inner anchor is brand-blue. */
+.hero-tertiary-link {
+    text-align: center;
+    margin: 1rem auto 0;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+.hero-tertiary-link a {
+    color: var(--brand-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+.hero-tertiary-link a:hover {
+    text-decoration: underline;
+}
+
+/* Hero trust strip — credibility above the fold */
+.hero-trust-strip {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    flex-wrap: wrap;
+    margin: 2rem auto 2.5rem;
+    max-width: 920px;
+    padding: 0 1rem;
+}
+
+.trust-pill {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 7px 14px;
+    background: rgba(148, 163, 184, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+.trust-pill strong {
+    color: var(--brand-primary, #6366f1);
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .hero-trust-strip {
+        gap: 0.4rem 0.5rem;
+        margin: 1.5rem auto 2rem;
+    }
+    .trust-pill {
+        font-size: 0.72rem;
+        padding: 5px 11px;
+    }
+}
+
 /* Hero Full-Width Video */
 .hero-video-full {
     width: 100%;
@@ -601,6 +727,16 @@ section {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.35rem;
+}
+
+/* Single-video variant — used on the home hero where one walkthrough
+   reads more confident than two side-by-side videos competing for
+   attention. Constrained max-width so it doesn't stretch banner-wide. */
+.hero-video-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-video-card {
@@ -652,6 +788,7 @@ section {
     width: 48px;
     height: 48px;
     background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border-radius: var(--radius-lg);
     color: white;
@@ -684,10 +821,13 @@ section {
 }
 
 .problem-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem;
     margin-bottom: 4rem;
+}
+.problem-stats-grid > .stat-card {
+    flex: 1 1 240px;
 }
 
 .stat-card {
@@ -759,10 +899,13 @@ section {
 }
 
 .solution-pillars {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 2rem;
     align-items: stretch;
+}
+.solution-pillars > .pillar {
+    flex: 1 1 240px;
 }
 
 .pillar {
@@ -878,7 +1021,9 @@ section {
 .sparcle-app-icon {
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, var(--blue-500), var(--cyan-400));
+    /* Premium pass: monochromatic blue gradient (was blue→cyan).
+       Same-family gradient reads sophisticated, not toy. */
+    background: linear-gradient(135deg, var(--blue-600), var(--blue-400));
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
@@ -953,9 +1098,12 @@ section {
 }
 
 .proof-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 2rem;
+}
+.proof-grid > .proof-card {
+    flex: 1 1 280px;
 }
 
 .proof-card {
@@ -1500,15 +1648,8 @@ h3 {
 /* ==================================================================================================
    RESPONSIVE
    ================================================================================================== */
-@media (max-width: 1200px) {
-    .solution-pillars {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .proof-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+/* solution-pillars + proof-grid use elastic flex; they reflow naturally
+   without explicit breakpoint overrides. */
 
 @media (max-width: 1024px) {
     .navbar {
@@ -1619,10 +1760,6 @@ h3 {
         grid-template-columns: 1fr;
     }
 
-    .problem-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .products-showcase {
         grid-template-columns: 1fr;
     }
@@ -1664,18 +1801,6 @@ h3 {
     .metric {
         min-width: 0;
         flex: 1 1 auto;
-    }
-
-    .problem-stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .solution-pillars {
-        grid-template-columns: 1fr;
-    }
-
-    .proof-grid {
-        grid-template-columns: 1fr;
     }
 
     .footer-grid {
@@ -1870,22 +1995,19 @@ h3 {
     text-decoration: none;
 }
 
-/* Compact proof grid (3 columns on homepage) */
-.proof-grid--compact {
-    grid-template-columns: repeat(3, 1fr);
-}
-
-@media (max-width: 768px) {
-    .proof-grid--compact {
-        grid-template-columns: 1fr;
-    }
+/* Compact proof grid (3 columns on homepage) — inherits flex from .proof-grid */
+.proof-grid--compact > .proof-card {
+    flex: 1 1 220px;
 }
 
 /* Platform section product grid */
 .platform-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 2rem;
+}
+.platform-grid > * {
+    flex: 1 1 320px;
 }
 
 /* Video play button — top-right corner */
@@ -2146,12 +2268,11 @@ h3 {
     flex-shrink: 0;
 }
 
-.eyebrow {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 700;
-    color: var(--brand-accent);
+/* Page-specific .eyebrow override removed — canonical rule above
+   already defines the premium pattern in brand-primary. Old rule used
+   --brand-accent (lighter blue), which broke visual hierarchy when an
+   eyebrow needed to feel like a section label. */
+.eyebrow--legacy-placeholder {
     margin-bottom: 0;
 }
 
@@ -2200,12 +2321,13 @@ h3 {
 }
 
 .card-grid {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     gap: 1.25rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .feature-card {
+    flex: 1 1 320px;
     border: 1px solid var(--border-default);
     border-radius: var(--radius-xl);
     background: var(--bg-surface);
@@ -2271,17 +2393,20 @@ h3 {
     background: var(--bg-surface, rgba(15, 18, 30, 0.4));
 }
 
-.offering-agentic .card-grid,
-.offering-highlights-bolt .card-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+.offering-agentic .card-grid > .feature-card,
+.offering-highlights-bolt .card-grid > .feature-card {
+    flex: 1 1 280px;
 }
 
 .agent-comparison {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem;
     margin-top: 3rem;
     max-width: 100%;
+}
+.agent-comparison > .comparison-card {
+    flex: 1 1 360px;
 }
 
 .comparison-card {
@@ -2348,12 +2473,13 @@ h3 {
 }
 
 .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
 }
 
 .faq-card {
+    flex: 1 1 360px;
     border: 1px solid var(--border-default);
     border-radius: var(--radius-xl);
     background: var(--bg-surface);
@@ -2415,17 +2541,11 @@ h3 {
 }
 
 /* ── Product page responsive ── */
-@media (min-width: 1100px) {
-    .card-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 900px) {
 
-    .card-grid,
-    .faq-grid {
-        grid-template-columns: 1fr;
+    .card-grid > .feature-card,
+    .faq-grid > .faq-card {
+        flex-basis: 100%;
     }
 }
 
@@ -2500,7 +2620,7 @@ h3 {
 
 .product-card-kicker {
     font-size: 0.82rem;
-    color: var(--brand-accent, #22d3ee);
+    color: var(--brand-accent, #60a5fa);
     margin: 0;
     letter-spacing: 0.02em;
 }
@@ -2581,7 +2701,7 @@ h3 {
     display: block;
     text-align: right;
     font-size: 0.82rem;
-    color: var(--brand-accent, #22d3ee);
+    color: var(--brand-accent, #60a5fa);
     text-decoration: none;
     margin-bottom: 2rem;
     opacity: 0.75;
@@ -2876,6 +2996,7 @@ h3 {
     gap: 2.5rem;
     max-width: 800px;
     margin: 0 auto 2rem;
+}
 .careers-role-card {
     background: var(--bg-elevated);
     border: 1px solid var(--border-default);
@@ -2967,4 +3088,415 @@ h3 {
 }
 .careers-how-to-apply strong {
     color: var(--brand-primary);
+}
+/* ──────────────────────────────────────────────────────────────────
+   Architecture Diagram — premium product-page section
+   Used by Bolt and Aeira product pages via ProductPageContent.architectureHtml.
+   Premium positioning: this is the page CTOs and CISOs read first;
+   the diagram is the visual, not a hero illustration.
+   ────────────────────────────────────────────────────────────────── */
+
+.offering-architecture {
+    padding: 4rem 0 4.5rem;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-muted);
+}
+
+.arch-diagram {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.arch-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.arch-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--brand-primary);
+    margin: 0 0 0.6rem;
+}
+
+.arch-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    line-height: 1.25;
+    color: var(--text-heading);
+}
+
+.arch-intro {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text-body);
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.arch-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.arch-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+}
+
+.arch-row-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.arch-row-cells {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+}
+.arch-row-cells--3 {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.arch-cell {
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    font-size: 0.86rem;
+    color: var(--text-body);
+    text-align: center;
+    line-height: 1.4;
+}
+
+.arch-cell--client {
+    font-weight: 500;
+}
+
+.arch-cell--edge {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.arch-cell--edge strong {
+    color: var(--text-heading);
+    font-size: 0.9rem;
+}
+.arch-cell--edge span {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Patent-bearing block — slightly stronger visual weight */
+.arch-block--patent,
+.arch-block,
+.arch-runtime,
+.arch-security-pipeline {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    padding: 1.1rem 1.3rem;
+}
+
+.arch-block h3,
+.arch-runtime-core h3,
+.arch-security-pipeline h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.55rem;
+}
+.arch-block p,
+.arch-runtime-core p {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin: 0;
+}
+
+/* 8-layer security pipeline list */
+.arch-layers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.5rem 1rem;
+}
+.arch-layers li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.84rem;
+    color: var(--text-body);
+    line-height: 1.45;
+}
+.arch-layer-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    background: var(--brand-primary-light);
+}
+
+/* Agent runtime composite */
+.arch-runtime {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.arch-runtime-modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.6rem;
+}
+.arch-module {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+}
+.arch-module h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.35rem;
+}
+.arch-module p {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Connecting arrow between rows */
+.arch-arrow {
+    width: 2px;
+    height: 28px;
+    background: linear-gradient(180deg, var(--border-default) 0%, var(--brand-primary) 100%);
+    margin: 0 auto;
+    position: relative;
+}
+.arch-arrow::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--brand-primary);
+    border-bottom: 2px solid var(--brand-primary);
+}
+
+.arch-footnote {
+    text-align: center;
+    margin-top: 1.75rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.arch-footnote a {
+    color: var(--brand-primary);
+    text-decoration: none;
+}
+.arch-footnote a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+    .offering-architecture {
+        padding: 2.5rem 0 3rem;
+    }
+    .arch-header h2 {
+        font-size: 1.35rem;
+    }
+    .arch-row {
+        padding: 1rem 1.1rem;
+    }
+    .arch-layers {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Founding Customers banner — global styles
+   Used on /pricing AND on the home page. Originally lived in
+   pricing-head.html only; promoted to global so the same banner can
+   appear on any page that needs it.
+   ────────────────────────────────────────────────────────────────── */
+.founding-banner {
+    margin: 80px auto 40px;
+    max-width: 880px;
+    padding: 36px 40px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(96, 165, 250, 0.06) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    border-radius: 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.founding-banner::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.7), transparent);
+}
+.founding-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--brand-primary);
+    background: var(--brand-primary-light);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 999px;
+    margin-bottom: 14px;
+}
+.founding-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 14px;
+    line-height: 1.3;
+}
+.founding-desc {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin: 0 auto 20px;
+}
+.founding-perks {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto 24px;
+    max-width: 560px;
+    text-align: left;
+    display: grid;
+    gap: 8px;
+}
+.founding-perks li {
+    font-size: 0.9rem;
+    color: var(--text-body);
+    padding-left: 22px;
+    position: relative;
+}
+.founding-perks li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--brand-primary);
+    font-weight: 700;
+}
+.founding-cta {
+    display: inline-block;
+    padding: 12px 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brand-primary);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.founding-cta:hover {
+    background: var(--brand-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+@media (max-width: 600px) {
+    .founding-banner {
+        padding: 28px 22px;
+        margin: 56px auto 32px;
+    }
+    .founding-title {
+        font-size: 1.2rem;
+    }
+    .founding-desc {
+        font-size: 0.88rem;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   Design Partners section — placeholder logos with NDA-respecting framing
+   Premium positioning: even greyed-out placeholders are better than
+   no social proof at all. Replace `.design-partner-logo` slots with
+   real logos as customers close + approve mention.
+   ────────────────────────────────────────────────────────────────── */
+.design-partners {
+    padding: var(--space-block) 0;
+    text-align: center;
+}
+.design-partners-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+}
+.design-partners-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem 2rem;
+    max-width: 920px;
+    margin: 0 auto 1rem;
+    align-items: center;
+    justify-items: center;
+}
+.design-partner-logo {
+    width: 100%;
+    max-width: 140px;
+    aspect-ratio: 16 / 5;
+    border: 1px dashed var(--border-default);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-body);
+    background: var(--bg-surface);
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+.design-partner-logo:hover {
+    border-color: var(--brand-primary-light);
+    color: var(--brand-primary);
+}
+.design-partners-note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+@media (max-width: 600px) {
+    .design-partners-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
 }

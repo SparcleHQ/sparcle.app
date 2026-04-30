@@ -1,6 +1,12 @@
 ---
+// Premium pass: /products.html is the canonical Bolt product page.
+// Aeira lives at /products/aeira.html as its own canonical URL. Each
+// product gets its own dedicated page with no tab switcher — "two
+// products, both serious" positioning. The dual-content rendering
+// path is retained in the component but is no longer wired by the
+// public site.
 import ProductPageTemplate from "../components/marketing/ProductPageTemplate.astro";
-import { boltProductContent, aeiraProductContent } from "../data/offerings";
+import { boltProductContent } from "../data/offerings";
 ---
 
-<ProductPageTemplate content={boltProductContent} secondContent={aeiraProductContent} />
+<ProductPageTemplate content={boltProductContent} />

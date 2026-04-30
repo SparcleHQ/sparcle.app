@@ -70,11 +70,10 @@
         }
 
         .nav-logo {
-            font-weight: 800;
+            font-weight: 700;
             font-size: 1.4rem;
-            background: linear-gradient(135deg, #6378ff, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent
+            /* Premium pass: solid brand color, no gradient text. */
+            color: var(--brand-primary);
         }
 
         .nav-links {
@@ -154,11 +153,15 @@
             color: var(--text2)
         }
 
+        /* Premium pass: solid brand-color emphasis instead of three-stop
+           gradient (purple→cyan-green) which read like a 2024 SaaS template.
+           Class kept for markup compatibility; only the visual changed. */
         .gradient-text {
-            background: linear-gradient(135deg, #6378ff 0%, #a78bfa 50%, #22d3a0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text
+            color: var(--brand-primary);
+            background: none;
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: currentColor;
+            background-clip: initial;
         }
 
         /* ── HERO ── */
@@ -201,10 +204,10 @@
 
         .stat-num {
             font-size: 2.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent
+            font-weight: 700;
+            /* Premium pass: solid brand-color emphasis instead of
+               two-stop gradient. Better light-theme readability. */
+            color: var(--brand-primary);
         }
 
         .stat-label {

@@ -99,6 +99,14 @@ function renderIcon(iconId: string | undefined): string {
         </div>
       </section>
 
+      {content.architectureHtml && (
+        <section class="offering-architecture" aria-label={`${content.productName} architecture`}>
+          <div class="container">
+            <Fragment set:html={content.architectureHtml} />
+          </div>
+        </section>
+      )}
+
       <section class={`offering-highlights offering-highlights-${content.productName.toLowerCase()}`} aria-label={`${content.productName} highlights`}>
         <div class="container">
           <div class="section-title-wrap">
@@ -212,6 +220,14 @@ function renderIcon(iconId: string | undefined): string {
             </div>
           </div>
         </section>
+
+        {secondContent.architectureHtml && (
+          <section class="offering-architecture" aria-label={`${secondContent.productName} architecture`}>
+            <div class="container">
+              <Fragment set:html={secondContent.architectureHtml} />
+            </div>
+          </section>
+        )}
 
         <section class="offering-highlights" aria-label={`${secondContent.productName} highlights`}>
           <div class="container">

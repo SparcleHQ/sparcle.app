@@ -1,11 +1,11 @@
 :root,
 [data-theme="dark"] {
     /* ==========================================================================
-     BOLT-BLUE DARK THEME - Smooth, Vibrant, Professional
-     Optimized for dark mode only
+     SPARCLE PREMIUM DARK — Carbon black + authoritative blue
+     Monochromatic blue family. No cyan. No gradient text. Restrained.
      ========================================================================== */
 
-    /* Slate Neutrals - Deep, Rich */
+    /* Slate Neutrals — Deep, restrained */
     --slate-50: #f8fafc;
     --slate-100: #f1f5f9;
     --slate-200: #e2e8f0;
@@ -18,66 +18,82 @@
     --slate-900: #0f172a;
     --slate-950: #020617;
 
-    /* Bolt Blue Palette - Vibrant but easy on eyes */
+    /* Sparcle Blue — Authoritative, monochromatic family.
+       Anchored on blue-600/700 (not the default blue-500) to read serious
+       rather than "Tailwind default." */
     --blue-300: #93c5fd;
     --blue-400: #60a5fa;
     --blue-500: #3b82f6;
     --blue-600: #2563eb;
     --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --blue-900: #1e3a8a;
 
+    /* Cyan kept as legacy variable but no longer the brand accent.
+       Reserved for rare data-viz contrast use only. Avoid in marketing. */
     --cyan-400: #22d3ee;
     --cyan-500: #06b6d4;
 
-    /* Dark Theme Colors */
-    --bg-body: #020617;
-    --bg-body-gradient: linear-gradient(180deg, #020617 0%, #0c1629 50%, #0f172a 100%);
-    --bg-surface: rgba(15, 23, 42, 0.6);
-    --bg-surface-solid: #0f172a;
-    --bg-surface-glass: rgba(15, 23, 42, 0.7);
-    --bg-elevated: rgba(30, 41, 59, 0.8);
-    --bg-elevated-rgb: 22, 27, 40;
-    --bg-muted: rgba(15, 23, 42, 0.4);
+    /* Dark theme — carbon-near-black, less blue-tinted than slate-950
+       so the brand blue reads as the only chromatic note on the page. */
+    --bg-body: #06080f;
+    --bg-body-gradient: linear-gradient(180deg, #06080f 0%, #0a0f1c 100%);
+    --bg-surface: rgba(15, 20, 36, 0.6);
+    --bg-surface-solid: #0f1424;
+    --bg-surface-glass: rgba(15, 20, 36, 0.7);
+    --bg-elevated: rgba(26, 34, 54, 0.82);
+    --bg-elevated-rgb: 26, 34, 54;
+    --bg-muted: rgba(15, 20, 36, 0.4);
 
     --text-heading: #ffffff;
     --text-body: #cbd5e1;
-    --text-muted: #8896ab;
+    --text-muted: #94a3b8;
     --text-on-primary: #ffffff;
 
-    --border-default: rgba(148, 163, 184, 0.15);
-    --border-strong: rgba(148, 163, 184, 0.3);
-    --border-subtle: rgba(255, 255, 255, 0.06);
+    /* Borders — slightly more restrained than the previous theme */
+    --border-default: rgba(148, 163, 184, 0.10);
+    --border-strong: rgba(148, 163, 184, 0.22);
+    --border-subtle: rgba(255, 255, 255, 0.04);
 
-    /* Brand Colors */
-    --brand-primary: #3b82f6;
-    --brand-primary-hover: #60a5fa;
-    --brand-primary-light: rgba(59, 130, 246, 0.15);
-    --brand-accent: #22d3ee;
-    --brand-gradient-start: #3b82f6;
-    --brand-gradient-end: #60a5fa;
+    /* Brand — single authoritative blue. No cyan accent.
+       --brand-accent intentionally aliased to a paler blue (not cyan)
+       so any legacy gradient code that consumed it stays in-family. */
+    --brand-primary: #2563eb;          /* blue-600 — deeper than the old #3b82f6 */
+    --brand-primary-hover: #1d4ed8;    /* blue-700 — darker on hover, not lighter */
+    --brand-primary-light: rgba(37, 99, 235, 0.12);
+    --brand-accent: #60a5fa;            /* blue-400 — pale blue, NOT cyan */
+    --brand-gradient-start: #1d4ed8;   /* same blue family — minimal, monochromatic */
+    --brand-gradient-end: #2563eb;
 
-    /* Status Colors */
+    /* Status colors — kept but desaturated slightly */
     --color-success: #4ade80;
     --color-success-strong: #22c55e;
-    --color-success-bg: rgba(22, 163, 74, 0.15);
+    --color-success-bg: rgba(22, 163, 74, 0.13);
     --color-danger: #f87171;
     --color-danger-strong: #ef4444;
-    --color-danger-bg: rgba(220, 38, 38, 0.12);
+    --color-danger-bg: rgba(220, 38, 38, 0.10);
     --color-warning: #facc15;
-    --color-warning-bg: rgba(234, 179, 8, 0.12);
-    --color-info: #818cf8;
-    --color-info-bg: rgba(99, 102, 241, 0.12);
+    --color-warning-bg: rgba(234, 179, 8, 0.10);
+    --color-info: #60a5fa;             /* re-anchored to blue family */
+    --color-info-bg: rgba(96, 165, 250, 0.10);
 
-    /* Shadows - Subtle and elegant */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 60px -15px rgba(59, 130, 246, 0.5);
-    --shadow-glow-strong: 0 0 100px -20px rgba(59, 130, 246, 0.6);
+    /* Shadows — neutral elevation. No colored glow.
+       Premium = monochrome shadows; brand color appears via foreground only. */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 24px 56px rgba(0, 0, 0, 0.55);
+    --shadow-glow: none;               /* deprecated — use neutral shadows */
+    --shadow-glow-strong: none;        /* deprecated */
 
     /* Layout */
     --container-max: 1280px;
     --nav-height: 80px;
+    /* Vertical rhythm tokens for premium consistency.
+       --space-section: vertical padding for top-level <section> elements.
+       --space-block: spacing between blocks within a section. */
+    --space-section: 6rem;
+    --space-block: 3rem;
 
     /* Typography */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -102,63 +118,76 @@
    LIGHT THEME OVERRIDES
    ================================================================== */
 [data-theme="light"] {
+    /* Sparcle Premium Light — pure white anchor + deep blue accent.
+       Off the previous blue-tinted background; reads more like a serious
+       enterprise platform (Anthropic, HashiCorp docs) than a gradient SaaS. */
     --blue-300: #3b82f6;
-    --blue-400: #1d4ed8;
-    --blue-500: #1e40af;
-    --blue-600: #1e3a8a;
+    --blue-400: #2563eb;
+    --blue-500: #1d4ed8;
+    --blue-600: #1e40af;
     --blue-700: #1e3a8a;
-    --cyan-400: #0e7490;
-    --cyan-500: #0f766e;
 
-    --bg-body: #edf2fb;
-    --bg-body-gradient: linear-gradient(180deg, #f5f8ff 0%, #ecf2fb 52%, #e2ebf8 100%);
-    --bg-surface: rgba(255, 255, 255, 0.82);
+    /* Cyan deprecated as accent; keep variables defined to avoid breakage,
+       but values pushed into the blue family so any leaked usage stays
+       monochromatic. */
+    --cyan-400: #1d4ed8;
+    --cyan-500: #1e3a8a;
+
+    --bg-body: #ffffff;
+    --bg-body-gradient: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+    --bg-surface: #ffffff;
     --bg-surface-solid: #ffffff;
-    --bg-surface-glass: rgba(255, 255, 255, 0.55);
-    --bg-elevated: rgba(255, 255, 255, 0.95);
+    --bg-surface-glass: rgba(255, 255, 255, 0.85);
+    --bg-elevated: #ffffff;
     --bg-elevated-rgb: 255, 255, 255;
-    --bg-muted: rgba(226, 235, 248, 0.72);
+    --bg-muted: #f5f7fa;
 
-    --text-heading: #0b1220;
-    --text-body: #334155;
-    --text-muted: #3f5168;
+    --text-heading: #06080f;            /* near-black */
+    --text-body: #1f2937;                /* darker than the previous slate-700 for premium contrast */
+    --text-muted: #4b5563;
     --text-on-primary: #ffffff;
 
-    --border-default: rgba(15, 23, 42, 0.22);
-    --border-strong: rgba(15, 23, 42, 0.32);
-    --border-subtle: rgba(15, 23, 42, 0.08);
+    --border-default: rgba(15, 23, 42, 0.10);
+    --border-strong: rgba(15, 23, 42, 0.20);
+    --border-subtle: rgba(15, 23, 42, 0.06);
 
-    --brand-primary: #2563eb;
-    --brand-primary-hover: #1d4ed8;
-    --brand-primary-light: rgba(37, 99, 235, 0.14);
-    --brand-accent: #0891b2;
-    --brand-gradient-start: #2563eb;
-    --brand-gradient-end: #3b82f6;
+    --brand-primary: #1e40af;            /* blue-800 — strong contrast against white */
+    --brand-primary-hover: #1e3a8a;     /* darker blue-900 on hover */
+    --brand-primary-light: rgba(30, 64, 175, 0.10);
+    --brand-accent: #2563eb;             /* blue-600 — pale-er accent in blue family, NOT cyan */
+    --brand-gradient-start: #1e40af;    /* monochromatic gradient (same family) */
+    --brand-gradient-end: #1d4ed8;
 
-    /* Status Colors - Light theme */
+    /* Status colors — light variants */
     --color-success: #166534;
     --color-success-strong: #15803d;
-    --color-success-bg: rgba(22, 101, 52, 0.14);
+    --color-success-bg: rgba(22, 101, 52, 0.10);
     --color-danger: #b91c1c;
     --color-danger-strong: #dc2626;
-    --color-danger-bg: rgba(185, 28, 28, 0.10);
+    --color-danger-bg: rgba(185, 28, 28, 0.08);
     --color-warning: #a16207;
-    --color-warning-bg: rgba(161, 98, 7, 0.10);
+    --color-warning-bg: rgba(161, 98, 7, 0.08);
     --color-info: #1e40af;
-    --color-info-bg: rgba(30, 64, 175, 0.10);
+    --color-info-bg: rgba(30, 64, 175, 0.08);
 
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
-    --shadow-xl: 0 25px 60px rgba(0, 0, 0, 0.1);
-    --shadow-glow: 0 0 60px -15px rgba(37, 99, 235, 0.2);
-    --shadow-glow-strong: 0 0 100px -20px rgba(37, 99, 235, 0.3);
+    /* Neutral elevation only — no colored glow. */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+    --shadow-xl: 0 24px 56px rgba(15, 23, 42, 0.12);
+    --shadow-glow: none;                 /* deprecated */
+    --shadow-glow-strong: none;          /* deprecated */
 }
 
-/* Mobile: tighter nav and spacing */
+/* Mobile: tighter nav and section rhythm.
+   At 6rem the desktop --space-section reads premium; on phones that's
+   ~102px between sections which feels excessive. 4rem (~68px) keeps
+   the rhythm without consuming half the viewport. */
 @media (max-width: 768px) {
     :root {
         --nav-height: 64px;
+        --space-section: 4rem;
+        --space-block: 2rem;
     }
 }
 
@@ -276,8 +305,8 @@
 
 [data-theme="light"] .navbar {
     background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
 }
 
 [data-theme="light"] .footer {

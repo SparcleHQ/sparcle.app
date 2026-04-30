@@ -1,0 +1,430 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Security & Compliance | Sparcle"
+  description="Bolt and Aeira are built for regulated industries — defense, finance, healthcare, federal. Architecture deployable for HIPAA, SOX, ITAR, and GDPR. Air-gap-ready by default. Detailed security briefs under NDA."
+  canonical="https://sparcle.app/security"
+>
+  <main class="page-security">
+    <!-- Hero -->
+    <section class="sec-hero">
+      <div class="container">
+        <p class="section-eyebrow">Security &amp; Compliance</p>
+        <h1>Built for the work your CISO has to defend.</h1>
+        <p class="sec-lede">
+          Bolt and Aeira are built for regulated industries from day one &mdash; not retrofitted with
+          enterprise add-ons. This page covers our architectural posture, the compliance regimes the
+          platform is deployable for today, and our roadmap. Detailed security briefs, threat models,
+          and pen-test results are shared under NDA.
+        </p>
+        <div class="sec-ctas">
+          <a href="#" onclick="openContactModal('Security Brief Request'); return false;" class="btn btn-primary btn-lg">
+            Request Security Brief (NDA)
+          </a>
+          <a href="/architecture" class="btn btn-secondary btn-lg">
+            Architecture posture &rarr;
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- At a glance -->
+    <section class="sec-section">
+      <div class="container">
+        <p class="section-eyebrow">At a glance</p>
+        <h2>The posture, summarized.</h2>
+        <div class="sec-pillars">
+          <div class="sec-pillar">
+            <h3>Your data. Your perimeter.</h3>
+            <p>
+              Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Bolt Absolute and Aeira
+              Federated never make outbound calls during operation. Bolt Bundled and Complete tiers
+              route AI inference through a Sparcle-managed gateway under MSA + DPA with zero-retention
+              guarantees from upstream providers.
+            </p>
+          </div>
+          <div class="sec-pillar">
+            <h3>Identity-bound by design</h3>
+            <p>
+              Every query inherits the calling user's identity from your IdP (SAML, OIDC, JWT). Aeira
+              filters in-band on every result; Bolt's pipeline applies policy guardrails before any
+              prompt reaches the LLM. No bypass mode for callers.
+            </p>
+          </div>
+          <div class="sec-pillar">
+            <h3>Encrypted &amp; auditable</h3>
+            <p>
+              KMS-enveloped storage with per-tenant key isolation. Provable cryptographic erasure for
+              GDPR &amp; HIPAA obligations. Audit trail on every query &mdash; including which results
+              were filtered and why. Specific KMS posture and crypto choices reviewed under NDA.
+            </p>
+          </div>
+          <div class="sec-pillar">
+            <h3>Patent-pending architecture</h3>
+            <p>
+              Three USPTO provisional applications cover the runtime architecture, the priority engine,
+              and the overlay UI. Numbers and filing dates on <a href="/terms#ip">our IP page</a>;
+              detailed claim language under NDA.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Compliance posture -->
+    <section class="sec-section sec-section-alt">
+      <div class="container">
+        <p class="section-eyebrow">Compliance Posture</p>
+        <h2>What's deployable today, what's on the roadmap.</h2>
+        <p class="sec-lede sec-lede--narrow">
+          We use precise language about compliance: an architecture is "deployable" for a regime when
+          it can be configured to satisfy that regime's technical requirements, but a formal certification
+          is a separate process with a third-party auditor. Here's where we are honestly.
+        </p>
+        <div class="sec-compliance-table">
+          <div class="sec-compliance-row sec-compliance-row--head">
+            <div>Regime</div>
+            <div>Status</div>
+            <div>Notes</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">HIPAA</div>
+            <div><span class="sec-status sec-status--ready">Architecture deployable</span></div>
+            <div>Self-hosted variants meet HIPAA technical safeguards. BAAs available on enterprise contracts during pilot evaluation.</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">SOX</div>
+            <div><span class="sec-status sec-status--ready">Architecture deployable</span></div>
+            <div>Audit-trail responses, immutable logging, and role-based controls support SOX IT general controls. Customer-specific scope reviewed during pilot.</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">ITAR / Export Control</div>
+            <div><span class="sec-status sec-status--ready">Architecture deployable</span></div>
+            <div>Air-gapped Federated tier available. US-person-only access controls and data residency enforced via deployment configuration.</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">GDPR</div>
+            <div><span class="sec-status sec-status--ready">Architecture deployable</span></div>
+            <div>Provable cryptographic erasure for Right to be Forgotten. EU data residency via region-pinned deployments.</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">SOC 2 Type II</div>
+            <div><span class="sec-status sec-status--roadmap">Roadmap</span></div>
+            <div>Audit engagement planned. Honest framing: no formal certification yet. Aligned controls implemented; happy to share gap analysis under NDA.</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">FedRAMP Moderate</div>
+            <div><span class="sec-status sec-status--roadmap">Roadmap</span></div>
+            <div>Federated tier targeted. Multi-quarter effort; we work with sponsoring agency partners during pilot.</div>
+          </div>
+          <div class="sec-compliance-row">
+            <div class="sec-compliance-label">ISO 27001</div>
+            <div><span class="sec-status sec-status--roadmap">Roadmap</span></div>
+            <div>Audit engagement on the path; controls aligned. NDA brief covers timeline.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deployment options -->
+    <section class="sec-section">
+      <div class="container">
+        <p class="section-eyebrow">Deployment Models</p>
+        <h2>You choose what we run, what you run.</h2>
+        <div class="sec-deploy-grid">
+          <div class="sec-deploy">
+            <h3>Self-Hosted (Bolt Absolute, Aeira Dynamic / Enhanced)</h3>
+            <p>
+              You run the data plane and the AI inference. Sparcle ships software, updates, and support.
+              Air-gap option available. Most regulated buyers start here. From $30/seat/month for Bolt;
+              from $999/month for Aeira Dynamic.
+            </p>
+          </div>
+          <div class="sec-deploy">
+            <h3>Hybrid (Bolt Bundled)</h3>
+            <p>
+              You run the data plane in your perimeter. Sparcle runs the AI inference gateway under an
+              MSA + DPA with zero-retention guarantees from upstream providers. Best for teams wanting
+              managed AI without giving up data residency. From $60/seat/month.
+            </p>
+          </div>
+          <div class="sec-deploy">
+            <h3>Fully Managed (Bolt Complete)</h3>
+            <p>
+              Sparcle runs the entire stack in our infrastructure under contractual SLA &amp; DPA.
+              For teams without a strong on-prem or VPC operations capability who still want enterprise
+              SSO, audit, and compliance. From $90/seat/month.
+            </p>
+          </div>
+          <div class="sec-deploy">
+            <h3>Air-Gapped (Aeira Federated)</h3>
+            <p>
+              No outbound, no inbound, no telemetry. Multi-region VPC or physically air-gapped. License
+              validation via offline-signed token, refreshed on a customer-controlled schedule. Defense,
+              federal, and the most-regulated industries. Custom annual contracts from $500K/year.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What's under NDA -->
+    <section class="sec-section sec-section-alt">
+      <div class="container">
+        <p class="section-eyebrow">Available under NDA</p>
+        <h2>Where the technical depth lives.</h2>
+        <p class="sec-lede sec-lede--narrow">
+          We deliberately don't publish implementation specifics on the public site. Below is what
+          we share under a mutual NDA during pilot evaluation:
+        </p>
+        <ul class="sec-nda-list">
+          <li><strong>Architecture brief</strong> &mdash; component-level diagrams of Bolt's runtime and Aeira's data plane, including the cache hierarchy, the priority engine's scoring model, and the security pipeline's specific layers</li>
+          <li><strong>Security posture documentation</strong> &mdash; threat model, encryption details, key management semantics, audit log format and retention</li>
+          <li><strong>Patent claim summaries</strong> &mdash; what the three USPTO filings cover and how they map to the runtime</li>
+          <li><strong>Pen-test results</strong> &mdash; latest external assessment findings and remediation status</li>
+          <li><strong>Compliance gap analysis</strong> &mdash; honest current-vs-target view for SOC 2, ISO 27001, FedRAMP</li>
+          <li><strong>Reference customer conversations</strong> &mdash; design partners willing to take a call about their experience</li>
+          <li><strong>Deployment runbook</strong> &mdash; Helm charts, Docker Compose, Kubernetes manifests, and the operational guides used during go-live</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="sec-cta-section">
+      <div class="container">
+        <div class="sec-cta-box">
+          <h2>Take the next step.</h2>
+          <p>
+            Schedule a 30-minute call to walk through the architecture, request the security brief
+            under NDA, or arrange a reference conversation with a design partner.
+          </p>
+          <div class="sec-ctas">
+            <a href="#" onclick="openContactModal('Security Brief Request'); return false;" class="btn btn-primary btn-lg">
+              Request Security Brief (NDA)
+            </a>
+            <a href="#" onclick="openContactModal('Architecture Review'); return false;" class="btn btn-secondary btn-lg">
+              Schedule Architecture Review
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-security {
+    color: var(--text-body);
+  }
+  .sec-hero {
+    padding: calc(var(--nav-height, 80px) + 3rem) 0 var(--space-section);
+    text-align: center;
+  }
+  .sec-hero h1 {
+    margin: 0 auto 1.25rem;
+    max-width: 820px;
+  }
+  .sec-lede {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    max-width: 760px;
+    margin: 0 auto 2rem;
+  }
+  .sec-lede--narrow {
+    max-width: 640px;
+  }
+  .sec-ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  /* .section-eyebrow inherits the canonical centered rule from styles.css */
+  .sec-section {
+    padding: var(--space-section) 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .sec-section-alt {
+    background: var(--bg-muted);
+  }
+  .sec-section h2 {
+    text-align: center;
+    margin: 0 auto 2.5rem;
+    max-width: 760px;
+  }
+  .sec-pillars {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .sec-pillar {
+    flex: 1 1 260px;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+    text-align: left;
+  }
+  .sec-pillar h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.75rem;
+  }
+  .sec-pillar p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin: 0;
+  }
+  .sec-pillar a {
+    color: var(--brand-primary);
+  }
+  .sec-pillar a:hover {
+    text-decoration: underline;
+  }
+
+  .sec-compliance-table {
+    max-width: 980px;
+    margin: 0 auto;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .sec-compliance-row {
+    display: grid;
+    grid-template-columns: 200px 180px 1fr;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sec-compliance-row:last-child {
+    border-bottom: none;
+  }
+  .sec-compliance-row > div {
+    padding: 1rem 1.2rem;
+    font-size: 0.92rem;
+    color: var(--text-body);
+    line-height: 1.5;
+  }
+  .sec-compliance-row--head > div {
+    font-weight: 700;
+    color: var(--text-heading);
+    background: var(--bg-muted);
+    font-size: 0.86rem;
+  }
+  .sec-compliance-label {
+    font-weight: 600;
+    color: var(--text-heading) !important;
+    background: var(--bg-muted);
+  }
+  .sec-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .sec-status--ready {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border: 1px solid var(--color-success);
+  }
+  .sec-status--roadmap {
+    color: var(--brand-primary);
+    background: var(--brand-primary-light);
+    border: 1px solid var(--brand-primary);
+  }
+
+  .sec-deploy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .sec-deploy {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+  }
+  .sec-deploy h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.75rem;
+  }
+  .sec-deploy p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin: 0;
+  }
+
+  .sec-nda-list {
+    max-width: 760px;
+    margin: 0 auto;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.85rem;
+  }
+  .sec-nda-list li {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+  .sec-nda-list strong {
+    color: var(--text-heading);
+  }
+
+  .sec-cta-section {
+    padding: var(--space-section) 0;
+  }
+  .sec-cta-box {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 18px;
+  }
+  .sec-cta-box h2 {
+    margin: 0 0 1rem;
+  }
+  .sec-cta-box p {
+    color: var(--text-body);
+    line-height: 1.6;
+    margin: 0 auto 1.5rem;
+    max-width: 560px;
+  }
+  @media (max-width: 720px) {
+    .sec-compliance-row {
+      grid-template-columns: 1fr;
+    }
+    .sec-compliance-row > div {
+      padding: 0.6rem 1rem;
+    }
+    .sec-compliance-row--head {
+      display: none;
+    }
+    .sec-compliance-label {
+      font-size: 0.78rem !important;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+  }
+</style>

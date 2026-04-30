@@ -19,18 +19,17 @@ const {
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <script is:inline>
       (function () {
         try {
           var t = localStorage.getItem("theme");
-          var sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           document.documentElement.setAttribute("data-theme",
-            t === "dark" || t === "light" ? t : (sysDark ? "dark" : "light"));
+            t === "dark" || t === "light" ? t : "light");
         } catch {
-          document.documentElement.setAttribute("data-theme", "dark");
+          document.documentElement.setAttribute("data-theme", "light");
         }
       })();
     </script>
@@ -90,15 +89,55 @@ const {
         "name": "Bolt",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Windows, macOS, Linux, iOS, Android, Web",
-        "description": "Sovereign enterprise AI agent — deploy on-prem or VPC, bring your own LLM, connect 30+ systems via MCP. IP and PII protected regardless of AI model.",
+        "description": "Sovereign enterprise AI agent — deploy on-prem or VPC, bring your own LLM, connect 60+ systems via MCP. IP and PII protected regardless of AI model.",
         "url": "https://sparcle.app/products.html",
-        "offers": {
-          "@type": "Offer",
-          "price": "10",
-          "priceCurrency": "USD",
-          "name": "Bolt Absolute",
-          "description": "$10/seat/month — self-hosted, BYO LLM, full Bolt platform"
-        },
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Bolt Absolute",
+            "price": "30",
+            "priceCurrency": "USD",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "30",
+              "priceCurrency": "USD",
+              "unitText": "seat/month",
+              "billingIncrement": 25
+            },
+            "description": "$30/seat/month (annual) — self-hosted, BYO LLM, full Bolt platform. 25-seat minimum.",
+            "url": "https://sparcle.app/pricing"
+          },
+          {
+            "@type": "Offer",
+            "name": "Bolt Bundled",
+            "price": "60",
+            "priceCurrency": "USD",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "60",
+              "priceCurrency": "USD",
+              "unitText": "seat/month",
+              "billingIncrement": 50
+            },
+            "description": "$60/seat/month (annual) — self-hosted, managed AI with smart routing, 10M tokens/mo. 50-seat minimum.",
+            "url": "https://sparcle.app/pricing"
+          },
+          {
+            "@type": "Offer",
+            "name": "Bolt Complete",
+            "price": "90",
+            "priceCurrency": "USD",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "90",
+              "priceCurrency": "USD",
+              "unitText": "seat/month",
+              "billingIncrement": 100
+            },
+            "description": "$90/seat/month (annual) — Sparcle-managed hosting, multi-region, 99.9% SLA, 15M tokens/mo. 100-seat minimum.",
+            "url": "https://sparcle.app/pricing"
+          }
+        ],
         "provider": {
           "@type": "Organization",
           "name": "Sparcle, LLC",
@@ -108,10 +147,32 @@ const {
           "Self-hosted / on-prem / VPC / air-gapped deployment",
           "Bring your own LLM — OpenAI, Anthropic, Ollama, NVIDIA NIM",
           "IP and PII protection regardless of AI model",
-          "30+ enterprise system integrations via open MCP",
+          "60+ enterprise system integrations via open MCP",
           "8-layer security pipeline",
+          "4-level ACL (region / department / group / user)",
           "Agentic actions — email, calendar, tasks, desktop",
           "HIPAA, SOX, ITAR, GDPR deployable"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Aeira",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Linux (self-hosted)",
+        "description": "Sovereign enterprise knowledge index — ACL-aware retrieval substrate for governed search and discovery. Deployed inside your perimeter; pairs with Bolt or any MCP-compatible client.",
+        "url": "https://sparcle.app/products/aeira.html",
+        "provider": {
+          "@type": "Organization",
+          "name": "Sparcle, LLC",
+          "url": "https://sparcle.app"
+        },
+        "featureList": [
+          "4-level ACL (region / department / group / user)",
+          "MCP-native retrieval interface",
+          "Self-hosted, no data leaves the enterprise perimeter",
+          "Indexes documents, wikis, policies, codebases, and data sources",
+          "Pairs with Bolt or runs standalone"
         ]
       }
     ])} />

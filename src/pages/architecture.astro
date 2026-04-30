@@ -1,0 +1,347 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Architecture | Sparcle"
+  description="How Bolt and Aeira are built — the architectural posture serious enterprise buyers ask about. Detailed component-level briefs available under NDA."
+  canonical="https://sparcle.app/architecture"
+>
+  <main class="page-architecture">
+    <!-- Hero -->
+    <section class="arch-page-hero">
+      <div class="container">
+        <p class="section-eyebrow">Architecture</p>
+        <h1>Built so your security team says yes.</h1>
+        <p class="arch-page-lede">
+          Bolt and Aeira are designed for the enterprises that can't compromise on either. Below is the
+          architectural posture at the level a buyer needs to evaluate fit. Detailed component briefs,
+          security architecture decisions, and patent-protected implementation specifics are shared
+          under NDA during pilot evaluation.
+        </p>
+        <div class="arch-page-ctas">
+          <a href="#" onclick="openContactModal('Architecture Review'); return false;" class="btn btn-primary btn-lg">
+            Schedule Architecture Review
+          </a>
+          <a href="#" onclick="openContactModal('Architecture Brief Request'); return false;" class="btn btn-secondary btn-lg">
+            Request Architecture Brief (NDA)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bolt platform overview -->
+    <section class="arch-section">
+      <div class="container">
+        <p class="section-eyebrow">Bolt &mdash; Enterprise Agent Platform</p>
+        <h2>An agent runtime built for durability and trust.</h2>
+        <div class="arch-pillars">
+          <div class="arch-pillar">
+            <h3>Inside your perimeter</h3>
+            <p>
+              Self-hosted on AWS, Azure, GCP, on-prem, or fully air-gapped. Identity flows through
+              your existing IdP (SAML, OIDC, JWT). Your data, prompts, and responses stay inside your
+              network &mdash; or, in the managed tier, inside a Sparcle-operated environment governed
+              by an MSA + DPA with zero-retention guarantees from upstream LLM providers.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Multi-layer security pipeline</h3>
+            <p>
+              Every prompt and response passes through an 8-layer pipeline covering identity validation,
+              PII detection, policy guardrails, rate limiting, caching, audit logging, secrets management,
+              and privacy-preserving context handling. The pipeline is patent-pending; specific layer
+              implementations are reviewed under NDA.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Bring your own LLM</h3>
+            <p>
+              OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model.
+              Hot-swappable. With your own keys (BYOK), there's zero token markup &mdash; you burn down
+              your existing cloud commits while keeping data inside your perimeter.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Durable agent lifecycle</h3>
+            <p>
+              Long-running agents survive process restarts, suspend on webhooks or timers, resume cleanly
+              when results arrive. Sub-agent isolation, cancel cascades, heartbeat-leased multi-pod
+              orchestration. Built for the work that doesn't finish in 5 seconds.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aeira platform overview -->
+    <section class="arch-section arch-section-alt">
+      <div class="container">
+        <p class="section-eyebrow">Aeira &mdash; Compliance-Grade Data Plane</p>
+        <h2>The data plane your auditor signs off on.</h2>
+        <div class="arch-pillars">
+          <div class="arch-pillar">
+            <h3>Identity-bound access</h3>
+            <p>
+              Every query is automatically filtered to what the calling user is entitled to see &mdash;
+              region, department, sensitivity clearance, role &mdash; derived from your existing IdP.
+              Your AI agents and your auditors see the same answer. No bypass mode for callers.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Provable erasure</h3>
+            <p>
+              When a tenant invokes the Right to be Forgotten under GDPR, or you need HIPAA-compliant
+              erasure of restricted records, Aeira gives you cryptographic proof &mdash; not just a
+              deleted row. Auditor-acceptable, independently verifiable. The specific KMS posture and
+              key-management semantics are shared under NDA.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Audit-trail responses</h3>
+            <p>
+              Every result carries the why-filtered context regulators ask for during reviews. What was
+              shown, what was suppressed, why. The artifact a compliance team can actually point to
+              when asked "how did you ensure this AI system honored access controls?"
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Air-gap-ready by default</h3>
+            <p>
+              Deploy in your VPC, on-prem, or fully air-gapped. All indexing, search, and retrieval
+              run inside your security perimeter &mdash; no outbound calls, no telemetry, no third-party
+              model API calls. Federated tier supports multi-region with offline-validated licensing
+              for environments with no inbound or outbound connectivity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deployment surface -->
+    <section class="arch-section">
+      <div class="container">
+        <p class="section-eyebrow">Deployment</p>
+        <h2>Three operating models. Same platform.</h2>
+        <p class="arch-page-lede arch-page-lede--narrow">
+          Bolt and Aeira ship in three operating models. Same platform throughout &mdash; the difference
+          is who runs the AI inference, who runs the data plane, and who runs the hosting.
+        </p>
+        <div class="arch-tier-table">
+          <div class="arch-tier-row arch-tier-row--head">
+            <div></div>
+            <div>Self-Hosted</div>
+            <div>Hybrid (Bundled)</div>
+            <div>Fully Managed</div>
+          </div>
+          <div class="arch-tier-row">
+            <div class="arch-tier-label">Data plane</div>
+            <div>Your perimeter</div>
+            <div>Your perimeter</div>
+            <div>Sparcle-operated</div>
+          </div>
+          <div class="arch-tier-row">
+            <div class="arch-tier-label">AI inference</div>
+            <div>Your LLM (BYOK / BYO)</div>
+            <div>Sparcle-managed gateway</div>
+            <div>Sparcle-managed gateway</div>
+          </div>
+          <div class="arch-tier-row">
+            <div class="arch-tier-label">Hosting</div>
+            <div>You</div>
+            <div>You</div>
+            <div>Sparcle (multi-region)</div>
+          </div>
+          <div class="arch-tier-row">
+            <div class="arch-tier-label">SLA</div>
+            <div>Self-managed</div>
+            <div>Priority support</div>
+            <div>99.9% with SRE on-call</div>
+          </div>
+          <div class="arch-tier-row">
+            <div class="arch-tier-label">Air-gap option</div>
+            <div>✓</div>
+            <div>—</div>
+            <div>—</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IP & patent posture -->
+    <section class="arch-section arch-section-alt">
+      <div class="container">
+        <p class="section-eyebrow">Intellectual Property</p>
+        <h2>Patent-pending architecture, verifiable today.</h2>
+        <p class="arch-page-lede arch-page-lede--narrow">
+          Three USPTO provisional patent applications cover the runtime architecture, the priority
+          engine, and the overlay UI. Numbers and filing dates are listed on
+          <a href="/terms#ip">our IP page</a>. Detailed claim descriptions, novelty analysis, and
+          implementation specifics are shared during architecture reviews under NDA.
+        </p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="arch-cta-section">
+      <div class="container">
+        <div class="arch-cta-box">
+          <h2>Ready to look at the details?</h2>
+          <p>
+            Architecture briefs, security posture documentation, deployment guides, and patent claim
+            summaries are shared during pilot evaluation under NDA. Schedule a 30-minute call and
+            we'll cover what's relevant to your environment.
+          </p>
+          <div class="arch-page-ctas">
+            <a href="#" onclick="openContactModal('Architecture Review'); return false;" class="btn btn-primary btn-lg">
+              Schedule Architecture Review
+            </a>
+            <a href="/security" class="btn btn-secondary btn-lg">
+              Security posture &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-architecture {
+    color: var(--text-body);
+  }
+  .arch-page-hero {
+    padding: calc(var(--nav-height, 80px) + 3rem) 0 var(--space-section);
+    text-align: center;
+  }
+  .arch-page-hero h1 {
+    margin: 0 auto 1.25rem;
+    max-width: 820px;
+  }
+  .arch-page-lede {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    max-width: 760px;
+    margin: 0 auto 2rem;
+  }
+  .arch-page-lede--narrow {
+    max-width: 640px;
+  }
+  .arch-page-ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  /* .section-eyebrow inherits the canonical centered rule from styles.css */
+  .arch-section {
+    padding: var(--space-section) 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .arch-section-alt {
+    background: var(--bg-muted);
+  }
+  .arch-section h2 {
+    text-align: center;
+    margin: 0 auto 2.5rem;
+    max-width: 760px;
+  }
+  .arch-pillars {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .arch-pillar {
+    flex: 1 1 260px;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+    text-align: left;
+  }
+  .arch-pillar h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.75rem;
+  }
+  .arch-pillar p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin: 0;
+  }
+  .arch-tier-table {
+    max-width: 980px;
+    margin: 0 auto;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .arch-tier-row {
+    display: grid;
+    grid-template-columns: 200px repeat(3, 1fr);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .arch-tier-row:last-child {
+    border-bottom: none;
+  }
+  .arch-tier-row > div {
+    padding: 0.95rem 1rem;
+    font-size: 0.92rem;
+    color: var(--text-body);
+  }
+  .arch-tier-row--head > div {
+    font-weight: 700;
+    color: var(--text-heading);
+    background: var(--bg-muted);
+    font-size: 0.88rem;
+  }
+  .arch-tier-label {
+    font-weight: 600;
+    color: var(--text-heading) !important;
+    background: var(--bg-muted);
+  }
+  .arch-cta-section {
+    padding: var(--space-section) 0;
+  }
+  .arch-cta-box {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: 18px;
+  }
+  .arch-cta-box h2 {
+    margin: 0 0 1rem;
+  }
+  .arch-cta-box p {
+    color: var(--text-body);
+    line-height: 1.6;
+    margin: 0 auto 1.5rem;
+    max-width: 560px;
+  }
+  @media (max-width: 720px) {
+    .arch-tier-row {
+      grid-template-columns: 1fr;
+    }
+    .arch-tier-row > div {
+      padding: 0.6rem 1rem;
+    }
+    .arch-tier-row--head {
+      display: none;
+    }
+    .arch-tier-label {
+      font-size: 0.78rem !important;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+  }
+</style>

@@ -93,7 +93,7 @@
         transform: translateX(-50%);
         width: 600px;
         height: 600px;
-        background: radial-gradient(circle, rgba(99, 179, 237, 0.08) 0%, transparent 70%);
+        background: radial-gradient(circle, var(--brand-primary-light) 0%, transparent 70%);
         pointer-events: none;
     }
 
@@ -106,11 +106,16 @@
         color: var(--text-heading);
     }
 
+    /* Premium pass: solid brand-color emphasis instead of two-stop
+       blue→purple gradient. Class name preserved so existing markup
+       keeps working. Also fixes light-theme contrast — the gradient
+       version was barely readable on white background. */
     .pricing-hero h1 .gradient {
-        background: linear-gradient(135deg, #63b3ed 0%, #a78bfa 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: var(--brand-primary);
+        background: none;
+        -webkit-background-clip: initial;
+        background-clip: initial;
+        -webkit-text-fill-color: currentColor;
     }
 
     .pricing-hero p {
@@ -168,7 +173,7 @@
     .toggle-knob {
         width: 20px;
         height: 20px;
-        background: #63b3ed;
+        background: var(--brand-primary);
         border-radius: 50%;
         position: absolute;
         top: 2px;
@@ -236,8 +241,9 @@
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        background: linear-gradient(135deg, #63b3ed 0%, #a78bfa 100%);
-        color: #0a0e17;
+        /* Premium pass: monochromatic blue gradient (was blue→purple). */
+        background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-700) 100%);
+        color: #ffffff;
         font-size: 0.7rem;
         font-weight: 700;
         padding: 4px 16px;
@@ -263,7 +269,7 @@
     }
 
     .plan-icon.bundle {
-        background: rgba(99, 179, 237, 0.15);
+        background: var(--brand-primary-light);
     }
 
     .plan-icon.complete {
@@ -275,7 +281,7 @@
     }
 
     .plan-icon.dynamic {
-        background: rgba(99, 179, 237, 0.15);
+        background: var(--brand-primary-light);
     }
 
     .plan-icon.enhanced {
@@ -418,15 +424,15 @@
     }
 
     .plan-features li a {
-        color: #63b3ed;
+        color: var(--brand-primary);
         text-decoration: underline;
-        text-decoration-color: rgba(99, 179, 237, 0.35);
+        text-decoration-color: rgba(37, 99, 235, 0.4);
         text-underline-offset: 2px;
     }
 
     .plan-features li a:hover {
-        color: #90cdf4;
-        text-decoration-color: rgba(144, 205, 244, 0.6);
+        color: var(--brand-primary-hover);
+        text-decoration-color: var(--brand-primary-hover);
     }
 
     .plan-features li a .inline-icon {
@@ -635,15 +641,15 @@
 
     .enterprise-perks li::before {
         content: '→ ';
-        color: #63b3ed;
+        color: var(--brand-primary);
         font-weight: 700;
     }
 
     .hero-badge {
         display: inline-block;
-        background: rgba(99, 179, 237, 0.1);
-        border: 1px solid rgba(99, 179, 237, 0.2);
-        color: #63b3ed;
+        background: var(--brand-primary-light);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        color: var(--brand-primary);
         font-size: 0.8rem;
         font-weight: 600;
         padding: 6px 16px;
@@ -658,18 +664,13 @@
     }
 
     .faq-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        flex-wrap: wrap;
         gap: 16px;
     }
 
-    @media (max-width: 768px) {
-        .faq-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
     .faq-item {
+        flex: 1 1 360px;
         background: var(--bg-elevated);
         border: 1px solid var(--border-default);
         border-radius: 12px;
@@ -858,12 +859,14 @@
     }
 
     .trust-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        display: flex;
+        flex-wrap: wrap;
         gap: 20px;
+        justify-content: center;
     }
 
     .trust-item {
+        flex: 1 1 260px;
         background: var(--bg-elevated);
         border: 1px solid var(--border-default);
         border-radius: 12px;
@@ -895,15 +898,326 @@
         line-height: 1.5;
     }
 
-    @media (max-width: 900px) {
-        .trust-grid {
-            grid-template-columns: repeat(2, 1fr);
+    /* ─── COMPETITIVE POSITIONING ─── */
+    .compete-section {
+        margin: 0 0 80px;
+    }
+
+    .compete-strip {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-width: 980px;
+        margin: 0 auto;
+        border: 1px solid var(--border-default);
+        border-radius: 14px;
+        background: var(--bg-elevated);
+        overflow: hidden;
+    }
+
+    .compete-row {
+        display: grid;
+        grid-template-columns: 1.6fr 0.6fr 1.4fr;
+        gap: 1rem 1.5rem;
+        align-items: baseline;
+        padding: 16px 22px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    .compete-row:last-child {
+        border-bottom: none;
+    }
+    .compete-row--bolt {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0));
+    }
+
+    .compete-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-heading);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+    .compete-tag {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--brand-primary);
+        background: var(--brand-primary-light);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        padding: 2px 8px;
+        border-radius: 999px;
+    }
+    .compete-tag--neutral {
+        color: var(--text-muted);
+        background: var(--bg-surface);
+        border-color: var(--border-subtle);
+    }
+
+    .compete-price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-heading);
+        white-space: nowrap;
+    }
+    .compete-price span {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-left: 2px;
+    }
+    .compete-row--bolt .compete-price {
+        color: var(--brand-primary);
+    }
+
+    .compete-note {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .compete-footnote {
+        max-width: 820px;
+        margin: 14px auto 0;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    /* Stack-math callout */
+    .stack-math-callout {
+        max-width: 980px;
+        margin: 56px auto 0;
+        padding: 32px 36px;
+        border: 1px solid var(--border-default);
+        border-radius: 18px;
+        background: var(--bg-elevated);
+        position: relative;
+        overflow: hidden;
+    }
+    .stack-math-callout::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.6), transparent);
+    }
+
+    .stack-math-headline {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .stack-math-subtitle {
+        font-size: 0.92rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        max-width: 720px;
+        margin: 12px auto 0;
+    }
+    .stack-math-subtitle strong {
+        color: var(--text-heading);
+        font-weight: 600;
+    }
+    .stack-math-eyebrow {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--brand-primary);
+        margin-bottom: 10px;
+    }
+    .stack-math-headline h3 {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: var(--text-heading);
+        line-height: 1.3;
+        margin: 0;
+    }
+    .stack-math-strike {
+        text-decoration: line-through;
+        text-decoration-color: rgba(248, 113, 113, 0.55);
+        text-decoration-thickness: 2px;
+        color: var(--text-muted);
+    }
+
+    .stack-math-grid {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .stack-math-grid li {
+        display: grid;
+        grid-template-columns: 1fr 2fr 0.5fr;
+        gap: 1rem;
+        align-items: center;
+        padding: 12px 18px;
+        border-radius: 10px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+    }
+    .stack-math-component {
+        font-size: 0.88rem;
+        color: var(--text-body);
+        font-weight: 500;
+    }
+    .stack-math-tool {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    .stack-math-cost {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-heading);
+        text-align: right;
+        white-space: nowrap;
+    }
+    .stack-math-total {
+        background: rgba(248, 113, 113, 0.06) !important;
+        border-color: rgba(248, 113, 113, 0.25) !important;
+    }
+    .stack-math-total .stack-math-cost {
+        color: #ef4444;
+    }
+    .stack-math-bolt {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.04)) !important;
+        border-color: rgba(37, 99, 235, 0.35) !important;
+    }
+    .stack-math-bolt .stack-math-cost {
+        color: var(--brand-primary);
+    }
+    .stack-math-note {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        text-align: center;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    /* "What no one else delivers" — surface/invocation USP */
+    .bolt-unique-callout {
+        max-width: 1080px;
+        margin: 40px auto 0;
+        padding: 36px 36px 32px;
+        border: 1px solid var(--border-default);
+        border-radius: 18px;
+        background: var(--bg-elevated);
+    }
+    .bolt-unique-headline {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    .bolt-unique-headline h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-heading);
+        margin: 0 0 12px;
+        line-height: 1.3;
+    }
+    .bolt-unique-subtitle {
+        font-size: 0.92rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        max-width: 760px;
+        margin: 0 auto;
+    }
+    .bolt-unique-subtitle strong {
+        color: var(--text-heading);
+        font-weight: 600;
+    }
+    .bolt-unique-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .bolt-unique-item {
+        flex: 1 1 240px;
+        padding: 16px 18px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+    }
+    .bolt-unique-item h4 {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-heading);
+        margin: 0 0 6px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .bolt-unique-item p {
+        font-size: 0.84rem;
+        color: var(--text-body);
+        line-height: 1.55;
+        margin: 0;
+    }
+    .bolt-unique-tag {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--brand-primary);
+        background: var(--brand-primary-light);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        padding: 2px 7px;
+        border-radius: 999px;
+    }
+    .bolt-unique-note {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        text-align: center;
+        max-width: 760px;
+        margin: 6px auto 0;
+    }
+    @media (max-width: 600px) {
+        .bolt-unique-callout {
+            padding: 24px 20px;
+        }
+        .bolt-unique-headline h3 {
+            font-size: 1.2rem;
         }
     }
 
-    @media (max-width: 600px) {
-        .trust-grid {
+    @media (max-width: 760px) {
+        .compete-row {
             grid-template-columns: 1fr;
+            gap: 6px;
+            padding: 14px 18px;
+        }
+        .compete-price {
+            font-size: 1.05rem;
+        }
+        .stack-math-callout {
+            padding: 24px 20px;
+        }
+        .stack-math-headline h3 {
+            font-size: 1.2rem;
+        }
+        .stack-math-grid li {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 1rem;
+            padding: 12px 14px;
+        }
+        .stack-math-tool {
+            grid-column: 1 / -1;
+            order: 3;
+            font-size: 0.78rem;
+        }
+        .stack-math-cost {
+            text-align: right;
         }
     }
 
@@ -953,9 +1267,9 @@
     }
 
     .integration-chip.chip-more {
-        color: #63b3ed;
-        border-color: rgba(99, 179, 237, 0.3);
-        background: rgba(99, 179, 237, 0.08);
+        color: var(--brand-primary);
+        border-color: rgba(37, 99, 235, 0.3);
+        background: var(--brand-primary-light);
         font-weight: 600;
     }
 
@@ -1128,6 +1442,139 @@
     @media (max-width: 500px) {
         .contact-modal {
             padding: 28px 20px 20px;
+        }
+    }
+
+    /* ── Founding Customers banner ──────────────────────────────────── */
+    /* Premium pass: re-anchored to blue family (was indigo + purple).
+       Keeps the banner distinctive without breaking the monochrome
+       brand palette. */
+    .founding-banner {
+        margin: 80px auto 40px;
+        max-width: 880px;
+        padding: 36px 40px;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(96, 165, 250, 0.06) 100%);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        border-radius: 18px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .founding-banner::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.7), transparent);
+    }
+    .founding-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: var(--brand-primary);
+        background: var(--brand-primary-light);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        border-radius: 999px;
+        margin-bottom: 14px;
+    }
+    .founding-title {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: var(--text-heading);
+        margin: 0 0 14px;
+        line-height: 1.3;
+    }
+    .founding-desc {
+        font-size: 0.95rem;
+        line-height: 1.55;
+        color: var(--text-muted);
+        max-width: 640px;
+        margin: 0 auto 20px;
+    }
+    .founding-perks {
+        list-style: none;
+        padding: 0;
+        margin: 0 auto 24px;
+        max-width: 560px;
+        text-align: left;
+        display: grid;
+        gap: 8px;
+    }
+    .founding-perks li {
+        font-size: 0.9rem;
+        color: var(--text-body, #cbd5e1);
+        padding-left: 22px;
+        position: relative;
+    }
+    .founding-perks li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--brand-primary);
+        font-weight: 700;
+    }
+    .founding-cta {
+        display: inline-block;
+        padding: 12px 28px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff;
+        /* Premium pass: solid brand color instead of indigo→purple gradient. */
+        background: var(--brand-primary);
+        border-radius: 12px;
+        text-decoration: none;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .founding-cta:hover {
+        background: var(--brand-primary-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* ── Capability badges (Aeira hero) ───────────────────────────────
+       Premium pass: re-anchored to blue family (was amber). The badges
+       are factual capability claims (4-level ACL, KMS-enveloped,
+       crypto-shred), not patent claims. They live in the brand palette
+       like everything else. */
+    .ip-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--brand-primary);
+        background: var(--brand-primary-light);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        border-radius: 999px;
+        margin: 8px 4px 0;
+    }
+    .compliance-line {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin: 12px auto 0;
+        max-width: 720px;
+        line-height: 1.5;
+    }
+    .compliance-roadmap {
+        font-size: 0.78rem;
+    }
+
+    @media (max-width: 600px) {
+        .founding-banner {
+            padding: 28px 22px;
+            margin: 56px auto 32px;
+        }
+        .founding-title {
+            font-size: 1.2rem;
+        }
+        .founding-desc {
+            font-size: 0.88rem;
         }
     }
 </style>

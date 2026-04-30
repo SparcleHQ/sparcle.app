@@ -44,6 +44,10 @@ export interface ProductPageContent {
   highlights: FeaturePoint[];
   agenticActions?: FeaturePoint[];
   faqs: FeaturePoint[];
+  /** Optional raw HTML for an architecture diagram, rendered between hero
+   *  and highlights. Premium positioning: a real architecture diagram is
+   *  the page CTOs and CISOs read first. */
+  architectureHtml?: string;
 }
 
 export interface PricingPageContent {
@@ -66,75 +70,57 @@ export interface PricingPageContent {
 }
 
 export const boltProductContent: ProductPageContent = {
-  title: "Bolt Product | Sparcle",
+  title: "Bolt — Patent-pending Enterprise Agent Runtime | Sparcle",
   description:
-    "Bolt is the enterprise AI operating system that unifies search, chat, and actions across your tool stack.",
+    "Bolt is the patent-pending enterprise agent runtime — durable agents, MCP-native architecture, multi-tier caching, 8-layer security, priority scoring engine, and adaptive overlay UI. Deployed inside your perimeter.",
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
-  productKicker: "Enterprise AI Agent",
-  productHeadline: "Your AI agent. Inside your walls. Across every system.",
+  productKicker: "Enterprise Agent Platform",
+  productHeadline: "The agent your security team will actually let you ship.",
   productIntro:
-    "Bolt doesn't just search — it takes action. Send emails, schedule meetings, manage tasks, control your desktop — all through natural language. Connected to 30+ enterprise systems via open MCP. Deployed on your infrastructure, with your own AI model, and with your IP and data protected at every layer.",
-  primaryCtaLabel: "Schedule Enterprise Demo",
-  primaryCtaHref: "#contact:Bolt Demo Request",
-  secondaryCtaLabel: "Features and Pricing",
+    "Bolt unifies your work — email, calendar, tasks, docs, tickets, code — through one AI agent that runs inside your own perimeter, with your own LLM, and your IP protected at every layer. Connected to 60+ enterprise systems out of the box. Patent-pending architecture; deep details under NDA.",
+  primaryCtaLabel: "Schedule Architecture Review",
+  primaryCtaHref: "#contact:Bolt Architecture Review",
+  secondaryCtaLabel: "Pricing & Tiers",
   secondaryCtaHref: "/pricing#bolt",
-  tertiaryCtaLabel: "Learn More",
+  tertiaryCtaLabel: "Technical Slides",
   tertiaryCtaHref: "/bolt-slides.html",
   tertiaryCtaTarget: "_blank",
   badge: "Enterprise",
   videoUrl: "/media/BoltSlides_compact.mp4",
   checklistHighlights: [
-    "<strong>Agentic actions</strong> — send emails, schedule meetings, manage tasks, all via natural language",
-    "<strong>Desktop agent</strong> — browse files, run commands, control apps on your local machine",
-    "<strong>Phone → Desktop bridge</strong> — access your work computer from anywhere via encrypted tunnel",
-    "<strong>On-prem/VPC deployment</strong> — your data stays in your perimeter",
-    "<strong>BYO LLM</strong> — use OpenAI, Anthropic, Ollama, NVIDIA NIM, or your own fine-tuned model",
-    "<strong>Your IP and data stay protected</strong> — use Bolt with any AI model, anywhere, with confidence nothing leaks",
-    "<strong>Switch AI models anytime</strong> — your employees see zero change, your data governance posture doesn't move",
+    "<strong>Inside your perimeter, day one</strong> — self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Your data never leaves your network.",
+    "<strong>Zero token markup</strong> — bring your own API keys; burn down your existing cloud commits without per-token surcharge",
+    "<strong>60+ hrs/employee/year recovered</strong> — context-switching savings alone deliver a 10× return at $30/seat",
+    "<strong>BYO LLM</strong> — OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model. Hot-swappable.",
+    "<strong>HIPAA / SOX / ITAR / GDPR deployable</strong> — architecture built for regulated environments from day one",
+    "<strong>60+ enterprise integrations</strong> — open Model Context Protocol, no vendor lock-in",
+    "<strong>Annual contracts, 25-seat minimum</strong> — Bolt Absolute starts at $30/seat/month. Founding Customer pricing available through 2026.",
   ],
   highlights: [
     {
-      title: "Unified AI Workspace",
+      title: "Inside your perimeter, day one",
       detail:
-        "Search, chat, and actions in one flow across email, calendar, docs, tickets, messaging, and code.",
-      icon: "layers",
-    },
-    {
-      title: "Desktop Agent",
-      detail:
-        "Browse local files, run terminal commands, open apps — Bolt's native agent gives AI access to your machine, sandboxed and permission-controlled.",
-      icon: "monitor",
-    },
-    {
-      title: "Enterprise Security",
-      detail:
-        "SSO, audit logging, policy controls, and privacy-first architecture for regulated environments.",
+        "Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Identity integrates with SAML, OIDC, JWT, and your existing IdP. Architecture deployable for HIPAA, SOX, ITAR, and GDPR — your data never leaves your network.",
       icon: "shield",
     },
     {
-      title: "Phone → Desktop Bridge",
+      title: "Zero token markup. Real ROI.",
       detail:
-        "Access your work computer from your phone via encrypted tunnel. Run builds, find files, check logs — from anywhere.",
-      icon: "smartphone",
-    },
-    {
-      title: "Deployment Flexibility",
-      detail:
-        "Self-host in your perimeter or run with Sparcle-managed AI and hosting, depending on risk profile.",
-      icon: "server",
-    },
-    {
-      title: "Use Any AI Model. Trust Every Conversation.",
-      detail:
-        "Your employees' data, your customers' information, and your organization's intellectual property stay protected — regardless of which AI model is running underneath. Switch providers, upgrade models, or run locally. From an employee's perspective, nothing changes. From a security perspective, nothing leaks.",
-      icon: "lock",
-    },
-    {
-      title: "Built for ROI",
-      detail:
-        "Designed to recover deep work time and reduce operational drag from fragmented workflows.",
+        "Bring your own API keys (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model). No per-token surcharge. Customers recover an average of 60+ hours per employee per year — a 10× return at $30/seat.",
       icon: "trending-up",
+    },
+    {
+      title: "Surfaces what matters, not what's loud",
+      detail:
+        "The One Thing™ patent-pending priority engine looks across email, calendar, tasks, and messages and tells you the single most important thing to do right now — with a human-readable reason for the call.",
+      icon: "layers",
+    },
+    {
+      title: "60+ integrations. No vendor lock-in.",
+      detail:
+        "Built on the open Model Context Protocol. Out-of-the-box connections to Slack, Jira, Confluence, Salesforce, GitHub, Notion, Drive, M365, and more. Sub-second responses, durable agents, three operating models from self-hosted to fully managed.",
+      icon: "code",
     },
   ],
   agenticActions: [
@@ -177,72 +163,131 @@ export const boltProductContent: ProductPageContent = {
   ],
   faqs: [
     {
-      title: "Can Bolt run in our own environment?",
+      title: "Can Bolt run inside our own perimeter?",
       detail:
-        "Yes. Bolt supports self-hosted deployment and managed options. You can choose by compliance and operating model.",
+        "Yes. Bolt Absolute and Bolt Bundled are self-hosted — Docker Compose for staging, Kubernetes for production HA. Bolt Complete is fully managed by Sparcle. All three tiers expose the same platform; you choose by operating model and compliance posture.",
+    },
+    {
+      title: "What does Bolt save my team in real terms?",
+      detail:
+        "Customers report 60+ hours per employee per year recovered from context-switching alone. At $60/hr fully loaded labor, that's roughly $3,600/seat/year of recovered productivity vs $360/seat/year for Bolt Absolute — a 10× return. ROI math is conservative and excludes incident-prevention and compliance-cost avoidance.",
     },
     {
       title: "Does Bolt require data migration?",
       detail:
-        "No. Bolt connects to your systems through connectors and APIs. Teams keep working in existing tools.",
+        "No. Bolt connects to your existing systems through 60+ MCP integrations and direct connectors. Teams keep working in their existing tools — Bolt is the unifying agent layer above them, not a replacement.",
+    },
+    {
+      title: "How is our IP protected when we use external LLMs?",
+      detail:
+        "Bolt's security pipeline applies PII detection, policy guardrails, audit logging, and privacy-preserving context handling before any prompt leaves your perimeter. With BYOK and a covered LLM provider (DPA + zero-retention), you get the upside of frontier models without your IP entering training data. With BYO self-hosted LLM, nothing leaves at all.",
+    },
+    {
+      title: "What's the seat minimum?",
+      detail:
+        "Bolt Absolute: 25 seats. Bolt Bundled: 50 seats. Bolt Complete: 100 seats. Annual contracts. Below those minimums, Bolt Personal is free with your own API key.",
+    },
+    {
+      title: "What's the Founding Customer Program?",
+      detail:
+        "First 50 customers get 40% off published pricing locked for 24 months, direct founder access, weekly office hours, and roadmap influence. Open through end of 2026 or until 50 customers are signed.",
+    },
+    {
+      title: "Can we see the architecture and security details?",
+      detail:
+        "Yes — under NDA. Detailed architecture briefs, security posture documentation, and patent claim summaries are shared during the pilot evaluation. Schedule an architecture review and we'll cover what's relevant to your environment.",
     },
   ],
 };
 
 export const aeiraProductContent: ProductPageContent = {
-  title: "Aeira Product | Sparcle",
+  title: "Aeira — Air-Gap-Ready Hybrid Search for Regulated Industries | Sparcle",
   description:
-    "Aeira is the governed data plane behind enterprise search and grounding, from included catalog to federated scale.",
+    "Aeira is the 100% self-hosted enterprise data plane for regulated industries. 4-level ACL, KMS-enveloped storage with crypto-shred for GDPR/HIPAA erasure, weighted RRF hybrid search, license-validated tiers. Defense, finance, healthcare, federal.",
   canonical: "https://sparcle.app/products/aeira.html",
   productName: "Aeira",
-  productKicker: "ACL-aware Enterprise Index",
-  productHeadline: "Catalog to Federated, same contract and ACL semantics.",
+  productKicker: "Compliance-Grade Search · Regulated Industries",
+  productHeadline: "The data plane your CISO will actually approve.",
   productIntro:
-    "Aeira powers discovery and grounding with a consistent API and authorization model as customers scale from lightweight catalog to high-governance federation.",
-  primaryCtaLabel: "Talk to Aeira Team",
-  primaryCtaHref: "#contact:Aeira Architecture Discussion",
-  secondaryCtaLabel: "Features & Pricing",
+    "Aeira is the 100% self-hosted enterprise data plane for regulated industries — defense, finance, healthcare, federal. Identity-bound search, provable erasure for GDPR / HIPAA obligations, audit-trail responses your compliance team can actually point to. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped — your data never leaves your perimeter. Architecture details available under NDA.",
+  primaryCtaLabel: "Design Aeira Deployment",
+  primaryCtaHref: "#contact:Aeira Deployment Design",
+  secondaryCtaLabel: "Pricing & Tiers",
   secondaryCtaHref: "/pricing.html#aeira",
-  tertiaryCtaLabel: "Learn More",
+  tertiaryCtaLabel: "Architecture Slides",
   tertiaryCtaHref: "/aeira-slides.html",
   tertiaryCtaTarget: "_blank",
   slidesUrl: "/aeira-slides.html",
+  checklistHighlights: [
+    "<strong>Identity-bound access control</strong> — every query is filtered to what the calling user is entitled to see; the agent never sees what they can't",
+    "<strong>Provable erasure for GDPR / HIPAA</strong> — cryptographically destroy the data, not just delete the row; auditor-acceptable proof",
+    "<strong>100% self-hosted</strong> — AWS, Azure, GCP, on-prem, or fully air-gapped; data never leaves your perimeter",
+    "<strong>Audit-trail responses</strong> — every result carries the why-filtered context regulators ask for during reviews",
+    "<strong>Standalone or with Bolt</strong> — buy Aeira alone for ACL-aware regulated search, or get Catalog free with every Bolt plan",
+    "<strong>Stable API across all tiers</strong> — start with Catalog, scale to Federated without integration rewrites",
+    "<strong>License-validated</strong> — Catalog (free with Bolt) → Dynamic ($999/mo) → Enhanced ($4,999/mo) → Federated (from $500K/yr)",
+  ],
   highlights: [
     {
-      title: "Included Catalog Baseline",
+      title: "Identity-bound access control",
       detail:
-        "Every Bolt plan includes Aeira Catalog with 8 core categories and 2 custom categories.",
-      icon: "database",
-    },
-    {
-      title: "Stable API Contract",
-      detail:
-        "Keep one integration contract while upgrading between Catalog, Dynamic, Enhanced, and Federated.",
-      icon: "code",
-    },
-    {
-      title: "JWT + ACL Compatibility",
-      detail:
-        "Consistent authorization semantics across tiers for safer rollouts and fewer integration rewrites.",
+        "Every query is automatically filtered to what the calling user's identity is entitled to see — region, department, sensitivity clearance, and role, derived from your existing IdP. Your AI agents and your auditors see the same answer.",
       icon: "lock",
     },
     {
-      title: "Scale Without Surprises",
+      title: "Provable erasure for GDPR / HIPAA",
       detail:
-        "Move from directory-style indexing to larger ingestion and governance profiles with clear guardrails.",
-      icon: "scale",
+        "When a tenant invokes the Right to be Forgotten or you need HIPAA-compliant erasure, Aeira gives you cryptographic proof — not just a deleted row. Auditor-acceptable, independently verifiable.",
+      icon: "shield",
+    },
+    {
+      title: "Air-gap-ready by default",
+      detail:
+        "Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped. All indexing, search, embedding, and AI retrieval run inside your security perimeter. No outbound calls, no telemetry, no surprises during a security review.",
+      icon: "server",
+    },
+    {
+      title: "Stable API. Standalone or with Bolt.",
+      detail:
+        "Same contract from Catalog (free with Bolt) through Federated (air-gapped enterprise). Scale tiers without integration rewrites. Customers with their own AI layer can buy Aeira alone; everyone else gets it bundled.",
+      icon: "code",
     },
   ],
   faqs: [
     {
-      title: "Is Catalog included in all Bolt plans?",
+      title: "Is Aeira Catalog included in all Bolt plans?",
       detail:
-        "Yes. Catalog is bundled in all Bolt plans as the baseline data layer.",
+        "Yes. Catalog is bundled free in every Bolt plan as the baseline data plane. Dynamic, Enhanced, and Federated are paid Aeira tiers for larger scale and stronger governance.",
+    },
+    {
+      title: "What does air-gapped deployment mean in practice?",
+      detail:
+        "Federated-tier deployments run entirely inside your security perimeter — typically a VPC, on-prem cluster, or physically air-gapped network. No outbound calls, no telemetry, no third-party model API calls. License validation happens via an offline-signed token, refreshed on a customer-controlled schedule. Catalog and Dynamic also run fully on-prem; Federated adds dedicated cluster isolation and custom topology.",
+    },
+    {
+      title: "How does Aeira help with GDPR / HIPAA erasure obligations?",
+      detail:
+        "Aeira gives you cryptographic erasure rather than just row-deletion — when an erasure obligation applies, the encrypted data becomes mathematically unreadable. The result is auditor-acceptable proof of erasure that satisfies GDPR Right to be Forgotten and HIPAA Right to Restrict Disclosure. We can walk through the specifics in an architecture review under NDA.",
+    },
+    {
+      title: "Can we bring our own data, embedding model, and infrastructure?",
+      detail:
+        "Yes to all three. Customer pays for their own compute, storage, and infrastructure (except in Bolt Complete, which is fully managed). Aeira ships with sensible defaults but supports BYO embedding models for customers with specialized domain models. The access-control semantics stay consistent regardless of which embedder is used.",
     },
     {
       title: "What changes when we upgrade tiers?",
       detail:
-        "Mostly scale, governance depth, and operations support. API contract and ACL semantics stay consistent.",
+        "Scale and governance depth — not the API. Catalog is keyword-only with hard record limits. Dynamic adds full hybrid search up to 10K records. Enhanced supports up to 100K records with high-throughput ingestion. Federated adds air-gap, multi-region, and dedicated cluster isolation. Applications written against Catalog scale up to Federated without rewrites.",
+    },
+    {
+      title: "Pricing — what does each tier cost?",
+      detail:
+        "Catalog: free with every Bolt plan. Dynamic: $999/month (up to 10K records). Enhanced: $4,999/month (up to 100K records, high-throughput ingestion). Federated: custom annual contracts from $500K/year (defense / federal / regulated tier). All paid tiers include software updates, patches, and support — customer pays for their own compute, storage, and infrastructure.",
+    },
+    {
+      title: "Can we see the architecture and security details?",
+      detail:
+        "Yes — under NDA. Detailed architecture briefs, encryption specifics, key management semantics, and audit-trail formats are shared during pilot evaluation. Schedule an Aeira deployment design call and we'll cover what's relevant to your environment.",
     },
   ],
 };
@@ -266,7 +311,7 @@ export const boltPricingContent: PricingPageContent = {
     {
       name: "Bolt Absolute",
       tagline: "Self-hosted platform with full data sovereignty",
-      price: "$10 / seat / month",
+      price: "$30 / seat / month",
       note: "Annual contract",
       ctaLabel: "Request Pilot",
       ctaHref: "#contact:Bolt Absolute Pilot",
@@ -280,7 +325,7 @@ export const boltPricingContent: PricingPageContent = {
     {
       name: "Bolt Bundled",
       tagline: "Self-hosted platform with Sparcle-managed AI",
-      price: "$20 / seat / month",
+      price: "$60 / seat / month",
       note: "Annual contract",
       highlight: "Most popular",
       ctaLabel: "Request Pilot",
@@ -295,7 +340,7 @@ export const boltPricingContent: PricingPageContent = {
     {
       name: "Bolt Complete",
       tagline: "Fully managed platform and hosting",
-      price: "$25 / seat / month",
+      price: "$90 / seat / month",
       note: "Annual contract",
       ctaLabel: "Talk to Sales",
       ctaHref: "#contact:Bolt Complete Inquiry",
@@ -388,8 +433,8 @@ export const aeiraPricingContent: PricingPageContent = {
       name: "Dynamic",
       tagline: "Index any corporate data. Hybrid AI search across everything.",
       prices: {
-        selfHosted: "$99 / month",
-        managed: "$99 / month",
+        selfHosted: "$999 / month",
+        managed: "$999 / month",
       },
       note: "Up to 10K records · Private Instance License",
       ctaLabel: "Start Dynamic",
@@ -410,8 +455,8 @@ export const aeiraPricingContent: PricingPageContent = {
       name: "Enhanced",
       tagline: "Production-scale search with async ingestion and enterprise controls",
       prices: {
-        selfHosted: "$499 / month",
-        managed: "$499 / month",
+        selfHosted: "$4,999 / month",
+        managed: "$4,999 / month",
       },
       note: "Up to 100K records · Private Instance License",
       highlight: "Data Leader",

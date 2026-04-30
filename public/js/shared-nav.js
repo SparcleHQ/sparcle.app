@@ -10,7 +10,7 @@
  *
  * Anti-flash <head> snippet (copy into every page's <head>):
  *   <script>
- *     (function(){var t=localStorage.getItem('theme')||'dark';
+ *     (function(){var t=localStorage.getItem('theme')||'light';
  *     document.documentElement.setAttribute('data-theme',t);})();
  *   </script>
  */
@@ -41,7 +41,16 @@
         if (page === 'crisis' && path.indexOf('/crisis') !== -1) return ' nav-active';
         if (page === 'solution' && path.indexOf('/solution') !== -1) return ' nav-active';
         if (page === 'why-sparcle' && path.indexOf('/why-sparcle') !== -1) return ' nav-active';
-        if (page === 'products' && (path.indexOf('/products') !== -1 || path.indexOf('/bolt') !== -1)) return ' nav-active';
+        // Bolt: /products.html or any /products subpath WITHOUT /aeira (so the
+        // dual-product page lights up the Bolt tab unless the URL is the
+        // Aeira variant).
+        if (page === 'bolt'
+            && (path === '/products.html' || path === '/products.html/'
+                || (path.indexOf('/products') !== -1 && path.indexOf('aeira') === -1))) {
+            return ' nav-active';
+        }
+        if (page === 'aeira' && path.indexOf('/aeira') !== -1) return ' nav-active';
+        if (page === 'resources' && (path.indexOf('architecture') !== -1 || path.indexOf('security') !== -1 || path.indexOf('integrations') !== -1 || path.indexOf('research') !== -1 || path.indexOf('terms') !== -1 || path.indexOf('privacy') !== -1)) return ' nav-active';
         return '';
     }
 
@@ -58,12 +67,22 @@
         '    </a>',
         '  </div>',
         '  <ul class="nav-menu" id="navMenu">',
-        '    <li><a href="/crisis" class="nav-link' + activeClass('crisis') + '">The Crisis</a></li>',
-        '    <li><a href="/solution" class="nav-link' + activeClass('solution') + '">Our Solution</a></li>',
-        '    <li><a href="/why-sparcle" class="nav-link' + activeClass('why-sparcle') + '">Why Sparcle</a></li>',
-        '    <li><a href="/products.html" class="nav-link' + activeClass('products') + '">Products</a></li>',
+        '    <li><a href="/products.html" class="nav-link' + activeClass('bolt') + '">Bolt</a></li>',
+        '    <li><a href="/products/aeira.html" class="nav-link' + activeClass('aeira') + '">Aeira</a></li>',
+        '    <li><a href="/solution" class="nav-link' + activeClass('solution') + '">Solutions</a></li>',
         '    <li><a href="/pricing#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
-        '    <li><a href="/download" class="nav-link' + activeClass('download') + '">Download</a></li>',
+        '    <li class="nav-item-has-submenu">',
+        '      <a href="/why-sparcle" class="nav-link' + activeClass('why-sparcle') + activeClass('resources') + '">Resources</a>',
+        '      <ul class="nav-submenu">',
+        '        <li><a href="/architecture" class="nav-link">Architecture</a></li>',
+        '        <li><a href="/security" class="nav-link">Security &amp; Compliance</a></li>',
+        '        <li><a href="/integrations" class="nav-link">Integrations</a></li>',
+        '        <li><a href="/why-sparcle" class="nav-link">Why Sparcle</a></li>',
+        '        <li><a href="/research.html" class="nav-link">Research &amp; Whitepaper</a></li>',
+        '        <li><a href="/crisis" class="nav-link">The Crisis (background)</a></li>',
+        '        <li><a href="/terms#ip" class="nav-link">Patents &amp; IP</a></li>',
+        '      </ul>',
+        '    </li>',
         '  </ul>',
         '  <div class="nav-controls">',
         '    <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark theme" data-mode="auto">',
@@ -88,7 +107,7 @@
         '        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
         '      </svg>',
         '    </button>',
-        '    <a href="#" onclick="openContactModal(); return false;" class="btn btn-primary btn-sm">Let\'s Talk</a>',
+        '    <a href="#" onclick="openContactModal(\'Architecture Review\'); return false;" class="btn btn-primary btn-sm">Schedule Review</a>',
         '  </div>',
         '  <!-- Mobile hamburger -->',
         '  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">',
@@ -116,12 +135,21 @@
         '        <h5>Products</h5>',
         '        <ul>',
         '          <li><a href="/products.html" style="display:inline-flex;align-items:center;gap:0.4rem;"><img src="/images/bolt-logo.svg" alt="" width="16" height="16" style="border-radius:3px;">Bolt</a></li>',
-        '          <li><a href="/products.html#aeira" style="display:inline-flex;align-items:center;gap:0.4rem;"><img src="/images/aeira-logo.svg" alt="" width="16" height="16" style="border-radius:3px;">Aeira</a></li>',
+        '          <li><a href="/products/aeira.html" style="display:inline-flex;align-items:center;gap:0.4rem;"><img src="/images/aeira-logo.svg" alt="" width="16" height="16" style="border-radius:3px;">Aeira</a></li>',
+        '          <li><a href="/download" style="display:inline-flex;align-items:center;gap:0.4rem;">' +
+        '            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+        '              <polyline points="7 10 12 15 17 10"/>' +
+        '              <line x1="12" y1="15" x2="12" y2="3"/>' +
+        '            </svg>Trial or Free</a></li>',
         '        </ul>',
         '      </div>',
         '      <div class="footer-col">',
         '        <h5>Resources</h5>',
         '        <ul>',
+        '          <li><a href="/architecture">Architecture</a></li>',
+        '          <li><a href="/security">Security &amp; Compliance</a></li>',
+        '          <li><a href="/integrations">Integrations</a></li>',
         '          <li><a href="/research.html">Research &amp; Whitepaper</a></li>',
         '          <li><a href="/media/Bolt_Strategic_Vision.pdf" target="_blank">Strategic Vision</a></li>',
         '          <li><a href="https://sparcle.app/legacy/whitepaper-print.html" target="_blank">Full Whitepaper</a></li>',
@@ -139,7 +167,7 @@
         '    </div>',
         '    <div class="footer-bottom">',
         '      <span>&copy; 2026 Sparcle, LLC. All rights reserved.</span>',
-        '      <span class="footer-legal">Patents Pending</span>',
+        '      <span class="footer-legal"><a href="/terms#ip" style="color:inherit;text-decoration:none;">Patents pending</a></span>',
         '    </div>',
         '  </div>',
         '</footer>'
@@ -177,26 +205,32 @@
 
     /* ------------------------------------------------------------------
        THEME INIT & TOGGLE
+       ------------------------------------------------------------------
+       Site default is LIGHT. Toggle is a binary light ↔ dark switch.
+       Saved preference (localStorage) wins; otherwise default to light.
+       OS preference is intentionally ignored — Sparcle's brand is the
+       blue/white look and we want a consistent first impression.
        ------------------------------------------------------------------ */
     (function initTheme() {
         var root = document.documentElement;
         var saved = localStorage.getItem('theme');
-        var mode = (saved === 'dark' || saved === 'light') ? saved : 'auto';
-        var labels = { auto: 'Switch to dark theme', dark: 'Switch to light theme', light: 'Use system theme' };
-        var cycles = { auto: 'dark', dark: 'light', light: 'auto' };
+        var mode = (saved === 'dark' || saved === 'light') ? saved : 'light';
 
         function applyMode(m) {
-            if (m === 'auto') {
-                var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                root.setAttribute('data-theme', sysDark ? 'dark' : 'light');
-            } else {
-                root.setAttribute('data-theme', m);
-            }
+            root.setAttribute('data-theme', m);
+        }
+
+        function nextMode(current) {
+            return current === 'dark' ? 'light' : 'dark';
+        }
+
+        function nextLabel(current) {
+            return current === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
         }
 
         function updateBtn(btn, m) {
             btn.setAttribute('data-mode', m);
-            btn.setAttribute('aria-label', labels[m]);
+            btn.setAttribute('aria-label', nextLabel(m));
         }
 
         applyMode(mode);
@@ -205,24 +239,13 @@
         if (btn) {
             updateBtn(btn, mode);
             btn.addEventListener('click', function () {
-                var current = btn.getAttribute('data-mode') || 'auto';
-                var next = cycles[current];
-                if (next === 'auto') {
-                    localStorage.removeItem('theme');
-                } else {
-                    localStorage.setItem('theme', next);
-                }
+                var current = btn.getAttribute('data-mode') || 'light';
+                var next = nextMode(current);
+                localStorage.setItem('theme', next);
                 applyMode(next);
                 updateBtn(btn, next);
             });
         }
-
-        // Sync with OS changes when in auto mode
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-            if (!localStorage.getItem('theme')) {
-                root.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-            }
-        });
     }());
 
     /* ------------------------------------------------------------------

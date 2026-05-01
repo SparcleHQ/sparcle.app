@@ -54,13 +54,13 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
 
           <!-- ── Bolt Enterprise Trial (PRIMARY) ── -->
           <div class="product-main download-edition--primary">
-            <span class="product-badge product-badge--accent">7-Day Trial &middot; Recommended</span>
             <div class="product-header">
               <img src="/images/bolt-logo.svg" alt="Bolt Enterprise" class="product-logo-img" width="56" height="56">
               <div>
                 <h3>Bolt Enterprise</h3>
                 <p class="product-subtitle">Full Platform &mdash; BYO Everything</p>
               </div>
+              <span class="product-badge product-badge--accent">7-Day Trial<span class="product-badge-suffix"> &middot; Recommended</span></span>
             </div>
             <p class="product-intro">
               The full enterprise platform. Bring your own identity provider, email, calendar,
@@ -156,32 +156,29 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
 
           <!-- ── Bolt Personal (SECONDARY, smaller, below) ── -->
           <div class="product-secondary download-edition--secondary">
-            <div class="download-edition-secondary-row">
-              <div class="download-edition-secondary-info">
-                <span class="product-badge" style="background:#16a34a;color:#fff;border-color:#16a34a;">FREE FOREVER</span>
-                <div class="product-header">
-                  <img src="/images/bolt-logo.svg" alt="Bolt Personal" class="product-logo-img" width="44" height="44">
-                  <div>
-                    <h3>Bolt Personal</h3>
-                    <p class="product-subtitle">Local AI desktop suite &mdash; no login, no cloud, BYO API key</p>
-                  </div>
-                </div>
-                <p class="product-intro">
-                  App launcher, clipboard history, file browser, terminal, and an AI agent that
-                  works with your files. Same desktop suite as Enterprise, minus the org-wide
-                  integrations. Free forever.
-                </p>
-                <ul class="download-edition-inline-features">
-                  <li>App launcher</li>
-                  <li>Clipboard history</li>
-                  <li>File browser + terminal</li>
-                  <li>AI chat &amp; web lookup</li>
-                  <li>BYO API key (Gemini free tier works)</li>
-                  <li>macOS &middot; Linux &middot; Windows</li>
-                </ul>
+            <div class="product-header">
+              <img src="/images/bolt-logo.svg" alt="Bolt Personal" class="product-logo-img" width="44" height="44">
+              <div>
+                <h3>Bolt Personal</h3>
+                <p class="product-subtitle">Local AI desktop suite &mdash; no login, no cloud, BYO API key</p>
               </div>
+              <span class="product-badge" style="background:#16a34a;color:#fff;border-color:#16a34a;">FREE FOREVER</span>
+            </div>
+            <p class="product-intro">
+              App launcher, clipboard history, file browser, terminal, and an AI agent that
+              works with your files. Same desktop suite as Enterprise, minus the org-wide
+              integrations. Free forever.
+            </p>
+            <ul class="download-edition-inline-features">
+              <li>App launcher</li>
+              <li>Clipboard history</li>
+              <li>File browser + terminal</li>
+              <li>AI chat &amp; web lookup</li>
+              <li>BYO API key (Gemini free tier works)</li>
+              <li>macOS &middot; Linux &middot; Windows</li>
+            </ul>
 
-              <div class="download-edition-secondary-cta download-section">
+            <div class="download-section">
                 <div class="dl-tabs">
                   <button class="dl-tab dl-tab--active" data-platform="macos">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
@@ -230,7 +227,6 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
                   <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt</p>
                 </div>
               </div>
-            </div>
           </div>
         </div>
 
@@ -343,47 +339,73 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
     border-color: var(--brand-primary) !important;
   }
 
-  /* Secondary card: Personal. Compact two-column at desktop, info left + CTA right.
-     Visually de-emphasized: no accent shadow, smaller typography, neutral border. */
+  /* Place the product badge on the same row as the icon + title within the
+     product-header. Override the global absolute corner placement so it flows
+     inline; pin it to the right edge of the row with margin-left: auto. */
+  .download-edition--primary .product-header,
+  .download-edition--secondary .product-header {
+    flex-wrap: wrap;
+  }
+  /* Allow the title/subtitle block (the div between the icon and the badge) to
+     shrink so the badge stays on the same row even when the subtitle is long.
+     The subtitle then wraps to multiple lines instead of pushing the badge down. */
+  .download-edition--primary .product-header > div:not(.product-badge):not(.product-logo-img),
+  .download-edition--secondary .product-header > div:not(.product-badge):not(.product-logo-img) {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .download-edition--primary .product-header .product-badge,
+  .download-edition--secondary .product-header .product-badge {
+    position: static;
+    top: auto;
+    right: auto;
+    margin-left: auto;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .download-edition--primary .product-header .product-badge,
+    .download-edition--secondary .product-header .product-badge {
+      font-size: 0.65rem;
+      padding: 0.35rem 0.7rem;
+      letter-spacing: 0.08em;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .download-edition--primary .product-header .product-badge,
+    .download-edition--secondary .product-header .product-badge {
+      font-size: 0.6rem;
+      padding: 0.3rem 0.6rem;
+      letter-spacing: 0.06em;
+    }
+    .product-badge-suffix {
+      display: none;
+    }
+  }
+
+  /* Secondary card: Personal. Same stacked layout as primary, just visually
+     de-emphasized: no accent shadow, smaller header type, neutral border. */
   .download-edition--secondary {
     padding: 1.75rem 2rem;
     background: var(--bg-surface);
     border-color: var(--border-subtle);
   }
-  .download-edition-secondary-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem 2.5rem;
-    align-items: stretch;
-  }
-  .download-edition-secondary-info {
-    flex: 1 1 360px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .download-edition-secondary-info .product-header {
-    margin: 0;
-  }
-  .download-edition-secondary-info h3 {
+  .download-edition--secondary h3 {
     font-size: 1.25rem;
-    margin: 0;
   }
-  .download-edition-secondary-info .product-subtitle {
+  .download-edition--secondary .product-subtitle {
     font-size: 0.85rem;
-    color: var(--text-muted);
-    margin: 0.15rem 0 0;
   }
-  .download-edition-secondary-info .product-intro {
+  .download-edition--secondary .product-intro {
     font-size: 0.9rem;
-    color: var(--text-body);
     line-height: 1.6;
-    margin: 0;
   }
   .download-edition-inline-features {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 2rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem 0.6rem;
@@ -397,16 +419,9 @@ import SectionHeader from "../components/marketing/SectionHeader.astro";
     border-radius: 999px;
     line-height: 1.3;
   }
-  .download-edition-secondary-cta {
-    flex: 1 1 320px;
-    border-top: none;
-    padding-top: 0;
-    margin-top: 0;
-  }
 
   @media (max-width: 720px) {
     .download-edition--secondary { padding: 1.5rem 1.25rem; }
-    .download-edition-secondary-row { gap: 1.25rem; }
   }
 
   /* Download CTA section inside product cards */

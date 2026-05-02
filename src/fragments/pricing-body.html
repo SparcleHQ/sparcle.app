@@ -1404,6 +1404,8 @@
                         <option value="500+">500+</option>
                     </select>
                 </div>
+                <div class="contact-form-group" id="contactTurnstileWrap"></div>
+                <p class="contact-privacy-note">Submissions are emailed to Sparcle. We don&rsquo;t share or sell.</p>
                 <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">Send Request</button>
             </div>
             <div id="contactFormStatus" class="contact-form-status"></div>
@@ -1420,6 +1422,21 @@
     var contactInterest = document.getElementById('contactInterest');
     var contactSubmit  = document.getElementById('contactSubmitBtn');
     var contactTitle   = document.getElementById('contactModalTitle');
+    var turnstileWrap  = document.getElementById('contactTurnstileWrap');
+    var turnstileWidgetId = null;
+
+    function renderTurnstile() {
+        var siteKey = (window.SPARCLE_CONFIG && window.SPARCLE_CONFIG.turnstileSiteKey) || '';
+        if (!siteKey || !window.turnstile || !turnstileWrap) return;
+        if (turnstileWidgetId !== null) {
+            try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
+            return;
+        }
+        turnstileWidgetId = window.turnstile.render(turnstileWrap, {
+            sitekey: siteKey,
+            theme: 'auto'
+        });
+    }
 
     function openContactModal(interest) {
         contactInterest.value = interest || 'General Inquiry';
@@ -1432,11 +1449,21 @@
         setTimeout(function() {
             document.getElementById('contactName').focus();
         }, 100);
+        var attempts = 0;
+        var iv = setInterval(function() {
+            if (window.turnstile || attempts++ > 40) {
+                clearInterval(iv);
+                renderTurnstile();
+            }
+        }, 100);
     }
 
     function closeContactModal() {
         contactOverlay.classList.remove('open');
         contactForm.reset();
+        if (turnstileWidgetId !== null && window.turnstile) {
+            try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
+        }
     }
 
     contactOverlay.addEventListener('click', function(e) {
@@ -1451,6 +1478,17 @@
 
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
+
+        var token = '';
+        if (window.turnstile && turnstileWidgetId !== null) {
+            try { token = window.turnstile.getResponse(turnstileWidgetId) || ''; } catch (err) {}
+        }
+        if (!token) {
+            contactStatus.className = 'contact-form-status show error';
+            contactStatus.innerHTML = '<p>Please complete the verification challenge.</p>';
+            return;
+        }
+
         contactSubmit.disabled = true;
         contactSubmit.textContent = 'Sending\u2026';
 
@@ -1459,17 +1497,18 @@
             email: document.getElementById('contactEmail').value.trim(),
             company: document.getElementById('contactCompany').value.trim(),
             teamSize: document.getElementById('contactTeamSize').value,
-            interest: contactInterest.value
+            interest: contactInterest.value,
+            turnstileToken: token
         };
 
-        var FORM_URL = 'https://script.google.com/macros/s/AKfycbzYbbgDcMm_9NbNKyKek7BTQT7rzsE4OaaVXNo926hGkxAFD5jOt0IXPXFJVWE7GDGe/exec';
-
-        fetch(FORM_URL, {
+        fetch('/api/contact', {
             method: 'POST',
-            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        }).then(function() {
+        }).then(function(r) {
+            return r.json().then(function(data) { return { ok: r.ok, data: data }; });
+        }).then(function(result) {
+            if (!result.ok || !result.data || !result.data.ok) throw new Error('send_failed');
             contactFields.style.display = 'none';
             contactStatus.className = 'contact-form-status show';
             contactStatus.innerHTML =
@@ -1477,6 +1516,11 @@
                 '<h4>Request Sent!</h4>' +
                 '<p>We\u2019ll get back to you within one business day.</p>';
         }).catch(function() {
+            contactSubmit.disabled = false;
+            contactSubmit.textContent = 'Send Request';
+            if (window.turnstile && turnstileWidgetId !== null) {
+                try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
+            }
             contactFields.style.display = 'none';
             contactStatus.className = 'contact-form-status show';
             contactStatus.innerHTML =

@@ -300,6 +300,22 @@
        SHARED CONTACT MODAL
        Only inject if the page doesn't already have one (pricing/index have theirs)
        ------------------------------------------------------------------ */
+    var sharedTurnstileWidgetId = null;
+
+    function sharedRenderTurnstile() {
+        var siteKey = (window.SPARCLE_CONFIG && window.SPARCLE_CONFIG.turnstileSiteKey) || '';
+        var wrap = document.getElementById('contactTurnstileWrap');
+        if (!siteKey || !window.turnstile || !wrap) return;
+        if (sharedTurnstileWidgetId !== null) {
+            try { window.turnstile.reset(sharedTurnstileWidgetId); } catch (e) {}
+            return;
+        }
+        sharedTurnstileWidgetId = window.turnstile.render(wrap, {
+            sitekey: siteKey,
+            theme: 'auto'
+        });
+    }
+
     if (!document.getElementById('contactModalOverlay')) {
         var modalHTML = [
             '<div id="contactModalOverlay" class="contact-modal-overlay" role="dialog" aria-modal="true" aria-label="Contact form">',
@@ -314,6 +330,8 @@
             '        <div class="contact-form-group"><label for="contactEmail">Work Email</label><input type="email" id="contactEmail" name="email" required placeholder="jane@company.com" autocomplete="email"></div>',
             '        <div class="contact-form-group"><label for="contactCompany">Company</label><input type="text" id="contactCompany" name="company" placeholder="Acme Corp" autocomplete="organization"></div>',
             '        <div class="contact-form-group"><label for="contactTeamSize">Team Size</label><select id="contactTeamSize" name="teamSize"><option value="">Select\u2026</option><option value="1-10">1\u201310</option><option value="11-50">11\u201350</option><option value="51-200">51\u2013200</option><option value="201-500">201\u2013500</option><option value="500+">500+</option></select></div>',
+            '        <div class="contact-form-group" id="contactTurnstileWrap"></div>',
+            '        <p class="contact-privacy-note">Submissions are emailed to Sparcle. We don\u2019t share or sell.</p>',
             '        <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">Send Request</button>',
             '      </div>',
             '      <div id="contactFormStatus" class="contact-form-status"></div>',
@@ -328,6 +346,18 @@
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
             var btn = document.getElementById('contactSubmitBtn');
+            var st  = document.getElementById('contactFormStatus');
+
+            var token = '';
+            if (window.turnstile && sharedTurnstileWidgetId !== null) {
+                try { token = window.turnstile.getResponse(sharedTurnstileWidgetId) || ''; } catch (err) {}
+            }
+            if (!token) {
+                st.className = 'contact-form-status show error';
+                st.innerHTML = '<p>Please complete the verification challenge.</p>';
+                return;
+            }
+
             btn.disabled = true;
             btn.textContent = 'Sending\u2026';
             var payload = {
@@ -335,18 +365,29 @@
                 email: document.getElementById('contactEmail').value.trim(),
                 company: document.getElementById('contactCompany').value.trim(),
                 teamSize: document.getElementById('contactTeamSize').value,
-                interest: document.getElementById('contactInterest').value
+                interest: document.getElementById('contactInterest').value,
+                turnstileToken: token
             };
-            var FORM_URL = 'https://script.google.com/macros/s/AKfycbzYbbgDcMm_9NbNKyKek7BTQT7rzsE4OaaVXNo926hGkxAFD5jOt0IXPXFJVWE7GDGe/exec';
-            fetch(FORM_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-            .then(function() {
+            fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(r) {
+                return r.json().then(function(data) { return { ok: r.ok, data: data }; });
+            })
+            .then(function(result) {
+                if (!result.ok || !result.data || !result.data.ok) throw new Error('send_failed');
                 document.getElementById('contactFormFields').style.display = 'none';
-                var st = document.getElementById('contactFormStatus');
                 st.className = 'contact-form-status show';
                 st.innerHTML = '<div class="status-icon">&#10003;</div><h4>Request Sent!</h4><p>We\u2019ll get back to you within one business day.</p>';
             }).catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Send Request';
+                if (window.turnstile && sharedTurnstileWidgetId !== null) {
+                    try { window.turnstile.reset(sharedTurnstileWidgetId); } catch (e) {}
+                }
                 document.getElementById('contactFormFields').style.display = 'none';
-                var st = document.getElementById('contactFormStatus');
                 st.className = 'contact-form-status show';
                 st.innerHTML = '<div class="status-icon">&#9993;</div><h4>Almost there!</h4><p>Please email us directly at <a href="mailto:bolt@sparcle.app" style="color:var(--brand-primary)">bolt@sparcle.app</a></p>';
             });
@@ -367,12 +408,22 @@
             if (btn) { btn.disabled = false; btn.textContent = 'Send Request'; }
             overlay.classList.add('open');
             setTimeout(function() { document.getElementById('contactName').focus(); }, 100);
+            var attempts = 0;
+            var iv = setInterval(function() {
+                if (window.turnstile || attempts++ > 40) {
+                    clearInterval(iv);
+                    sharedRenderTurnstile();
+                }
+            }, 100);
         };
         window.closeContactModal = function() {
             var overlay = document.getElementById('contactModalOverlay');
             if (overlay) overlay.classList.remove('open');
             var form = document.getElementById('contactForm');
             if (form) form.reset();
+            if (window.turnstile && sharedTurnstileWidgetId !== null) {
+                try { window.turnstile.reset(sharedTurnstileWidgetId); } catch (e) {}
+            }
         };
         document.addEventListener('click', function(e) {
             var overlay = document.getElementById('contactModalOverlay');

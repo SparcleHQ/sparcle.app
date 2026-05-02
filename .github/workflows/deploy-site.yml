@@ -1,9 +1,8 @@
 name: Deploy Astro site to GitHub Pages
 
+# Disabled: site now deploys via Cloudflare Pages on push to main.
+# Kept for emergency rollback only — trigger manually from the Actions tab if needed.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:

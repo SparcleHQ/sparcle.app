@@ -83,18 +83,32 @@ function Wait-ApiReadiness {
   )
 
   $portEnd = $BoltApiPortBase + $BoltApiPortRange - 1
+  # Try plaintext http:// first, then https:// (skipping cert validation for
+  # the locally-generated sidecar cert) since the API may be in TLS mode.
   $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
   while ($stopwatch.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
     for ($port = $BoltApiPortBase; $port -le $portEnd; $port++) {
       foreach ($path in @("/api/health", "/health")) {
-        try {
-          $response = Invoke-WebRequest -Uri "http://127.0.0.1:$port$path" -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
-          if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
-            return "http://127.0.0.1:$port$path"
+        foreach ($scheme in @("http", "https")) {
+          try {
+            $url = "${scheme}://127.0.0.1:$port$path"
+            $iwrParams = @{
+              Uri             = $url
+              UseBasicParsing = $true
+              TimeoutSec      = 2
+              ErrorAction     = "Stop"
+            }
+            if ($scheme -eq "https" -and (Get-Command Invoke-WebRequest).Parameters.ContainsKey("SkipCertificateCheck")) {
+              $iwrParams.SkipCertificateCheck = $true
+            }
+            $response = Invoke-WebRequest @iwrParams
+            if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300) {
+              return $url
+            }
           }
-        }
-        catch {
-          # keep probing
+          catch {
+            # keep probing
+          }
         }
       }
     }

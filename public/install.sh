@@ -44,11 +44,18 @@ wait_for_api_readiness() {
   api_url=""
   elapsed=0
 
+  # Try plaintext http:// first; fall back to https:// (with -k for the
+  # locally-generated sidecar cert) since the API may be in TLS mode.
   while [ "$elapsed" -lt "$timeout_seconds" ]; do
     for port in $(seq "$port_base" "$port_end"); do
       for path in /api/health /health; do
         if curl -fsS --max-time 1 "http://127.0.0.1:${port}${path}" >/dev/null 2>&1; then
           api_url="http://127.0.0.1:${port}${path}"
+          printf '%s\n' "$api_url"
+          return 0
+        fi
+        if curl -fskS --max-time 1 "https://127.0.0.1:${port}${path}" >/dev/null 2>&1; then
+          api_url="https://127.0.0.1:${port}${path}"
           printf '%s\n' "$api_url"
           return 0
         fi

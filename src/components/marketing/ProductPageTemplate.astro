@@ -73,7 +73,7 @@ function renderIcon(iconId: string | undefined): string {
 
           {content.videoUrl && (
             <div class="product-video-wrap" style="margin-bottom: 2rem;">
-              <video controls preload="metadata">
+              <video controls playsinline preload="metadata">
                 <source src={content.videoUrl} type="video/mp4" />
                 Your browser does not support the video element.
               </video>
@@ -185,7 +185,7 @@ function renderIcon(iconId: string | undefined): string {
 
             {secondContent.videoUrl && (
               <div class="product-video-wrap" style="margin-bottom: 2rem;">
-                <video controls preload="metadata">
+                <video controls playsinline preload="metadata">
                   <source src={secondContent.videoUrl} type="video/mp4" />
                   Your browser does not support the video element.
                 </video>

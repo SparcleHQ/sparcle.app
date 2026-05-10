@@ -72,13 +72,13 @@ export interface PricingPageContent {
 export const boltProductContent: ProductPageContent = {
   title: "Bolt — Patent-pending Enterprise Agent Runtime | Sparcle",
   description:
-    "Bolt is the patent-pending enterprise agent runtime — durable agents, MCP-native architecture, multi-tier caching, 8-layer security, priority scoring engine, and adaptive overlay UI. Deployed inside your perimeter.",
+    "Bolt is the patent-pending enterprise agent runtime — durable agents, MCP-native architecture, multi-tier caching, multi-layer security, priority scoring engine, and adaptive overlay UI. Deployed inside your perimeter.",
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
   productKicker: "Enterprise Agent Platform",
   productHeadline: "The agent your security team will actually let you ship.",
   productIntro:
-    "Bolt unifies your work — email, calendar, tasks, docs, tickets, code — through one AI agent that runs inside your own perimeter, with your own LLM, and your IP protected at every layer. Connected to 60+ enterprise systems out of the box. Patent-pending architecture; deep details under NDA.",
+    "Bolt unifies your work — email, calendar, tasks, docs, tickets, code — through one AI agent that runs inside your own perimeter, with your own LLM, and your IP protected at every layer. Connects to your enterprise systems via the open Model Context Protocol. Patent-pending architecture; deep details under NDA.",
   primaryCtaLabel: "Schedule Architecture Review",
   primaryCtaHref: "#contact:Bolt Architecture Review",
   secondaryCtaLabel: "Pricing & Tiers",
@@ -89,25 +89,25 @@ export const boltProductContent: ProductPageContent = {
   badge: "Enterprise",
   videoUrl: "/media/BoltSlides_compact.mp4",
   checklistHighlights: [
-    "<strong>Inside your perimeter, day one</strong> — self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Your data never leaves your network.",
+    "<strong>Inside your perimeter, day one</strong> — self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Your data stays on your infrastructure.",
     "<strong>Zero token markup</strong> — bring your own API keys; burn down your existing cloud commits without per-token surcharge",
-    "<strong>60+ hrs/employee/year recovered</strong> — context-switching savings alone deliver a 10× return at $30/seat",
+    "<strong>Reclaim productive time</strong> — eliminate context-switching and tool-hopping with one agent across your stack",
     "<strong>BYO LLM</strong> — OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model. Hot-swappable.",
-    "<strong>HIPAA / SOX / ITAR / GDPR deployable</strong> — architecture built for regulated environments from day one",
-    "<strong>60+ enterprise integrations</strong> — open Model Context Protocol, no vendor lock-in",
+    "<strong>Designed for regulated industries</strong> — HIPAA, GDPR, DPDPA, sovereign-AI workflows; architecture built for regulated environments from day one",
+    "<strong>Open MCP integrations</strong> — connect to your enterprise systems via Model Context Protocol; no vendor lock-in",
     "<strong>Annual contracts, 25-seat minimum</strong> — Bolt Absolute starts at $30/seat/month. Founding Customer pricing available through 2026.",
   ],
   highlights: [
     {
       title: "Inside your perimeter, day one",
       detail:
-        "Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Identity integrates with SAML, OIDC, JWT, and your existing IdP. Architecture deployable for HIPAA, SOX, ITAR, and GDPR — your data never leaves your network.",
+        "Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Identity integrates with SAML, OIDC, JWT, and your existing IdP. Architecture designed for HIPAA, GDPR, and DPDPA workflows — your data stays on your infrastructure.",
       icon: "shield",
     },
     {
       title: "Zero token markup. Real ROI.",
       detail:
-        "Bring your own API keys (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model). No per-token surcharge. Customers recover an average of 60+ hours per employee per year — a 10× return at $30/seat.",
+        "Bring your own API keys (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model). No per-token surcharge. Eliminate context-switching across your stack and reclaim productive time, with measurable per-seat ROI on a defensible cost base.",
       icon: "trending-up",
     },
     {
@@ -117,9 +117,9 @@ export const boltProductContent: ProductPageContent = {
       icon: "layers",
     },
     {
-      title: "60+ integrations. No vendor lock-in.",
+      title: "Open MCP integrations. No vendor lock-in.",
       detail:
-        "Built on the open Model Context Protocol. Out-of-the-box connections to Slack, Jira, Confluence, Salesforce, GitHub, Notion, Drive, M365, and more. Sub-second responses, durable agents, three operating models from self-hosted to fully managed.",
+        "Built on the open Model Context Protocol. Out-of-the-box connections to Slack, Jira, Confluence, Salesforce, GitHub, Notion, Drive, M365, and a growing roster. Durable agents, three operating models from self-hosted to fully managed.",
       icon: "code",
     },
   ],
@@ -170,12 +170,12 @@ export const boltProductContent: ProductPageContent = {
     {
       title: "What does Bolt save my team in real terms?",
       detail:
-        "Customers report 60+ hours per employee per year recovered from context-switching alone. At $60/hr fully loaded labor, that's roughly $3,600/seat/year of recovered productivity vs $360/seat/year for Bolt Absolute — a 10× return. ROI math is conservative and excludes incident-prevention and compliance-cost avoidance.",
+        "Bolt eliminates context-switching across email, calendar, tasks, docs, tickets, and code — collapsing tool-hopping into a single agent surface. Per-seat ROI scales with the number of systems your team uses daily and is most measurable as recovered productive time. Detailed ROI methodology available on request.",
     },
     {
       title: "Does Bolt require data migration?",
       detail:
-        "No. Bolt connects to your existing systems through 60+ MCP integrations and direct connectors. Teams keep working in their existing tools — Bolt is the unifying agent layer above them, not a replacement.",
+        "No. Bolt connects to your existing systems through open MCP integrations and direct connectors. Teams keep working in their existing tools — Bolt is the unifying agent layer above them, not a replacement.",
     },
     {
       title: "How is our IP protected when we use external LLMs?",

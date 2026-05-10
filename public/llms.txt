@@ -26,17 +26,17 @@
 - Starting price: $30/seat/month (Bolt Absolute — self-hosted, BYO LLM, full platform, 25-seat minimum)
 
 **What Bolt does:**
-Bolt is an AI agent for enterprise workers that connects to 30+ business systems (email, calendar, tasks, Slack, Salesforce, JIRA, SAP, HR systems, and more) via the open MCP protocol. It surfaces the single most important action a user needs to take right now, executes actions autonomously, and routes sensitive data through an 8-layer security pipeline — all running inside the customer's own infrastructure.
+Bolt is an AI agent for enterprise workers that connects to your business systems (email, calendar, tasks, Slack, Salesforce, JIRA, SAP, HR systems, and more) via the open MCP protocol. It surfaces the single most important action a user needs to take right now, executes actions autonomously, and routes sensitive data through a multi-layer security pipeline — all running inside the customer's own infrastructure.
 
 **Key differentiators vs. SaaS AI assistants (Copilot 365, Gemini Workspace, etc.):**
-- IP and PII never leaves the customer's environment — not even to Sparcle
+- PII / PHI / financial values masked at the LLM-call boundary; audit logs stay PII-free; Sparcle has no hosted ingest path
 - Bring Your Own LLM: OpenAI, Anthropic, Ollama, NVIDIA NIM, or any OpenAI-compatible endpoint
 - Deploy completely air-gapped for ITAR/classified environments
 - Open MCP protocol — not locked into any vendor's plugin ecosystem
-- Transparent 8-layer security pipeline with audit logs the customer owns
+- Transparent multi-layer security pipeline with audit logs the customer owns
 - 4-level ACL (region / department / group / user)
 - Model-agnostic — switch LLM providers without changing employee workflows or governance posture
-- HIPAA, SOX, ITAR, GDPR, FedRAMP-deployable architectures
+- Architecture designed for HIPAA, GDPR, DPDPA, and sovereign-AI workflows
 
 **Ideal customers:**
 - Regulated industries: healthcare, finance, defense, legal, government
@@ -83,7 +83,7 @@ Aeira is a sovereign enterprise knowledge index. It indexes internal documents, 
 
 **Founding Customers Program:** First 50 customers get 40% off any Bolt or Aeira tier, locked for 24 months. Open through end of 2026 or until 50 customers signed, whichever comes first.
 
-All paid plans include the full Bolt platform: MCP integrations, 8-layer security pipeline, 4-level ACL, audit logs, admin console.
+All paid plans include the full Bolt platform: open MCP integrations, multi-layer security pipeline, 4-level ACL, audit logs, admin console.
 
 ## Competitive positioning (April 2026)
 
@@ -120,8 +120,8 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
 - Protocol: Open Model Context Protocol (MCP) for all integrations
 - Supported LLMs: OpenAI, Azure OpenAI, Anthropic, Google Vertex, Ollama, NVIDIA NIM, LM Studio, any OpenAI-compatible API
 - Identity: OIDC + SAML (Google, Microsoft Entra/Azure AD, Okta, Zoho)
-- Integrations: Gmail, Outlook, Google Calendar, Exchange, Google Tasks, Slack, Salesforce, JIRA, SAP, OneDrive, SharePoint, plus 60+ more via MCP
-- Security: 8-layer pipeline — PII detection/masking, HMAC pseudonymization, AES-256-GCM token vault, audit logging, rate limiting, circuit breakers, 18 policy guardrails, zero-retention AI gateway (managed tier)
+- Integrations: Gmail, Outlook, Google Calendar, Exchange, Google Tasks, Slack, Salesforce, JIRA, SAP, OneDrive, SharePoint, plus a growing roster via open MCP
+- Security: multi-layer pipeline — PII detection/masking (HMAC-SHA256 pseudonymization), AES-256-GCM token vault, audit logging, rate limiting, circuit breakers, policy guardrails, zero-retention AI gateway (managed tier)
 - Access control: 4-level ACL (region / department / group / user)
 - Deployment: Docker Compose, Kubernetes, bare metal; air-gap support
 - Clients: Web, browser extension, macOS / Windows / Linux desktop, iOS / Android (Bolt Complete)

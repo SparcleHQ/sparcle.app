@@ -1,0 +1,25 @@
+Sparcle Marketing Site
+Copyright (c) 2024-2026 Sparcle LLC. All rights reserved.
+
+This product is proprietary software developed by Sparcle LLC and is
+distributed under the Sparcle Proprietary License; see LICENSE.
+
+================================================================================
+
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+This project incorporates third-party open source components. The full list of
+runtime dependencies and their licenses is enumerated in THIRD_PARTY_LICENSES.txt
+(generated from package-lock.json).
+
+For full license texts, see THIRD_PARTY_LICENSES.txt and package-lock.json.
+
+To obtain source code for open source components where required by license
+terms, please contact: bolt@sparcle.app
+
+================================================================================
+
+TRADEMARK NOTICES
+
+"Sparcle", "Bolt", and "Aeira" are trademarks of Sparcle LLC.
+All other trademarks are property of their respective owners.

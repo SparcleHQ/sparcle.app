@@ -1,0 +1,64 @@
+Sparcle Proprietary License
+
+Copyright (c) 2024-2026 Sparcle LLC. All rights reserved.
+
+NOTICE: This software and associated documentation files (the "Software") are
+proprietary and confidential to Sparcle LLC. Unauthorized copying, modification,
+distribution, or use of this Software, via any medium, is strictly prohibited.
+
+GRANT OF LICENSE
+
+Subject to the terms of a valid Sparcle Software License Agreement (covering
+the applicable Sparcle product, including but not limited to Bolt and Aeira)
+or Trial License issued by Sparcle LLC, you are granted a limited,
+non-exclusive, non-transferable, revocable license to use the Software solely
+for your internal business purposes.
+
+RESTRICTIONS
+
+You may NOT:
+- Copy, modify, or create derivative works of the Software
+- Reverse engineer, decompile, or disassemble the Software
+- Distribute, sublicense, or transfer the Software to any third party
+- Remove or alter any proprietary notices or labels on the Software
+- Use the Software to provide services to third parties (SaaS/hosting)
+- Use the Software after license expiration or termination
+
+TERMINATION
+
+This license terminates automatically if you breach any term. Upon termination,
+you must destroy all copies of the Software.
+
+WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL SPARCLE LLC BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY ARISING FROM THE USE OF THE SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES.
+
+THIRD-PARTY COMPONENTS
+
+This Software may include third-party open source components. Where present,
+see NOTICE.txt and THIRD_PARTY_LICENSES.txt in this repository for attributions
+and applicable license terms.
+
+ASSIGNMENT
+
+This license, and all rights and obligations of Sparcle LLC hereunder, may be
+assigned or transferred to any successor entity (including in connection with
+a conversion to a corporation, merger, or sale of assets) without further
+consent from or notice to licensees.
+
+TRADEMARKS
+
+"Sparcle", "Bolt", and "Aeira" are trademarks of Sparcle LLC. No right or
+license to use any Sparcle trademark is granted under this license.
+
+CONTACT
+
+For licensing and support inquiries: bolt@sparcle.app

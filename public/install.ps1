@@ -394,20 +394,23 @@ Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
 Save-PgRuntimeSources -AppIdentifier $AppIdentifier
 
 # ── Launch ─────────────────────────────────────────────────────────────────
-$ExeName = ($AppName -replace ' ', '-') + ".exe"
+# Tauri uses the Cargo crate name for the binary (`bolt.exe`), not the
+# productName — same quirk Mac install.sh documents at install_macos().
+# The install *directory* is productName ("Bolt Enterprise", "Bolt Personal",
+# "Bolt"); the .exe inside is always `bolt.exe`.
+$ExeName = "bolt.exe"
 $ProgramFiles = $env:ProgramFiles
 $LocalPrograms = Join-Path $env:LOCALAPPDATA "Programs"
 $SearchRoots = @(
   (Join-Path $ProgramFiles $AppName),
-  (Join-Path $LocalPrograms $AppName),
-  $ProgramFiles,
-  $LocalPrograms
+  (Join-Path $LocalPrograms $AppName)
 )
 $ExePath = $null
 foreach ($root in $SearchRoots) {
-  if (Test-Path $root) {
-    $ExePath = Get-ChildItem -Path $root -Filter $ExeName -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($ExePath) { break }
+  $candidate = Join-Path $root $ExeName
+  if (Test-Path $candidate) {
+    $ExePath = Get-Item $candidate
+    break
   }
 }
 
@@ -418,8 +421,19 @@ if ($ExePath) {
   Start-Process $ExePath.FullName
   Verify-RuntimeContract
 } else {
-  # Fallback: try Start Menu shortcut
-  $Shortcut = Get-ChildItem "$env:APPDATA\Microsoft\Windows\Start Menu\Programs" -Filter "$AppName.lnk" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+  # Fallback: try Start Menu shortcut in both user and machine locations.
+  # NSIS perMachine installs put shortcuts under %ProgramData%, not %APPDATA%.
+  $ShortcutRoots = @(
+    (Join-Path $env:APPDATA     'Microsoft\Windows\Start Menu\Programs'),
+    (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs')
+  )
+  $Shortcut = $null
+  foreach ($r in $ShortcutRoots) {
+    if (Test-Path $r) {
+      $Shortcut = Get-ChildItem $r -Filter "$AppName.lnk" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+      if ($Shortcut) { break }
+    }
+  }
   if ($Shortcut) {
     Info "Launching $AppName..."
     Start-Process $Shortcut.FullName

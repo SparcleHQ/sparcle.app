@@ -183,6 +183,27 @@ function Save-PgRuntimeSources {
   Info "Persisted PostgreSQL sources config: $configFile"
 }
 
+function Stop-BoltProcesses {
+  # NSIS /S silently skips files that are in use, so an "upgrade" over a
+  # running Bolt is a no-op for any locked binary — most painfully the
+  # bolt-api sidecar, which stays at the first-installed version forever
+  # while the user sees "Installed successfully" on every retry.
+  # Kill known image names defensively before invoking the installer.
+  $names = @('bolt', 'bolt-api', 'Bolt', 'Bolt Personal', 'Bolt Enterprise')
+  $killed = $false
+  foreach ($n in $names) {
+    $procs = Get-Process -Name $n -ErrorAction SilentlyContinue
+    if ($procs) {
+      $procs | Stop-Process -Force -ErrorAction SilentlyContinue
+      $killed = $true
+    }
+  }
+  if ($killed) {
+    Start-Sleep -Milliseconds 500
+    Info "Stopped running Bolt processes so files can be replaced"
+  }
+}
+
 function Is-Administrator {
   try {
     $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -321,6 +342,7 @@ Unblock-File -Path $DlPath -ErrorAction SilentlyContinue
 Ok "Installer trusted — no SmartScreen warnings"
 
 # ── Install ─────────────────────────────────────────────────────────────────
+Stop-BoltProcesses
 Info "Installing $AppName..."
 $isAdmin = Is-Administrator
 

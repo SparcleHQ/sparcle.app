@@ -1251,9 +1251,10 @@
                     </div>
                     <div class="faq-item">
                         <h3>What search technology powers Aeira?</h3>
-                        <p>Paid tiers use hybrid search combining Elasticsearch (BM25 keyword matching) with
-                            Weaviate (semantic vector search using 768-dim embeddings). Every result is
-                            ACL-filtered per user. Catalog uses lightweight keyword search only.</p>
+                        <p>Paid tiers use hybrid search combining Postgres full-text search (BM25 keyword
+                            matching) with pgvector (semantic vector search). Every result is ACL-filtered per
+                            user. Catalog uses lightweight keyword search only. Dynamic+ tiers can opt into
+                            Quickwit splits over object storage for very large corpora.</p>
                     </div>
                     <div class="faq-item">
                         <h3>How do I get data into Aeira?</h3>

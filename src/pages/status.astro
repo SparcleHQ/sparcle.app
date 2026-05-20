@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Status | Sparcle"
+  description="Bolt and Aeira system status."
+  canonical="https://sparcle.app/status"
+>
+  <main class="page-security">
+    <section class="sec-hero">
+      <div class="container">
+        <p class="section-eyebrow">System status</p>
+        <h1>All systems operational.</h1>
+        <p class="sec-lede">
+          A live status dashboard is in preparation. For pilot and production incidents, your
+          deployment includes the standalone audit verifier and Prometheus metrics endpoint;
+          your operations team monitors those directly. For Sparcle-managed services, write
+          to <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

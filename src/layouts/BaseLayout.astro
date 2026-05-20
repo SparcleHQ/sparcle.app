@@ -18,6 +18,13 @@ const {
 } = Astro.props;
 
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
+// Cache-busting version string for /js/shared-nav.js (and other public
+// assets we want to force-refresh on edit). Bump this whenever you edit
+// public/js/shared-nav.js — Cloudflare's edge cache otherwise serves the
+// stale file for up to 24h (cache-control: max-age=86400). The dashboard
+// cache-purge works too, but bumping this is the zero-click path.
+const sharedNavVersion = "20260520a";
 ---
 
 <!doctype html>
@@ -220,6 +227,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
     <main id="main-content">
       <slot />
     </main>
-    <script is:inline src="/js/shared-nav.js"></script>
+    <script is:inline src={`/js/shared-nav.js?v=${sharedNavVersion}`}></script>
   </body>
 </html>

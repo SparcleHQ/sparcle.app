@@ -10,23 +10,23 @@
                 </div>
                 <div class="s-tag">Aeira · Enterprise Index · 2026</div>
                 <h1 class="s-h" style="font-size:clamp(3rem,7vw,5.5rem)">The <span class="grad">ACL-aware</span><br>Enterprise Index</h1>
-                <p class="s-sub" style="text-align:center;margin:1.25rem auto;max-width:620px">Aeira powers discovery and grounding with a consistent API and authorization model — from lightweight catalog to high-governance federation. One contract. One ACL model. Every scale.</p>
+                <p class="s-sub" style="text-align:center;margin:1.25rem auto;max-width:620px">Aeira powers discovery and grounding with a patent-pending 4-axis ACL, a sealed audit chain your auditor can verify without us, and 103+ in-house connectors &mdash; all inside your perimeter, with your LLM. One contract. One ACL model. Every scale.</p>
                 <div class="stats" style="justify-content:center">
                     <div class="stat">
-                        <div class="n">4 Tiers</div>
-                        <div class="l">Catalog → Federated</div>
+                        <div class="n">4-axis</div>
+                        <div class="l">ACL &mdash; patent-pending</div>
                     </div>
                     <div class="stat">
-                        <div class="n">100K+</div>
-                        <div class="l">Records Indexed</div>
+                        <div class="n">103+</div>
+                        <div class="l">In-house connectors</div>
                     </div>
                     <div class="stat">
-                        <div class="n">4-Level</div>
-                        <div class="l">ACL Enforcement</div>
+                        <div class="n">BYO LLM</div>
+                        <div class="l">Your endpoint, your contract</div>
                     </div>
                     <div class="stat">
-                        <div class="n">1 API</div>
-                        <div class="l">Across All Tiers</div>
+                        <div class="n">Verifier</div>
+                        <div class="l">Customer-run audit chain</div>
                     </div>
                 </div>
             </div>
@@ -89,16 +89,20 @@
                 </div>
                 <div class="stats" style="margin-top:2rem">
                     <div class="stat">
+                        <div class="n">Inside</div>
+                        <div class="l">Your perimeter</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">BYO LLM</div>
+                        <div class="l">Your contract, your endpoint</div>
+                    </div>
+                    <div class="stat">
+                        <div class="n">103+</div>
+                        <div class="l">In-house connectors</div>
+                    </div>
+                    <div class="stat">
                         <div class="n">Hybrid</div>
-                        <div class="l">Keyword + Semantic</div>
-                    </div>
-                    <div class="stat">
-                        <div class="n">Stable</div>
-                        <div class="l">API Contract</div>
-                    </div>
-                    <div class="stat">
-                        <div class="n">JWT</div>
-                        <div class="l">Native Auth</div>
+                        <div class="l">Keyword + semantic</div>
                     </div>
                 </div>
             </div>
@@ -114,12 +118,13 @@
                 <div class="g2" style="margin-top:1rem; align-items: stretch;">
                     <div>
                         <div class="layer"><span class="ln">L1</span><span class="ll">JWT Validation</span><span class="ld">Authenticate every request with org identity</span></div>
-                        <div class="layer"><span class="ln">L2</span><span class="ll">ACL Engine</span><span class="ld">4-level: public · department · group · user</span></div>
+                        <div class="layer"><span class="ln">L2</span><span class="ll">ACL Engine &mdash; patent-pending</span><span class="ld">4-axis pre-filter (country · office · role-band · employment-type) + 4 access classes</span></div>
                         <div class="layer"><span class="ln">L3</span><span class="ll">Query Router</span><span class="ld">Keyword, semantic, or hybrid — auto-selected</span></div>
                         <div class="layer"><span class="ln">L4</span><span class="ll">Index Layer</span><span class="ld">Entity templates + custom types via API</span></div>
                         <div class="layer"><span class="ln">L5</span><span class="ll">Ingestion Pipeline</span><span class="ld">Bulk API · Async Kafka · CSV/YAML/JSON</span></div>
                         <div class="layer"><span class="ln">L6</span><span class="ll">Rate Limiting</span><span class="ld">Per-user quotas · sliding window · burst control</span></div>
-                        <div class="layer"><span class="ln">L7</span><span class="ll">Metrics &amp; Monitoring</span><span class="ld">Prometheus-native operational telemetry</span></div>
+                        <div class="layer"><span class="ln">L7</span><span class="ll">Audit chain</span><span class="ld">Sealed Merkle, Ed25519-signed, standalone verifier &mdash; auditor runs it themselves</span></div>
+                        <div class="layer"><span class="ln">L8</span><span class="ll">Metrics &amp; Monitoring</span><span class="ld">Prometheus-native operational telemetry</span></div>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:1rem">
                         <div class="card">
@@ -310,40 +315,46 @@
         <!-- ═══ SLIDE 8 — ACL & SECURITY ═══ -->
         <div class="slide" data-title="Security & ACL Model">
             <div class="s-content">
-                <div class="s-tag">Security &amp; Authorization</div>
-                <h2 class="s-h">Permissions enforced <span class="grad">at the index level</span></h2>
-                <p class="s-sub">Aeira doesn't filter results after search — it enforces ACL during query execution. Users never see data they're not authorized to access, regardless of search strategy.</p>
+                <div class="s-tag">Security &amp; Authorization &middot; Patent-pending</div>
+                <h2 class="s-h">Patent-pending <span class="grad">4-axis ACL</span> + verifiable audit chain</h2>
+                <p class="s-sub">Aeira indexes ACL as a first-class dimension &mdash; every doc carries country, office, role-band, and employment-type restrictions that are evaluated at query time. 3 provisional patents filed. Every access decision is emitted to a sealed Merkle audit chain your auditor can verify without our cooperation.</p>
                 <div class="g2">
                     <div>
-                        <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem">
-                            <i data-lucide="shield-check" style="width:48px;height:48px;color:var(--g);margin-bottom:1rem"></i>
-                            <h3 style="font-size:1.3rem;margin-bottom:.5rem">4-Level ACL</h3>
-                            <p style="color:var(--t2)">Consistent authorization semantics across every tier — from Catalog to Federated.</p>
-                            <div class="badges" style="margin-top:.75rem;justify-content:center">
-                                <span class="badge g">Public</span>
-                                <span class="badge g">Department</span>
-                                <span class="badge g">Group</span>
-                                <span class="badge g">User</span>
+                        <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem">
+                            <i data-lucide="shield-check" style="width:40px;height:40px;color:var(--g);margin-bottom:.75rem"></i>
+                            <h3 style="font-size:1.1rem;margin-bottom:.4rem">4-axis ACL &mdash; patent-pending</h3>
+                            <p style="color:var(--t2);font-size:.85rem;margin-bottom:.5rem">Restrictions indexed at ingest. Documents not matching the requester's identity never enter the candidate set.</p>
+                            <div class="badges" style="margin-top:.4rem;justify-content:center">
+                                <span class="badge g">country</span>
+                                <span class="badge g">office</span>
+                                <span class="badge g">role-band</span>
+                                <span class="badge g">employment-type</span>
                             </div>
+                            <p style="color:var(--t2);font-size:.72rem;margin-top:.6rem;font-style:italic">Plus 4 access classes: Public &middot; Restricted &middot; Group &middot; User</p>
+                        </div>
+                        <div class="card" style="margin-top:.75rem;padding:1.25rem">
+                            <i data-lucide="file-check" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
+                            <h3 style="font-size:1rem">Standalone audit verifier</h3>
+                            <p style="font-size:.82rem">Sealed Merkle chain, Ed25519-signed, KMS-rooted. Your auditor runs the verifier binary themselves &mdash; no Sparcle cooperation required.</p>
                         </div>
                     </div>
                     <div>
                         <div class="g2" style="margin-top:0;grid-template-columns:1fr 1fr">
                             <div class="card"><i data-lucide="key" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
-                                <h3>JWT Native</h3>
-                                <p style="font-size:.78rem">Every request validated via JWT. Identity claims pass through from your IdP.</p>
+                                <h3>JWT native</h3>
+                                <p style="font-size:.78rem">Every request validated via JWT. Identity claims pass through from your IdP (Okta, Entra, OneLogin, Auth0, Google, Zoho, or any compliant OIDC / SAML 2.0).</p>
+                            </div>
+                            <div class="card"><i data-lucide="server" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
+                                <h3>Per-tenant CMK</h3>
+                                <p style="font-size:.78rem">Vault, AWS KMS, Azure Key Vault, or PKCS#11 HSM. Crypto-shred for HIPAA-aligned / GDPR Article 17 erasure &mdash; deleting the key destroys the derived data.</p>
                             </div>
                             <div class="card"><i data-lucide="globe" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
-                                <h3>Region-Aware</h3>
-                                <p style="font-size:.78rem">Enhanced+ tiers add location-based access control for multi-region compliance.</p>
+                                <h3>Per-region keyrings</h3>
+                                <p style="font-size:.78rem">Enhanced+ tiers add region-bound key residency. EU data can't be read from a US replica, even by a tenant admin.</p>
                             </div>
                             <div class="card"><i data-lucide="lock" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
-                                <h3>Namespace Isolation</h3>
-                                <p style="font-size:.78rem">Each tenant gets a dedicated namespace with independent access boundaries.</p>
-                            </div>
-                            <div class="card"><i data-lucide="refresh-cw" style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
-                                <h3>Consistent Upgrade</h3>
-                                <p style="font-size:.78rem">Same ACL semantics across all tiers. No rewrites when you scale.</p>
+                                <h3>Namespace isolation</h3>
+                                <p style="font-size:.78rem">Each tenant gets a dedicated namespace with independent access boundaries. Tenant_id mandatory in every storage call &mdash; no implicit-default path.</p>
                             </div>
                         </div>
                     </div>

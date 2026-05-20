@@ -1,24 +1,395 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Components shown on the status page. Single source of truth for the
+// page; edit this list to reflect current state.
+//
+// state: "operational" | "degraded" | "outage" | "maintenance"
+//
+// Scope: Sparcle-operated public-facing surfaces only. Customer
+// deployments (their Aeira cluster, Bolt sidecar, IdP, KMS, LLM
+// endpoint) run inside the customer perimeter and are monitored by the
+// customer's own ops team via the audit verifier + Prometheus
+// endpoint that ships with the product.
+
+interface Component {
+  name: string;
+  state: "operational" | "degraded" | "outage" | "maintenance";
+  detail: string;
+}
+
+const components: Component[] = [
+  {
+    name: "sparcle.app",
+    state: "operational",
+    detail: "Marketing site, documentation, pricing.",
+  },
+  {
+    name: "Download server",
+    state: "operational",
+    detail: "Bolt desktop installers (macOS, Linux, Windows).",
+  },
+  {
+    name: "Auto-updater channel",
+    state: "operational",
+    detail: "Signed update manifests for installed Bolt clients.",
+  },
+  {
+    name: "Chrome Web Store extension",
+    state: "operational",
+    detail: "Bolt browser extension distribution.",
+  },
+  {
+    name: "Contact form + email",
+    state: "operational",
+    detail: "Inquiries and NDA-document requests routed to bolt@sparcle.app.",
+  },
+];
+
+// Upstream dependencies whose status indirectly affects ours. Linked to
+// the vendor's own status page so users can verify independently.
+interface Upstream {
+  name: string;
+  detail: string;
+  href: string;
+}
+
+const upstream: Upstream[] = [
+  {
+    name: "Cloudflare",
+    detail: "DNS, CDN, edge functions, Turnstile.",
+    href: "https://www.cloudflarestatus.com/",
+  },
+  {
+    name: "GitHub",
+    detail: "Release hosting for Bolt installers and update manifests.",
+    href: "https://www.githubstatus.com/",
+  },
+  {
+    name: "Chrome Web Store",
+    detail: "Browser-extension distribution channel.",
+    href: "https://status.cloud.google.com/",
+  },
+  {
+    name: "Apple Developer",
+    detail: "macOS notarization service for Bolt desktop binaries.",
+    href: "https://developer.apple.com/system-status/",
+  },
+];
+
+// Recent incidents. Empty until a real incident occurs.
+// Schema preserved so the renderer has something to test against and
+// adding an incident is a single-object append.
+interface Incident {
+  id: string;
+  title: string;
+  status: "investigating" | "identified" | "monitoring" | "resolved";
+  startedAt: string; // ISO 8601
+  resolvedAt?: string;
+  narrative: string;
+}
+
+const incidents: Incident[] = [];
+
+// Overall state derived from worst component state.
+const stateRank = { operational: 0, maintenance: 1, degraded: 2, outage: 3 };
+type StateKey = keyof typeof stateRank;
+const overall: StateKey = components.reduce<StateKey>(
+  (worst, c) => (stateRank[c.state] > stateRank[worst] ? c.state : worst),
+  "operational",
+);
+
+const overallLabel: Record<StateKey, string> = {
+  operational: "All systems operational",
+  maintenance: "Scheduled maintenance",
+  degraded: "Degraded performance",
+  outage: "Service disruption",
+};
+
+const stateLabel: Record<StateKey, string> = {
+  operational: "Operational",
+  maintenance: "Maintenance",
+  degraded: "Degraded",
+  outage: "Outage",
+};
+
+const lastUpdated = "2026-05-20"; // YYYY-MM-DD — bump on each edit.
 ---
 
 <BaseLayout
   title="Status | Sparcle"
-  description="Bolt and Aeira system status."
+  description="Live operational status for sparcle.app, Bolt download + auto-updater, and the Chrome Web Store extension. Plus upstream-dependency links."
   canonical="https://sparcle.app/status"
 >
   <main class="page-security">
     <section class="sec-hero">
       <div class="container">
         <p class="section-eyebrow">System status</p>
-        <h1>All systems operational.</h1>
+        <h1 class={`status-headline state-${overall}`}>{overallLabel[overall]}.</h1>
         <p class="sec-lede">
-          A live status dashboard is in preparation. For pilot and production incidents, your
-          deployment includes the standalone audit verifier and Prometheus metrics endpoint;
-          your operations team monitors those directly. For Sparcle-managed services, write
-          to <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a>.
+          Status of the Sparcle-operated surfaces that distribute Bolt and Aeira. Customer
+          deployments run inside your perimeter and are monitored by your own operations team via
+          the audit verifier binary and the Prometheus metrics endpoint that ship with the product.
+        </p>
+        <p class="status-meta">
+          Last updated <time datetime={lastUpdated}>{lastUpdated}</time>
+          &middot; Report an issue: <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a>
         </p>
       </div>
     </section>
+
+    <section class="sec-section">
+      <div class="container">
+        <p class="section-eyebrow">Components</p>
+        <h2>Sparcle-operated surfaces.</h2>
+        <div class="status-table" role="table" aria-label="Sparcle component status">
+          <div class="status-row status-row--head" role="row">
+            <div role="columnheader">Component</div>
+            <div role="columnheader">State</div>
+            <div role="columnheader">Detail</div>
+          </div>
+          {components.map(c => (
+            <div class="status-row" role="row">
+              <div class="status-name" role="cell">{c.name}</div>
+              <div class="status-state" role="cell">
+                <span class={`status-dot state-${c.state}`} aria-hidden="true"></span>
+                <span>{stateLabel[c.state]}</span>
+              </div>
+              <div class="status-detail" role="cell">{c.detail}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="sec-section sec-section-alt">
+      <div class="container">
+        <p class="section-eyebrow">Upstream</p>
+        <h2>Dependencies you can verify independently.</h2>
+        <p class="sec-lede sec-lede--narrow">
+          Sparcle relies on the following third-party services. Their status pages are the
+          authoritative source for each.
+        </p>
+        <div class="upstream-grid">
+          {upstream.map(u => (
+            <a class="upstream-card" href={u.href} target="_blank" rel="noopener">
+              <h3>{u.name}</h3>
+              <p>{u.detail}</p>
+              <p class="upstream-link">{u.href.replace(/^https?:\/\//, "")} &rarr;</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="sec-section">
+      <div class="container">
+        <p class="section-eyebrow">Recent incidents</p>
+        <h2>{incidents.length === 0 ? "No active incidents." : "Active and recent incidents."}</h2>
+        {incidents.length === 0 ? (
+          <p class="sec-lede">
+            No incidents to report. When something does affect a Sparcle-operated surface, it will be
+            posted here with a timestamp, current status, and a plain-language narrative.
+          </p>
+        ) : (
+          <ul class="incident-list">
+            {incidents.map(i => (
+              <li class={`incident incident-${i.status}`}>
+                <div class="incident-head">
+                  <time datetime={i.startedAt}>{new Date(i.startedAt).toUTCString()}</time>
+                  <span class={`incident-badge incident-badge--${i.status}`}>{i.status}</span>
+                </div>
+                <h3>{i.title}</h3>
+                <p>{i.narrative}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   </main>
+
+  <style>
+    /* Clear the fixed navbar — same pattern as security.astro's .sec-hero. */
+    .page-security .sec-hero {
+      padding: calc(var(--nav-height, 80px) + 3rem) 0 var(--space-section, 4rem);
+    }
+    .page-security .sec-section {
+      padding: 0 0 var(--space-section, 4rem);
+    }
+
+    .status-headline {
+      letter-spacing: -0.02em;
+    }
+    .status-headline.state-operational {
+      color: var(--text-heading);
+    }
+    .status-headline.state-maintenance {
+      color: #1b6ec2;
+    }
+    .status-headline.state-degraded {
+      color: #d49b3c;
+    }
+    .status-headline.state-outage {
+      color: #b23a2f;
+    }
+    .status-meta {
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+    .status-meta a {
+      color: inherit;
+    }
+    .status-table {
+      margin-top: 2rem;
+      border: 1px solid var(--border-default);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: var(--bg-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .status-row {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 2.4fr;
+      gap: 1.5rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-default);
+      align-items: center;
+    }
+    .status-row:last-child {
+      border-bottom: none;
+    }
+    .status-row--head {
+      background: var(--bg-elevated);
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-heading);
+      font-weight: 700;
+    }
+    .status-name {
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+    .status-state {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+    }
+    .status-dot {
+      width: 0.625rem;
+      height: 0.625rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.state-operational { background: #2d7a4f; }
+    .status-dot.state-maintenance { background: #1b6ec2; }
+    .status-dot.state-degraded    { background: #d49b3c; }
+    .status-dot.state-outage      { background: #b23a2f; }
+    .status-detail {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    @media (max-width: 720px) {
+      .status-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      .status-row--head {
+        display: none;
+      }
+    }
+
+    .upstream-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .upstream-card {
+      display: block;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border-default);
+      border-radius: 0.75rem;
+      background: var(--bg-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .upstream-card:hover {
+      border-color: var(--brand-primary);
+      transform: translateY(-2px);
+    }
+    .upstream-card h3 {
+      margin: 0 0 0.4rem 0;
+      font-size: 1rem;
+      color: var(--text-heading);
+    }
+    .upstream-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+    .upstream-link {
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 0.75rem;
+      color: var(--text-heading) !important;
+      margin-top: 0.6rem !important;
+    }
+
+    .incident-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .incident {
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border-default);
+      border-radius: 0.75rem;
+      background: var(--bg-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .incident-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-family: "SF Mono", Menlo, monospace;
+    }
+    .incident h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--text-heading);
+    }
+    .incident p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .incident-badge {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      color: white;
+    }
+    .incident-badge--investigating { background: #b23a2f; }
+    .incident-badge--identified    { background: #d49b3c; }
+    .incident-badge--monitoring    { background: #1b6ec2; }
+    .incident-badge--resolved      { background: #2d7a4f; }
+  </style>
 </BaseLayout>

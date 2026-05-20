@@ -237,7 +237,7 @@ export const aeiraProductContent: ProductPageContent = {
     {
       title: "Provable erasure for GDPR / HIPAA",
       detail:
-        "When a tenant invokes the Right to be Forgotten or you need HIPAA-compliant erasure, Aeira gives you cryptographic proof — not just a deleted row. Auditor-acceptable, independently verifiable.",
+        "When a tenant invokes the Right to be Forgotten or you need HIPAA-aligned erasure, Aeira gives you cryptographic proof — not just a deleted row. Auditor-acceptable, independently verifiable.",
       icon: "shield",
     },
     {

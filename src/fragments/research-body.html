@@ -493,23 +493,23 @@
                 <p style="color: var(--text-muted); margin-bottom: 1.5rem; max-width: 760px;">
                     LLM token costs and latency make "query everything" models economically unsustainable at scale.
                     Bolt's multi-tier caching architecture is designed to achieve high cache hit rates with
-                    sub-second responses — delivering most answers without any LLM cost.
+                    fast in-perimeter responses — delivering most answers without any LLM cost.
                 </p>
 
                 <div class="tier-list">
                     <div class="tier-item">
                         <span class="tier-badge">Tier 1</span>
                         <div class="tier-content">
-                            <h4>Semantic Cache — Sub-100ms, zero LLM cost</h4>
+                            <h4>Semantic Cache — zero LLM cost on hit</h4>
                             <p>Frequently accessed data (emails, calendar events, recent tickets) is pre-indexed
-                                for instant retrieval. Queries hit this layer first, delivering responses in
-                                milliseconds with no token spend.</p>
+                                for fast in-perimeter retrieval. Queries hit this layer first, delivering responses
+                                with no token spend on cache hits.</p>
                         </div>
                     </div>
                     <div class="tier-item">
                         <span class="tier-badge">Tier 2</span>
                         <div class="tier-content">
-                            <h4>Structured Cache — Sub-200ms, zero LLM cost</h4>
+                            <h4>Structured Cache — zero LLM cost on hit</h4>
                             <p>Structured data (user profiles, org charts, project metadata) cached with
                                 configurable TTLs. Handles the majority of repeated queries with no token cost.</p>
                         </div>

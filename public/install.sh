@@ -3,17 +3,25 @@
 # Works on macOS and Linux.
 #
 # Usage:
-#   curl -fsSL https://sparcle.app/install.sh | sh                  # Personal edition (default)
-#   curl -fsSL https://sparcle.app/install.sh | sh -s -- trial      # Enterprise Trial
-#   curl -fsSL https://sparcle.app/install.sh | sh -s -- personal   # Personal (explicit)
+#   curl -fsSL https://sparcle.app/install.sh | sh                          # Personal edition (default), latest
+#   curl -fsSL https://sparcle.app/install.sh | sh -s -- trial              # Enterprise Trial, latest
+#   curl -fsSL https://sparcle.app/install.sh | sh -s -- personal           # Personal (explicit), latest
+#   curl -fsSL https://sparcle.app/install.sh | sh -s -- trial 0.1.18       # Specific version (positional)
+#   BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/install.sh | sh      # Specific version (env)
 #
 # What this does:
 #   1. Detects your OS and architecture
-#   2. Fetches the latest release version from GitHub
-#   3. Downloads the correct installer from GitHub Releases
-#   4. Installs to /Applications (admin macOS) or ~/Applications (non-admin macOS), and ~/.local/bin on Linux
-#   5. Marks the app as trusted for your OS to launch safely
-#   6. Launches the app
+#   2. Resolves the target version (BOLT_VERSION env > positional arg > /releases/latest)
+#   3. Downloads the correct installer from GitHub Releases (with on-disk cache)
+#   4. On Linux, auto-falls-back to the most recent release that ships Linux artifacts
+#      (if BOLT_VERSION is not pinned by the user)
+#   5. Installs to /Applications (admin macOS) or ~/Applications (non-admin macOS), and ~/.local/bin on Linux
+#   6. Marks the app as trusted for your OS to launch safely
+#   7. Launches the app
+#
+# Re-runs are network-free when the cached download still matches the remote
+# (per-version cache at ~/.cache/bolt-installer/v<version>/ — override with
+# BOLT_INSTALLER_CACHE_DIR).
 #
 # No password required. Safe to re-run — overwrites previous installation.
 set -e
@@ -29,6 +37,8 @@ DEFAULT_BOLT_API_PORT_BASE="13018"
 DEFAULT_BOLT_API_PORT_RANGE="10"
 DOWNLOAD_RETRY_MAX="5"
 DOWNLOAD_RETRY_DELAY="2"
+CACHE_BASE_DIR="${BOLT_INSTALLER_CACHE_DIR:-${HOME}/.cache/bolt-installer}"
+CACHE_KEEP_VERSIONS="2"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
@@ -92,6 +102,70 @@ select_release_asset() {
   FILE_NAME="${FILE_PREFIX}-${VERSION}-${RUST_TRIPLE}.${desired_ext}"
   FILE_URL="${BASE_URL}/${FILE_NAME}"
   EXT="${FILE_NAME##*.}"
+}
+
+# HEAD the URL and probe size + etag of the final redirect target.
+# Side effects: sets REMOTE_SIZE and REMOTE_ETAG (either may be empty).
+probe_remote_asset() {
+  url="$1"
+  REMOTE_SIZE=""
+  REMOTE_ETAG=""
+  headers=$(curl -fsILS --max-time 30 "$url" 2>/dev/null || true)
+  [ -n "$headers" ] || return 1
+  REMOTE_SIZE=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} tolower($1)=="content-length:" {gsub(/\r/,""); v=$2} END{print v}')
+  REMOTE_ETAG=$(printf '%s\n' "$headers" | awk 'BEGIN{IGNORECASE=1} tolower($1)=="etag:" {gsub(/\r/,""); v=$2; for(i=3;i<=NF;i++) v=v" "$i} END{print v}')
+  [ -n "$REMOTE_SIZE" ] || return 1
+  return 0
+}
+
+# Returns 0 (skip download) if the cached file matches the remote.
+# Requires probe_remote_asset to have been run first.
+is_cache_fresh() {
+  cached="$1"
+  meta="$2"
+  [ -f "$cached" ] || return 1
+  local_size=$(wc -c < "$cached" 2>/dev/null | tr -d ' ')
+  [ -n "$local_size" ] && [ "$local_size" -gt 1000 ] || return 1
+  [ -n "$REMOTE_SIZE" ] || return 1
+  [ "$local_size" = "$REMOTE_SIZE" ] || return 1
+  if [ -f "$meta" ] && [ -n "$REMOTE_ETAG" ]; then
+    saved_etag=$(awk -F'\t' '$1=="etag" {sub(/^etag\t/,""); print; exit}' "$meta")
+    if [ -n "$saved_etag" ] && [ "$saved_etag" != "$REMOTE_ETAG" ]; then
+      return 1
+    fi
+  fi
+  return 0
+}
+
+write_cache_meta() {
+  meta="$1"
+  {
+    printf 'size\t%s\n' "$REMOTE_SIZE"
+    [ -n "$REMOTE_ETAG" ] && printf 'etag\t%s\n' "$REMOTE_ETAG"
+    printf 'fetched_at\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "")"
+  } > "$meta" 2>/dev/null || true
+}
+
+gc_cache() {
+  [ -d "$CACHE_BASE_DIR" ] || return 0
+  current="v${VERSION}"
+  # Keep the current version + the most-recent (CACHE_KEEP_VERSIONS - 1) others.
+  ls -1t "$CACHE_BASE_DIR" 2>/dev/null | while IFS= read -r entry; do
+    case "$entry" in
+      v*) printf '%s\n' "$entry" ;;
+    esac
+  done | awk -v cur="$current" -v keep="$CACHE_KEEP_VERSIONS" '
+    $0==cur {next}
+    {others[++n]=$0}
+    END {
+      # Keep (keep-1) most-recent non-current; delete the rest.
+      drop_from = keep
+      for (i=drop_from; i<=n; i++) print others[i]
+    }
+  ' | while IFS= read -r stale; do
+    [ -n "$stale" ] || continue
+    rm -rf "${CACHE_BASE_DIR}/${stale}" 2>/dev/null || true
+  done
 }
 
 configure_pg_runtime_sources() {
@@ -500,29 +574,25 @@ command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
 configure_pg_runtime_sources
 
 # ── Cleanup trap ─────────────────────────────────────────────────────────────
-TMPDIR_DL=""
+# Note: the download cache under $CACHE_BASE_DIR persists across runs so that
+# re-running this installer with the same version skips the download entirely.
+# Only ephemeral state (DMG mount point, .partial residue from a failed
+# download) is cleaned up on exit.
+TMPDIR_MOUNT=""
+PARTIAL_PATH=""
 cleanup() {
-  if [ -n "${TMPDIR_DL}" ] && [ -d "${TMPDIR_DL}" ]; then
-    # Detach any mounted DMG on macOS
-    if [ "$PLATFORM" = "macos" ] && [ -d "${TMPDIR_DL}/bolt-mount" ]; then
-      hdiutil detach "${TMPDIR_DL}/bolt-mount" -quiet 2>/dev/null || true
+  if [ -n "${TMPDIR_MOUNT}" ] && [ -d "${TMPDIR_MOUNT}" ]; then
+    if [ "$PLATFORM" = "macos" ]; then
+      hdiutil detach "${TMPDIR_MOUNT}" -quiet 2>/dev/null || true
     fi
-    rm -rf "${TMPDIR_DL}"
+    rm -rf "${TMPDIR_MOUNT}"
+  fi
+  # Drop any partial download that didn't finish; never touch the cache file.
+  if [ -n "${PARTIAL_PATH}" ] && [ -f "${PARTIAL_PATH}" ]; then
+    rm -f "${PARTIAL_PATH}" 2>/dev/null || true
   fi
 }
 trap cleanup EXIT
-
-# ── Fetch latest version from GitHub ─────────────────────────────────────────
-VERSION="$FALLBACK_VERSION"
-LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
-API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
-V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//' || true)
-if [ -n "$V" ]; then
-  VERSION="$V"
-else
-  warn "Could not fetch latest version — using v${VERSION}"
-fi
-BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
 
 # ── Parse edition argument ───────────────────────────────────────────────────
 EDITION="${1:-personal}"
@@ -540,6 +610,59 @@ case "$EDITION" in
     fail "Unknown edition: $EDITION. Use 'personal' or 'trial'."
     ;;
 esac
+
+# ── Resolve version (env > positional arg > /releases/latest) ────────────────
+# VERSION_PINNED=1 means the user explicitly chose a version, so on Linux
+# we should NOT silently walk back to an older release if assets are missing.
+VERSION=""
+VERSION_PINNED=0
+if [ -n "${BOLT_VERSION:-}" ]; then
+  VERSION="$(printf '%s' "$BOLT_VERSION" | sed 's/^v//')"
+  VERSION_PINNED=1
+elif [ -n "${2:-}" ]; then
+  VERSION="$(printf '%s' "$2" | sed 's/^v//')"
+  VERSION_PINNED=1
+fi
+
+if [ -z "$VERSION" ]; then
+  LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
+  API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
+  V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//' || true)
+  if [ -n "$V" ]; then
+    VERSION="$V"
+  else
+    VERSION="$FALLBACK_VERSION"
+    warn "Could not fetch latest version — using v${VERSION}"
+  fi
+fi
+BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
+
+# find_latest_release_with_asset(pattern_glob_suffix)
+# Walks the recent releases list and prints the tag (without leading v) of the
+# most recent release whose asset name matches the FILE_PREFIX + given suffix.
+# Suffix examples: "-x86_64-unknown-linux-gnu.(deb|AppImage)"
+#                  "-x86_64-apple-darwin.dmg"
+find_latest_release_with_asset() {
+  suffix_re="$1"
+  api_resp=$(curl -fsSL --max-time 10 "https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=30" 2>/dev/null || true)
+  [ -n "$api_resp" ] || return 1
+  printf '%s\n' "$api_resp" | awk -v prefix="$FILE_PREFIX" -v suffix="$suffix_re" '
+    /"tag_name":/ {
+      tag = $0
+      sub(/.*"tag_name": *"/, "", tag); sub(/".*/, "", tag)
+    }
+    /"name":/ {
+      name = $0
+      sub(/.*"name": *"/, "", name); sub(/".*/, "", name)
+      pat = "^" prefix "-[0-9][0-9.]*" suffix "$"
+      if (name ~ pat) {
+        sub(/^v/, "", tag)
+        print tag
+        exit
+      }
+    }
+  '
+}
 
 # ── Detect architecture ─────────────────────────────────────────────────────
 ARCH=$(uname -m)
@@ -568,56 +691,123 @@ echo "  Version:       ${VERSION}"
 echo "  Platform:      ${PLATFORM} (${ARCH})"
 echo ""
 
-# ── Download ─────────────────────────────────────────────────────────────────
-TMPDIR_DL=$(mktemp -d)  # cleaned up by EXIT trap
-DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
+# ── Download (with per-version cache) ────────────────────────────────────────
+# fetch_with_cache: populates $DL_PATH from $FILE_URL, reusing the cached file
+# when its size+ETag match the remote. Returns 0 on success, 1 if the asset is
+# not available on the server (so the caller can fall through to a fallback
+# asset like AppImage when .deb is missing).
+fetch_with_cache() {
+  CACHE_DIR="${CACHE_BASE_DIR}/v${VERSION}"
+  mkdir -p "$CACHE_DIR" 2>/dev/null || true
+  DL_PATH="${CACHE_DIR}/${FILE_NAME}"
+  META_PATH="${DL_PATH}.meta"
+  PARTIAL_PATH="${DL_PATH}.partial"
 
-info "Downloading ${FILE_NAME}..."
-HTTP_CODE=$(curl -fSL \
-  --retry "${DOWNLOAD_RETRY_MAX}" \
-  --retry-all-errors \
-  --retry-delay "${DOWNLOAD_RETRY_DELAY}" \
-  --connect-timeout 15 \
-  --max-time 300 \
-  -w '%{http_code}' \
-  -o "${DL_PATH}" \
-  "${FILE_URL}" 2>/dev/null) || true
+  # Probe remote first so we know what "fresh" means. If HEAD fails (network
+  # blip, server doesn't allow HEAD) we fall through to the normal download.
+  probe_ok=0
+  if probe_remote_asset "$FILE_URL"; then
+    probe_ok=1
+    if is_cache_fresh "$DL_PATH" "$META_PATH"; then
+      ok "Using cached ${FILE_NAME} ($(du -h "$DL_PATH" | cut -f1 | tr -d ' ')) — skipping download"
+      return 0
+    fi
+  fi
 
-if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
-  rm -rf "${TMPDIR_DL}"
-  # On Linux with .deb, retry with AppImage before giving up
+  info "Downloading ${FILE_NAME}..."
+  rm -f "$PARTIAL_PATH" 2>/dev/null || true
+  HTTP_CODE=$(curl -fSL \
+    --retry "${DOWNLOAD_RETRY_MAX}" \
+    --retry-all-errors \
+    --retry-delay "${DOWNLOAD_RETRY_DELAY}" \
+    --connect-timeout 15 \
+    --max-time 300 \
+    -w '%{http_code}' \
+    -o "${PARTIAL_PATH}" \
+    "${FILE_URL}" 2>/dev/null) || true
+
+  if [ ! -f "${PARTIAL_PATH}" ] || [ "$(wc -c < "${PARTIAL_PATH}" | tr -d ' ')" -lt 1000 ]; then
+    rm -f "${PARTIAL_PATH}" 2>/dev/null || true
+    PARTIAL_PATH=""
+    return 1
+  fi
+
+  # Atomic publish into the cache.
+  mv -f "${PARTIAL_PATH}" "${DL_PATH}"
+  PARTIAL_PATH=""
+
+  # Persist metadata so the next run can decide cache-fresh without a HEAD
+  # round-trip ambiguity. Probe again if we didn't earlier, so the size we
+  # record actually corresponds to the bytes on disk.
+  if [ "$probe_ok" -ne 1 ]; then
+    probe_remote_asset "$FILE_URL" || true
+  fi
+  # Authoritative size = bytes on disk (server-reported can be stripped by
+  # proxies; what we just wrote is what we'll compare next time).
+  REMOTE_SIZE=$(wc -c < "${DL_PATH}" | tr -d ' ')
+  write_cache_meta "$META_PATH"
+
+  ok "Downloaded $(du -h "${DL_PATH}" | cut -f1 | tr -d ' ')"
+  return 0
+}
+
+# download_for_platform tries the preferred extension and (on Linux) falls
+# back from .deb to .AppImage within the SAME version. Returns 0 on success,
+# 1 if neither asset is available on the server for this version+platform.
+download_for_platform() {
+  select_release_asset "$EXT"
+  if fetch_with_cache; then
+    return 0
+  fi
   if [ "$USE_DEB" -eq 1 ]; then
     warn ".deb package not available — falling back to AppImage..."
     USE_DEB=0
     select_release_asset "AppImage"
-    TMPDIR_DL=$(mktemp -d)
-    DL_PATH="${TMPDIR_DL}/${FILE_NAME}"
-    HTTP_CODE=$(curl -fSL \
-      --retry "${DOWNLOAD_RETRY_MAX}" \
-      --retry-all-errors \
-      --retry-delay "${DOWNLOAD_RETRY_DELAY}" \
-      --connect-timeout 15 \
-      --max-time 300 \
-      -w '%{http_code}' \
-      -o "${DL_PATH}" \
-      "${FILE_URL}" 2>/dev/null) || true
-    if [ ! -f "${DL_PATH}" ] || [ "$(wc -c < "${DL_PATH}" | tr -d ' ')" -lt 1000 ]; then
-      rm -rf "${TMPDIR_DL}"
-      fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
+    fetch_with_cache && return 0
+  fi
+  return 1
+}
+
+if ! download_for_platform; then
+  # On Linux: a release without Linux artifacts (e.g. v0.1.21, v0.1.20) is a
+  # real pattern in our shipping history. Auto-fall-back to the most recent
+  # release that actually ships Linux binaries — unless the user pinned a
+  # specific version explicitly, in which case respect their choice and fail
+  # loudly.
+  fallback_version=""
+  if [ "$PLATFORM" = "linux" ] && [ "$VERSION_PINNED" -eq 0 ]; then
+    fallback_version=$(find_latest_release_with_asset '-x86_64-unknown-linux-gnu\\.(deb|AppImage)' 2>/dev/null || true)
+  fi
+
+  if [ -n "$fallback_version" ] && [ "$fallback_version" != "$VERSION" ]; then
+    warn "v${VERSION} has no Linux artifacts for ${APP_NAME} — falling back to v${fallback_version}"
+    VERSION="$fallback_version"
+    BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
+    USE_DEB=0
+    if command -v dpkg >/dev/null 2>&1; then USE_DEB=1; EXT="deb"; else EXT="AppImage"; fi
+    if ! download_for_platform; then
+      fail "Download failed: no working Linux build of ${APP_NAME} found in recent releases.\n  Check https://sparcle.app/download for supported platforms."
     fi
   else
-    fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
+    if [ "$VERSION_PINNED" -eq 1 ]; then
+      fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE:-?}).\n  v${VERSION} of ${APP_NAME} doesn't ship a ${PLATFORM} ${ARCH} build.\n  Try a different version (BOLT_VERSION=<x.y.z>) or omit BOLT_VERSION to use the latest."
+    else
+      fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE:-?}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
+    fi
   fi
 fi
 
-ok "Downloaded $(du -h "${DL_PATH}" | cut -f1 | tr -d ' ')"
+# Prune old version caches in the background of the user's awareness.
+gc_cache
 
 # ══════════════════════════════════════════════════════════════════════════════
 # macOS: mount DMG → copy .app → trust → launch
 # ══════════════════════════════════════════════════════════════════════════════
 install_macos() {
-  MOUNT_POINT="${TMPDIR_DL}/bolt-mount"
-  mkdir -p "${MOUNT_POINT}"
+  # Fresh, isolated mount point for hdiutil — never inside the persistent
+  # download cache (we don't want the mount to live beyond this process).
+  TMPDIR_MOUNT=$(mktemp -d)
+  MOUNT_POINT="${TMPDIR_MOUNT}"
 
   info "Installing ${APP_NAME}..."
   hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
@@ -785,7 +975,8 @@ install_linux_appimage() {
   cleanup_legacy_linux_native_install "${APP_FILE_NAME}"
   stop_running_linux_app "${DEST}"
 
-  mv "${DL_PATH}" "${DEST}"
+  # Copy (not move) so the cache survives for the next re-run.
+  cp -f "${DL_PATH}" "${DEST}"
   chmod +x "${DEST}"
   ok "Installed to ${DEST}"
 

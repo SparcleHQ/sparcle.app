@@ -1,26 +1,39 @@
 # Bolt Installer for Windows — https://sparcle.app/install.ps1
 # Usage (run in PowerShell):
-#   irm https://sparcle.app/install.ps1 | iex                                  # Personal edition (default)
-#   $env:EDITION='trial'; irm https://sparcle.app/install.ps1 | iex            # Enterprise Trial
+#   irm https://sparcle.app/install.ps1 | iex                                            # Personal edition (default), latest
+#   $env:EDITION='trial'; irm https://sparcle.app/install.ps1 | iex                      # Enterprise Trial, latest
+#   $env:BOLT_VERSION='0.1.18'; irm https://sparcle.app/install.ps1 | iex                # Pin a specific version
+#   $env:EDITION='trial'; $env:BOLT_VERSION='0.1.18'; irm .../install.ps1 | iex          # Both
 #
 # What this does:
-#   1. Fetches the latest release version from GitHub
-#   2. Downloads the correct installer from GitHub Releases
-#   3. Verifies checksums when release metadata is available
-#   4. Marks the file as trusted for Windows to run safely
-#   5. Runs the installer silently
-#   6. Launches the app
+#   1. Resolves the target version ($env:BOLT_VERSION > /releases/latest)
+#   2. Downloads the correct installer from GitHub Releases (with on-disk cache)
+#   3. Marks the file as trusted for Windows to run safely
+#   4. Runs the installer silently
+#   5. Launches the app
+#
+# Re-runs are network-free when the cached download still matches the remote
+# (per-version cache at %LOCALAPPDATA%\Sparcle\bolt-installer\v<version>\ —
+# override with $env:BOLT_INSTALLER_CACHE_DIR).
 #
 # No admin required. Safe to re-run.
 
 param(
-  [string]$Edition = ""
+  [string]$Edition = "",
+  [string]$Version = ""
 )
 
 # Allow $env:EDITION as fallback (needed for irm | iex which can't pass params)
 if (-not $Edition) {
   $Edition = if ($env:EDITION) { $env:EDITION } else { "personal" }
 }
+
+# Same pattern for version pinning.
+if (-not $Version -and $env:BOLT_VERSION) {
+  $Version = $env:BOLT_VERSION
+}
+$VersionPinned = [bool]$Version
+if ($Version) { $Version = $Version -replace '^v', '' }
 
 $ErrorActionPreference = "Stop"
 
@@ -36,15 +49,23 @@ $BoltApiPortBase = 13018
 $BoltApiPortRange = 10
 $PrewarmRetryAttempts = 3
 $PrewarmRetryDelaySeconds = 2
+$CacheBaseDir = if ($env:BOLT_INSTALLER_CACHE_DIR) {
+  $env:BOLT_INSTALLER_CACHE_DIR
+} else {
+  Join-Path $env:LOCALAPPDATA "Sparcle\bolt-installer"
+}
+$CacheKeepVersions = 2
 
-# ── Fetch latest version from GitHub ────────────────────────────────────────
-try {
-  $Release = Invoke-RestMethod "https://api.github.com/repos/$GitHubRepo/releases/latest" -TimeoutSec 5 -ErrorAction Stop
-  $Version = ($Release.tag_name -replace '^v', '')
-  if (-not $Version) { throw "empty tag" }
-} catch {
-  $Version = $FallbackVersion
-  Write-Host "  ⚠  Could not fetch latest version — using v$Version" -ForegroundColor Yellow
+# ── Resolve version (env/param > /releases/latest) ──────────────────────────
+if (-not $Version) {
+  try {
+    $Release = Invoke-RestMethod "https://api.github.com/repos/$GitHubRepo/releases/latest" -TimeoutSec 5 -ErrorAction Stop
+    $Version = ($Release.tag_name -replace '^v', '')
+    if (-not $Version) { throw "empty tag" }
+  } catch {
+    $Version = $FallbackVersion
+    Write-Host "  ⚠  Could not fetch latest version — using v$Version" -ForegroundColor Yellow
+  }
 }
 $BaseUrl = "https://github.com/$GitHubRepo/releases/download/v$Version"
 
@@ -75,6 +96,112 @@ function Invoke-DownloadWithRetry {
       Start-Sleep -Seconds $DownloadRetryDelaySeconds
     }
   }
+}
+
+function Get-RemoteAssetInfo {
+  param([string]$Url)
+  try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $resp = Invoke-WebRequest -Uri $Url -Method Head -UseBasicParsing -TimeoutSec 30 -MaximumRedirection 10 -ErrorAction Stop
+    $sizeHdr = $resp.Headers['Content-Length']
+    $etagHdr = $resp.Headers['ETag']
+    if ($sizeHdr -is [array]) { $sizeHdr = $sizeHdr[0] }
+    if ($etagHdr -is [array]) { $etagHdr = $etagHdr[0] }
+    $size = 0
+    if ($sizeHdr) { [void][int64]::TryParse([string]$sizeHdr, [ref]$size) }
+    return @{ Size = $size; Etag = [string]$etagHdr }
+  }
+  catch {
+    return $null
+  }
+}
+
+function Test-CacheFresh {
+  param(
+    [string]$Cached,
+    [string]$Meta,
+    [hashtable]$Remote
+  )
+  if (-not (Test-Path $Cached)) { return $false }
+  if (-not $Remote -or -not $Remote.Size -or $Remote.Size -le 1000) { return $false }
+  $info = Get-Item $Cached -ErrorAction SilentlyContinue
+  if (-not $info -or $info.Length -ne $Remote.Size) { return $false }
+  if ((Test-Path $Meta) -and $Remote.Etag) {
+    $savedEtag = ""
+    foreach ($line in Get-Content $Meta -ErrorAction SilentlyContinue) {
+      if ($line -match '^etag\t(.+)$') { $savedEtag = $Matches[1]; break }
+    }
+    if ($savedEtag -and $savedEtag -ne $Remote.Etag) { return $false }
+  }
+  return $true
+}
+
+function Save-CacheMeta {
+  param(
+    [string]$Meta,
+    [hashtable]$Remote
+  )
+  $lines = @()
+  if ($Remote.Size) { $lines += "size`t$($Remote.Size)" }
+  if ($Remote.Etag) { $lines += "etag`t$($Remote.Etag)" }
+  $lines += "fetched_at`t$([DateTime]::UtcNow.ToString('o'))"
+  Set-Content -Path $Meta -Value $lines -Encoding UTF8
+}
+
+function Invoke-CacheGc {
+  param([string]$CurrentVersionDir)
+  if (-not (Test-Path $CacheBaseDir)) { return }
+  try {
+    $dirs = Get-ChildItem -Path $CacheBaseDir -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like 'v*' -and $_.FullName -ne $CurrentVersionDir } |
+            Sort-Object LastWriteTime -Descending
+    $skip = [Math]::Max(0, $CacheKeepVersions - 1)
+    $toDelete = $dirs | Select-Object -Skip $skip
+    foreach ($d in $toDelete) {
+      Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $d.FullName
+    }
+  } catch {
+    # Best-effort GC — never fail the install over leftover cache.
+  }
+}
+
+function Get-CachedOrDownload {
+  param(
+    [string]$Url,
+    [string]$FileName,
+    [string]$Label
+  )
+  $verDir   = Join-Path $CacheBaseDir "v$Version"
+  New-Item -ItemType Directory -Force -Path $verDir | Out-Null
+  $dlPath   = Join-Path $verDir $FileName
+  $metaPath = "$dlPath.meta"
+  $partial  = "$dlPath.partial"
+
+  $remote = Get-RemoteAssetInfo -Url $Url
+  if ($remote -and (Test-CacheFresh -Cached $dlPath -Meta $metaPath -Remote $remote)) {
+    $sizeMb = [math]::Round((Get-Item $dlPath).Length / 1MB, 1)
+    Ok "Using cached $Label (${sizeMb}MB) — skipping download"
+    return @{ Path = $dlPath; VersionDir = $verDir }
+  }
+
+  Info "Downloading $Label..."
+  if (Test-Path $partial) { Remove-Item -Force $partial -ErrorAction SilentlyContinue }
+  Invoke-DownloadWithRetry -Url $Url -OutFile $partial -Label $Label
+  if (-not (Test-Path $partial) -or (Get-Item $partial).Length -lt 1000) {
+    Remove-Item -Force $partial -ErrorAction SilentlyContinue
+    throw "Downloaded file is missing or too small."
+  }
+  Move-Item -Force $partial $dlPath
+
+  if (-not $remote) { $remote = Get-RemoteAssetInfo -Url $Url }
+  if (-not $remote) { $remote = @{} }
+  # Authoritative size = what we wrote to disk.
+  $remote.Size = (Get-Item $dlPath).Length
+  Save-CacheMeta -Meta $metaPath -Remote $remote
+
+  $sizeMb = [math]::Round((Get-Item $dlPath).Length / 1MB, 1)
+  Ok "Downloaded ${sizeMb}MB"
+  return @{ Path = $dlPath; VersionDir = $verDir }
 }
 
 function Wait-ApiReadiness {
@@ -305,36 +432,33 @@ Write-Host "  Architecture:  $Arch"
 Write-Host "  Installer:     $InstallerExt"
 Write-Host ""
 
-# ── Download ────────────────────────────────────────────────────────────────
-$TmpDir  = Join-Path $env:TEMP "bolt-install"
-New-Item -ItemType Directory -Force -Path $TmpDir | Out-Null
-$DlPath  = Join-Path $TmpDir $FileName
-
-Info "Downloading $FileName..."
+# ── Download (with per-version cache) ───────────────────────────────────────
+# Cache layout: $CacheBaseDir\v<version>\<file> + sidecar <file>.meta with
+# size/etag. Re-running this script with the same version is a no-op for the
+# network when the cached file still matches the remote.
 try {
-  Invoke-DownloadWithRetry -Url $FileUrl -OutFile $DlPath -Label $FileName
+  $cacheResult = Get-CachedOrDownload -Url $FileUrl -FileName $FileName -Label $FileName
+  $DlPath = $cacheResult.Path
+  $VersionDir = $cacheResult.VersionDir
 } catch {
   if ($InstallerExt -eq "exe") {
-    # NSIS .exe is a newer artifact — fall back to MSI if the server doesn't
-    # have it (e.g. a release from before we shipped NSIS alongside MSI).
     Warn "NSIS .exe not available for v$Version — falling back to MSI..."
     $InstallerExt = "msi"
     Select-ReleaseAsset -DesiredExt $InstallerExt
-    $DlPath  = Join-Path $TmpDir $FileName
     try {
-      Invoke-DownloadWithRetry -Url $FileUrl -OutFile $DlPath -Label $FileName
+      $cacheResult = Get-CachedOrDownload -Url $FileUrl -FileName $FileName -Label $FileName
+      $DlPath = $cacheResult.Path
+      $VersionDir = $cacheResult.VersionDir
     } catch {
-      Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
       Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
     }
   } else {
-    Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
     Fail "Download failed: $FileName not found.`n  $AppName may not be available for $Arch yet.`n  Check https://sparcle.app/download for supported platforms."
   }
 }
 
-$Size = [math]::Round((Get-Item $DlPath).Length / 1MB, 1)
-Ok "Downloaded ${Size}MB"
+# Prune older version caches in the background.
+Invoke-CacheGc -CurrentVersionDir $VersionDir
 
 # ── Mark as trusted for Windows to run safely ───────────────────────────────
 Info "Marking $AppName as trusted..."
@@ -389,8 +513,8 @@ if ($InstallerExt -eq "exe") {
   }
 }
 
-# ── Cleanup ────────────────────────────────────────────────────────────────
-Remove-Item -Recurse -Force $TmpDir -ErrorAction SilentlyContinue
+# ── Persist runtime config ─────────────────────────────────────────────────
+# (download cache under $CacheBaseDir is intentionally preserved for re-runs)
 Save-PgRuntimeSources -AppIdentifier $AppIdentifier
 
 # ── Launch ─────────────────────────────────────────────────────────────────

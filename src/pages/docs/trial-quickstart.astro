@@ -1,0 +1,454 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import InstallTabs from "../../components/InstallTabs.astro";
+
+// Trial sidecar quickstart. Public, indexable, kept tight.
+//
+// PDF: this page is its own source-of-truth. Regenerate the companion PDF
+// after edits with:
+//   npm run pdf:trial-quickstart
+// (See scripts/render-pdf.mjs. The print stylesheet at the bottom of this
+// file controls the PDF rendering.)
+//
+// Conventions:
+// - No personal/internal paths, customer names, or NDA references.
+// - Trial = real aeira-rs crates + a 2,573-row synthetic corpus.
+// - Never claim features that are not actually shipping in the trial UX.
+
+interface Step {
+  title: string;
+  body: string;
+}
+
+const fiveThings: Step[] = [
+  {
+    title: "1. Cross-source scoped query",
+    body: "Type a question into the launcher. Bolt runs it across the preloaded synthetic corpus (ERP rows, email threads, channel messages, documents) and returns a single answer with per-source provenance.",
+  },
+  {
+    title: "2. Boundary + PII demo",
+    body: "Open the LLM payload view on any result. Sensitive fields appear masked at the LLM boundary while internal tools continue to operate on the unmasked values. This is the BYO-LLM + PII-protected contract in one screen.",
+  },
+  {
+    title: "3. /discover — the trial Aeira catalog",
+    body: "Type /discover to open the trial Aeira catalog. It lists every entity, relationship, and field the synthetic corpus exposes, so you can see the shape of the data without writing a query. (For local-disk navigation, /browse is the file browser.)",
+  },
+  {
+    title: "4. Audit chain",
+    body: "Open the audit verifier on any prior query. Every step (retrieval, masking decision, tool call, LLM call) is cryptographically chained. The chain encoding is byte-compatible with the production Aeira audit chain.",
+  },
+  {
+    title: "5. Bring your own LLM",
+    body: "Settings → AI Configuration: drop in an Anthropic, OpenAI, Google, Mistral, or OpenAI-compatible local key. Re-run any prior query against your provider with the same masking contract.",
+  },
+];
+---
+
+<BaseLayout
+  title="Trial sidecar quickstart | Sparcle"
+  description="Get the Bolt Enterprise Trial running in under a minute. One install command, instant demo mode, real Aeira retrieval and ACL crates against a synthetic 2,573-row corpus. 7 days, all features unlocked."
+  canonical="https://sparcle.app/docs/trial-quickstart"
+>
+  <main class="qs-page">
+    <section class="qs-hero">
+      <div class="container">
+        <p class="qs-eyebrow"><a href="/docs">&larr; Docs</a></p>
+        <h1>Trial quickstart.</h1>
+        <p class="qs-lede">
+          Bolt Enterprise Trial running locally in under a minute. One install command,
+          instant demo mode, real Aeira retrieval and ACL crates against a 2,573-row
+          synthetic corpus. 7 days, all features unlocked.
+        </p>
+        <ul class="qs-pills">
+          <li><a href="/docs/pdfs/trial-quickstart.pdf" target="_blank" rel="noopener">Download as PDF &rarr;</a></li>
+          <li><a href="/download">Download page &rarr;</a></li>
+          <li><a href="/pricing">Pricing &rarr;</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>What you'll have running in 60 seconds</h2>
+        <ul class="qs-bullets">
+          <li>Bolt Enterprise Trial desktop app (macOS, Linux, Windows).</li>
+          <li>Embedded PostgreSQL (one-time prewarm during install).</li>
+          <li>The same Aeira Rust crates that ship in production: ACL evaluator, retrieval, audit chain.</li>
+          <li>A preloaded 2,573-row synthetic corpus (mixed ERP, mail, channel, and document records).</li>
+          <li>Instant demo mode by default. No identity provider, no LLM key required to start.</li>
+          <li>7 days, all features unlocked.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>Install</h2>
+        <p class="qs-section-blurb">
+          One command per platform. The script downloads the installer, prewarms
+          PostgreSQL, and launches the app. Safe to re-run: subsequent runs reuse
+          a per-version on-disk cache and skip the download.
+        </p>
+
+        <InstallTabs
+          macos={{
+            hint: "Run in Terminal · Apple Silicon & Intel",
+            command: "curl -fsSL https://sparcle.app/trial.sh | sh",
+            note: "Downloads, installs to /Applications, and launches Bolt Enterprise.",
+          }}
+          linux={{
+            hint: "Run in Terminal · x86_64 & ARM64",
+            command: "curl -fsSL https://sparcle.app/trial.sh | sh",
+            note: "Auto-detects Linux · installs AppImage to ~/.local/bin.",
+          }}
+          windows={{
+            hint: "Run in PowerShell · x86_64",
+            command: "irm https://sparcle.app/trial.ps1 | iex",
+            note: "Marks app as trusted · downloads, installs, and launches Bolt Enterprise.",
+          }}
+        />
+
+        <p class="qs-section-blurb">
+          <strong>Pin a specific version</strong> with <code>BOLT_VERSION</code>. Useful when
+          you want to reproduce a behavior against an older release.
+        </p>
+        <pre class="qs-block"><code>BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/trial.sh | sh</code></pre>
+        <p class="qs-section-blurb">
+          On PowerShell: <code>$env:BOLT_VERSION='0.1.18'; irm https://sparcle.app/trial.ps1 | iex</code>.
+        </p>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>First 60 seconds</h2>
+        <ol class="qs-bullets numbered">
+          <li>Installer downloads the platform artifact, prewarms PostgreSQL, and launches Bolt.</li>
+          <li>Bolt opens in instant demo mode. No login. No keys.</li>
+          <li>You're now querying the synthetic corpus. Open the launcher and ask a question.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>Five things to try</h2>
+        <p class="qs-section-blurb">In order of wow per minute.</p>
+        <ol class="qs-steps">
+          {fiveThings.map(step => (
+            <li>
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>Bring your own IdP and data (optional)</h2>
+        <p class="qs-section-blurb">
+          The trial works end-to-end on the preloaded corpus. When you're ready to
+          point it at your environment:
+        </p>
+        <ul class="qs-bullets">
+          <li><strong>Settings &rarr; Identity</strong>: connect Okta, Entra, OneLogin, Auth0, Google, or Zoho.</li>
+          <li><strong>Settings &rarr; Connectors</strong>: 103 first-party connectors. An Airbyte bridge fronts roughly 350 more.</li>
+          <li><strong>Settings &rarr; AI</strong>: bring your own key for Anthropic, OpenAI, Google, Mistral, or any OpenAI-compatible local model.</li>
+        </ul>
+        <p class="qs-section-blurb">
+          PII masking applies the same way whether the corpus is synthetic or yours.
+        </p>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>Data locality</h2>
+        <ul class="qs-bullets">
+          <li>The trial runs entirely on your machine. Bolt, the local API sidecar, and embedded PostgreSQL are all local processes.</li>
+          <li>LLM calls are the only outbound traffic, and only when you point Bolt at a hosted provider. PII masking redacts sensitive fields at the boundary before the call.</li>
+          <li>No trial data is sent to Sparcle servers in any shipping mode. There is no telemetry path that uploads your corpus, queries, or results.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="qs-section qs-section-final">
+      <div class="container">
+        <h2>What's next</h2>
+        <ul class="qs-bullets">
+          <li><a href="/docs/pdfs/pilot-preflight-checklist.pdf" target="_blank" rel="noopener">90-day pilot pre-flight checklist (PDF)</a> for moving from trial to a real environment.</li>
+          <li><a href="/architecture">System overview</a> if you want the full picture before a pilot.</li>
+          <li><a href="/security">Security and compliance</a> for the threat-model and audit-chain story.</li>
+          <li><a href="/pricing">Pricing</a> when you're ready to size a deployment.</li>
+        </ul>
+        <p class="qs-section-blurb qs-footnote">
+          Trial issues: re-run the install command (it's idempotent). Anything stuck after that,
+          reach the team via the contact link in the footer.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    /* All colors use semantic theme tokens that auto-switch dark/light.
+       Token definitions live in public/css/variables.css. */
+
+    .qs-page {
+      background: var(--bg-body);
+      min-height: 100vh;
+    }
+    .qs-page .container {
+      /* Match /docs container width so the two pages share the same canvas. */
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    /* All sections use the full container width to match /download visually. */
+
+    .qs-hero {
+      padding: calc(var(--nav-height) + 2.5rem) 0 1.5rem;
+    }
+    .qs-eyebrow {
+      margin: 0 0 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .qs-eyebrow a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .qs-eyebrow a:hover {
+      color: var(--brand-accent);
+    }
+    .qs-hero h1 {
+      font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+      letter-spacing: -0.02em;
+      color: var(--text-heading);
+      margin: 0 0 1rem 0;
+      line-height: 1.05;
+    }
+    .qs-lede {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: var(--text-body);
+      margin: 0 0 1.5rem 0;
+    }
+    .qs-pills {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .qs-pills a {
+      display: inline-block;
+      padding: 0.55rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 0.5rem;
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .qs-pills a:hover {
+      border-color: var(--brand-primary);
+      background: var(--brand-primary-light);
+    }
+
+    .qs-section {
+      padding: 2rem 0;
+      border-top: 1px solid var(--border-default);
+    }
+    .qs-section-final {
+      padding-bottom: 5rem;
+    }
+    .qs-section h2 {
+      margin: 0 0 1rem;
+      font-size: 1.5rem;
+      color: var(--text-heading);
+      letter-spacing: -0.01em;
+    }
+    .qs-section h3 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+    .qs-section-blurb {
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-body);
+    }
+    .qs-footnote {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .qs-bullets {
+      margin: 0 0 0.5rem;
+      padding-left: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-body);
+    }
+    .qs-bullets li {
+      margin-bottom: 0.4rem;
+    }
+    .qs-bullets.numbered {
+      list-style: decimal;
+    }
+    .qs-bullets a {
+      color: var(--brand-accent);
+      text-decoration: none;
+    }
+    .qs-bullets a:hover {
+      text-decoration: underline;
+    }
+
+    /* Inline `<code>` in paragraphs and the standalone .qs-block (used for
+       the BOLT_VERSION example outside the tabbed widget). The tabbed
+       install widget brings its own styling via the InstallTabs component. */
+    .qs-block {
+      margin: 0.25rem 0 0.75rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 0.4rem;
+      padding: 0.55rem 0.75rem;
+      overflow-x: auto;
+    }
+    .qs-block code,
+    p code {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.825rem;
+      color: var(--text-body);
+      background: transparent;
+      padding: 0;
+    }
+    p code {
+      background: var(--bg-elevated);
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.25rem;
+    }
+
+    .qs-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: step;
+      display: grid;
+      gap: 0.85rem;
+    }
+    .qs-steps > li {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 0.625rem;
+      padding: 1rem 1.1rem;
+    }
+    .qs-steps p {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--text-body);
+    }
+
+    /* ── Print stylesheet ──────────────────────────────────────────────────
+       Renders cleanly when the page is printed (Cmd+P → Save as PDF) or
+       when a headless Chrome runs scripts/render-pdf.mjs against this URL.
+       Goals: hide site chrome, drop dark-mode tokens to printer-friendly
+       black-on-white, simple typography, sane page breaks. */
+    @media print {
+      @page {
+        size: Letter;
+        margin: 0.6in 0.7in;
+      }
+      html, body {
+        background: #ffffff !important;
+        color: #111111 !important;
+      }
+      /* Strip the site nav + footer injected by shared-nav.js. */
+      .navbar, .footer, #navbar { display: none !important; }
+      .qs-pills, .qs-eyebrow { display: none !important; }
+
+      .qs-page {
+        background: #ffffff !important;
+      }
+      .qs-page .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .qs-hero {
+        padding: 0 0 0.5rem !important;
+      }
+      .qs-hero h1 {
+        font-size: 22pt;
+        color: #111 !important;
+        margin: 0 0 0.4rem !important;
+      }
+      .qs-lede {
+        font-size: 11pt;
+        color: #222 !important;
+        margin: 0 0 0.75rem !important;
+      }
+      .qs-section {
+        padding: 0.5rem 0 !important;
+        border-top: 0.5pt solid #ccc !important;
+        break-inside: avoid;
+      }
+      .qs-section:first-of-type {
+        border-top: none !important;
+      }
+      .qs-section h2 {
+        font-size: 14pt;
+        color: #111 !important;
+        margin: 0.5rem 0 0.4rem !important;
+        break-after: avoid;
+      }
+      .qs-section h3 {
+        font-size: 11pt;
+        color: #111 !important;
+      }
+      .qs-section-blurb,
+      .qs-bullets,
+      .qs-steps p {
+        font-size: 10.5pt !important;
+        color: #222 !important;
+        line-height: 1.4 !important;
+      }
+      .qs-footnote {
+        color: #555 !important;
+      }
+      .qs-steps > li {
+        background: #f6f6f6 !important;
+        border: 0.5pt solid #ccc !important;
+        break-inside: avoid;
+      }
+      .qs-block {
+        background: #f0f0f0 !important;
+        border: 0.5pt solid #ccc !important;
+      }
+      .qs-block code,
+      p code {
+        color: #111 !important;
+        font-size: 9.5pt !important;
+      }
+      p code {
+        background: #f0f0f0 !important;
+      }
+      a {
+        color: #1a4fb6 !important;
+        text-decoration: none !important;
+      }
+      /* Page breaks: keep the install commands together, and start the
+         "Five things to try" block on a fresh page where possible. */
+      .qs-section h2 { page-break-after: avoid; }
+      .qs-steps     { page-break-inside: avoid; }
+    }
+  </style>
+</BaseLayout>

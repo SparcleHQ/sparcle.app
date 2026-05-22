@@ -118,8 +118,62 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </div>
     </section>
 
-    <!-- Deployment surface -->
+    <!-- Customer-extensible Authority Policy SDK -->
     <section class="arch-section">
+      <div class="container">
+        <p class="section-eyebrow">Authority Policy SDK &mdash; Customer-Extensible Layer</p>
+        <h2>Your search. Your policy. Your code.</h2>
+        <p class="arch-page-lede arch-page-lede--narrow">
+          Every regulated vertical has its own honest definition of authoritative. The Authority Policy
+          trait lets customers write theirs &mdash; in Rust, or in YAML config that wraps the reference
+          packs &mdash; without forking the product. ACL handles authorization. Authority Policy handles
+          ranking. Separate concerns, separate trait surfaces. Three reference packs ship in the box;
+          vertical and customer-specific packs ship on engagement.
+        </p>
+        <div class="arch-pillars">
+          <div class="arch-pillar">
+            <h3>Default pack</h3>
+            <p>
+              Universal signals every install benefits from &mdash; freshness, authority tier, approval
+              lifecycle, audience targeting. Sensible defaults for any organization, regardless of
+              vertical. Customers tune weights or swap in a vertical pack as needs evolve.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Regulated pack</h3>
+            <p>
+              Regulated-industry baseline &mdash; tighter freshness cadence, hard penalty on deprecated
+              and archived records, emphasis on authority-tier sourcing. Compliance teams cite the
+              right document, not the most recent draft of the wrong one.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Healthcare pack</h3>
+            <p>
+              Clinical-evidence ladder layered on the Regulated pack &mdash; clinical guidelines outrank
+              clinical notes, expired-CME demotion, configurable per-customer evidence taxonomies.
+              A starting point for customer-specific clinical ontology work.
+            </p>
+          </div>
+          <div class="arch-pillar">
+            <h3>Customer-written</h3>
+            <p>
+              Vertical packs and customer-specific impls slot into the same trait surface. Defense,
+              finance, legal, federal-civilian engagements ship custom packs on the same SDK. Code lives
+              in your repos, runs inside your perimeter, signed and reviewed by your team.
+            </p>
+          </div>
+        </div>
+        <p class="arch-page-lede arch-page-lede--narrow" style="margin-top: 2rem;">
+          The trait surface and reference impls live in <code>aeira-authority-policy</code>. Architecture
+          poster (PDF) walks the L4.5 placement between the ACL pre-filter and the RRF rank merge:
+          <a href="/docs/pdfs/bolt-aeira-architecture-poster.pdf">bolt-aeira-architecture-poster.pdf</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Deployment surface -->
+    <section class="arch-section arch-section-alt">
       <div class="container">
         <p class="section-eyebrow">Deployment</p>
         <h2>Three operating models. Same platform.</h2>
@@ -169,7 +223,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </section>
 
     <!-- IP & patent posture -->
-    <section class="arch-section arch-section-alt">
+    <section class="arch-section">
       <div class="container">
         <p class="section-eyebrow">Intellectual Property</p>
         <h2>Patent-pending architecture, verifiable today.</h2>

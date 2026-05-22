@@ -59,11 +59,66 @@ const icons = {
         />
       </div>
 
+      <!-- Authority Policy SDK trust-signal demonstration -->
+      <SectionHeader
+        label="Authority Policy SDK"
+        heading="Every answer carries<br>its receipts."
+        intro="ACL-aware retrieval governs who can see what. Authority Policy decides how to rank what they can see — using freshness, approval status, audience targeting, and vertical-specific evidence ladders. Three reference packs ship in the box; customers extend or write their own."
+        class="section-header--spaced"
+      />
+
+      <div class="trust-cards">
+        <div class="trust-card">
+          <div class="tc-eyebrow">Generic</div>
+          <div class="tc-query">&ldquo;Find my Q4 deck&rdquo;</div>
+          <div class="tc-answer">
+            <div class="tc-title">Q4 Sales Deck.pptx</div>
+            <div class="tc-source">Drive · Marketing folder</div>
+            <div class="tc-pills">
+              <span class="pill pos">Updated 2 weeks ago</span>
+              <span class="pill pos">Approved</span>
+              <span class="pill pos">For your audience</span>
+            </div>
+          </div>
+          <div class="tc-note">Default pack: freshness, approval, audience targeting.</div>
+        </div>
+
+        <div class="trust-card">
+          <div class="tc-eyebrow">Healthcare</div>
+          <div class="tc-query">&ldquo;Latest hypertension treatment guideline&rdquo;</div>
+          <div class="tc-answer">
+            <div class="tc-title">Hypertension Management — Tier 1 Guideline</div>
+            <div class="tc-source">Clinical Library · Cardiology</div>
+            <div class="tc-pills">
+              <span class="pill pos">Clinical guideline</span>
+              <span class="pill pos">CME current</span>
+              <span class="pill pos">Authoritative source-of-record</span>
+            </div>
+          </div>
+          <div class="tc-note">Healthcare pack: evidence ladder, CME currency.</div>
+        </div>
+
+        <div class="trust-card demoted">
+          <div class="tc-eyebrow">Demoted</div>
+          <div class="tc-query">&ldquo;Expense policy&rdquo;</div>
+          <div class="tc-answer">
+            <div class="tc-title">Expense Policy v3 (2023)</div>
+            <div class="tc-source">Confluence · Finance space</div>
+            <div class="tc-pills">
+              <span class="pill neg">Retired policy &mdash; do not cite</span>
+            </div>
+          </div>
+          <div class="tc-note">Regulated pack: retired policies sink below the cut.</div>
+        </div>
+      </div>
+
+      <p class="trust-tagline"><strong>Your search. Your policy. Your code.</strong> Trust scoring runs inside your perimeter, on the substrate you already control. Reference packs in Rust + YAML; SDK is open to customer impls.</p>
+
       <!-- Platform Capabilities sub-section -->
       <SectionHeader
         label="Platform Capabilities"
         heading="Every Surface.<br>Every Workflow."
-        intro="Bolt meets knowledge workers wherever they are — desktop, browser, or mobile. With autonomous execution, ACL-aware retrieval, and an enterprise catalog built in, your team gets instant productivity from day one."
+        intro="Bolt meets knowledge workers wherever they are &mdash; desktop, browser, or mobile. With autonomous execution, ACL-aware retrieval, and an enterprise catalog built in, your team gets instant productivity from day one."
         class="section-header--spaced"
       />
 
@@ -101,3 +156,108 @@ const icons = {
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Authority Policy SDK trust-signal demonstration cards */
+  .trust-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin: 2rem 0 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .trust-cards { grid-template-columns: 1fr; }
+  }
+  .trust-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--brand);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .trust-card.demoted {
+    border-left-color: #d83333;
+    background: color-mix(in srgb, var(--panel) 92%, #d83333 8%);
+  }
+  .tc-eyebrow {
+    font-family: Menlo, Monaco, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .tc-query {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .tc-answer {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--border);
+  }
+  .tc-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .tc-source {
+    font-family: Menlo, Monaco, monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    letter-spacing: 0.04em;
+  }
+  .tc-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+  }
+  .pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .pill.pos {
+    background: color-mix(in srgb, var(--panel) 80%, #16a34a 20%);
+    border-color: #16a34a;
+    color: #16a34a;
+  }
+  .pill.neg {
+    background: color-mix(in srgb, var(--panel) 85%, #d83333 15%);
+    border-color: #d83333;
+    color: #ff8a8a;
+  }
+  .tc-note {
+    margin-top: auto;
+    padding-top: 0.85rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  .trust-tagline {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 80ch;
+    margin: 0 auto 2rem;
+    text-align: center;
+  }
+  .trust-tagline strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+</style>

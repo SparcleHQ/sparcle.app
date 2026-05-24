@@ -109,6 +109,39 @@ fi
 FILE_NAME="bolt-cli-${VERSION}-${RUST_TRIPLE}"
 FILE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}/${FILE_NAME}"
 
+# ── Per-platform walk-back ───────────────────────────────────────────────────
+# If the current /releases/latest tag is missing the user's platform bolt-cli
+# (partial ship in flight, or a single-asset upload silently 502'd from GitHub —
+# the same failure mode that hit the desktop trial mac arm64 DMG on v0.1.31),
+# walk back through recent releases to find the first one that has it. Skipped
+# when the user explicitly pinned via $BOLT_VERSION or a positional arg.
+VERSION_PINNED=0
+if [ -n "${BOLT_VERSION:-}" ] || [ -n "${1:-}" ]; then
+  VERSION_PINNED=1
+fi
+
+asset_head_ok() {
+  _url="$1"
+  _code=$(curl -sIL --max-time 5 -o /dev/null -w '%{http_code}' "$_url" 2>/dev/null || echo "000")
+  case "$_code" in 200|302) return 0 ;; *) return 1 ;; esac
+}
+
+if [ "$VERSION_PINNED" -eq 0 ] && ! asset_head_ok "$FILE_URL"; then
+  warn "v${VERSION} does not yet have bolt-cli for ${RUST_TRIPLE} — checking earlier releases..."
+  RELEASES_RESP=$(curl -fsSL --max-time 10 "https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=10" 2>/dev/null || true)
+  for _v in $(echo "$RELEASES_RESP" | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//'); do
+    [ "$_v" = "$VERSION" ] && continue
+    _candidate_url="https://github.com/${GITHUB_REPO}/releases/download/v${_v}/bolt-cli-${_v}-${RUST_TRIPLE}"
+    if asset_head_ok "$_candidate_url"; then
+      warn "Installing bolt-cli v${_v} (latest v${VERSION} is mid-ship for ${RUST_TRIPLE})"
+      VERSION="$_v"
+      FILE_NAME="bolt-cli-${VERSION}-${RUST_TRIPLE}"
+      FILE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}/${FILE_NAME}"
+      break
+    fi
+  done
+fi
+
 echo ""
 echo "  ⚡ Bolt CLI Installer"
 echo "  ─────────────────────────────────────"

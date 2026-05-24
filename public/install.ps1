@@ -116,6 +116,33 @@ function Get-RemoteAssetInfo {
   }
 }
 
+# Walk back recent releases looking for the most recent one whose asset names
+# match a regex. Suffix examples:
+#   '-x86_64-pc-windows-msvc\.exe$'
+#   '-x86_64-pc-windows-msvc\.(exe|msi)$'
+# Used when the current /releases/latest tag is missing the user's installer
+# (partial ship in flight, or a single-asset 502'd silently like trial mac
+# arm64 on v0.1.31). Returns the tag (without leading v) or $null.
+function Find-LatestReleaseWithAsset {
+  param(
+    [string]$FilePrefixPattern,
+    [string]$SuffixPattern
+  )
+  try {
+    $releases = Invoke-RestMethod "https://api.github.com/repos/$GitHubRepo/releases?per_page=10" -TimeoutSec 10 -ErrorAction Stop
+    foreach ($rel in $releases) {
+      foreach ($asset in $rel.assets) {
+        if ($asset.name -match ("^" + $FilePrefixPattern + "-[0-9][0-9.]*" + $SuffixPattern)) {
+          return ($rel.tag_name -replace '^v', '')
+        }
+      }
+    }
+  } catch {
+    return $null
+  }
+  return $null
+}
+
 function Test-CacheFresh {
   param(
     [string]$Cached,
@@ -422,6 +449,32 @@ $Arch = if ([Environment]::Is64BitOperatingSystem) {
 $PreferMsi = [bool]$env:BOLT_INSTALL_MSI
 $InstallerExt = if ($PreferMsi) { "msi" } else { "exe" }
 Select-ReleaseAsset -DesiredExt $InstallerExt
+
+# Per-platform walk-back: if v$Version doesn't have either the .exe or .msi for
+# this edition (partial ship, or a single-asset silent 502 — the same failure
+# that hit trial mac arm64 on v0.1.31), walk back recent releases to find one
+# that does. Skipped when the user pinned a version via $env:BOLT_VERSION or
+# -Version arg.
+if (-not $VersionPinned) {
+  $primaryInfo = Get-RemoteAssetInfo -Url $FileUrl
+  if (-not $primaryInfo) {
+    # Try the other extension first within the same release.
+    $altExt = if ($InstallerExt -eq "exe") { "msi" } else { "exe" }
+    $altUrl = "$BaseUrl/$FilePrefix-$Version-$Arch.$altExt"
+    if (-not (Get-RemoteAssetInfo -Url $altUrl)) {
+      Warn "v$Version has no Windows installer for $AppName — checking earlier releases..."
+      $prefixPattern = [regex]::Escape($FilePrefix)
+      $suffixPattern = "-" + [regex]::Escape($Arch) + "\.(exe|msi)$"
+      $fallback = Find-LatestReleaseWithAsset -FilePrefixPattern $prefixPattern -SuffixPattern $suffixPattern
+      if ($fallback -and $fallback -ne $Version) {
+        Warn "Installing v$fallback (latest v$Version is mid-ship for Windows)"
+        $Version = $fallback
+        $BaseUrl = "https://github.com/$GitHubRepo/releases/download/v$Version"
+        Select-ReleaseAsset -DesiredExt $InstallerExt
+      }
+    }
+  }
+}
 
 Write-Host ""
 Write-Host "  ⚡ Bolt Installer" -ForegroundColor Cyan

@@ -14,11 +14,16 @@
 /images/*
   Cache-Control: public, max-age=86400
 
+# CSS/JS get a short max-age because filenames aren't content-hashed.
+# A 24h cache previously wedged a stale styles.css after deploy until
+# the entry expired naturally. 5 min keeps things fresh but still
+# benefits repeat-visit performance. Add ?v= query param in BaseLayout
+# for an immediate bust on each new deploy.
 /css/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=300, must-revalidate
 
 /js/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=300, must-revalidate
 
 # Never cache the contact endpoint
 /api/contact

@@ -24,7 +24,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 // public/js/shared-nav.js — Cloudflare's edge cache otherwise serves the
 // stale file for up to 24h (cache-control: max-age=86400). The dashboard
 // cache-purge works too, but bumping this is the zero-click path.
-const sharedNavVersion = "20260523d";
+const sharedNavVersion = "20260524a";
 ---
 
 <!doctype html>
@@ -198,9 +198,9 @@ const sharedNavVersion = "20260523d";
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="/css/variables.css" />
-    <link rel="stylesheet" href="/css/styles.css" />
-    <link rel="stylesheet" href="/css/sparkle-animation.css" />
+    <link rel="stylesheet" href={`/css/variables.css?v=${sharedNavVersion}`} />
+    <link rel="stylesheet" href={`/css/styles.css?v=${sharedNavVersion}`} />
+    <link rel="stylesheet" href={`/css/sparkle-animation.css?v=${sharedNavVersion}`} />
     <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
 
     <!-- Google Analytics 4 -->

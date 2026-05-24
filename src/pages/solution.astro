@@ -1,422 +1,431 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import SectionHeader from "../components/marketing/SectionHeader.astro";
-import PillarCard from "../components/marketing/PillarCard.astro";
-import StatCard from "../components/marketing/StatCard.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CardGrid from "../components/ui/CardGrid.astro";
+import Card from "../components/ui/Card.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
 
 const icons = {
-  bolt: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>',
-  database: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5" /><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" /></svg>',
-  network: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v6m0 6v6m-9-9h6m6 0h6" /></svg>',
-  lock: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>',
-  monitor: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><polyline points="8 21 12 17 16 21" /></svg>',
-  shield: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>',
-  globe: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32" /></svg>',
-  book: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>',
+  bolt:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+  database: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>',
+  network:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>',
+  lock:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  monitor:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/></svg>',
+  shield:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  globe:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>',
+  book:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
 };
 ---
-
 <BaseLayout
   title="Our Solution | Sparcle — Bolt AI Agent & Aeira Data Plane"
   description="See how Bolt and Aeira solve enterprise productivity fragmentation: AI agent across your enterprise systems, ACL-aware data plane, open MCP integration, and enterprise-grade security."
   canonical="https://sparcle.app/solution"
 >
-  <!-- ========================================
-       OUR SOLUTION
-       ======================================== -->
-  <section id="solution" class="section-solution section-solution--page">
-    <div class="container">
-      <SectionHeader
-        label="Our Solution"
-        heading="Two Products.<br>One Sovereign AI Platform."
-        intro="Bolt is the AI agent that eliminates context switching — running inside your own perimeter, with your own models, under your own compliance framework. Aeira is the ACL-enforced knowledge index that ensures every answer is grounded, governed, and authorized. Together, they give every knowledge worker instant access to everything your organization knows — with your IP and data protected at every layer."
-      />
+  <main class="page-solution">
+    <Hero
+      eyebrow="The Solution"
+      title="Two products. One sovereign AI platform."
+      lede="Bolt is the AI agent that eliminates context switching — running inside your own perimeter, with your own models, under your own compliance framework. Aeira is the ACL-enforced knowledge index that ensures every answer is grounded, governed, and authorized. Together, they give every knowledge worker instant access to everything your organization knows — with your IP and data protected at every layer."
+    >
+      <a href="/products.html" class="btn btn-primary btn-lg">Meet Bolt</a>
+      <a href="/products/aeira.html" class="btn btn-secondary btn-lg">Meet Aeira</a>
+    </Hero>
 
-      <div class="solution-pillars">
-        <PillarCard
-          number="01"
-          title="Bolt — Enterprise AI Operating System"
-          description="Ask in natural language, get answers across your enterprise systems — deployed on your infrastructure, with your own AI model, in your compliance framework. One Thing™ surfaces the single most important action right now. Works with Microsoft 365, Google Workspace, Zoho, or any OIDC provider — no migration, no lock-in. Unlike Copilot or Gemini, nothing leaves your perimeter."
-          icon={icons.bolt}
-        />
-        <PillarCard
-          number="02"
-          title="Aeira — ACL-aware Enterprise Index"
-          description="Access · Enterprise · Index · Retrieval · Augment. From curated Catalog to full hybrid search with 4-level ACL filtering — Aeira ensures every user and every AI query only sees what they're authorized to access."
-          icon={icons.database}
-        />
-        <PillarCard
-          number="03"
-          title="Open MCP + Model Independence"
-          description="Built on the Model Context Protocol — the open standard for AI tool integration. No proprietary connectors. No model lock-in. Run any LLM — switch providers whenever you want, without employees noticing or your data moving. Your IT team can extend Bolt with custom servers in hours, not months."
-          icon={icons.network}
-        />
-        <PillarCard
-          number="04"
-          title="AI Governance Built In, Not Bolted On"
-          description="Your IP and employee data stay protected — regardless of which AI model is running underneath. Multi-layer security pipeline, policy guardrails, compliance audit logging, and on-prem/VPC/air-gapped deployment options. Designed for HIPAA, GDPR, and DPDPA workflows from day one — not retrofitted after."
-          icon={icons.lock}
-        />
+    <PageSection
+      eyebrow="Our Solution"
+      title="Four pillars."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        <Card icon={icons.bolt} eyebrow="01" title="Bolt — Enterprise AI Operating System">
+          Ask in natural language, get answers across your enterprise systems — deployed on your
+          infrastructure, with your own AI model, in your compliance framework. One Thing&trade;
+          surfaces the single most important action right now. Works with Microsoft 365, Google
+          Workspace, Zoho, or any OIDC provider — no migration, no lock-in. Unlike Copilot or
+          Gemini, nothing leaves your perimeter.
+        </Card>
+        <Card icon={icons.database} eyebrow="02" title="Aeira — ACL-aware Enterprise Index">
+          Access &middot; Enterprise &middot; Index &middot; Retrieval &middot; Augment. From curated
+          Catalog to full hybrid search with 4-level ACL filtering — Aeira ensures every user and
+          every AI query only sees what they're authorized to access.
+        </Card>
+        <Card icon={icons.network} eyebrow="03" title="Open MCP + Model Independence">
+          Built on the Model Context Protocol — the open standard for AI tool integration. No
+          proprietary connectors. No model lock-in. Run any LLM — switch providers whenever you
+          want, without employees noticing or your data moving. Your IT team can extend Bolt with
+          custom servers in hours, not months.
+        </Card>
+        <Card icon={icons.lock} eyebrow="04" title="AI Governance Built In, Not Bolted On">
+          Your IP and employee data stay protected — regardless of which AI model is running
+          underneath. Multi-layer security pipeline, policy guardrails, compliance audit logging,
+          and on-prem / VPC / air-gapped deployment options. Designed for HIPAA, GDPR, and DPDPA
+          workflows from day one — not retrofitted after.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Authority Policy SDK"
+      title="Every answer carries its receipts."
+      lede="ACL-aware retrieval governs who can see what. Authority Policy decides how to rank what they can see — using freshness, approval status, audience targeting, and vertical-specific evidence ladders. Three reference packs ship in the box; customers extend or write their own."
+      stripe="a"
+    >
+      <div class="receipt-grid grid-3">
+        <article class="receipt-card">
+          <div class="receipt-card__eyebrow">Generic</div>
+          <div class="receipt-card__query">&ldquo;Find my Q4 deck&rdquo;</div>
+          <div class="receipt-card__answer">
+            <div class="receipt-card__title">Q4 Sales Deck.pptx</div>
+            <div class="receipt-card__source">Drive &middot; Marketing folder</div>
+            <div class="receipt-card__pills">
+              <span class="receipt-pill receipt-pill--pos">Updated 2 weeks ago</span>
+              <span class="receipt-pill receipt-pill--pos">Approved</span>
+              <span class="receipt-pill receipt-pill--pos">For your audience</span>
+            </div>
+          </div>
+          <div class="receipt-card__note">Default pack: freshness, approval, audience targeting.</div>
+        </article>
+
+        <article class="receipt-card">
+          <div class="receipt-card__eyebrow">Healthcare</div>
+          <div class="receipt-card__query">&ldquo;Latest hypertension treatment guideline&rdquo;</div>
+          <div class="receipt-card__answer">
+            <div class="receipt-card__title">Hypertension Management — Tier 1 Guideline</div>
+            <div class="receipt-card__source">Clinical Library &middot; Cardiology</div>
+            <div class="receipt-card__pills">
+              <span class="receipt-pill receipt-pill--pos">Clinical guideline</span>
+              <span class="receipt-pill receipt-pill--pos">CME current</span>
+              <span class="receipt-pill receipt-pill--pos">Authoritative source-of-record</span>
+            </div>
+          </div>
+          <div class="receipt-card__note">Healthcare pack: evidence ladder, CME currency.</div>
+        </article>
+
+        <article class="receipt-card receipt-card--demoted">
+          <div class="receipt-card__eyebrow">Demoted</div>
+          <div class="receipt-card__query">&ldquo;Expense policy&rdquo;</div>
+          <div class="receipt-card__answer">
+            <div class="receipt-card__title">Expense Policy v3 (2023)</div>
+            <div class="receipt-card__source">Confluence &middot; Finance space</div>
+            <div class="receipt-card__pills">
+              <span class="receipt-pill receipt-pill--neg">Retired policy — do not cite</span>
+            </div>
+          </div>
+          <div class="receipt-card__note">Regulated pack: retired policies sink below the cut.</div>
+        </article>
       </div>
 
-      <!-- Authority Policy SDK trust-signal demonstration -->
-      <SectionHeader
-        label="Authority Policy SDK"
-        heading="Every answer carries<br>its receipts."
-        intro="ACL-aware retrieval governs who can see what. Authority Policy decides how to rank what they can see — using freshness, approval status, audience targeting, and vertical-specific evidence ladders. Three reference packs ship in the box; customers extend or write their own."
-        class="section-header--spaced"
-      />
+      <p class="section-tagline">
+        <strong>Your search. Your policy. Your code.</strong> Trust scoring runs inside your
+        perimeter, on the substrate you already control. Reference packs in Rust + YAML; SDK is
+        open to customer impls.
+      </p>
+    </PageSection>
 
-      <div class="trust-cards">
-        <div class="trust-card">
-          <div class="tc-eyebrow">Generic</div>
-          <div class="tc-query">&ldquo;Find my Q4 deck&rdquo;</div>
-          <div class="tc-answer">
-            <div class="tc-title">Q4 Sales Deck.pptx</div>
-            <div class="tc-source">Drive · Marketing folder</div>
-            <div class="tc-pills">
-              <span class="pill pos">Updated 2 weeks ago</span>
-              <span class="pill pos">Approved</span>
-              <span class="pill pos">For your audience</span>
-            </div>
+    <PageSection
+      eyebrow="From question to action"
+      title="One overlay. Across every system."
+      lede="Knowledge workers don't just need answers — they need to act on them. Bolt is the overlay every user already lives in: on top of any app, anywhere. It chains MCP servers, calls sub-agents, and closes the loop. Autonomous when safe. Human-in-the-loop when not. Audit-traced either way."
+      stripe="b"
+    >
+      <div class="action-grid grid-2">
+        <article class="action-card action-card--autonomous">
+          <div class="action-card__header">
+            <span class="action-card__verb">Find</span>
+            <span class="action-card__mode action-card__mode--autonomous">Autonomous</span>
           </div>
-          <div class="tc-note">Default pack: freshness, approval, audience targeting.</div>
-        </div>
-
-        <div class="trust-card">
-          <div class="tc-eyebrow">Healthcare</div>
-          <div class="tc-query">&ldquo;Latest hypertension treatment guideline&rdquo;</div>
-          <div class="tc-answer">
-            <div class="tc-title">Hypertension Management — Tier 1 Guideline</div>
-            <div class="tc-source">Clinical Library · Cardiology</div>
-            <div class="tc-pills">
-              <span class="pill pos">Clinical guideline</span>
-              <span class="pill pos">CME current</span>
-              <span class="pill pos">Authoritative source-of-record</span>
-            </div>
-          </div>
-          <div class="tc-note">Healthcare pack: evidence ladder, CME currency.</div>
-        </div>
-
-        <div class="trust-card demoted">
-          <div class="tc-eyebrow">Demoted</div>
-          <div class="tc-query">&ldquo;Expense policy&rdquo;</div>
-          <div class="tc-answer">
-            <div class="tc-title">Expense Policy v3 (2023)</div>
-            <div class="tc-source">Confluence · Finance space</div>
-            <div class="tc-pills">
-              <span class="pill neg">Retired policy &mdash; do not cite</span>
-            </div>
-          </div>
-          <div class="tc-note">Regulated pack: retired policies sink below the cut.</div>
-        </div>
-      </div>
-
-      <p class="trust-tagline"><strong>Your search. Your policy. Your code.</strong> Trust scoring runs inside your perimeter, on the substrate you already control. Reference packs in Rust + YAML; SDK is open to customer impls.</p>
-
-      <!-- From question to action -->
-      <SectionHeader
-        label="From question to action"
-        heading="One overlay.<br>Across every system."
-        intro="Knowledge workers don't just need answers — they need to act on them. Bolt is the overlay every user already lives in: on top of any app, anywhere. It chains MCP servers, calls sub-agents, and closes the loop. Autonomous when safe. Human-in-the-loop when not. Audit-traced either way."
-        class="section-header--spaced"
-      />
-
-      <div class="action-cards">
-        <div class="action-card autonomous">
-          <div class="ac-header">
-            <span class="ac-verb">Find</span>
-            <span class="ac-mode autonomous">Autonomous</span>
-          </div>
-          <div class="ac-query">&ldquo;Is the Acme renewal at risk?&rdquo;</div>
-          <div class="ac-chain">
+          <div class="action-card__query">&ldquo;Is the Acme renewal at risk?&rdquo;</div>
+          <div class="action-card__chain">
             <code>mdm</code> &middot; <code>salesforce</code> &middot; <code>zendesk</code> &middot; <code>marketo</code>
           </div>
-          <div class="ac-outcome">Bolt chains four MCP servers, returns a synthesized assessment with citations. Read-only. No side effects. PII masked at the LLM call.</div>
-        </div>
-
-        <div class="action-card autonomous">
-          <div class="ac-header">
-            <span class="ac-verb">Pull</span>
-            <span class="ac-mode autonomous">Autonomous</span>
+          <div class="action-card__outcome">
+            Bolt chains four MCP servers, returns a synthesized assessment with citations.
+            Read-only. No side effects. PII masked at the LLM call.
           </div>
-          <div class="ac-query">&ldquo;Pull the latest engineering hiring docs into this thread.&rdquo;</div>
-          <div class="ac-chain">
+        </article>
+
+        <article class="action-card action-card--autonomous">
+          <div class="action-card__header">
+            <span class="action-card__verb">Pull</span>
+            <span class="action-card__mode action-card__mode--autonomous">Autonomous</span>
+          </div>
+          <div class="action-card__query">&ldquo;Pull the latest engineering hiring docs into this thread.&rdquo;</div>
+          <div class="action-card__chain">
             <code>confluence</code> &middot; <code>notion</code> &middot; <code>drive</code> &middot; <code>aeira</code> or <code>glean</code>
           </div>
-          <div class="ac-outcome">Bolt searches across the customer's index of choice — Aeira if they run it, Glean / Coveo / any enterprise search if not — and lands docs inline with freshness and approval signals.</div>
-        </div>
-
-        <div class="action-card autonomous">
-          <div class="ac-header">
-            <span class="ac-verb">Notify</span>
-            <span class="ac-mode autonomous">Autonomous</span>
+          <div class="action-card__outcome">
+            Bolt searches across the customer's index of choice — Aeira if they run it, Glean /
+            Coveo / any enterprise search if not — and lands docs inline with freshness and
+            approval signals.
           </div>
-          <div class="ac-query">Watch: &ldquo;Any F500 account with &gt;20% usage decline + open P1 ticket.&rdquo;</div>
-          <div class="ac-chain">
+        </article>
+
+        <article class="action-card action-card--autonomous">
+          <div class="action-card__header">
+            <span class="action-card__verb">Notify</span>
+            <span class="action-card__mode action-card__mode--autonomous">Autonomous</span>
+          </div>
+          <div class="action-card__query">Watch: &ldquo;Any F500 account with &gt;20% usage decline + open P1 ticket.&rdquo;</div>
+          <div class="action-card__chain">
             <code>mdm</code> &middot; <code>zendesk</code> &middot; <code>slack</code> &middot; <code>jira</code>
           </div>
-          <div class="ac-outcome">Bolt watch evaluates on schedule, posts the rollup to the CS lead's Slack, files a follow-up task. Routing is the action; no external comms yet.</div>
-        </div>
-
-        <div class="action-card hitl">
-          <div class="ac-header">
-            <span class="ac-verb">Act</span>
-            <span class="ac-mode hitl">Human-in-the-loop</span>
+          <div class="action-card__outcome">
+            Bolt watch evaluates on schedule, posts the rollup to the CS lead's Slack, files a
+            follow-up task. Routing is the action; no external comms yet.
           </div>
-          <div class="ac-query">Same watch fires on a tier-1 account.</div>
-          <div class="ac-chain">
+        </article>
+
+        <article class="action-card action-card--hitl">
+          <div class="action-card__header">
+            <span class="action-card__verb">Act</span>
+            <span class="action-card__mode action-card__mode--hitl">Human-in-the-loop</span>
+          </div>
+          <div class="action-card__query">Same watch fires on a tier-1 account.</div>
+          <div class="action-card__chain">
             <code>mdm</code> &middot; <code>salesforce</code> &middot; <code>gmail</code> or <code>outlook</code> &middot; <code>docusign</code>
           </div>
-          <div class="ac-outcome">Bolt drafts the save-plan email and the contract amendment notes. Holds at the send-confirmation gate. CSM reviews, approves, Bolt sends and logs the audit entry. Outbound and irreversible actions always gate.</div>
-        </div>
+          <div class="action-card__outcome">
+            Bolt drafts the save-plan email and the contract amendment notes. Holds at the
+            send-confirmation gate. CSM reviews, approves, Bolt sends and logs the audit entry.
+            Outbound and irreversible actions always gate.
+          </div>
+        </article>
       </div>
 
-      <p class="action-tagline"><strong>Knowledge workers juggle 40+ systems on average.</strong> Most AI products add a 41st tab. Bolt is the overlay that consumes the other 40 — through MCP, A2A, or any HTTP API — and gives every user one place to ask, act, and audit. Same identity, same governance, same audit chain across every system they reach.</p>
+      <p class="section-tagline">
+        <strong>Knowledge workers juggle 40+ systems on average.</strong> Most AI products add a
+        41st tab. Bolt is the overlay that consumes the other 40 — through MCP, A2A, or any HTTP
+        API — and gives every user one place to ask, act, and audit. Same identity, same
+        governance, same audit chain across every system they reach.
+      </p>
+    </PageSection>
 
-      <!-- Platform Capabilities sub-section -->
-      <SectionHeader
-        label="Platform Capabilities"
-        heading="Every Surface.<br>Every Workflow."
-        intro="Bolt meets knowledge workers wherever they are &mdash; desktop, browser, or mobile. With autonomous execution, ACL-aware retrieval, and an enterprise catalog built in, your team gets instant productivity from day one."
-        class="section-header--spaced"
-      />
+    <PageSection
+      eyebrow="Platform Capabilities"
+      title="Every surface. Every workflow."
+      lede="Bolt meets knowledge workers wherever they are — desktop, browser, or mobile. With autonomous execution, ACL-aware retrieval, and an enterprise catalog built in, your team gets instant productivity from day one."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        <Card icon={icons.monitor} title="Multi-Surface Access">
+          <strong>macOS &middot; Windows &middot; Linux &middot; Web &middot; Browser Extension &middot; iOS &middot; Android.</strong>
+          Native apps, browser extensions, and PWA — Bolt deploys across your entire fleet.
+          One agent, every platform, same experience.
+        </Card>
+        <Card icon={icons.shield} title="ACL-Aware Everything">
+          <strong>Every query respects your org's access controls.</strong>
+          Aeira's 4-level ACL filtering ensures users and AI only see authorized data — org,
+          group, role, and individual permissions enforced in real time.
+        </Card>
+        <Card icon={icons.globe} title="Autonomous Execution">
+          <strong>Multi-step workflows in plain language.</strong>
+          Draft emails, file tickets, schedule meetings, summarize threads — Bolt plans and
+          executes complex workflows with human-in-the-loop confirmation.
+        </Card>
+        <Card icon={icons.book} title="Enterprise Catalog">
+          <strong>Curated company directory — included free.</strong>
+          20 entity types: offices, policies, apps, contacts, and more. New hires find the right
+          resource on day one. Scales to Dynamic, Enhanced, and Federated search tiers.
+        </Card>
+      </CardGrid>
+    </PageSection>
 
-      <div class="problem-stats-grid">
-        <StatCard
-          title="Multi-Surface Access"
-          text="macOS · Windows · Linux · Web · Browser Extension · iOS · Android"
-          impact="Native apps, browser extensions, and PWA — Bolt deploys across your entire fleet. One agent, every platform, same experience."
-          icon={icons.monitor}
-        />
-        <StatCard
-          title="ACL-Aware Everything"
-          text="Every query respects your org's access controls"
-          impact="Aeira's 4-level ACL filtering ensures users and AI only see authorized data — org, group, role, and individual permissions enforced in real time."
-          icon={icons.shield}
-        />
-        <StatCard
-          title="Autonomous Execution"
-          text="Multi-step workflows in plain language"
-          impact="Draft emails, file tickets, schedule meetings, summarize threads — Bolt plans and executes complex workflows with human-in-the-loop confirmation."
-          icon={icons.globe}
-        />
-        <StatCard
-          title="Enterprise Catalog"
-          text="Curated company directory — included free"
-          impact="20 entity types: offices, policies, apps, contacts, and more. New hires find the right resource on day one. Scales to Dynamic, Enhanced, and Federated search tiers."
-          icon={icons.book}
-        />
-      </div>
-
-      <div class="section-cta-row">
-        <a href="/products.html" class="btn btn-primary btn-lg"><img src="/images/bolt-logo.svg" alt="" width="22" height="22" style="vertical-align:-4px;margin-right:6px;">Explore Bolt</a>
-        <a href="/products/aeira.html" class="btn btn-secondary btn-lg"><img src="/images/aeira-logo.svg" alt="" width="22" height="22" style="vertical-align:-4px;margin-right:6px;">Explore Aeira</a>
-      </div>
-    </div>
-  </section>
+    <CTAStrip
+      variant="band"
+      title="Two products. One platform. Your perimeter."
+      lede="Schedule a 30-minute call. We'll walk through architecture, deployment models, and what's relevant to your environment."
+    >
+      <a href="/products.html" class="btn btn-primary btn-lg">Explore Bolt</a>
+      <a href="/products/aeira.html" class="btn btn-secondary btn-lg">Explore Aeira</a>
+    </CTAStrip>
+  </main>
 </BaseLayout>
 
-<style>
-  /* Authority Policy SDK trust-signal demonstration cards */
-  .trust-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    margin: 2rem 0 1.5rem;
+<style is:global>
+  /* ---------------------------------------------------------------
+     SECTION-LEVEL TAGLINE — a short closing line after a card grid.
+     Used after the receipt-grid and action-grid on /solution.
+     --------------------------------------------------------------- */
+  .section-tagline {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 70ch;
+    margin: 2rem auto 0;
+    text-align: center;
   }
-  @media (max-width: 900px) {
-    .trust-cards { grid-template-columns: 1fr; }
-  }
-  .trust-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--brand);
-    border-radius: var(--radius);
-    padding: 1.5rem 1.5rem 1.25rem;
+  .section-tagline strong { color: var(--text-heading); font-weight: 600; }
+
+  /* ---------------------------------------------------------------
+     RECEIPT-CARD — mock search-result card used to demo the
+     Authority Policy SDK. Page-specific UI, but anchored to
+     canonical tokens so it matches the rest of the site.
+     --------------------------------------------------------------- */
+  .receipt-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
-  .trust-card.demoted {
-    border-left-color: #d83333;
-    background: color-mix(in srgb, var(--panel) 92%, #d83333 8%);
+  .receipt-card--demoted {
+    border-left-color: var(--color-danger-strong);
   }
-  .tc-eyebrow {
-    font-family: Menlo, Monaco, monospace;
+  .receipt-card__eyebrow {
+    font-family: var(--font-mono);
     font-size: 0.7rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--text-muted);
     font-weight: 700;
     margin-bottom: 0.6rem;
   }
-  .tc-query {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.25rem;
+  .receipt-card__query {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
     font-weight: 700;
-    color: var(--text);
-    line-height: 1.2;
-  }
-  .tc-answer {
-    margin-top: 0.9rem;
-    padding-top: 0.9rem;
-    border-top: 1px dashed var(--border);
-  }
-  .tc-title {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text);
+    color: var(--text-heading);
     line-height: 1.25;
+    letter-spacing: -0.01em;
   }
-  .tc-source {
-    font-family: Menlo, Monaco, monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-top: 0.25rem;
+  .receipt-card__answer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-default);
+  }
+  .receipt-card__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.3;
+  }
+  .receipt-card__source {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
     letter-spacing: 0.04em;
   }
-  .tc-pills {
+  .receipt-card__pills {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
-    margin-top: 0.75rem;
+    margin-top: 0.85rem;
   }
-  .pill {
+  .receipt-pill {
     font-size: 0.72rem;
     font-weight: 600;
     padding: 0.25rem 0.65rem;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     border: 1px solid;
     line-height: 1.3;
     white-space: nowrap;
   }
-  .pill.pos {
-    background: color-mix(in srgb, var(--panel) 80%, #16a34a 20%);
-    border-color: #16a34a;
-    color: #16a34a;
+  .receipt-pill--pos {
+    background: var(--color-success-bg);
+    border-color: var(--color-success);
+    color: var(--color-success-strong);
   }
-  .pill.neg {
-    background: color-mix(in srgb, var(--panel) 85%, #d83333 15%);
-    border-color: #d83333;
-    color: #ff8a8a;
+  .receipt-pill--neg {
+    background: var(--color-danger-bg);
+    border-color: var(--color-danger);
+    color: var(--color-danger-strong);
   }
-  .tc-note {
+  .receipt-card__note {
     margin-top: auto;
-    padding-top: 0.85rem;
+    padding-top: 1rem;
     font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.45;
-  }
-  .trust-tagline {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--muted);
-    max-width: 80ch;
-    margin: 0 auto 2rem;
-    text-align: center;
-  }
-  .trust-tagline strong {
-    color: var(--text);
-    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1.5;
   }
 
-  /* From question to action — four-verb action cards */
-  .action-cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-    margin: 2rem 0 1.5rem;
-  }
-  @media (max-width: 900px) {
-    .action-cards { grid-template-columns: 1fr; }
-  }
+  /* ---------------------------------------------------------------
+     ACTION-CARD — verb-led MCP chain visualization. Page-specific.
+     --------------------------------------------------------------- */
   .action-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--brand);
-    border-radius: var(--radius);
-    padding: 1.5rem 1.5rem 1.25rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
-  .action-card.autonomous { border-left-color: #16a34a; }
-  .action-card.hitl { border-left-color: #d97706; }
-  .ac-header {
+  .action-card--autonomous { border-left-color: var(--color-success-strong); }
+  .action-card--hitl       { border-left-color: var(--color-warning); }
+  .action-card__header {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
-    margin-bottom: 0.85rem;
+    margin-bottom: 1rem;
   }
-  .ac-verb {
-    font-family: Georgia, "Times New Roman", serif;
+  .action-card__verb {
+    font-family: var(--font-display);
     font-size: 1.65rem;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-heading);
     letter-spacing: -0.02em;
     line-height: 1;
   }
-  .ac-mode {
-    font-family: Menlo, Monaco, monospace;
+  .action-card__mode {
+    font-family: var(--font-mono);
     font-size: 0.65rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     font-weight: 700;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-full);
     border: 1px solid;
     white-space: nowrap;
   }
-  .ac-mode.autonomous {
-    background: color-mix(in srgb, var(--panel) 82%, #16a34a 18%);
-    border-color: #16a34a;
-    color: #16a34a;
+  .action-card__mode--autonomous {
+    background: var(--color-success-bg);
+    border-color: var(--color-success);
+    color: var(--color-success-strong);
   }
-  .ac-mode.hitl {
-    background: color-mix(in srgb, var(--panel) 82%, #d97706 18%);
-    border-color: #d97706;
-    color: #f5b85a;
+  .action-card__mode--hitl {
+    background: var(--color-warning-bg);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
   }
-  .ac-query {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.15rem;
+  .action-card__query {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text);
-    line-height: 1.3;
+    color: var(--text-heading);
+    line-height: 1.35;
     margin-bottom: 0.85rem;
+    letter-spacing: -0.01em;
   }
-  .ac-chain {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-bottom: 0.85rem;
-    line-height: 1.5;
+  .action-card__chain {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
   }
-  .ac-chain code {
-    font-family: Menlo, Monaco, monospace;
-    font-size: 0.72rem;
-    background: color-mix(in srgb, var(--panel) 70%, var(--text) 4%);
-    padding: 0.15rem 0.45rem;
+  .action-card__chain code {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    background: var(--bg-muted);
+    padding: 0.15rem 0.5rem;
     border-radius: 4px;
-    border: 1px solid var(--border);
-    color: var(--text);
+    border: 1px solid var(--border-default);
+    color: var(--text-body);
   }
-  .ac-outcome {
+  .action-card__outcome {
     margin-top: auto;
-    font-size: 0.88rem;
-    color: var(--muted);
-    line-height: 1.55;
-  }
-  .action-tagline {
-    font-size: 1rem;
-    line-height: 1.65;
-    color: var(--muted);
-    max-width: 80ch;
-    margin: 1.5rem auto 2.5rem;
-    text-align: center;
-  }
-  .action-tagline strong {
-    color: var(--text);
-    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-body);
+    line-height: 1.6;
   }
 </style>

@@ -1,0 +1,162 @@
+---
+/**
+ * CTAStrip — end-of-page conversion block. Two flavors.
+ *
+ * variant="band" (default) — full-bleed brand-blue band, white text + button.
+ *                            Use as the final section on a marketing page.
+ * variant="inline"          — transparent, sits at the end of any PageSection
+ *                            for a "next step" CTA without changing the page rhythm.
+ *
+ * Props:
+ *   variant       'band' | 'inline'
+ *   eyebrow       optional small caps label above title
+ *   title         h2
+ *   lede          paragraph
+ *   class         extra class
+ *
+ * Slots:
+ *   default       the CTA buttons (1–2 .btn elements)
+ *   note          small note under buttons (e.g., "Or download Personal — free forever")
+ */
+export interface Props {
+  variant?: 'band' | 'inline';
+  eyebrow?: string;
+  title?: string;
+  lede?: string;
+  class?: string;
+}
+const {
+  variant = 'band',
+  eyebrow,
+  title,
+  lede,
+  class: className = '',
+} = Astro.props;
+---
+{variant === 'band' ? (
+  <section class={`cta-strip cta-strip--band ${className}`}>
+    <div class="cta-strip__inner w-prose">
+      {eyebrow && <p class="eyebrow eyebrow--on-band">{eyebrow}</p>}
+      {title && <h2 class="cta-strip__title" set:html={title} />}
+      {lede && <p class="cta-strip__lede" set:html={lede} />}
+      <div class="cta-strip__actions">
+        <slot />
+      </div>
+      {Astro.slots.has('note') && (
+        <p class="cta-strip__note"><slot name="note" /></p>
+      )}
+    </div>
+  </section>
+) : (
+  <div class={`cta-strip cta-strip--inline ${className}`}>
+    {title && <h3 class="cta-strip__title" set:html={title} />}
+    {lede && <p class="cta-strip__lede" set:html={lede} />}
+    <div class="cta-strip__actions">
+      <slot />
+    </div>
+    {Astro.slots.has('note') && (
+      <p class="cta-strip__note"><slot name="note" /></p>
+    )}
+  </div>
+)}
+
+<style is:global>
+  .cta-strip--band {
+    padding: var(--space-section) 0;
+    background: linear-gradient(135deg, var(--blue-700) 0%, var(--blue-600) 100%);
+    color: #fff;
+    text-align: center;
+  }
+  .cta-strip--band .cta-strip__inner {
+    text-align: center;
+  }
+  .cta-strip--band .cta-strip__title {
+    color: #fff;
+    margin: 0 0 1rem;
+  }
+  .cta-strip--band .cta-strip__lede {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 auto 2rem;
+    max-width: 65ch;
+  }
+  .cta-strip--band .cta-strip__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .cta-strip--band .cta-strip__actions .btn-primary {
+    background: #fff;
+    color: var(--blue-700);
+    box-shadow: var(--shadow-md);
+  }
+  .cta-strip--band .cta-strip__actions .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--blue-800);
+  }
+  .cta-strip--band .cta-strip__actions .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  .cta-strip--band .cta-strip__actions .btn-secondary:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+  .cta-strip--band .cta-strip__note {
+    margin: 1.5rem auto 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    max-width: 480px;
+  }
+  .cta-strip--band .cta-strip__note a {
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: underline;
+  }
+  .eyebrow.eyebrow--on-band {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .cta-strip--inline {
+    margin-top: var(--space-block);
+    text-align: center;
+  }
+  .cta-strip--inline .cta-strip__title {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+  }
+  .cta-strip--inline .cta-strip__lede {
+    color: var(--text-muted);
+    margin: 0 auto 1.25rem;
+    max-width: 60ch;
+  }
+  .cta-strip--inline .cta-strip__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .cta-strip--inline .cta-strip__note {
+    margin: 1rem auto 0;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    max-width: 480px;
+  }
+
+  @media (max-width: 768px) {
+    .cta-strip--band .cta-strip__actions,
+    .cta-strip--inline .cta-strip__actions {
+      flex-direction: column;
+      align-items: stretch;
+      max-width: 320px;
+      margin-inline: auto;
+    }
+    .cta-strip--band .cta-strip__actions .btn,
+    .cta-strip--inline .cta-strip__actions .btn {
+      width: 100%;
+    }
+  }
+</style>

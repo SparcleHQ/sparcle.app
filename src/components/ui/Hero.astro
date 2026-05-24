@@ -1,0 +1,124 @@
+---
+/**
+ * Hero — the canonical page hero. One per page; uses h1.
+ *
+ * Layout slots:
+ *   default      block under the lede (CTAs, badges, custom content)
+ *   media        wide media element rendered at page-width, below the title block
+ *
+ * Props:
+ *   eyebrow      small caps label above h1
+ *   title        the h1 (HTML allowed; use <strong> for accent words)
+ *   lede         paragraph below h1
+ *   align        'center' (default) | 'left'
+ *   stripe       'a' (body bg, default) | 'b' (muted bg)
+ *   class        extra class on the <section>
+ */
+export interface Props {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  align?: 'center' | 'left';
+  stripe?: 'a' | 'b';
+  class?: string;
+}
+const {
+  eyebrow,
+  title,
+  lede,
+  align = 'center',
+  stripe = 'a',
+  class: className = '',
+} = Astro.props;
+const stripeClass = stripe === 'b' ? 'section-stripe-b' : 'section-stripe-a';
+---
+<section class={`hero-band ${stripeClass} align-${align} ${className}`}>
+  <div class="hero-band__inner w-page">
+    <div class="hero-band__text w-prose">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1 class="hero-band__title" set:html={title} />
+      {lede && <p class="hero-band__lede" set:html={lede} />}
+      <div class="hero-band__actions">
+        <slot />
+      </div>
+    </div>
+    {Astro.slots.has('media') && (
+      <div class="hero-band__media">
+        <slot name="media" />
+      </div>
+    )}
+  </div>
+</section>
+
+<style is:global>
+  .hero-band {
+    padding: calc(var(--nav-height, 80px) + 3.5rem) 0 var(--space-section);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-band__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+  .hero-band.align-left .hero-band__inner {
+    align-items: flex-start;
+  }
+  .hero-band__text {
+    text-align: center;
+  }
+  .hero-band.align-left .hero-band__text {
+    text-align: left;
+    margin: 0;
+  }
+  .hero-band__title {
+    margin: 0 0 1.25rem;
+    /* h1 size inherits from global clamp. */
+  }
+  .hero-band__title strong {
+    color: var(--brand-primary);
+    font-weight: inherit;
+  }
+  .hero-band__lede {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    max-width: 65ch;
+    margin: 0 auto 2rem;
+  }
+  .hero-band.align-left .hero-band__lede {
+    margin-left: 0;
+  }
+  .hero-band__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .hero-band.align-left .hero-band__actions {
+    justify-content: flex-start;
+  }
+  .hero-band__media {
+    width: 100%;
+    max-width: 100%;
+  }
+  @media (max-width: 768px) {
+    .hero-band {
+      padding-top: calc(var(--nav-height, 64px) + 2rem);
+    }
+    .hero-band__inner {
+      gap: 2rem;
+    }
+    .hero-band__actions {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      max-width: 360px;
+      margin-inline: auto;
+    }
+    .hero-band__actions .btn {
+      width: 100%;
+    }
+  }
+</style>

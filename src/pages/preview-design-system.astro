@@ -1,0 +1,254 @@
+---
+/**
+ * /preview-design-system — design system review page.
+ *
+ * Not linked from the nav. Shows every primitive in every variant so the
+ * design system can be reviewed end-to-end on a single page in both
+ * dark and light themes (toggle via the navbar theme button).
+ *
+ * Safe to ship to production: it's an unlinked /preview-design-system URL
+ * useful as a future maintenance reference even after the migration ships.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CardGrid from "../components/ui/CardGrid.astro";
+import Card from "../components/ui/Card.astro";
+import FAQ from "../components/ui/FAQ.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+import Pill from "../components/ui/Pill.astro";
+import Prose from "../components/ui/Prose.astro";
+
+const iconShield = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+const iconKey = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15 19 4M18 5l3 3M15 8l3 3"/></svg>`;
+const iconLock = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+const iconNetwork = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+
+const faqItems = [
+  { question: "How does this redesign change the per-page CSS?", answer: "<p>Every page composes from eight shared primitives. Per-page <code>&lt;style&gt;</code> blocks shrink to near-zero. Anything page-specific lives as content props, not as a new class.</p>" },
+  { question: "What about light vs. dark theme parity?", answer: "<p>All primitives use the canonical <code>--text-heading</code>, <code>--bg-surface-solid</code>, <code>--border-default</code> tokens. Both themes render at AAA contrast on body and heading text.</p>" },
+  { question: "Why locked grid columns instead of auto-fit?", answer: "<p>Auto-fit produces uneven last rows at tablet widths. Locked breakpoints (4 to 2 at 1024px, 3 to 2 at 900px, all to 1 at 640px) give a deliberate cascade at every viewport.</p>" },
+];
+---
+<BaseLayout
+  title="Design System Preview | Sparcle"
+  description="Internal review surface for the unified design system."
+  canonical="https://sparcle.app/preview-design-system"
+>
+  <Hero
+    eyebrow="Design System"
+    title="The eight primitives the entire site uses."
+    lede="Every marketing page composes from <strong>one Hero, one PageSection, one CardGrid, one Card (4 variants), one FAQ, one CTAStrip, one Pill, one Prose</strong>. This page shows every variant in dark and light. Use the theme toggle in the navbar to flip themes."
+  >
+    <a href="#" class="btn btn-primary btn-lg">Primary CTA</a>
+    <a href="#" class="btn btn-secondary btn-lg">Secondary CTA</a>
+  </Hero>
+
+  <PageSection
+    eyebrow="Width Contract"
+    title="Three widths. That is it."
+    lede="Every section snaps to one of <code>--w-prose</code> (720px), <code>--w-content</code> (1120px), or <code>--w-page</code> (1280px). Below: visual indicators of each width."
+    stripe="b"
+    width="page"
+  >
+    <div class="ds-width-stack">
+      <div class="ds-width-bar w-prose"><span>w-prose (720px) — headers, ledes, FAQ, CTA copy</span></div>
+      <div class="ds-width-bar w-content"><span>w-content (1120px) — card grids, tables, default section width</span></div>
+      <div class="ds-width-bar w-page"><span>w-page (1280px) — nav, footer, hero band, full-bleed media</span></div>
+    </div>
+  </PageSection>
+
+  <PageSection
+    eyebrow="Card — default variant"
+    title="One card. One padding. One radius. Everywhere."
+    lede="Replaces .pillar, .arch-pillar, .sec-pillar, .sec-deploy, .feature-card, .info-card."
+    stripe="a"
+  >
+    <CardGrid cols={3}>
+      <Card icon={iconShield} title="Inside your perimeter">
+        Self-hosted on AWS, Azure, GCP, on-prem, or fully air-gapped. Identity flows through your existing IdP. Your data stays inside your network.
+      </Card>
+      <Card icon={iconKey} title="Bring your own LLM">
+        OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model. Hot-swappable. With BYOK there is zero token markup.
+      </Card>
+      <Card icon={iconLock} title="Identity-bound access">
+        Every query is automatically filtered to what the calling user is entitled to see — region, department, sensitivity clearance, role.
+      </Card>
+    </CardGrid>
+  </PageSection>
+
+  <PageSection
+    eyebrow="Card — 2-up"
+    title="Same primitive, different column count."
+    stripe="b"
+  >
+    <CardGrid cols={2}>
+      <Card icon={iconNetwork} title="Self-Hosted">
+        You run the data plane and the AI inference. Sparcle ships software, updates, and support. Air-gap option available. Most regulated buyers start here.
+      </Card>
+      <Card icon={iconNetwork} title="Hybrid (Bundled)">
+        You run the data plane in your perimeter. Sparcle runs the AI inference gateway under an MSA plus DPA with zero-retention guarantees from upstream providers.
+      </Card>
+    </CardGrid>
+  </PageSection>
+
+  <PageSection
+    eyebrow="Card — 4-up + stat variant"
+    title="The stat variant. Metric-forward."
+    stripe="a"
+  >
+    <CardGrid cols={4}>
+      <Card variant="stat" metric="40+" title="Tools per knowledge worker">
+        New hires drown in the tab graveyard. Bolt collapses it.
+      </Card>
+      <Card variant="stat" metric="Day 1" title="Compliance readiness">
+        Architecture is deployable for HIPAA, SOX, ITAR, GDPR on day one.
+      </Card>
+      <Card variant="stat" metric="Any LLM" title="Yours or ours">
+        Switch model, vendor, or deployment without touching the agent layer.
+      </Card>
+      <Card variant="stat" metric="0" title="Outbound calls (Absolute tier)">
+        Air-gap-ready by default. No telemetry. No third-party model APIs.
+      </Card>
+    </CardGrid>
+  </PageSection>
+
+  <PageSection
+    eyebrow="Card — proof variant + accent stripes"
+    title="Status communication via left border."
+    stripe="b"
+  >
+    <CardGrid cols={3}>
+      <Card variant="default" accent="success" title="HIPAA — deployable">
+        Self-hosted variants meet HIPAA technical safeguards. BAAs available on enterprise contracts during pilot evaluation.
+      </Card>
+      <Card variant="default" accent="warning" title="SOC 2 Type II — roadmap">
+        Audit engagement planned. Honest framing: no formal certification yet. Aligned controls implemented; gap analysis under NDA.
+      </Card>
+      <Card variant="default" accent="danger" title="Public LLM exposure — never">
+        Zero-retention contracts upstream where managed inference applies. Self-hosted variants never call out at all.
+      </Card>
+    </CardGrid>
+  </PageSection>
+
+  <PageSection
+    eyebrow="Pill"
+    title="One pill. Five variants. Three sizes."
+    lede="Replaces .trust-pill, .hero-badge, .product-badge, .sec-status, .compact-feature."
+    stripe="a"
+    width="prose"
+  >
+    <div class="ds-pill-row">
+      <Pill variant="neutral">Neutral</Pill>
+      <Pill variant="brand"><strong>Patent-pending</strong> governance</Pill>
+      <Pill variant="success">Architecture deployable</Pill>
+      <Pill variant="warning">Roadmap</Pill>
+      <Pill variant="danger">Deprecated</Pill>
+    </div>
+    <div class="ds-pill-row">
+      <Pill size="sm" variant="neutral">small</Pill>
+      <Pill size="md" variant="neutral">medium (default)</Pill>
+      <Pill size="lg" variant="neutral">large</Pill>
+    </div>
+  </PageSection>
+
+  <PageSection
+    eyebrow="Prose"
+    title="Long-form running text at one width."
+    stripe="b"
+    width="prose"
+    align="left"
+  >
+    <Prose>
+      <p>
+        Bolt is the enterprise AI agent for regulated organizations that cannot send data
+        to third-party clouds. Unlike Copilot 365 or Gemini, Bolt deploys inside your own
+        perimeter under your own compliance framework. It works seamlessly with your
+        existing identity stack — Microsoft 365, Google Workspace, Zoho, or any OIDC
+        provider.
+      </p>
+      <h3>Why regulated buyers start with self-hosted</h3>
+      <p>
+        Self-hosted variants meet the technical requirements for HIPAA, SOX, ITAR, and
+        GDPR. The data plane never makes outbound calls during operation. Most regulated
+        teams start with the Absolute tier and add a managed inference gateway later if
+        their use case warrants it.
+      </p>
+      <ul>
+        <li>Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped.</li>
+        <li>Identity-bound queries; no bypass mode for callers.</li>
+        <li>Provable cryptographic erasure for Right-to-be-Forgotten obligations.</li>
+        <li>Audit-trail responses regulators can point to during reviews.</li>
+      </ul>
+      <blockquote>
+        "Your search. Your policy. Your code." The Authority Policy SDK lets every
+        regulated vertical write its own honest definition of authoritative.
+      </blockquote>
+      <p>
+        Detailed component briefs, security architecture decisions, and patent-protected
+        implementation specifics are shared under NDA during pilot evaluation.
+      </p>
+    </Prose>
+  </PageSection>
+
+  <FAQ items={faqItems} stripe="a" />
+
+  <PageSection
+    eyebrow="CTAStrip — inline variant"
+    title="A small in-section CTA."
+    stripe="b"
+    width="prose"
+  >
+    <Prose align="center">
+      <p>
+        The inline CTAStrip sits at the end of a PageSection when you want a soft
+        next-step without changing the page rhythm.
+      </p>
+    </Prose>
+    <CTAStrip variant="inline" title="Want the deep architecture brief?" lede="Schedule a 30-minute call to walk through what is shared under NDA.">
+      <a href="#" class="btn btn-primary btn-lg">Schedule a call</a>
+      <a href="#" class="btn btn-secondary btn-lg">View deployment models</a>
+    </CTAStrip>
+  </PageSection>
+
+  <CTAStrip
+    variant="band"
+    eyebrow="Take the next step"
+    title="Ready to look at the details?"
+    lede="Architecture briefs, security posture documentation, deployment guides, and patent claim summaries are shared during pilot evaluation under NDA."
+  >
+    <a href="#" class="btn btn-primary btn-lg">Schedule Architecture Review</a>
+    <a href="#" class="btn btn-secondary btn-lg">Security posture &rarr;</a>
+    <Fragment slot="note">
+      Or download <a href="/download">Bolt Personal — free forever, bring your own API key</a>
+    </Fragment>
+  </CTAStrip>
+</BaseLayout>
+
+<style>
+  /* Page-local helpers, scoped — for the preview surface only. */
+  .ds-width-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 var(--w-padding-x);
+  }
+  .ds-width-bar {
+    background: var(--brand-primary-light);
+    border: 1px dashed var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    color: var(--brand-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    text-align: center;
+  }
+  .ds-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
+</style>

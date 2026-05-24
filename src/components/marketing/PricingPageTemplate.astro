@@ -117,18 +117,24 @@ const toggleEnabled = Boolean(content.toggleLabelLeft && content.toggleLabelRigh
       </div>
     </section>
 
-    <section class="faq" aria-label="Pricing questions">
-      <div class="container">
-        <h2>Questions?</h2>
-        <div class="faq-grid">
-          {
-            content.faqs.map((item) => (
-              <article class="faq-item">
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))
-          }
+    <section class="faq page-section section-stripe-a" aria-label="Pricing questions">
+      <header class="page-section__header w-prose">
+        <p class="eyebrow">FAQ</p>
+        <h2 class="page-section__title">Questions?</h2>
+      </header>
+      <div class="page-section__body w-content">
+        <div class="faq-accordion faq-accordion--centered">
+          {content.faqs.map((item) => (
+            <details class="faq-details">
+              <summary class="faq-summary">
+                <h3 class="faq-question">{item.title}</h3>
+                <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </summary>
+              <div class="faq-answer-wrapper">
+                <div class="faq-answer"><p>{item.detail}</p></div>
+              </div>
+            </details>
+          ))}
         </div>
       </div>
     </section>
@@ -368,39 +374,11 @@ const toggleEnabled = Boolean(content.toggleLabelLeft && content.toggleLabelRigh
   }
 
   .faq {
-    padding: 1rem 0 0;
-  }
-
-  .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    margin-top: 0.9rem;
-  }
-
-  .faq-item {
-    border: 1px solid var(--border-default);
-    border-radius: 14px;
-    background: var(--bg-elevated);
-    padding: 1rem;
-  }
-
-  .faq-item h3 {
-    font-size: 1rem;
-    margin-bottom: 0.45rem;
-  }
-
-  .faq-item p {
-    margin: 0;
-    font-size: 0.9rem;
+    padding: var(--space-section) 0;
   }
 
   @media (max-width: 980px) {
     .plan-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .faq-grid {
       grid-template-columns: 1fr;
     }
   }

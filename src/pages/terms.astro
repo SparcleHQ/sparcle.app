@@ -1,81 +1,58 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import Prose from "../components/ui/Prose.astro";
 ---
-
 <BaseLayout
   title="Terms of Service | Sparcle"
   description="Terms of service for Sparcle, LLC — Bolt AI platform and Aeira enterprise data plane."
   canonical="https://sparcle.app/terms"
 >
-  <main class="page-legal">
-    <h1>Terms of Service</h1>
-    <p class="page-legal-date">Last updated: March 12, 2026</p>
+  <main class="page-terms">
+    <Hero
+      eyebrow="Legal"
+      title="Terms of Service."
+      lede="Last updated: March 12, 2026"
+    />
 
-    <h2>1. Acceptance</h2>
-    <p>By accessing or using sparcle.app, the Bolt platform, or the Aeira data plane (collectively, the "Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+    <PageSection stripe="b" width="content" align="left">
+      <Prose>
+        <h2>1. Acceptance</h2>
+        <p>By accessing or using sparcle.app, the Bolt platform, or the Aeira data plane (collectively, the "Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
 
-    <h2>2. Description of Service</h2>
-    <p>Sparcle, LLC provides an enterprise AI productivity platform ("Bolt") that unifies workplace tools via the Model Context Protocol (MCP), and an enterprise data plane ("Aeira") that provides ACL-aware search, indexing, and catalog capabilities. The website at sparcle.app provides information about our services and allows prospective customers to contact us.</p>
+        <h2>2. Description of Service</h2>
+        <p>Sparcle, LLC provides an enterprise AI productivity platform ("Bolt") that unifies workplace tools via the Model Context Protocol (MCP), and an enterprise data plane ("Aeira") that provides ACL-aware search, indexing, and catalog capabilities. The website at sparcle.app provides information about our services and allows prospective customers to contact us.</p>
 
-    <h2>3. Eligibility</h2>
-    <p>The Service is intended for business use. By using the Service, you represent that you are authorized to enter into these Terms on behalf of your organization.</p>
+        <h2>3. Eligibility</h2>
+        <p>The Service is intended for business use. By using the Service, you represent that you are authorized to enter into these Terms on behalf of your organization.</p>
 
-    <h2>4. Use of the Service</h2>
-    <p>You agree not to: (a) use the Service for any unlawful purpose; (b) attempt to gain unauthorized access to any system; (c) transmit malware or harmful code; (d) violate any applicable laws or regulations.</p>
+        <h2>4. Use of the Service</h2>
+        <p>You agree not to: (a) use the Service for any unlawful purpose; (b) attempt to gain unauthorized access to any system; (c) transmit malware or harmful code; (d) violate any applicable laws or regulations.</p>
 
-    <h2 id="ip">5. Intellectual Property</h2>
-    <p>All content, trademarks, and technology on this site and in the Bolt and Aeira platforms are owned by Sparcle, LLC or its licensors. No license is granted except as expressly stated.</p>
+        <h2 id="ip">5. Intellectual Property</h2>
+        <p>All content, trademarks, and technology on this site and in the Bolt and Aeira platforms are owned by Sparcle, LLC or its licensors. No license is granted except as expressly stated.</p>
 
-    <p><strong>Patent Pending.</strong> Bolt and Aeira incorporate technology covered by patent applications pending with the United States Patent and Trademark Office (USPTO). Application details are available to enterprise customers and design partners under NDA.</p>
+        <p><strong>Patent Pending.</strong> Bolt and Aeira incorporate technology covered by patent applications pending with the United States Patent and Trademark Office (USPTO). Application details are available to enterprise customers and design partners under NDA.</p>
 
-    <h2>6. Enterprise Agreements</h2>
-    <p>Enterprise use of the Bolt platform and Aeira data plane is governed by a separate Master Service Agreement (MSA) and Data Processing Agreement (DPA). In the event of conflict, the MSA takes precedence over these Terms.</p>
+        <h2>6. Enterprise Agreements</h2>
+        <p>Enterprise use of the Bolt platform and Aeira data plane is governed by a separate Master Service Agreement (MSA) and Data Processing Agreement (DPA). In the event of conflict, the MSA takes precedence over these Terms.</p>
 
-    <h2>7. Disclaimer of Warranties</h2>
-    <p>The website is provided "as is." We make no warranties, express or implied, regarding availability, accuracy, or fitness for a particular purpose.</p>
+        <h2>7. Disclaimer of Warranties</h2>
+        <p>The website is provided "as is." We make no warranties, express or implied, regarding availability, accuracy, or fitness for a particular purpose.</p>
 
-    <h2>8. Limitation of Liability</h2>
-    <p>To the maximum extent permitted by law, Sparcle, LLC shall not be liable for indirect, incidental, or consequential damages arising from use of the website.</p>
+        <h2>8. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by law, Sparcle, LLC shall not be liable for indirect, incidental, or consequential damages arising from use of the website.</p>
 
-    <h2>9. Governing Law</h2>
-    <p>These Terms are governed by the laws of the State of Delaware, USA, without regard to conflict of law principles.</p>
+        <h2>9. Governing Law</h2>
+        <p>These Terms are governed by the laws of the State of Delaware, USA, without regard to conflict of law principles.</p>
 
-    <h2>10. Changes</h2>
-    <p>We may update these Terms at any time. Continued use of the Service after changes constitutes acceptance.</p>
+        <h2>10. Changes</h2>
+        <p>We may update these Terms at any time. Continued use of the Service after changes constitutes acceptance.</p>
 
-    <h2>11. Contact</h2>
-    <p>Questions: <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a></p>
+        <h2>11. Contact</h2>
+        <p>Questions: <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a></p>
+      </Prose>
+    </PageSection>
   </main>
 </BaseLayout>
-
-<style>
-  .page-legal {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: calc(var(--nav-height, 80px) + 3rem) 2rem 5rem;
-    color: var(--text-body);
-    line-height: 1.8;
-  }
-  .page-legal h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    color: var(--text-heading);
-  }
-  .page-legal-date {
-    color: var(--text-muted);
-    margin-bottom: 3rem;
-  }
-  .page-legal h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin: 2rem 0 0.5rem;
-    color: var(--text-heading);
-  }
-  .page-legal a {
-    color: var(--brand-primary);
-  }
-  .page-legal a:hover {
-    text-decoration: underline;
-  }
-</style>

@@ -1,0 +1,82 @@
+---
+/**
+ * Pill — small rounded label. Replaces .trust-pill, .hero-badge, .product-badge,
+ * .compact-feature, .sec-status, etc.
+ *
+ * Props:
+ *   variant   'neutral' (default) | 'brand' | 'success' | 'warning' | 'danger'
+ *   size      'sm' | 'md' (default) | 'lg'
+ *   href      if set, renders as an anchor
+ *   class     extra class
+ */
+export interface Props {
+  variant?: 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  class?: string;
+}
+const {
+  variant = 'neutral',
+  size = 'md',
+  href,
+  class: className = '',
+} = Astro.props;
+const classes = `pill pill--${variant} pill--${size} ${className}`;
+const Tag = href ? 'a' : 'span';
+---
+<Tag class={classes} href={href}>
+  <slot />
+</Tag>
+
+<style is:global>
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: 1;
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+  }
+  .pill strong {
+    color: inherit;
+    font-weight: 700;
+  }
+
+  .pill--sm { font-size: 0.72rem; padding: 4px 9px; }
+  .pill--md { font-size: 0.78rem; padding: 6px 12px; }
+  .pill--lg { font-size: 0.84rem; padding: 8px 16px; }
+
+  .pill--neutral {
+    background: rgba(148, 163, 184, 0.10);
+    border-color: rgba(148, 163, 184, 0.20);
+    color: var(--text-muted);
+  }
+  .pill--brand {
+    background: var(--brand-primary-light);
+    border-color: rgba(37, 99, 235, 0.30);
+    color: var(--brand-primary);
+  }
+  .pill--success {
+    background: var(--color-success-bg);
+    border-color: var(--color-success);
+    color: var(--color-success-strong);
+  }
+  .pill--warning {
+    background: var(--color-warning-bg);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+  }
+  .pill--danger {
+    background: var(--color-danger-bg);
+    border-color: var(--color-danger);
+    color: var(--color-danger-strong);
+  }
+  a.pill:hover {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+  }
+</style>

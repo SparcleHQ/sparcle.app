@@ -1,78 +1,93 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import SectionHeader from "../components/marketing/SectionHeader.astro";
-import ProofCard from "../components/marketing/ProofCard.astro";
----
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CardGrid from "../components/ui/CardGrid.astro";
+import Card from "../components/ui/Card.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+import Pill from "../components/ui/Pill.astro";
 
+const benefits = [
+  { metric: "Real",   label: "Working Product",       body: "Bolt and Aeira are built and working — you'll be testing and shipping real software, not prototypes." },
+  { metric: "Day 1",  label: "Early-Stage Upside",    body: "Join before the growth curve. Shape the product, the culture, and the company trajectory." },
+  { metric: "$10T+",  label: "Mission That Matters",  body: "Help regulated organizations in a $10T+ economy adopt AI without surrendering data sovereignty." },
+  { metric: "<5",     label: "No Bureaucracy",        body: "Small team, direct access to founders, fast decisions. Your ideas ship in days, not quarters." },
+  { metric: "Any",    label: "Remote-First",          body: "Work from anywhere. We care about output, not hours. Async-friendly, timezone-flexible." },
+  { metric: "OIDC",   label: "Enterprise-Grade",      body: "SSO, MCP integrations, directory sync — work on real enterprise infrastructure problems." },
+];
+---
 <BaseLayout
   title="Careers | Sparcle — Join the Sovereign AI Movement"
   description="Join Sparcle and help enterprises reclaim control of their AI infrastructure. We're hiring a Fractional Head of Enterprise Sales and a Contract QA/Test Engineer."
   canonical="https://sparcle.app/careers"
 >
-  <script type="application/ld+json" set:html={JSON.stringify([
-    {
-      "@context": "https://schema.org",
-      "@type": "JobPosting",
-      "title": "Head of Enterprise Sales",
-      "description": "Seasoned enterprise sales leader to open doors at mid-market and large organizations — especially in healthcare, financial services, defense, and legal. Fractional (10–20 hrs/week) with retainer + significant commission on closed deals.",
-      "datePosted": "2026-04-08",
-      "employmentType": "CONTRACTOR",
-      "jobLocationType": "TELECOMMUTE",
-      "hiringOrganization": {
-        "@type": "Organization",
-        "name": "Sparcle, LLC",
-        "sameAs": "https://sparcle.app",
-        "logo": "https://sparcle.app/images/sparcle-logo.svg"
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Head of Enterprise Sales",
+        "description": "Seasoned enterprise sales leader to open doors at mid-market and large organizations — especially in healthcare, financial services, defense, and legal. Fractional (10–20 hrs/week) with retainer + significant commission on closed deals.",
+        "datePosted": "2026-04-08",
+        "employmentType": "CONTRACTOR",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": {
+          "@type": "Organization",
+          "name": "Sparcle, LLC",
+          "sameAs": "https://sparcle.app",
+          "logo": "https://sparcle.app/images/sparcle-logo.svg"
+        },
+        "applicantLocationRequirements": { "@type": "Country", "name": "US" },
+        "jobBenefits": "Equity vesting tied to revenue milestones, flexible hours, fully remote",
+        "skills": "Enterprise sales, B2B SaaS, regulated verticals, AI/ML, compliance"
       },
-      "applicantLocationRequirements": { "@type": "Country", "name": "US" },
-      "jobBenefits": "Equity vesting tied to revenue milestones, flexible hours, fully remote",
-      "skills": "Enterprise sales, B2B SaaS, regulated verticals, AI/ML, compliance"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "JobPosting",
-      "title": "QA / Test Engineer",
-      "description": "Detail-oriented QA engineer to manually test Bolt end-to-end on macOS, Windows, and Linux — desktop app, PWA, and browser extension. Configure and break OIDC/OAuth2 flows, validate MCP integrations, and ensure enterprise-grade quality.",
-      "datePosted": "2026-04-08",
-      "employmentType": "CONTRACTOR",
-      "jobLocationType": "TELECOMMUTE",
-      "hiringOrganization": {
-        "@type": "Organization",
-        "name": "Sparcle, LLC",
-        "sameAs": "https://sparcle.app",
-        "logo": "https://sparcle.app/images/sparcle-logo.svg"
-      },
-      "applicantLocationRequirements": { "@type": "Country", "name": "US" },
-      "jobBenefits": "Flexible hours, fully remote, competitive hourly rate",
-      "skills": "QA testing, OIDC/OAuth2, cross-platform desktop testing, Playwright, MCP"
-    }
-  ])} />
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "QA / Test Engineer",
+        "description": "Detail-oriented QA engineer to manually test Bolt end-to-end on macOS, Windows, and Linux — desktop app, PWA, and browser extension. Configure and break OIDC/OAuth2 flows, validate MCP integrations, and ensure enterprise-grade quality.",
+        "datePosted": "2026-04-08",
+        "employmentType": "CONTRACTOR",
+        "jobLocationType": "TELECOMMUTE",
+        "hiringOrganization": {
+          "@type": "Organization",
+          "name": "Sparcle, LLC",
+          "sameAs": "https://sparcle.app",
+          "logo": "https://sparcle.app/images/sparcle-logo.svg"
+        },
+        "applicantLocationRequirements": { "@type": "Country", "name": "US" },
+        "jobBenefits": "Flexible hours, fully remote, competitive hourly rate",
+        "skills": "QA testing, OIDC/OAuth2, cross-platform desktop testing, Playwright, MCP"
+      }
+    ])} />
+  </Fragment>
 
-  <!-- ══════════════════════════════════════════
-       HERO / INTRO
-       ══════════════════════════════════════════ -->
-  <section class="section-solution section-solution--page">
-    <div class="container">
-      <SectionHeader
-        label="Careers"
-        heading="Build the Future of<br>Enterprise AI"
-        intro="We're a small, focused team building sovereign AI infrastructure for regulated enterprises. We ship fast, think deeply, and believe great software sells itself — but great people make it unstoppable."
-      />
+  <main class="page-careers">
+    <Hero
+      eyebrow="Careers"
+      title="Build the future of enterprise AI."
+      lede="We're a small, focused team building sovereign AI infrastructure for regulated enterprises. We ship fast, think deeply, and believe great software sells itself — but great people make it unstoppable."
+    />
 
-      <!-- ══════════════════════════════════════
-           OPEN ROLES
-           ══════════════════════════════════════ -->
+    <PageSection
+      eyebrow="Open roles"
+      title="Two seats. Direct access. Real product."
+      stripe="b"
+    >
       <div class="careers-roles">
-
-        <!-- ── Role 1 ──────────────────────── -->
+        <!-- Role 1 -->
         <article class="careers-role-card">
           <div class="careers-role-top">
             <div class="careers-role-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div>
               <h3>Head of Enterprise Sales</h3>
-              <span class="careers-role-tags">Fractional · Remote · Commission-Heavy</span>
+              <div class="careers-role-pills">
+                <Pill variant="brand" size="sm">Fractional</Pill>
+                <Pill variant="neutral" size="sm">Remote</Pill>
+                <Pill variant="neutral" size="sm">Commission-Heavy</Pill>
+              </div>
             </div>
           </div>
 
@@ -112,7 +127,7 @@ import ProofCard from "../components/marketing/ProofCard.astro";
             </div>
           </div>
 
-          <div class="careers-role-section careers-how-to-apply">
+          <div class="careers-how-to-apply">
             <h4>How to apply</h4>
             <p>Write to <strong>bolt@sparcle.app</strong> with subject <em>"Application: Head of Enterprise Sales"</em> and include:</p>
             <ul>
@@ -127,15 +142,19 @@ import ProofCard from "../components/marketing/ProofCard.astro";
           </div>
         </article>
 
-        <!-- ── Role 2 ──────────────────────── -->
+        <!-- Role 2 -->
         <article class="careers-role-card">
           <div class="careers-role-top">
             <div class="careers-role-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
             <div>
               <h3>QA / Test Engineer</h3>
-              <span class="careers-role-tags">Freelance / Contract · Remote · Part-Time</span>
+              <div class="careers-role-pills">
+                <Pill variant="brand" size="sm">Freelance / Contract</Pill>
+                <Pill variant="neutral" size="sm">Remote</Pill>
+                <Pill variant="neutral" size="sm">Part-Time</Pill>
+              </div>
             </div>
           </div>
 
@@ -156,7 +175,7 @@ import ProofCard from "../components/marketing/ProofCard.astro";
                 <li>Set up and validate MCP server integrations in corporate environments</li>
                 <li>Test enterprise deployment scenarios — SSO, directory sync, token lifecycle</li>
                 <li>Write and maintain automated tests (Playwright, integration tests)</li>
-                <li>Report and track bugs with structured reports — steps to reproduce, expected vs. actual, screen recordings or screencasts of the issue</li>
+                <li>Report and track bugs with structured reports — steps to reproduce, expected vs. actual, screen recordings</li>
               </ul>
             </div>
             <div class="careers-role-section">
@@ -181,75 +200,175 @@ import ProofCard from "../components/marketing/ProofCard.astro";
             </div>
           </div>
 
-          <div class="careers-role-section careers-how-to-apply">
+          <div class="careers-how-to-apply">
             <h4>How to apply</h4>
             <p>Write to <strong>bolt@sparcle.app</strong> with subject <em>"Application: QA / Test Engineer"</em> and include:</p>
             <ul>
               <li>Your name and LinkedIn or GitHub profile</li>
               <li>Years of QA/test engineering experience</li>
               <li>Testing frameworks you've used</li>
-              <li>Which operating systems do you have access to (macOS, Windows, Linux)?</li>
-              <li>Have you configured OIDC/OAuth2 providers (Google, Microsoft, Okta, etc.)?</li>
-              <li>Experience with MCP servers or enterprise identity (SSO, SCIM)?</li>
+              <li>Which operating systems you have access to (macOS, Windows, Linux)</li>
+              <li>Whether you've configured OIDC/OAuth2 providers (Google, Microsoft, Okta, etc.)</li>
+              <li>Experience with MCP servers or enterprise identity (SSO, SCIM)</li>
               <li>Availability (hrs/week), hourly rate expectation (USD), and timezone</li>
               <li>Resume or link to past work</li>
             </ul>
           </div>
         </article>
       </div>
-    </div>
-  </section>
+    </PageSection>
 
-  <!-- ══════════════════════════════════════════
-       WHY JOIN US
-       ══════════════════════════════════════════ -->
-  <section class="section-proof">
-    <div class="container">
-      <SectionHeader
-        label="Why Join Us"
-        heading="Early Stage.<br>Real Product."
-      />
+    <PageSection
+      eyebrow="Why join us"
+      title="Early stage. Real product."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {benefits.map((b) => (
+          <Card variant="proof" metric={b.metric} title={b.label}>{b.body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
 
-      <div class="proof-grid">
-        <ProofCard
-          metric="Real"
-          label="Working Product"
-          description="Bolt and Aeira are built and working — you'll be testing and shipping real software, not prototypes."
-        />
-        <ProofCard
-          metric="Day 1"
-          label="Early-Stage Upside"
-          description="Join before the growth curve. Shape the product, the culture, and the company trajectory."
-        />
-        <ProofCard
-          metric="10T+"
-          label="Mission That Matters"
-          description="Help regulated organizations in a $10T+ economy adopt AI without surrendering data sovereignty."
-        />
-        <ProofCard
-          metric="<5"
-          label="No Bureaucracy"
-          description="Small team, direct access to founders, fast decisions. Your ideas ship in days, not quarters."
-        />
-        <ProofCard
-          metric="Any"
-          label="Remote-First"
-          description="Work from anywhere. We care about output, not hours. Async-friendly, timezone-flexible."
-        />
-        <ProofCard
-          metric="OIDC"
-          label="Enterprise-Grade"
-          description="SSO, MCP integrations, directory sync — work on real enterprise infrastructure problems."
-        />
-      </div>
-
-      <div class="section-cta-row" style="margin-top:3rem;">
-        <p class="section-intro" style="text-align:center;">
-          Don't see a perfect fit? We're always open to hearing from exceptional people.<br>
-          Write to <strong>bolt@sparcle.app</strong> with your background and what interests you.
-        </p>
-      </div>
-    </div>
-  </section>
+    <CTAStrip
+      variant="band"
+      title="Don't see a perfect fit?"
+      lede="We're always open to hearing from exceptional people."
+    >
+      <a href="mailto:bolt@sparcle.app" class="btn btn-primary btn-lg">Write to bolt@sparcle.app</a>
+    </CTAStrip>
+  </main>
 </BaseLayout>
 
+<style is:global>
+  .careers-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .careers-role-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 2.25rem;
+  }
+  .careers-role-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .careers-role-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .careers-role-top h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.6rem;
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  .careers-role-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .careers-role-summary {
+    color: var(--text-body);
+    line-height: 1.65;
+    margin: 0 0 1.5rem;
+    font-size: 1rem;
+  }
+  .careers-role-sections {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .careers-role-section h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-primary);
+    margin: 0 0 0.75rem;
+  }
+  .careers-role-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .careers-role-section li {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-body);
+    padding-left: 1rem;
+    position: relative;
+  }
+  .careers-role-section li::before {
+    content: "•";
+    position: absolute;
+    left: 0.2rem;
+    color: var(--brand-primary);
+  }
+  .careers-how-to-apply {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .careers-how-to-apply h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-primary);
+    margin: 0 0 0.75rem;
+  }
+  .careers-how-to-apply p {
+    color: var(--text-body);
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+  }
+  .careers-how-to-apply ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .careers-how-to-apply li {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-body);
+    padding-left: 1rem;
+    position: relative;
+  }
+  .careers-how-to-apply li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--brand-primary);
+  }
+
+  @media (max-width: 900px) {
+    .careers-role-sections {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .careers-role-card { padding: 1.5rem 1.25rem; }
+    .careers-role-top { flex-direction: column; }
+  }
+</style>

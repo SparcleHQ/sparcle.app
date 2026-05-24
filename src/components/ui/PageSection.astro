@@ -1,0 +1,91 @@
+---
+/**
+ * PageSection — the canonical <section> wrapper for every marketing page.
+ *
+ * Renders a consistent rhythm:
+ *   [optional eyebrow] [title] [optional lede]   ← always w-prose, centered
+ *   [-- space-block --]
+ *   <slot>                                       ← user content at chosen width
+ *
+ * Two consecutive PageSections should alternate stripe="a" / stripe="b" to give
+ * a deliberate vertical rhythm without dividing lines.
+ *
+ * Props:
+ *   eyebrow      small caps label above title
+ *   title        h2 (use Hero for h1)
+ *   lede         paragraph below title, centered, prose-width
+ *   stripe       'a' (body bg) | 'b' (muted bg) — alternate down a page
+ *   width        slot width: 'prose' | 'content' (default) | 'page'
+ *   align        slot align: 'center' (default) | 'left'
+ *   id           anchor id
+ *   class        extra class on the <section>
+ */
+export interface Props {
+  eyebrow?: string;
+  title?: string;
+  lede?: string;
+  stripe?: 'a' | 'b';
+  width?: 'prose' | 'content' | 'page';
+  align?: 'center' | 'left';
+  id?: string;
+  class?: string;
+}
+const {
+  eyebrow,
+  title,
+  lede,
+  stripe = 'a',
+  width = 'content',
+  align = 'center',
+  id,
+  class: className = '',
+} = Astro.props;
+
+const stripeClass = stripe === 'b' ? 'section-stripe-b' : 'section-stripe-a';
+const widthClass = width === 'prose' ? 'w-prose' : width === 'page' ? 'w-page' : 'w-content';
+const hasHeader = Boolean(eyebrow || title || lede);
+---
+<section id={id} class={`page-section ${stripeClass} ${className}`}>
+  {hasHeader && (
+    <header class="page-section__header w-prose">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      {title && <h2 class="page-section__title" set:html={title} />}
+      {lede && <p class="page-section__lede" set:html={lede} />}
+    </header>
+  )}
+  <div class={`page-section__body ${widthClass} align-${align}`}>
+    <slot />
+  </div>
+</section>
+
+<style is:global>
+  .page-section__header {
+    text-align: center;
+    margin-bottom: var(--space-block);
+  }
+  .page-section__header .eyebrow {
+    margin-bottom: 0.75rem;
+  }
+  .page-section__title {
+    text-align: center;
+    margin: 0 auto 1rem;
+    /* Sized via global h2 clamp — no override here. */
+  }
+  .page-section__lede {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    max-width: 65ch;
+    margin: 0 auto;
+  }
+  .page-section__lede a {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+  .page-section__body.align-left {
+    text-align: left;
+  }
+  .page-section__body.align-center > * {
+    /* Center single-child blocks (a Card, a Prose) when align=center. */
+  }
+</style>

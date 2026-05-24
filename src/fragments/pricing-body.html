@@ -15,7 +15,8 @@
     <!-- ═══════════════════════════════════════════════════════════════
          BOLT SECTION
          ═══════════════════════════════════════════════════════════════ -->
-    <div id="bolt-section" class="product-section active" id-anchor="bolt">
+    <a id="bolt" class="anchor" aria-hidden="true"></a>
+    <div id="bolt-section" class="product-section active">
 
         <!-- HERO -->
         <section class="pricing-hero container">
@@ -35,7 +36,7 @@
                         <polyline points="7 10 12 15 17 10" />
                         <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    Download Bolt — free Personal or 7-day Enterprise trial
+                    Download the 7-day Enterprise trial &mdash; full platform, your org credentials
                 </a>
                 <span class="trial-note">Desktop app &middot; macOS, Windows, Linux &middot; No credit card</span>
             </div>
@@ -763,69 +764,89 @@
             </div>
         </div>
 
-        <!-- BOLT FAQ -->
-        <div class="container">
-            <div class="faq-section">
-                <div class="section-title">
-                    <h2>Questions?</h2>
-                </div>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <h3>What do BYOK and BYO LLM mean?</h3>
-                        <p><strong>BYOK</strong> (Bring Your Own Key) &mdash; plug in API keys from your existing enterprise agreements with Azure OpenAI, AWS Bedrock, Google, or Anthropic. <strong>BYO LLM</strong> (Bring Your Own LLM) &mdash; run self-hosted or private models in your own environment. Bolt supports both. 
-                        This means <strong>zero unpredictable token markups</strong>. You can securely burn down your existing cloud spend commitments while ensuring your data never leaves your perimeter.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>How does Bolt connect to our tools?</h3>
-                        <p>Bolt uses the open Model Context Protocol (MCP) to connect to your SaaS tools &mdash; Slack,
-                            Jira, Notion, Salesforce, and more. No data migration needed.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>What happens if we exceed the AI token budget?</h3>
-                        <p>You'll never be cut off. When you reach 80% of your monthly token budget,
-                            Bolt automatically routes to the most cost-efficient model so you stay
-                            productive. Once the budget is exhausted, additional usage is billed at
-                            $5 per 5M tokens. We'll alert you before you approach limits.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Is there a free option?</h3>
-                        <p><strong>Bolt Personal is completely free</strong> &mdash; private AI chat with your own API key,
-                            no login required. For enterprise features (IDP, email, calendar, agentic actions),
-                            <a href="/download">download Bolt Enterprise Trial</a> and get a 7-day trial with the full platform.
-                            No credit card required, no data leaves your machine. For a production pilot, we offer a
-                            30-day evaluation with dedicated onboarding.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Where does our data live?</h3>
-                        <p>With Absolute &mdash; entirely in your environment. With Bundled &mdash; your infra + Bolt's
-                            AI gateway
-                            (covered by DPA, zero-retention). With Complete &mdash; Bolt-managed infrastructure with
-                            your
-                            choice of region (US, EU, APAC).</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Can we switch plans later?</h3>
-                        <p>Yes. Start with Absolute (BYOK / BYO LLM) and upgrade to Bundled or Complete anytime. Your
-                            data,
-                            integrations, and configuration carry over seamlessly.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>What do we need to deploy Bolt?</h3>
-                        <p>Absolute and Bundled deploy via Docker Compose (single VM) or Kubernetes (HA). You&rsquo;ll
-                            need a Redis instance and your identity provider configured. We provide deployment guides,
-                            Helm charts, and optional deployment setup services. Complete is fully managed &mdash; we
-                            handle everything.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>How long does deployment take?</h3>
-                        <p>Docker Compose staging setups typically run in 1&ndash;2 hours. Production Kubernetes
-                            deployments with SSO, networking, and compliance review typically take 1&ndash;2 weeks with
-                            our guidance. We offer optional deployment engineering services for teams that want a
-                            turnkey handoff.</p>
-                    </div>
+        <!-- BOLT FAQ — canonical accordion (matches FAQ.astro across the site) -->
+        <section class="page-section section-stripe-a">
+            <header class="page-section__header w-prose">
+                <p class="eyebrow">FAQ</p>
+                <h2 class="page-section__title">Questions?</h2>
+            </header>
+            <div class="page-section__body w-content">
+                <div class="faq-accordion faq-accordion--centered">
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">What do BYOK and BYO LLM mean?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p><strong>BYOK</strong> (Bring Your Own Key) &mdash; plug in API keys from your existing enterprise agreements with Azure OpenAI, AWS Bedrock, Google, or Anthropic. <strong>BYO LLM</strong> (Bring Your Own LLM) &mdash; run self-hosted or private models in your own environment. Bolt supports both. This means <strong>zero unpredictable token markups</strong>. You can securely burn down your existing cloud spend commitments while ensuring your data never leaves your perimeter.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">How does Bolt connect to our tools?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Bolt uses the open Model Context Protocol (MCP) to connect to your SaaS tools &mdash; Slack, Jira, Notion, Salesforce, and more. No data migration needed.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">What happens if we exceed the AI token budget?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>You'll never be cut off. When you reach 80% of your monthly token budget, Bolt automatically routes to the most cost-efficient model so you stay productive. Once the budget is exhausted, additional usage is billed at $5 per 5M tokens. We'll alert you before you approach limits.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">Is there a free option?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p><strong>Bolt Personal is completely free</strong> &mdash; private AI chat with your own API key, no login required. For enterprise features (IDP, email, calendar, agentic actions), <a href="/download">download Bolt Enterprise Trial</a> and get a 7-day trial with the full platform. No credit card required, no data leaves your machine. For a production pilot, we offer a 30-day evaluation with dedicated onboarding.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">Where does our data live?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>With Absolute &mdash; entirely in your environment. With Bundled &mdash; your infra + Bolt's AI gateway (covered by DPA, zero-retention). With Complete &mdash; Bolt-managed infrastructure with your choice of region (US, EU, APAC).</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">Can we switch plans later?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Yes. Start with Absolute (BYOK / BYO LLM) and upgrade to Bundled or Complete anytime. Your data, integrations, and configuration carry over seamlessly.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">What do we need to deploy Bolt?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Absolute and Bundled deploy via Docker Compose (single VM) or Kubernetes (HA). You&rsquo;ll need a Redis instance and your identity provider configured. We provide deployment guides, Helm charts, and optional deployment setup services. Complete is fully managed &mdash; we handle everything.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">How long does deployment take?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Docker Compose staging setups typically run in 1&ndash;2 hours. Production Kubernetes deployments with SSO, networking, and compliance review typically take 1&ndash;2 weeks with our guidance. We offer optional deployment engineering services for teams that want a turnkey handoff.</p></div>
+                        </div>
+                    </details>
                 </div>
             </div>
-        </div>
+        </section>
 
         <div class="container">
             <p class="hero-citation"
@@ -842,6 +863,7 @@
     <!-- ═══════════════════════════════════════════════════════════════
          AEIRA SECTION
          ═══════════════════════════════════════════════════════════════ -->
+    <a id="aeira" class="anchor" aria-hidden="true"></a>
     <div id="aeira-section" class="product-section">
 
         <!-- HERO -->
@@ -1214,58 +1236,71 @@
             </div>
         </div>
 
-        <!-- AEIRA FAQ -->
-        <div class="container">
-            <div class="faq-section">
-                <div class="section-title">
-                    <h2>Questions?</h2>
-                </div>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <h3>Is Aeira Catalog really free?</h3>
-                        <p>Yes. Catalog is a curated company directory included with every Bolt plan &mdash;
-                            8 core categories plus 2 custom, 50 records each. It helps employees find the right
-                            office, policy, app, or contact on day one. You only pay when you need the full
-                            search platform (Dynamic+).</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>What&rsquo;s the difference between Catalog and Dynamic?</h3>
-                        <p>Catalog is a curated directory with keyword search and manual updates &mdash; think of it
-                            as your company&rsquo;s quick-reference index. Dynamic is a full enterprise search
-                            platform: ingest any document or data, search with hybrid AI (keyword + semantic vector),
-                            use 20 ready-made entity templates or define your own via API, and enforce 4-level
-                            ACL per user.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Can I index any type of corporate data?</h3>
-                        <p>Yes. On Dynamic and above, you can ingest any document &mdash; wiki pages, runbooks,
-                            onboarding guides, knowledge base articles, internal docs, and more. The 20 built-in
-                            entity templates are a starting point for common HR/IT/ops data, not a limit.
-                            Use the API to define and ingest your own types.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>What about a fully managed option?</h3>
-                        <p>Yes &mdash; we offer Sparcle-managed Aeira for organizations that don't want to
-                            run their own data plane. Includes SLA guarantees, dedicated isolation, and 24/7
-                            monitoring. Contact us for pricing.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>What search technology powers Aeira?</h3>
-                        <p>Paid tiers use hybrid search combining Postgres full-text search (BM25 keyword
-                            matching) with pgvector (semantic vector search). Every result is ACL-filtered per
-                            user. Catalog uses lightweight keyword search only. Dynamic+ tiers can opt into
-                            Quickwit splits over object storage for very large corpora.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>How do I get data into Aeira?</h3>
-                        <p>All paid tiers support bulk ingestion via REST API &mdash; push CSV, JSON, or YAML
-                            documents directly. Enhanced and Federated tiers add high-throughput async
-                            ingestion via Kafka. We publish SDKs, CLI tools, and example scripts to
-                            help you build ingestion pipelines for your data sources.</p>
-                    </div>
+        <!-- AEIRA FAQ — canonical accordion (matches FAQ.astro across the site) -->
+        <section class="page-section section-stripe-a">
+            <header class="page-section__header w-prose">
+                <p class="eyebrow">FAQ</p>
+                <h2 class="page-section__title">Questions?</h2>
+            </header>
+            <div class="page-section__body w-content">
+                <div class="faq-accordion faq-accordion--centered">
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">Is Aeira Catalog really free?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Yes. Catalog is a curated company directory included with every Bolt plan &mdash; 8 core categories plus 2 custom, 50 records each. It helps employees find the right office, policy, app, or contact on day one. You only pay when you need the full search platform (Dynamic+).</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">What&rsquo;s the difference between Catalog and Dynamic?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Catalog is a curated directory with keyword search and manual updates &mdash; think of it as your company&rsquo;s quick-reference index. Dynamic is a full enterprise search platform: ingest any document or data, search with hybrid AI (keyword + semantic vector), use 20 ready-made entity templates or define your own via API, and enforce 4-level ACL per user.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">Can I index any type of corporate data?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Yes. On Dynamic and above, you can ingest any document &mdash; wiki pages, runbooks, onboarding guides, knowledge base articles, internal docs, and more. The 20 built-in entity templates are a starting point for common HR/IT/ops data, not a limit. Use the API to define and ingest your own types.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">What about a fully managed option?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Yes &mdash; we offer Sparcle-managed Aeira for organizations that don't want to run their own data plane. Includes SLA guarantees, dedicated isolation, and 24/7 monitoring. Contact us for pricing.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">What search technology powers Aeira?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>Paid tiers use hybrid search combining Postgres full-text search (BM25 keyword matching) with pgvector (semantic vector search). Every result is ACL-filtered per user. Catalog uses lightweight keyword search only. Dynamic+ tiers can opt into Quickwit splits over object storage for very large corpora.</p></div>
+                        </div>
+                    </details>
+                    <details class="faq-details">
+                        <summary class="faq-summary">
+                            <h3 class="faq-question">How do I get data into Aeira?</h3>
+                            <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </summary>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer"><p>All paid tiers support bulk ingestion via REST API &mdash; push CSV, JSON, or YAML documents directly. Enhanced and Federated tiers add high-throughput async ingestion via Kafka. We publish SDKs, CLI tools, and example scripts to help you build ingestion pipelines for your data sources.</p></div>
+                        </div>
+                    </details>
                 </div>
             </div>
-        </div>
+        </section>
 
     </div><!-- /#aeira-section -->
 
@@ -1372,161 +1407,3 @@
     window.addEventListener('hashchange', activateFromHash);
 </script>
 
-<!-- Contact Modal -->
-<div id="contactModalOverlay" class="contact-modal-overlay" role="dialog" aria-modal="true" aria-label="Contact form">
-    <div class="contact-modal">
-        <button class="contact-modal-close" onclick="closeContactModal()" aria-label="Close">&times;</button>
-        <h3 id="contactModalTitle">Get in Touch</h3>
-        <p class="modal-subtitle">We'll respond within one business day.</p>
-        <form id="contactForm" autocomplete="on">
-            <div id="contactFormFields">
-                <input type="hidden" id="contactInterest" name="interest" value="">
-                <div class="contact-form-group">
-                    <label for="contactName">Name</label>
-                    <input type="text" id="contactName" name="name" required placeholder="Jane Smith" autocomplete="name">
-                </div>
-                <div class="contact-form-group">
-                    <label for="contactEmail">Work Email</label>
-                    <input type="email" id="contactEmail" name="email" required placeholder="jane@company.com" autocomplete="email">
-                </div>
-                <div class="contact-form-group">
-                    <label for="contactCompany">Company</label>
-                    <input type="text" id="contactCompany" name="company" placeholder="Acme Corp" autocomplete="organization">
-                </div>
-                <div class="contact-form-group">
-                    <label for="contactTeamSize">Team Size</label>
-                    <select id="contactTeamSize" name="teamSize">
-                        <option value="">Select…</option>
-                        <option value="1-10">1–10</option>
-                        <option value="11-50">11–50</option>
-                        <option value="51-200">51–200</option>
-                        <option value="201-500">201–500</option>
-                        <option value="500+">500+</option>
-                    </select>
-                </div>
-                <div class="contact-form-group" id="contactTurnstileWrap"></div>
-                <p class="contact-privacy-note">Submissions are emailed to Sparcle. We don&rsquo;t share or sell.</p>
-                <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">Send Request</button>
-            </div>
-            <div id="contactFormStatus" class="contact-form-status"></div>
-        </form>
-    </div>
-</div>
-
-<script>
-    /* ── Contact Modal ─────────────────────────────── */
-    var contactOverlay = document.getElementById('contactModalOverlay');
-    var contactForm    = document.getElementById('contactForm');
-    var contactFields  = document.getElementById('contactFormFields');
-    var contactStatus  = document.getElementById('contactFormStatus');
-    var contactInterest = document.getElementById('contactInterest');
-    var contactSubmit  = document.getElementById('contactSubmitBtn');
-    var contactTitle   = document.getElementById('contactModalTitle');
-    var turnstileWrap  = document.getElementById('contactTurnstileWrap');
-    var turnstileWidgetId = null;
-
-    function renderTurnstile() {
-        var siteKey = (window.SPARCLE_CONFIG && window.SPARCLE_CONFIG.turnstileSiteKey) || '';
-        if (!siteKey || !window.turnstile || !turnstileWrap) return;
-        if (turnstileWidgetId !== null) {
-            try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
-            return;
-        }
-        turnstileWidgetId = window.turnstile.render(turnstileWrap, {
-            sitekey: siteKey,
-            theme: 'auto'
-        });
-    }
-
-    function openContactModal(interest) {
-        contactInterest.value = interest || 'General Inquiry';
-        contactTitle.textContent = interest || 'Get in Touch';
-        contactFields.style.display = '';
-        contactStatus.className = 'contact-form-status';
-        contactSubmit.disabled = false;
-        contactSubmit.textContent = 'Send Request';
-        contactOverlay.classList.add('open');
-        setTimeout(function() {
-            document.getElementById('contactName').focus();
-        }, 100);
-        var attempts = 0;
-        var iv = setInterval(function() {
-            if (window.turnstile || attempts++ > 40) {
-                clearInterval(iv);
-                renderTurnstile();
-            }
-        }, 100);
-    }
-
-    function closeContactModal() {
-        contactOverlay.classList.remove('open');
-        contactForm.reset();
-        if (turnstileWidgetId !== null && window.turnstile) {
-            try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
-        }
-    }
-
-    contactOverlay.addEventListener('click', function(e) {
-        if (e.target === contactOverlay) closeContactModal();
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && contactOverlay.classList.contains('open')) {
-            closeContactModal();
-        }
-    });
-
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        var token = '';
-        if (window.turnstile && turnstileWidgetId !== null) {
-            try { token = window.turnstile.getResponse(turnstileWidgetId) || ''; } catch (err) {}
-        }
-        if (!token) {
-            contactStatus.className = 'contact-form-status show error';
-            contactStatus.innerHTML = '<p>Please complete the verification challenge.</p>';
-            return;
-        }
-
-        contactSubmit.disabled = true;
-        contactSubmit.textContent = 'Sending\u2026';
-
-        var payload = {
-            name: document.getElementById('contactName').value.trim(),
-            email: document.getElementById('contactEmail').value.trim(),
-            company: document.getElementById('contactCompany').value.trim(),
-            teamSize: document.getElementById('contactTeamSize').value,
-            interest: contactInterest.value,
-            turnstileToken: token
-        };
-
-        fetch('/api/contact', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(function(r) {
-            return r.json().then(function(data) { return { ok: r.ok, data: data }; });
-        }).then(function(result) {
-            if (!result.ok || !result.data || !result.data.ok) throw new Error('send_failed');
-            contactFields.style.display = 'none';
-            contactStatus.className = 'contact-form-status show';
-            contactStatus.innerHTML =
-                '<div class="status-icon">&#10003;</div>' +
-                '<h4>Request Sent!</h4>' +
-                '<p>We\u2019ll get back to you within one business day.</p>';
-        }).catch(function() {
-            contactSubmit.disabled = false;
-            contactSubmit.textContent = 'Send Request';
-            if (window.turnstile && turnstileWidgetId !== null) {
-                try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
-            }
-            contactFields.style.display = 'none';
-            contactStatus.className = 'contact-form-status show';
-            contactStatus.innerHTML =
-                '<div class="status-icon">&#9993;</div>' +
-                '<h4>Almost there!</h4>' +
-                '<p>Please email us directly at <a href="mailto:bolt@sparcle.app" style="color:var(--brand-primary)">bolt@sparcle.app</a></p>';
-        });
-    });
-</script>

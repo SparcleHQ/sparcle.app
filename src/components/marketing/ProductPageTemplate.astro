@@ -153,16 +153,24 @@ function renderIcon(iconId: string | undefined): string {
       <section class="offering-faq" aria-label={`${content.productName} questions`}>
         <div class="container">
           <div class="faq-section">
-            <div class="section-title">
-              <h2>Questions?</h2>
-            </div>
-            <div class="faq-grid">
-              {content.faqs.map((item) => (
-                <div class="faq-item">
-                  <h3>{item.title}</h3>
-                  <p>{item.detail}</p>
-                </div>
-              ))}
+            <header class="page-section__header w-prose">
+              <p class="eyebrow">FAQ</p>
+              <h2 class="page-section__title">Questions?</h2>
+            </header>
+            <div class="page-section__body w-content">
+              <div class="faq-accordion faq-accordion--centered">
+                {content.faqs.map((item) => (
+                  <details class="faq-details">
+                    <summary class="faq-summary">
+                      <h3 class="faq-question">{item.title}</h3>
+                      <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                    </summary>
+                    <div class="faq-answer-wrapper">
+                      <div class="faq-answer"><p>{item.detail}</p></div>
+                    </div>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -242,16 +250,24 @@ function renderIcon(iconId: string | undefined): string {
         <section class="offering-faq" aria-label={`${secondContent.productName} questions`}>
           <div class="container">
             <div class="faq-section">
-              <div class="section-title">
-                <h2>Questions?</h2>
-              </div>
-              <div class="faq-grid">
-                {secondContent.faqs.map((item) => (
-                  <div class="faq-item">
-                    <h3>{item.title}</h3>
-                    <p>{item.detail}</p>
-                  </div>
-                ))}
+              <header class="page-section__header w-prose">
+                <p class="eyebrow">FAQ</p>
+                <h2 class="page-section__title">Questions?</h2>
+              </header>
+              <div class="page-section__body w-content">
+                <div class="faq-accordion faq-accordion--centered">
+                  {secondContent.faqs.map((item) => (
+                    <details class="faq-details">
+                      <summary class="faq-summary">
+                        <h3 class="faq-question">{item.title}</h3>
+                        <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+                      </summary>
+                      <div class="faq-answer-wrapper">
+                        <div class="faq-answer"><p>{item.detail}</p></div>
+                      </div>
+                    </details>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

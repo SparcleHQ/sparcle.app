@@ -1,19 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-
-// Public docs index. Cards contain link lists per category.
-// Each item: title + optional tag (nda | soon | dated).
-// nda      = available under NDA, click opens contact modal
-// soon     = page or asset not yet built; not linked
-// dated    = available later (e.g., "Aug 2026"); not linked yet
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+import Pill from "../components/ui/Pill.astro";
 
 interface DocItem {
   title: string;
-  href?: string;             // omit for "soon" or NDA-only items
-  external?: boolean;        // open in new tab (PDFs)
+  href?: string;
+  external?: boolean;
   nda?: boolean;
   soon?: boolean;
-  available?: string;        // e.g. "Aug 2026"
+  available?: string;
 }
 
 interface DocCategory {
@@ -56,7 +54,7 @@ const categories: DocCategory[] = [
       { title: "Bolt threat model (STRIDE)", nda: true },
       { title: "Patent-pending 4-axis ACL + audit verifier", href: "/security" },
       { title: "Supply-chain attestation (Cosign + SBOM)", soon: true },
-      { title: "External pen-test report", nda: true, available: "Aug 2026" },
+      { title: "External pen-test report", nda: true, available: "On the roadmap" },
     ],
   },
   {
@@ -94,250 +92,169 @@ const categories: DocCategory[] = [
   },
 ];
 ---
-
 <BaseLayout
   title="Documentation | Sparcle"
   description="Bolt + Aeira documentation — architecture, security, compliance, vertical briefs, pilot checklist, TCO calculator, connector catalog. Threat models and the CISO brief are available under NDA."
   canonical="https://sparcle.app/docs"
 >
-  <main class="docs-page">
-    <section class="docs-hero">
-      <div class="container">
-        <h1>Docs.</h1>
-        <p class="docs-lede">
-          Bolt + Aeira documentation. Architecture, security, compliance, connectors, API reference,
-          pilots. Some artifacts (threat models, pen-test reports) are shared under NDA &mdash; request
-          via the security page.
-        </p>
-        <ul class="docs-pills">
-          <li><a href="/download">Try the trial sidecar &rarr;</a></li>
-          <li><a href="#" onclick="openContactModal('Security Brief Request'); return false;">Request a security brief (NDA) &rarr;</a></li>
-          <li><a href="/pricing">Pricing &rarr;</a></li>
-          <li><a href="#" onclick="openContactModal('General Inquiry'); return false;">Contact &rarr;</a></li>
-        </ul>
-      </div>
-    </section>
+  <main class="page-docs">
+    <Hero
+      eyebrow="Documentation"
+      title="Docs."
+      lede="Bolt + Aeira documentation. Architecture, security, compliance, connectors, API reference, pilots. Some artifacts (threat models, pen-test reports) are shared under NDA — request via the security page."
+    >
+      <Pill href="/download" variant="brand" size="lg">Try the trial sidecar &rarr;</Pill>
+      <Pill href="#" variant="neutral" size="lg" class="js-pill-nda">Request a security brief (NDA) &rarr;</Pill>
+      <Pill href="/pricing" variant="neutral" size="lg">Pricing &rarr;</Pill>
+      <Pill href="#" variant="neutral" size="lg" class="js-pill-contact">Contact &rarr;</Pill>
+    </Hero>
 
-    <section class="docs-categories">
-      <div class="container">
-        <div class="docs-grid">
-          {categories.map(cat => (
-            <div class="docs-card">
-              <h2>{cat.title}</h2>
-              <p class="docs-card-blurb">{cat.blurb}</p>
-              <ul>
-                {cat.items.map(item => (
-                  <li>
-                    {item.nda ? (
-                      <a href="#" onclick={`openContactModal('NDA Document Request: ${item.title.replace(/'/g, "\\'")}'); return false;`}>
-                        <span class="docs-item-title">{item.title}</span>
-                        <span class="docs-tags">
-                          <span class="docs-tag tag-nda">NDA</span>
-                          {item.available && <span class="docs-tag tag-available">{item.available}</span>}
-                        </span>
-                      </a>
-                    ) : item.soon ? (
-                      <span class="docs-item-disabled">
-                        <span class="docs-item-title">{item.title}</span>
-                        <span class="docs-tags">
-                          <span class="docs-tag tag-soon">coming soon</span>
-                        </span>
+    <PageSection stripe="b">
+      <div class="docs-grid">
+        {categories.map((cat) => (
+          <article class="docs-card">
+            <h3>{cat.title}</h3>
+            <p class="docs-card__blurb">{cat.blurb}</p>
+            <ul class="docs-card__list">
+              {cat.items.map((item) => (
+                <li>
+                  {item.nda ? (
+                    <a href="#" onclick={`openContactModal('NDA Document Request: ${item.title.replace(/'/g, "\\'")}'); return false;`}>
+                      <span class="docs-card__title">{item.title}</span>
+                      <span class="docs-card__tags">
+                        <Pill variant="brand" size="sm">NDA</Pill>
+                        {item.available && <Pill variant="warning" size="sm">{item.available}</Pill>}
                       </span>
-                    ) : (
-                      <a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined}>
-                        <span class="docs-item-title">{item.title}</span>
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+                    </a>
+                  ) : item.soon ? (
+                    <span class="docs-card__disabled">
+                      <span class="docs-card__title">{item.title}</span>
+                      <span class="docs-card__tags">
+                        <Pill variant="neutral" size="sm">coming soon</Pill>
+                      </span>
+                    </span>
+                  ) : (
+                    <a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener" : undefined}>
+                      <span class="docs-card__title">{item.title}</span>
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
       </div>
-    </section>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Need something we don't list?"
+      lede="Most NDA artifacts and customer-specific documents are shared during pilot evaluation. Ask and we'll route you to the right brief."
+    >
+      <a href="#" onclick="openContactModal('Documentation Request'); return false;" class="btn btn-primary btn-lg">
+        Request documentation
+      </a>
+      <a href="/security" class="btn btn-secondary btn-lg">Security &amp; compliance &rarr;</a>
+    </CTAStrip>
   </main>
 
-  <style>
-    /* All colors use semantic theme tokens that auto-switch dark/light.
-       Token definitions live in public/css/variables.css. */
-
-    .docs-page {
-      background: var(--bg-body);
-      min-height: 100vh;
-    }
-    .docs-page .container {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    .docs-hero {
-      padding: calc(var(--nav-height) + 3rem) 0 2.5rem;
-    }
-    .docs-hero h1 {
-      font-size: clamp(2.5rem, 5vw, 3.75rem);
-      letter-spacing: -0.02em;
-      color: var(--text-heading);
-      margin: 0 0 1rem 0;
-      line-height: 1.05;
-    }
-    .docs-lede {
-      font-size: 1.05rem;
-      line-height: 1.55;
-      color: var(--text-body);
-      max-width: 720px;
-      margin: 0 0 1.5rem 0;
-    }
-    .docs-pills {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-    }
-    .docs-pills a {
-      display: inline-block;
-      padding: 0.55rem 1rem;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-default);
-      border-radius: 0.5rem;
-      color: var(--text-heading);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .docs-pills a:hover {
-      border-color: var(--brand-primary);
-      background: var(--brand-primary-light);
-    }
-
-    .docs-categories {
-      padding: 2rem 0 5rem;
-    }
-    .docs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 1.5rem;
-    }
-    .docs-card {
-      /* Matches the .feature-card recipe used elsewhere on the site —
-         --bg-surface is rgba-based so it gives glassy contrast in dark
-         mode AND clean white in light mode; the border + shadow on hover
-         give visual elevation in both. */
-      background: var(--bg-surface);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-xl, 0.875rem);
-      padding: 1.75rem;
-      display: flex;
-      flex-direction: column;
-      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
-    }
-    .docs-card:hover {
-      border-color: var(--brand-primary);
-      box-shadow: var(--shadow-glow);
-      transform: translateY(-2px);
-    }
-    .docs-card h2 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.25rem;
-      color: var(--text-heading);
-    }
-    .docs-card-blurb {
-      margin: 0 0 1.25rem 0;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      color: var(--text-muted);
-    }
-    .docs-card ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      flex: 1;
-    }
-    .docs-card li {
-      padding: 0.6rem 0;
-      border-top: 1px solid var(--border-default);
-      font-size: 0.9rem;
-    }
-    .docs-card li:first-child {
-      border-top: none;
-    }
-    .docs-card li a,
-    .docs-card li .docs-item-disabled {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      color: var(--text-body);
-      transition: color 0.15s;
-    }
-    .docs-card li a:hover {
-      color: var(--brand-accent);
-    }
-    .docs-card li .docs-item-disabled {
-      cursor: default;
-      color: var(--text-muted);
-    }
-    .docs-card li .docs-item-disabled .docs-item-title {
-      font-style: italic;
-    }
-    .docs-item-title {
-      flex: 1;
-    }
-    .docs-tags {
-      display: inline-flex;
-      gap: 0.4rem;
-      flex-shrink: 0;
-    }
-    .docs-tag {
-      font-family: "SF Mono", Menlo, monospace;
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 0.15rem 0.45rem;
-      border-radius: 0.25rem;
-      font-weight: 600;
-    }
-    /* Tag colors: tested for >=4.5:1 contrast against card background
-       (--bg-surface) in both dark + light modes per WCAG AA. */
-    .tag-nda {
-      background: rgba(178, 58, 47, 0.20);
-      color: #f0a394;
-      border: 1px solid rgba(178, 58, 47, 0.45);
-    }
-    .tag-available {
-      background: rgba(212, 155, 60, 0.20);
-      color: #f0c478;
-      border: 1px solid rgba(212, 155, 60, 0.45);
-    }
-    .tag-soon {
-      background: rgba(148, 163, 184, 0.12);
-      color: var(--text-body);
-      border: 1px solid var(--border-strong);
-    }
-    /* Light-mode tag colors: tested for >=7:1 contrast (WCAG AAA for
-       small text) against the card background. The dark-mode defaults
-       are already saturated; light mode needs solid fills. */
-    [data-theme="light"] .tag-nda {
-      background: #b23a2f;
-      color: #ffffff;
-      border-color: #8a2e25;
-    }
-    [data-theme="light"] .tag-available {
-      background: #b8810f;
-      color: #ffffff;
-      border-color: #8a6111;
-    }
-    [data-theme="light"] .tag-soon {
-      background: #475569;
-      color: #ffffff;
-      border-color: #334155;
-    }
-  </style>
+  <script is:inline>
+    // Wire the two contact-modal pills (cleaner than inline onclick on the
+    // <Pill> component which doesn't expose an onclick prop).
+    document.addEventListener('DOMContentLoaded', function () {
+      var nda = document.querySelector('.js-pill-nda');
+      if (nda) nda.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (window.openContactModal) window.openContactModal('Security Brief Request');
+      });
+      var contact = document.querySelector('.js-pill-contact');
+      if (contact) contact.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (window.openContactModal) window.openContactModal('General Inquiry');
+      });
+    });
+  </script>
 </BaseLayout>
+
+<style is:global>
+  .page-docs .docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+  .page-docs .docs-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .page-docs .docs-card:hover {
+    border-color: var(--brand-primary-light);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .page-docs .docs-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .page-docs .docs-card__blurb {
+    margin: 0 0 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+  .page-docs .docs-card__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+  }
+  .page-docs .docs-card__list li {
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.92rem;
+  }
+  .page-docs .docs-card__list li:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+  .page-docs .docs-card__list li a,
+  .page-docs .docs-card__list li .docs-card__disabled {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--text-body);
+    transition: color var(--transition-fast);
+  }
+  .page-docs .docs-card__list li a:hover {
+    color: var(--brand-primary);
+  }
+  .page-docs .docs-card__disabled {
+    cursor: default;
+    color: var(--text-muted);
+  }
+  .page-docs .docs-card__disabled .docs-card__title {
+    font-style: italic;
+  }
+  .page-docs .docs-card__title { flex: 1; }
+  .page-docs .docs-card__tags {
+    display: inline-flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  /* Hero pill row alignment — the hero already centers its actions slot,
+     but we want pills to flow as a tight wrap rather than a vertical stack
+     on the desktop hero. */
+  .page-docs .hero-band__actions {
+    gap: 0.6rem;
+  }
+</style>

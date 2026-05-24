@@ -1,0 +1,27 @@
+---
+/**
+ * CardGrid — N equal-width columns, lock-step responsive cascade.
+ *
+ * Outputs just the `.grid-N` utility class. We deliberately do NOT
+ * add a `.card-grid` wrapper class because a pre-existing
+ * `.card-grid { display: flex }` rule (used by /products.html's
+ * .feature-card layout) cascades AFTER the .grid-N rules and
+ * silently flips the layout to single-column flex. Keeping the
+ * namespaces separate avoids that collision.
+ *
+ * Props:
+ *   cols   2 | 3 | 4   (default 3)
+ *   gap    'sm' | 'md' (default) | 'lg'
+ *   class  extra class
+ */
+export interface Props {
+  cols?: 2 | 3 | 4;
+  gap?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+const { cols = 3, gap = 'md', class: className = '' } = Astro.props;
+const gapStyle = gap === 'sm' ? '1rem' : gap === 'lg' ? '2rem' : '1.5rem';
+---
+<div class={`grid-${cols} ds-grid ${className}`} style={`gap: ${gapStyle};`}>
+  <slot />
+</div>

@@ -24,19 +24,24 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 // public/js/shared-nav.js — Cloudflare's edge cache otherwise serves the
 // stale file for up to 24h (cache-control: max-age=86400). The dashboard
 // cache-purge works too, but bumping this is the zero-click path.
-const sharedNavVersion = "20260520a";
+const sharedNavVersion = "20260523d";
 ---
 
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <script is:inline>
+      // FOUC-prevention: resolve theme before first paint.
+      // Tri-state: explicit 'light' / 'dark' from localStorage wins; otherwise
+      // honor prefers-color-scheme (auto). Matches shared-nav.js toggle logic.
       (function () {
         try {
-          var t = localStorage.getItem("theme");
-          document.documentElement.setAttribute("data-theme",
-            t === "dark" || t === "light" ? t : "light");
+          var saved = localStorage.getItem("theme");
+          var resolved = (saved === "dark" || saved === "light")
+            ? saved
+            : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", resolved);
         } catch {
           document.documentElement.setAttribute("data-theme", "light");
         }
@@ -51,8 +56,8 @@ const sharedNavVersion = "20260520a";
     <meta name="category" content="technology" />
     <meta name="classification" content="Business" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020617" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#edf2fb" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1020" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
 
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:type" content="website" />

@@ -34,26 +34,29 @@
     --cyan-400: #22d3ee;
     --cyan-500: #06b6d4;
 
-    /* Dark theme — carbon-near-black, less blue-tinted than slate-950
-       so the brand blue reads as the only chromatic note on the page. */
-    --bg-body: #06080f;
-    --bg-body-gradient: linear-gradient(180deg, #06080f 0%, #0a0f1c 100%);
-    --bg-surface: rgba(15, 20, 36, 0.6);
-    --bg-surface-solid: #0f1424;
-    --bg-surface-glass: rgba(15, 20, 36, 0.7);
-    --bg-elevated: rgba(26, 34, 54, 0.82);
-    --bg-elevated-rgb: 26, 34, 54;
-    --bg-muted: rgba(15, 20, 36, 0.4);
+    /* Dark theme — lifted near-black (was #06080f, which read as
+       harsh-CRT-black against white text and made the alternating
+       section stripes invisible). New base sits at the GitHub /
+       Linear register: dark enough to read serious, light enough
+       that surfaces + stripes have visible elevation. */
+    --bg-body: #0b1020;
+    --bg-body-gradient: linear-gradient(180deg, #0b1020 0%, #10162a 100%);
+    --bg-surface: rgba(22, 28, 48, 0.65);
+    --bg-surface-solid: #161c30;          /* one tier above body */
+    --bg-surface-glass: rgba(22, 28, 48, 0.72);
+    --bg-elevated: rgba(34, 42, 66, 0.85);
+    --bg-elevated-rgb: 34, 42, 66;
+    --bg-muted: #11172a;                   /* solid, not alpha — stripes need to read */
 
     --text-heading: #ffffff;
     --text-body: #cbd5e1;
     --text-muted: #94a3b8;
     --text-on-primary: #ffffff;
 
-    /* Borders — slightly more restrained than the previous theme */
-    --border-default: rgba(148, 163, 184, 0.10);
-    --border-strong: rgba(148, 163, 184, 0.22);
-    --border-subtle: rgba(255, 255, 255, 0.04);
+    /* Borders — bumped one notch so card edges read on the lifted bg */
+    --border-default: rgba(148, 163, 184, 0.14);
+    --border-strong: rgba(148, 163, 184, 0.26);
+    --border-subtle: rgba(255, 255, 255, 0.06);
 
     /* Brand — single authoritative blue. No cyan accent.
        --brand-accent intentionally aliased to a paler blue (not cyan)
@@ -89,11 +92,25 @@
     /* Layout */
     --container-max: 1280px;
     --nav-height: 80px;
+
+    /* Content width contract — every section snaps to one of these three.
+       Single source of truth. Eliminates the "zig-zag" caused by 5+
+       different ad-hoc max-widths sprinkled across per-page CSS.
+         --w-page    nav/footer inner, hero band, full-bleed media
+         --w-content card grids, tables, the default section width
+         --w-prose   running text, headers, intros (~65–75ch at 17px) */
+    --w-page:    1280px;
+    --w-content: 1120px;
+    --w-prose:    720px;
+    --w-padding-x: 2rem;
+
     /* Vertical rhythm tokens for premium consistency.
        --space-section: vertical padding for top-level <section> elements.
-       --space-block: spacing between blocks within a section. */
+       --space-block:   spacing between header and content within a section.
+       --space-stack:   spacing between sibling text blocks. */
     --space-section: 6rem;
-    --space-block: 3rem;
+    --space-block:   3rem;
+    --space-stack:   1rem;
 
     /* Typography */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -188,6 +205,7 @@
         --nav-height: 64px;
         --space-section: 4rem;
         --space-block: 2rem;
+        --w-padding-x: 1.25rem;
     }
 }
 
@@ -264,43 +282,16 @@
     background: rgba(185, 28, 28, 0.12) !important;
 }
 
-/* Light mode overrides for specific sections */
-[data-theme="light"] .section-cta {
-    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
-}
-
-[data-theme="light"] .cta-box h2 {
-    color: white;
-}
-
-[data-theme="light"] .cta-box p {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-[data-theme="light"] .cta-resources {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-[data-theme="light"] .cta-resources a {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-[data-theme="light"] .section-cta .btn-primary {
-    background: white;
-    color: #1d4ed8;
-}
-
-[data-theme="light"] .section-cta::before {
-    background: radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.3) 0%, rgba(30, 64, 175, 0.1) 70%);
-}
+/* Section-CTA legacy block (`.section-cta`, `.cta-box`, `.cta-resources`,
+   `.stat-icon` linear-gradient) removed — superseded by CTAStrip's
+   `.cta-strip--band` variant + Card's stat/proof variants, both of which
+   embed their own light/dark treatment inline. The matching base styles
+   in styles.css remain only to support /research.html until that page
+   migrates. */
 
 [data-theme="light"] .hero-video-info {
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
-}
-
-[data-theme="light"] .stat-icon {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
 }
 
 [data-theme="light"] .navbar {

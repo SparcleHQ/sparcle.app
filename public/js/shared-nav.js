@@ -72,7 +72,12 @@
         '    <li><a href="/solution" class="nav-link' + activeClass('solution') + '">Solutions</a></li>',
         '    <li><a href="/pricing#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
         '    <li class="nav-item-has-submenu">',
-        '      <a href="/why-sparcle" class="nav-link' + activeClass('why-sparcle') + activeClass('resources') + '">Resources</a>',
+        '      <button type="button" class="nav-link submenu-toggle-btn' + activeClass('resources') + '" aria-expanded="false" aria-haspopup="true">',
+        '        Resources',
+        '        <svg class="submenu-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+        '          <polyline points="6 9 12 15 18 9"/>',
+        '        </svg>',
+        '      </button>',
         '      <ul class="nav-submenu">',
         '        <li><a href="/docs" class="nav-link">Documentation</a></li>',
         '        <li><a href="/architecture" class="nav-link">Architecture</a></li>',
@@ -87,28 +92,32 @@
         '    </li>',
         '  </ul>',
         '  <div class="nav-controls">',
-        '    <button class="theme-toggle" id="themeToggle" aria-label="Switch to dark theme" data-mode="auto">',
-        '      <!-- half-filled circle: left=light, right=dark — auto/system theme -->',
-        '      <svg class="icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
-        '        <path d="M12 3A9 9 0 0 0 12 21Z" fill="currentColor" stroke="none"/>',
-        '        <circle cx="12" cy="12" r="9"/>',
-        '      </svg>',
-        '      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-        '        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
-        '      </svg>',
-        '      <!-- sun (light mode) -->',
-        '      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-        '        <circle cx="12" cy="12" r="5"/>',
-        '        <line x1="12" y1="1" x2="12" y2="3"/>',
-        '        <line x1="12" y1="21" x2="12" y2="23"/>',
-        '        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>',
-        '        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>',
-        '        <line x1="1" y1="12" x2="3" y2="12"/>',
-        '        <line x1="21" y1="12" x2="23" y2="12"/>',
-        '        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>',
-        '        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
-        '      </svg>',
-        '    </button>',
+        '    <div class="theme-switch" id="themeSwitch" role="group" aria-label="Color theme">',
+        '      <button type="button" class="theme-switch__opt" data-theme-set="auto" aria-pressed="false" aria-label="Use system theme" title="System">',
+        '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+        '          <circle cx="12" cy="12" r="9"/>',
+        '          <path d="M12 3A9 9 0 0 0 12 21Z" fill="currentColor" stroke="none"/>',
+        '        </svg>',
+        '      </button>',
+        '      <button type="button" class="theme-switch__opt" data-theme-set="light" aria-pressed="false" aria-label="Use light theme" title="Light">',
+        '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+        '          <circle cx="12" cy="12" r="4.5"/>',
+        '          <line x1="12" y1="2" x2="12" y2="4"/>',
+        '          <line x1="12" y1="20" x2="12" y2="22"/>',
+        '          <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>',
+        '          <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>',
+        '          <line x1="2" y1="12" x2="4" y2="12"/>',
+        '          <line x1="20" y1="12" x2="22" y2="12"/>',
+        '          <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>',
+        '          <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>',
+        '        </svg>',
+        '      </button>',
+        '      <button type="button" class="theme-switch__opt" data-theme-set="dark" aria-pressed="false" aria-label="Use dark theme" title="Dark">',
+        '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+        '          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+        '        </svg>',
+        '      </button>',
+        '    </div>',
         '    <a href="#" onclick="openContactModal(\'Architecture Review\'); return false;" class="btn btn-primary btn-sm">Schedule Review</a>',
         '  </div>',
         '  <!-- Mobile hamburger -->',
@@ -208,46 +217,63 @@
     }
 
     /* ------------------------------------------------------------------
-       THEME INIT & TOGGLE
+       THEME INIT & SEGMENTED SWITCH
        ------------------------------------------------------------------
-       Site default is LIGHT. Toggle is a binary light ↔ dark switch.
-       Saved preference (localStorage) wins; otherwise default to light.
-       OS preference is intentionally ignored — Sparcle's brand is the
-       blue/white look and we want a consistent first impression.
+       3-state segmented control: [ Auto | Light | Dark ]
+       - 'auto'  : follow prefers-color-scheme; no localStorage entry.
+       - 'light' : explicit; saved to localStorage.
+       - 'dark'  : explicit; saved to localStorage.
+       The FOUC-prevention script in BaseLayout has already resolved the
+       initial theme; this block manages the switch's pressed state +
+       direct mode selection.
        ------------------------------------------------------------------ */
     (function initTheme() {
         var root = document.documentElement;
-        var saved = localStorage.getItem('theme');
-        var mode = (saved === 'dark' || saved === 'light') ? saved : 'light';
+        var mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
 
-        function applyMode(m) {
-            root.setAttribute('data-theme', m);
+        function systemTheme() { return mql && mql.matches ? 'dark' : 'light'; }
+
+        function currentMode() {
+            var saved = localStorage.getItem('theme');
+            return (saved === 'dark' || saved === 'light') ? saved : 'auto';
         }
 
-        function nextMode(current) {
-            return current === 'dark' ? 'light' : 'dark';
+        function applyMode(mode) {
+            root.setAttribute('data-theme', mode === 'auto' ? systemTheme() : mode);
         }
 
-        function nextLabel(current) {
-            return current === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        function setMode(mode) {
+            if (mode === 'auto') {
+                localStorage.removeItem('theme');
+            } else {
+                localStorage.setItem('theme', mode);
+            }
+            applyMode(mode);
+            updateSwitchUI(mode);
         }
 
-        function updateBtn(btn, m) {
-            btn.setAttribute('data-mode', m);
-            btn.setAttribute('aria-label', nextLabel(m));
+        function updateSwitchUI(mode) {
+            var opts = document.querySelectorAll('.theme-switch__opt');
+            opts.forEach(function (b) {
+                var on = b.getAttribute('data-theme-set') === mode;
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
         }
 
-        applyMode(mode);
+        applyMode(currentMode());
+        updateSwitchUI(currentMode());
 
-        var btn = document.getElementById('themeToggle');
-        if (btn) {
-            updateBtn(btn, mode);
+        document.querySelectorAll('.theme-switch__opt').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var current = btn.getAttribute('data-mode') || 'light';
-                var next = nextMode(current);
-                localStorage.setItem('theme', next);
-                applyMode(next);
-                updateBtn(btn, next);
+                var mode = btn.getAttribute('data-theme-set') || 'auto';
+                setMode(mode);
+            });
+        });
+
+        // Live system-pref response (only matters when in 'auto').
+        if (mql && mql.addEventListener) {
+            mql.addEventListener('change', function () {
+                if (currentMode() === 'auto') applyMode('auto');
             });
         }
     }());
@@ -295,6 +321,51 @@
                 toggle.classList.remove('open');
                 toggle.setAttribute('aria-expanded', 'false');
             });
+        });
+    }());
+
+    /* ------------------------------------------------------------------
+       SUBMENU TOGGLE — Resources dropdown
+       ------------------------------------------------------------------
+       Click-driven on every device. Previously the submenu was
+       hover-only on desktop and completely unreachable on mobile.
+       Now: clicking the chevron toggles .submenu-open on the parent
+       <li> + flips aria-expanded on the button. Outside-click / Esc
+       closes any open submenu. The Resources <a> stays clickable
+       as a direct link to /why-sparcle.
+       ------------------------------------------------------------------ */
+    (function initSubmenuToggle() {
+        var toggles = document.querySelectorAll('.submenu-toggle, .submenu-toggle-btn');
+        if (!toggles.length) return;
+
+        function closeAll(except) {
+            document.querySelectorAll('.nav-item-has-submenu.submenu-open').forEach(function (li) {
+                if (li === except) return;
+                li.classList.remove('submenu-open');
+                var btn = li.querySelector('.submenu-toggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        toggles.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var li = btn.closest('.nav-item-has-submenu');
+                if (!li) return;
+                var open = li.classList.toggle('submenu-open');
+                btn.setAttribute('aria-expanded', String(open));
+                if (open) closeAll(li);
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.nav-item-has-submenu')) return;
+            closeAll(null);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeAll(null);
         });
     }());
 

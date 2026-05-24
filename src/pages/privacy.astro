@@ -1,79 +1,56 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import Prose from "../components/ui/Prose.astro";
 ---
-
 <BaseLayout
   title="Privacy Policy | Sparcle"
   description="Privacy policy for Sparcle, LLC — Bolt AI platform and Aeira enterprise data plane."
   canonical="https://sparcle.app/privacy"
 >
-  <main class="page-legal">
-    <h1>Privacy Policy</h1>
-    <p class="page-legal-date">Last updated: March 12, 2026</p>
+  <main class="page-privacy">
+    <Hero
+      eyebrow="Legal"
+      title="Privacy Policy."
+      lede="Last updated: March 12, 2026"
+    />
 
-    <h2>1. Who We Are</h2>
-    <p>Sparcle, LLC ("Sparcle," "we," "our," or "us") operates the website at <a href="https://sparcle.app">sparcle.app</a>, the Bolt enterprise AI platform, and the Aeira enterprise data plane. Contact us at <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a>.</p>
+    <PageSection stripe="b" width="content" align="left">
+      <Prose>
+        <h2>1. Who we are</h2>
+        <p>Sparcle, LLC ("Sparcle," "we," "our," or "us") operates the website at <a href="https://sparcle.app">sparcle.app</a>, the Bolt enterprise AI platform, and the Aeira enterprise data plane. Contact us at <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a>.</p>
 
-    <h2>2. Information We Collect</h2>
-    <p>We collect information you provide directly (e.g., name, email when contacting us), usage data (pages visited, browser type, referral source), and, for Bolt and Aeira platform customers, data necessary to operate the service under a Data Processing Agreement.</p>
+        <h2>2. Information we collect</h2>
+        <p>We collect information you provide directly (e.g., name, email when contacting us), usage data (pages visited, browser type, referral source), and, for Bolt and Aeira platform customers, data necessary to operate the service under a Data Processing Agreement.</p>
 
-    <h2>3. How We Use Information</h2>
-    <p>We use collected information to respond to inquiries, improve our website and products, communicate product updates (with your consent), and fulfill contractual obligations to customers.</p>
+        <h2>3. How we use information</h2>
+        <p>We use collected information to respond to inquiries, improve our website and products, communicate product updates (with your consent), and fulfill contractual obligations to customers.</p>
 
-    <h2>4. Data Sharing</h2>
-    <p>We do not sell your personal data. We may share data with trusted service providers who assist in operating our website or platform, under confidentiality obligations. We may disclose data if required by law.</p>
+        <h2>4. Data sharing</h2>
+        <p>We do not sell your personal data. We may share data with trusted service providers who assist in operating our website or platform, under confidentiality obligations. We may disclose data if required by law.</p>
 
-    <h2>5. Enterprise Customer Data</h2>
-    <p>Data processed through the Bolt platform and Aeira data plane on behalf of enterprise customers is governed by the applicable Data Processing Agreement (DPA). Bolt and Aeira's on-premises and VPC deployment options ensure customer data never leaves the customer's environment. Our AI gateway operates under zero-retention policy. Aeira enforces per-user ACL filtering — users only see data accessible under their own identity token.</p>
+        <h2>5. Enterprise customer data</h2>
+        <p>Data processed through the Bolt platform and Aeira data plane on behalf of enterprise customers is governed by the applicable Data Processing Agreement (DPA). Bolt and Aeira's on-premises and VPC deployment options ensure customer data never leaves the customer's environment. Our AI gateway operates under zero-retention policy. Aeira enforces per-user ACL filtering — users only see data accessible under their own identity token.</p>
 
-    <h2>6. Cookies</h2>
-    <p>Our website uses only essential cookies (e.g., theme preference). We do not use advertising or cross-site tracking cookies.</p>
+        <h2>6. Cookies</h2>
+        <p>Our website uses only essential cookies (e.g., theme preference). We do not use advertising or cross-site tracking cookies.</p>
 
-    <h2>7. Your Rights</h2>
-    <p>Depending on your jurisdiction, you may have rights to access, correct, delete, or export your personal data. Contact us at <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a> to exercise these rights.</p>
+        <h2>7. Your rights</h2>
+        <p>Depending on your jurisdiction, you may have rights to access, correct, delete, or export your personal data. Contact us at <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a> to exercise these rights.</p>
 
-    <h2>8. Data Retention</h2>
-    <p>We retain personal data only as long as necessary for the purposes described above or as required by law.</p>
+        <h2>8. Data retention</h2>
+        <p>We retain personal data only as long as necessary for the purposes described above or as required by law.</p>
 
-    <h2>9. Security</h2>
-    <p>We implement industry-standard security measures including TLS encryption, access controls, and audit logging to protect your data.</p>
+        <h2>9. Security</h2>
+        <p>We implement industry-standard security measures including TLS encryption, access controls, and audit logging to protect your data.</p>
 
-    <h2>10. Changes to This Policy</h2>
-    <p>We may update this policy periodically. The "Last updated" date at the top reflects the most recent revision. Continued use of the site constitutes acceptance of the updated policy.</p>
+        <h2>10. Changes to this policy</h2>
+        <p>We may update this policy periodically. The "Last updated" date at the top reflects the most recent revision. Continued use of the site constitutes acceptance of the updated policy.</p>
 
-    <h2>11. Contact</h2>
-    <p>For privacy-related questions: <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a></p>
+        <h2>11. Contact</h2>
+        <p>For privacy-related questions: <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a></p>
+      </Prose>
+    </PageSection>
   </main>
 </BaseLayout>
-
-<style>
-  .page-legal {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: calc(var(--nav-height, 80px) + 3rem) 2rem 5rem;
-    color: var(--text-body);
-    line-height: 1.8;
-  }
-  .page-legal h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    color: var(--text-heading);
-  }
-  .page-legal-date {
-    color: var(--text-muted);
-    margin-bottom: 3rem;
-  }
-  .page-legal h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin: 2rem 0 0.5rem;
-    color: var(--text-heading);
-  }
-  .page-legal a {
-    color: var(--brand-primary);
-  }
-  .page-legal a:hover {
-    text-decoration: underline;
-  }
-</style>

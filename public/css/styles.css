@@ -181,44 +181,61 @@ strong {
     outline-offset: 2px;
 }
 
-/* Theme Toggle Button */
-.theme-toggle {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    display: flex;
+/* Theme switch — 3-state segmented control [Auto | Light | Dark].
+   Each segment is directly clickable so users can jump to any mode
+   without cycling through. Replaces the prior single-icon cycle
+   button (.theme-toggle) which was less discoverable. */
+.theme-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.theme-switch__opt {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-body);
-    transition: all var(--transition-fast);
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
     cursor: pointer;
-    background: none;
-    border: 1px solid var(--border-default);
+    transition: color var(--transition-fast), background var(--transition-fast);
+    padding: 0;
 }
-
-.theme-toggle:hover {
-    color: var(--brand-primary);
-    background: var(--brand-primary-light);
-    border-color: var(--brand-primary);
-}
-
-.theme-toggle .icon-auto,
-.theme-toggle .icon-sun,
-.theme-toggle .icon-moon {
-    width: 20px;
-    height: 20px;
-    display: none;
-}
-
-.theme-toggle[data-mode="auto"] .icon-auto,
-.theme-toggle[data-mode="dark"] .icon-moon,
-.theme-toggle[data-mode="light"] .icon-sun {
+.theme-switch__opt svg {
+    width: 16px;
+    height: 16px;
     display: block;
 }
+.theme-switch__opt:hover {
+    color: var(--text-heading);
+}
+.theme-switch__opt[aria-pressed="true"] {
+    background: var(--brand-primary);
+    color: var(--text-on-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.theme-switch__opt[aria-pressed="true"]:hover {
+    color: var(--text-on-primary);
+}
+.theme-switch__opt:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+}
 
-/* Fallback: if data-mode not yet set, show auto icon */
-.theme-toggle:not([data-mode]) .icon-auto {
-    display: block;
+/* Mobile: nudge the switch a touch smaller so it fits the slimmer nav. */
+@media (max-width: 640px) {
+    .theme-switch { padding: 2px; }
+    .theme-switch__opt { width: 28px; height: 28px; }
+    .theme-switch__opt svg { width: 14px; height: 14px; }
 }
 
 /* ==================================================================================================
@@ -229,6 +246,45 @@ strong {
     max-width: var(--container-max);
     margin: 0 auto;
     padding: 0 2rem;
+}
+
+/* Width primitives — single source of truth for inner widths.
+   Use .w-prose for any block of running text or a section header.
+   Use .w-content for any card grid, table, or feature block.
+   Use .w-page for navbar/footer inner or full-bleed-friendly bands.
+   The matching --w-* tokens are defined in variables.css. */
+.w-page,
+.w-content,
+.w-prose {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--w-padding-x);
+}
+.w-page    { max-width: var(--w-page); }
+.w-content { max-width: var(--w-content); }
+.w-prose   { max-width: var(--w-prose); }
+
+/* Section stripes — alternating backgrounds without dividing lines.
+   Apply at the <section> level. The light/dark token system already
+   sets --bg-muted as a subtle one-tone-off-body color in both themes. */
+.section-stripe-a { background: var(--bg-body); }
+.section-stripe-b { background: var(--bg-muted); }
+
+/* Lock-step N-column grids. Never auto-fit — auto-fit is what produces
+   uneven last rows and the "wrap of one stray card" zig-zag on tablet
+   widths. Explicit breakpoints below give a deliberate cascade. */
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
+
+@media (max-width: 1024px) {
+    .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+    .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
 
 section {
@@ -370,8 +426,58 @@ section {
     line-height: 1;
 }
 
-.nav-item-has-submenu .submenu-toggle[aria-expanded="true"] .submenu-caret {
+.nav-item-has-submenu .submenu-toggle[aria-expanded="true"] .submenu-caret,
+.nav-item-has-submenu .submenu-toggle-btn[aria-expanded="true"] .submenu-caret {
     transform: rotate(180deg);
+}
+
+/* Resources nav button — same .nav-link visual as link siblings.
+   Desktop: inline-flex so the pill hugs its content like other nav items.
+   Mobile: block-level full-width row so it lines up with the other
+   stacked items (otherwise it reads as a misplaced small pill). */
+.submenu-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text-body);
+}
+.submenu-toggle-btn .submenu-caret {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+    transform-origin: 50% 50%;
+    color: currentColor;
+    opacity: 0.7;
+    vertical-align: middle;
+}
+.submenu-toggle-btn:hover .submenu-caret,
+.submenu-toggle-btn[aria-expanded="true"] .submenu-caret {
+    opacity: 1;
+}
+
+@media (max-width: 1024px) {
+    .submenu-toggle-btn {
+        display: flex;
+        width: 100%;
+        text-align: center;
+    }
+    /* Submenu items inherit the parent's centered alignment so the
+       open menu reads as a single coherent column. */
+    .nav-submenu {
+        text-align: center;
+    }
+    .nav-submenu .nav-link {
+        text-align: center;
+        justify-content: center;
+    }
 }
 
 /* Positioning anchor for the absolute-positioned submenu — without this
@@ -384,8 +490,13 @@ section {
 .nav-submenu {
     position: absolute;
     top: calc(100% + 0.4rem);
-    left: 0;
-    min-width: 220px;
+    /* Center the panel under the Resources button + chevron — anchoring
+       it to left: 0 made it look like it "snapped" to the parent's left
+       edge on open. left: 50% + translateX(-50%) keeps it centered on
+       the trigger regardless of where the trigger sits in the nav. */
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 240px;
     background: var(--bg-surface-solid);
     border: 1px solid var(--border-default);
     border-radius: 12px;
@@ -403,7 +514,11 @@ section {
     padding: 0.65rem 0.75rem;
 }
 
-.nav-item-has-submenu:hover .nav-submenu,
+/* Submenu opens on click only (driven by shared-nav.js's submenu-toggle
+   handler adding .submenu-open). Hover-only was unreachable on touch
+   devices and surprising on desktop. Keyboard users can still :focus-within
+   to expose the submenu without clicking. */
+.nav-item-has-submenu.submenu-open .nav-submenu,
 .nav-item-has-submenu:focus-within .nav-submenu {
     display: block;
 }
@@ -1691,10 +1806,13 @@ h3 {
         left: 0;
         right: 0;
         flex-direction: column;
+        /* Generous vertical gap so the active / hover / focus-ring
+           halos of adjacent items don't visually collide. */
+        gap: 0.5rem;
         background: var(--bg-surface-solid);
         border: 1px solid var(--border-default);
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        padding: 1rem;
+        padding: 1rem 0.75rem;
         margin-top: 0.5rem;
         box-shadow: var(--shadow-xl);
         z-index: 100;
@@ -1705,9 +1823,18 @@ h3 {
     }
 
     .nav-link {
-        padding: 1rem 1.25rem;
+        padding: 0.6rem 1.25rem;
         font-size: 1rem;
         border-radius: var(--radius-md);
+    }
+
+    /* Nav focus-rings on mobile sit AT the element edge instead of 3px
+       outside, otherwise the ring of an active/clicked item eats into
+       the next item's space (visible as "overlap"). Keyboard users
+       still see a clear ring; this just changes its offset. */
+    .nav-menu .nav-link:focus-visible,
+    .nav-menu .submenu-toggle-btn:focus-visible {
+        outline-offset: 0;
     }
 
     .nav-item {
@@ -1729,6 +1856,9 @@ h3 {
 
     .nav-submenu {
         position: static;
+        /* Reset desktop's translateX(-50%) — mobile uses static flow. */
+        left: auto;
+        transform: none;
         min-width: 100%;
         margin: 0.15rem 0 0.35rem;
         background: rgba(255, 255, 255, 0.02);
@@ -3522,3 +3652,594 @@ h3 {
         gap: 1rem;
     }
 }
+
+/* ==================================================================================================
+   DESIGN-SYSTEM PRIMITIVES — Global CSS for all unified component primitives.
+
+   Why this lives here instead of inside each .astro <style is:global> block:
+   Astro inlines <style is:global> only into pages that render that component.
+   Markup that USES the same classes on pages that DON'T import the component
+   would render unstyled (e.g. ProductPageTemplate's .faq-accordion on /products.html,
+   .data-table on /architecture, .pill everywhere). Putting these styles in the
+   global stylesheet that's <link>-loaded by every page eliminates that risk.
+
+   When in doubt, primitives go here. Page-specific styles stay in their page's
+   <style> block.
+   ================================================================================================== */
+
+/* ---------- Hero band ---------- */
+.hero-band {
+    padding: calc(var(--nav-height, 80px) + 3.5rem) 0 var(--space-section);
+    position: relative;
+    overflow: hidden;
+}
+.hero-band__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+}
+.hero-band.align-left .hero-band__inner { align-items: flex-start; }
+.hero-band__text { text-align: center; }
+.hero-band.align-left .hero-band__text { text-align: left; margin: 0; }
+.hero-band__title { margin: 0 0 1.25rem; }
+.hero-band__title strong { color: var(--brand-primary); font-weight: inherit; }
+.hero-band__lede {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    max-width: 65ch;
+    margin: 0 auto 2rem;
+}
+.hero-band.align-left .hero-band__lede { margin-left: 0; }
+.hero-band__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.hero-band.align-left .hero-band__actions { justify-content: flex-start; }
+.hero-band__media { width: 100%; max-width: 100%; }
+
+@media (max-width: 768px) {
+    .hero-band { padding-top: calc(var(--nav-height, 64px) + 2rem); }
+    .hero-band__inner { gap: 2rem; }
+    .hero-band__actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 360px;
+        margin-inline: auto;
+    }
+    .hero-band__actions .btn { width: 100%; }
+}
+
+/* ---------- PageSection ---------- */
+.page-section {
+    padding: var(--space-section) 0;
+}
+.page-section__header {
+    text-align: center;
+    margin-bottom: var(--space-block);
+}
+.page-section__header .eyebrow,
+.page-section__header .section-eyebrow {
+    margin-bottom: 0.75rem;
+}
+.page-section__title {
+    text-align: center;
+    margin: 0 auto 1rem;
+}
+.page-section__lede {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    max-width: 65ch;
+    margin: 0 auto;
+}
+.page-section__lede a {
+    color: var(--brand-primary);
+    text-decoration: underline;
+}
+.page-section__body.align-left { text-align: left; }
+
+/* ---------- CardGrid ----------
+   Equal-height helper for the new <CardGrid> primitive.
+   Namespaced .ds-grid to avoid collision with the older
+   .card-grid (flex-based) layout used by ProductPageTemplate. */
+.ds-grid {
+    width: 100%;
+    align-items: stretch;
+}
+.ds-grid > * { height: 100%; }
+
+/* ---------- Card ---------- */
+.card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    text-decoration: none;
+    color: inherit;
+}
+.card:hover {
+    border-color: var(--brand-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+a.card:hover .card__title { color: var(--brand-primary); }
+.card--muted { background: var(--bg-muted); }
+
+.card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+}
+.card__icon svg { width: 22px; height: 22px; }
+
+.card__eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.5rem;
+}
+
+.card__title {
+    font-size: 1.1875rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.75rem;
+    line-height: 1.3;
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    transition: color var(--transition-fast);
+}
+
+.card__body {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-body);
+    flex-grow: 1;
+}
+.card__body p:last-child { margin-bottom: 0; }
+.card__body a {
+    color: var(--brand-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+.card__body a:hover { text-decoration: underline; }
+
+.card__footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.card--stat,
+.card--proof {
+    text-align: center;
+    align-items: center;
+}
+.card--proof { padding: 2.25rem 1.75rem; }
+.card__metric {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: var(--brand-primary);
+    line-height: 1;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+}
+.card--stat .card__title,
+.card--proof .card__title {
+    font-size: 1rem;
+    text-align: center;
+}
+.card--stat .card__body,
+.card--proof .card__body {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.card.accent-success { border-left: 3px solid var(--color-success-strong); }
+.card.accent-warning { border-left: 3px solid var(--color-warning); }
+.card.accent-danger  { border-left: 3px solid var(--color-danger-strong); }
+
+@media (max-width: 768px) {
+    .card { padding: 1.5rem 1.25rem; }
+    .card--proof { padding: 1.75rem 1.25rem; }
+}
+
+/* ---------- FAQ accordion ----------
+   Centered, 880px max-width by default. Items can be expanded
+   independently — the previous exclusive-grouping `name=` attribute
+   was both an accessibility regression (closes user's open item)
+   and a browser-support gap (Firefox < 119, Chrome < 120). */
+.faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.faq-accordion--centered {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.faq-details {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.faq-details:hover { border-color: var(--border-strong); }
+.faq-details[open] { border-color: var(--brand-primary-light); }
+.faq-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    list-style: none;
+    gap: 1rem;
+}
+.faq-summary::-webkit-details-marker { display: none; }
+.faq-question {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-heading);
+    font-family: var(--font-sans);
+    line-height: 1.4;
+}
+.faq-icon {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: transform var(--transition-base), color var(--transition-fast), background var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(148, 163, 184, 0.08);
+}
+.faq-details[open] .faq-icon {
+    transform: rotate(180deg);
+    color: var(--brand-primary);
+    background: var(--brand-primary-light);
+}
+.faq-answer-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--transition-base);
+}
+.faq-details[open] .faq-answer-wrapper { grid-template-rows: 1fr; }
+.faq-answer {
+    overflow: hidden;
+    padding: 0 1.5rem 1.5rem;
+    color: var(--text-body);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+.faq-answer p:last-child { margin-bottom: 0; }
+.faq-answer a {
+    color: var(--brand-primary);
+    text-decoration: underline;
+}
+.faq-answer code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    padding: 0.1em 0.4em;
+    background: var(--bg-muted);
+    border-radius: 4px;
+}
+.faq-answer kbd {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    font-weight: 600;
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+}
+
+/* ---------- CTAStrip ---------- */
+.cta-strip--band {
+    padding: var(--space-section) 0;
+    background: linear-gradient(135deg, var(--blue-700) 0%, var(--blue-600) 100%);
+    color: #fff;
+    text-align: center;
+}
+.cta-strip--band .cta-strip__inner { text-align: center; }
+.cta-strip--band .cta-strip__title { color: #fff; margin: 0 0 1rem; }
+.cta-strip--band .cta-strip__lede {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0 auto 2rem;
+    max-width: 65ch;
+}
+.cta-strip--band .cta-strip__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.cta-strip--band .cta-strip__actions .btn-primary {
+    background: #fff;
+    color: var(--blue-700);
+    box-shadow: var(--shadow-md);
+}
+.cta-strip--band .cta-strip__actions .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--blue-800);
+}
+.cta-strip--band .cta-strip__actions .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+.cta-strip--band .cta-strip__actions .btn-secondary:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+.cta-strip--band .cta-strip__note {
+    margin: 1.5rem auto 0;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9rem;
+    max-width: 480px;
+}
+.cta-strip--band .cta-strip__note a {
+    color: #fff;
+    text-decoration: underline;
+}
+.eyebrow.eyebrow--on-band { color: rgba(255, 255, 255, 0.85); }
+
+.cta-strip--inline {
+    margin-top: var(--space-block);
+    text-align: center;
+}
+.cta-strip--inline .cta-strip__title { font-size: 1.25rem; margin: 0 0 0.5rem; }
+.cta-strip--inline .cta-strip__lede {
+    color: var(--text-muted);
+    margin: 0 auto 1.25rem;
+    max-width: 60ch;
+}
+.cta-strip--inline .cta-strip__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.cta-strip--inline .cta-strip__note {
+    margin: 1rem auto 0;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    max-width: 480px;
+}
+
+@media (max-width: 768px) {
+    .cta-strip--band .cta-strip__actions,
+    .cta-strip--inline .cta-strip__actions {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 320px;
+        margin-inline: auto;
+    }
+    .cta-strip--band .cta-strip__actions .btn,
+    .cta-strip--inline .cta-strip__actions .btn { width: 100%; }
+}
+
+/* ---------- Pill ---------- */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: 1;
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+.pill strong { color: inherit; font-weight: 700; }
+.pill--sm { font-size: 0.72rem; padding: 4px 9px; }
+.pill--md { font-size: 0.78rem; padding: 6px 12px; }
+.pill--lg { font-size: 0.84rem; padding: 8px 16px; }
+.pill--neutral {
+    background: rgba(148, 163, 184, 0.10);
+    border-color: rgba(148, 163, 184, 0.20);
+    color: var(--text-muted);
+}
+.pill--brand {
+    background: var(--brand-primary-light);
+    border-color: rgba(37, 99, 235, 0.30);
+    color: var(--brand-primary);
+}
+.pill--success {
+    background: var(--color-success-bg);
+    border-color: var(--color-success);
+    color: var(--color-success-strong);
+}
+.pill--warning {
+    background: var(--color-warning-bg);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+.pill--danger {
+    background: var(--color-danger-bg);
+    border-color: var(--color-danger);
+    color: var(--color-danger-strong);
+}
+a.pill:hover {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+/* ---------- Prose ---------- */
+.prose {
+    color: var(--text-body);
+    max-width: 760px;
+    margin-inline: auto;
+}
+.prose.align-center { text-align: center; }
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    margin: 0 0 1.25rem;
+}
+.prose.align-center p,
+.prose.align-center ul,
+.prose.align-center ol {
+    margin-left: auto;
+    margin-right: auto;
+}
+.prose h2,
+.prose h3,
+.prose h4 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-heading);
+}
+.prose h2 { font-size: 1.625rem; }
+.prose h3 { font-size: 1.25rem; font-family: var(--font-display); }
+.prose h4 { font-size: 1.0625rem; font-weight: 700; }
+.prose a {
+    color: var(--brand-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.prose ul,
+.prose ol { padding-left: 1.5rem; }
+.prose li {
+    margin-bottom: 0.5rem;
+    list-style: revert;
+}
+.prose blockquote {
+    border-left: 3px solid var(--brand-primary);
+    padding: 0.75rem 1.25rem;
+    background: var(--brand-primary-light);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-style: italic;
+    color: var(--text-heading);
+}
+.prose code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    padding: 0.1em 0.4em;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+}
+.prose strong {
+    color: var(--text-heading);
+    font-weight: 600;
+}
+
+/* ---------- Data table — used on /security and /architecture for the
+   compliance + tier matrices. The .data-table--cols4 modifier on
+   /architecture changes the column count. ---------- */
+.data-table {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.data-table__row {
+    display: grid;
+    grid-template-columns: 200px 180px 1fr;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.data-table__row:last-child { border-bottom: none; }
+.data-table__row > div {
+    padding: 1rem 1.2rem;
+    font-size: 0.95rem;
+    color: var(--text-body);
+    line-height: 1.55;
+}
+.data-table__row--head > div {
+    font-weight: 700;
+    color: var(--text-heading);
+    background: var(--bg-muted);
+    font-size: 0.86rem;
+}
+.data-table__label {
+    font-weight: 600;
+    color: var(--text-heading) !important;
+    background: var(--bg-muted);
+}
+.data-table--cols4 .data-table__row {
+    grid-template-columns: 180px repeat(3, 1fr);
+}
+@media (max-width: 720px) {
+    .data-table__row,
+    .data-table--cols4 .data-table__row {
+        grid-template-columns: 1fr;
+    }
+    .data-table__row > div { padding: 0.6rem 1.1rem; }
+    .data-table__row--head { display: none; }
+    .data-table__label {
+        font-size: 0.78rem !important;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+    }
+}
+
+/* ---------- Anchor — invisible deep-link target with nav-clearance
+   scroll offset. Use as <a id="..." class="anchor" aria-hidden="true">
+   immediately before any block you want a #fragment URL to land on. */
+.anchor {
+    display: block;
+    height: 1px;
+    margin-top: calc(var(--nav-height, 80px) * -1);
+    padding-top: var(--nav-height, 80px);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ---------- NDA list (used on /security) ---------- */
+.nda-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+.nda-list li {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-body);
+}
+.nda-list strong { color: var(--text-heading); }

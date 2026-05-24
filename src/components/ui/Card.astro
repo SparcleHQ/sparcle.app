@@ -1,3 +1,203 @@
-<article class="card">
-  <slot />
-</article>
+---
+/**
+ * Card — the one card primitive for the entire site.
+ *
+ * Variants tune visual emphasis only; padding, radius, border treatment, and
+ * hover are constant. Anything more bespoke (a price plan, a comparison cell)
+ * lives in its own component built on top of Card or as its own block —
+ * NOT as another generic "feature card" class.
+ *
+ * Variants:
+ *   default  text card (replaces .pillar, .arch-pillar, .sec-pillar, .sec-deploy, .feature-card)
+ *   stat     metric-forward (number + label + impact) — replaces .stat-card
+ *   proof    metric-forward, centered — replaces .proof-card
+ *   muted    subtle background (use inside section-stripe-a sections)
+ *
+ * Props:
+ *   variant       'default' | 'stat' | 'proof' | 'muted'
+ *   eyebrow       optional small caps label above title
+ *   title         card title (h3)
+ *   metric        large number/label for variant=stat | proof
+ *   icon          inline SVG string (or img URL) for default variant
+ *   href          if set, the whole card becomes a link
+ *   accent        color hint for left-border accent (default | success | warning | danger)
+ *   class         extra class
+ */
+export interface Props {
+  variant?: 'default' | 'stat' | 'proof' | 'muted';
+  eyebrow?: string;
+  title?: string;
+  metric?: string;
+  icon?: string;
+  href?: string;
+  accent?: 'default' | 'success' | 'warning' | 'danger';
+  class?: string;
+}
+const {
+  variant = 'default',
+  eyebrow,
+  title,
+  metric,
+  icon,
+  href,
+  accent = 'default',
+  class: className = '',
+} = Astro.props;
+
+const classes = `card card--${variant} accent-${accent} ${className}`;
+const Tag = href ? 'a' : 'article';
+---
+<Tag class={classes} href={href}>
+  {variant === 'stat' || variant === 'proof' ? (
+    <>
+      {metric && <div class="card__metric">{metric}</div>}
+      {title && <h3 class="card__title">{title}</h3>}
+      <div class="card__body"><slot /></div>
+    </>
+  ) : (
+    <>
+      {icon && <div class="card__icon" set:html={icon} />}
+      {eyebrow && <p class="card__eyebrow">{eyebrow}</p>}
+      {title && <h3 class="card__title">{title}</h3>}
+      <div class="card__body"><slot /></div>
+      {Astro.slots.has('footer') && (
+        <div class="card__footer"><slot name="footer" /></div>
+      )}
+    </>
+  )}
+</Tag>
+
+<style is:global>
+  .card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:hover {
+    border-color: var(--brand-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  /* Anchor variant: no underline; only the title carries the link affordance via color. */
+  a.card:hover .card__title {
+    color: var(--brand-primary);
+  }
+
+  /* Muted variant: lives inside section-stripe-a (body bg); the muted bg
+     becomes the card's surface so it visually recedes vs the stripe-b
+     contrast band. */
+  .card--muted {
+    background: var(--bg-muted);
+  }
+
+  .card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+  }
+  .card__icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .card__eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.5rem;
+  }
+
+  .card__title {
+    font-size: 1.1875rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.75rem;
+    line-height: 1.3;
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    transition: color var(--transition-fast);
+  }
+
+  .card__body {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-body);
+    flex-grow: 1;
+  }
+  .card__body p:last-child {
+    margin-bottom: 0;
+  }
+  .card__body a {
+    color: var(--brand-primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .card__body a:hover {
+    text-decoration: underline;
+  }
+
+  .card__footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  /* Stat / proof variants — metric-forward, centered. */
+  .card--stat,
+  .card--proof {
+    text-align: center;
+    align-items: center;
+  }
+  .card--proof {
+    padding: 2.25rem 1.75rem;
+  }
+  .card__metric {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: var(--brand-primary);
+    line-height: 1;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  .card--stat .card__title,
+  .card--proof .card__title {
+    font-size: 1rem;
+    text-align: center;
+  }
+  .card--stat .card__body,
+  .card--proof .card__body {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  /* Accent stripe — left border for status/category tagging. */
+  .card.accent-success { border-left: 3px solid var(--color-success-strong); }
+  .card.accent-warning { border-left: 3px solid var(--color-warning); }
+  .card.accent-danger  { border-left: 3px solid var(--color-danger-strong); }
+
+  @media (max-width: 768px) {
+    .card { padding: 1.5rem 1.25rem; }
+    .card--proof { padding: 1.75rem 1.25rem; }
+  }
+</style>

@@ -16,6 +16,30 @@ const proofs = [
   { metric: "Any LLM",    label: "Model-Agnostic by Design",      body: "Switch providers anytime — OpenAI, Anthropic, Ollama, or your own fine-tuned model. Employees see no change. Data posture doesn't move." },
   { metric: "BYOK",       label: "Zero Token Markup",             body: "Bring your own API keys; burn down your existing cloud compute commits without per-token surcharge. Eliminate context-switching across your stack and reclaim productive time." },
 ];
+
+const walls = [
+  { num: "01", title: "Ranking is a vendor's black box.",       body: "You cannot tell why the wrong document came back. Your compliance team has been told \"we'll add it to the backlog\" for two years." },
+  { num: "02", title: "Your data leaves your perimeter.",        body: "Sensitive documents get indexed in someone else's cloud and ranked by someone else's algorithm. Your CISO has no audit chain to point to." },
+  { num: "03", title: "Your teams cannot find what they need.",  body: "Hundreds of tabs open. The right answer is in one of them. Nobody finds it when they need it. Decisions get made on what is already stale." },
+];
+
+const governance = [
+  { num: "01", title: "Who sees what.",                 body: "Per-role data access enforced at the database, not the answer. Identity reads first; documents read second." },
+  { num: "02", title: "Which LLM each role uses.",      body: "Local for sensitive workloads, hosted for the rest. Switch any time. Your model, your boundary." },
+  { num: "03", title: "Which MCP tools are allowed.",   body: "Allowlist per role, per integration. Engineering can call GitHub; Finance cannot. Finance can call NetSuite; Engineering cannot." },
+  { num: "04", title: "Which agents can run.",          body: "Sub-agent gating per role and per scope. SOC triage stays inside Security. Forecast stays inside Finance." },
+  { num: "05", title: "Which sources are in bounds.",   body: "Source-level allowlisting per audience. Contractors see project corpus, not HR comp data." },
+  { num: "06", title: "Every change recorded.",         body: "Policy updates land in the same tamper-evident audit chain. The auditor sees who changed what and when." },
+];
+
+const outcomes = [
+  { metric: "Hours",     label: "Time reclaimed",              body: "Launcher utilities save hours per person per week before AI fires. The product earns its keep before the LLM bill starts." },
+  { metric: "Prevented", label: "Policy violations stopped",   body: "ACL pre-filter blocks cross-role exposure at the database. Not detected after; prevented before." },
+  { metric: "Hidden",    label: "PII never leaves",            body: "Private information masked at the LLM boundary with deterministic tokens that survive a full conversation." },
+  { metric: "Bounded",   label: "Spend contained",             body: "20+ utilities and 20+ scopes cost zero tokens. AI fires only when reasoning is genuinely needed." },
+  { metric: "Enforced",  label: "Compliance met",              body: "Role, model, and source governance enforced automatically. Your rules become your guardrails." },
+  { metric: "Sealed",    label: "Audit evidence preserved",    body: "Tamper-evident Merkle chain ready when the regulator calls. No \"trust our SOC report.\"" },
+];
 ---
 <BaseLayout
   title="Why Sparcle | Mission, Proof & Enterprise Metrics"
@@ -68,10 +92,25 @@ const proofs = [
     </PageSection>
 
     <PageSection
+      eyebrow="What we solve"
+      title="The three walls every enterprise hits."
+      lede="The pain is real. The cost is hidden in delayed decisions, wrong answers, and policy violations nobody saw coming."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {walls.map((w) => (
+          <Card variant="default" eyebrow={`Wall ${w.num}`} title={w.title}>
+            {w.body}
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
       eyebrow="Built &amp; Deployed"
       title="Real product. Real metrics."
       lede="Production-grade systems deployed today. These numbers reflect running code, real integrations, and filed patent applications."
-      stripe="a"
+      stripe="b"
     >
       <CardGrid cols={3}>
         {proofs.map((p) => (
@@ -89,6 +128,36 @@ const proofs = [
           Explore our research
         </a>
       </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Governance plane"
+      title="Your organization stays in control."
+      lede="Define your business rules once. Bolt and Aeira enforce them across every query, every agent, every model, every source."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {governance.map((g) => (
+          <Card variant="default" eyebrow={`Dimension ${g.num}`} title={g.title}>
+            {g.body}
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="The outcome"
+      title="What buyers, auditors, and your team actually feel."
+      lede="The launcher pays for itself before AI fires. The trust layer keeps the answer defensible. The audit chain proves it."
+      stripe="b"
+    >
+      <CardGrid cols={3}>
+        {outcomes.map((o) => (
+          <Card variant="proof" metric={o.metric} title={o.label}>
+            {o.body}
+          </Card>
+        ))}
+      </CardGrid>
     </PageSection>
 
     <CTAStrip

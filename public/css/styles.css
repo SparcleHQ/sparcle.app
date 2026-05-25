@@ -2292,10 +2292,17 @@ h3 {
 }
 
 .hero-modal-video {
-    max-width: 90vw;
+    /* Lock to 16:9 with explicit width so the element renders at the
+       final size from the instant the modal opens — before video
+       metadata loads. Prevents the "small first, big after" snap that
+       happens when only max-width/max-height are set. */
+    width: min(90vw, calc(85vh * 16 / 9));
+    aspect-ratio: 16 / 9;
     max-height: 85vh;
+    background: #000;
     border-radius: var(--radius-lg);
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+    object-fit: contain;
 }
 
 /* Dedicated page sections — extra top padding for nav clearance */

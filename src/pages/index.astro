@@ -60,12 +60,12 @@ const proofs = [
           </div>
 
           <div class="hero-video-full">
-            <!-- Hero video — Bolt + Aeira combined story (1:43). Bigger than the
+            <!-- Hero video: Bolt + Aeira combined story (1:40). Bigger than the
                  two-tile row below to signal "start here." -->
             <div class="hero-video-hero" id="heroVideoHero">
-              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-eera-90s.mp4" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
+              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-aeira-90s.mp4" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
                 <video class="hero-preview-video" muted playsinline preload="metadata" loop autoplay>
-                  <source src="media/bolt-eera-90s.mp4" type="video/mp4">
+                  <source src="media/bolt-aeira-90s.mp4" type="video/mp4">
                 </video>
                 <div class="video-controls-overlay video-preview-overlay">
                   <div class="video-play-btn" title="Click to watch with audio">
@@ -77,7 +77,7 @@ const proofs = [
                   </div>
                 </div>
                 <div class="video-card-label">
-                  <span class="video-card-label__eyebrow">Start here · 1:43</span>
+                  <span class="video-card-label__eyebrow">Start here · 1:40</span>
                   <span class="video-card-label__title">Bolt + Aeira: the full story</span>
                   <span class="video-card-label__sub">Why your AI lives in your network, not theirs</span>
                 </div>
@@ -120,7 +120,7 @@ const proofs = [
                   </div>
                 </div>
                 <div class="video-card-label">
-                  <span class="video-card-label__eyebrow">Vision · 1:17</span>
+                  <span class="video-card-label__eyebrow">Vision · 1:16</span>
                   <span class="video-card-label__title">How Bolt</span>
                   <span class="video-card-label__sub">Pure intelligent execution</span>
                 </div>
@@ -352,13 +352,18 @@ const proofs = [
   <script is:inline>
     (function () {
       var grid = document.getElementById('heroVideoGrid');
+      // Cards in DOM order: [0] hero (Bolt+Aeira), [1] Why Bolt (walkthrough),
+      // [2] How Bolt (pure-intelligent-execution). Pre-restructure code
+      // assumed exactly 2 cards; that assumption is gone now.
       var cards = document.querySelectorAll('.hero-video-card');
-      var leftCard = cards[0] || null;
-      var rightCard = cards[1] || null;
+      var heroCard = document.querySelector('.hero-video-card--hero') || null;
+      var gridCards = grid ? grid.querySelectorAll('.hero-video-card') : [];
+      var leftCard = gridCards[0] || null;
+      var rightCard = gridCards[1] || null;
       var modal = document.getElementById('heroVideoModal');
       var modalVideo = document.getElementById('heroModalVideo');
       var closeBtn = document.getElementById('heroModalClose');
-      if (!grid || !cards.length || !modal || !modalVideo) return;
+      if (!cards.length || !modal || !modalVideo) return;
 
       function playLeftPreview() {
         if (!leftCard) return;
@@ -417,6 +422,7 @@ const proofs = [
 
       function slugToCard(slug) {
         if (!slug) return null;
+        if (slug === 'hero' || slug === 'start-here' || slug === 'bolt-aeira' || slug === 'bolt-and-aeira') return heroCard;
         if (slug === 'left' || slug === 'why-bolt' || slug === 'walkthrough' || slug === 'bolt-walkthrough' || slug === 'demo') return leftCard;
         if (slug === 'right' || slug === 'how-bolt' || slug === 'pure' || slug === 'intelligent' || slug === 'bolt-pure-intelligent-execution') return rightCard;
         return null;
@@ -452,7 +458,10 @@ const proofs = [
       }
       cards.forEach(function (c) {
         var src = c.getAttribute('data-video-src');
-        var slug = c === leftCard ? 'why-bolt' : 'how-bolt';
+        var slug = c === heroCard ? 'bolt-aeira'
+                 : c === leftCard ? 'why-bolt'
+                 : c === rightCard ? 'how-bolt'
+                 : '';
         c.addEventListener('click', function () { openModal(src, slug, true); });
         c.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(src, slug, true); }
@@ -466,7 +475,9 @@ const proofs = [
       var deepCard = slugToCard(deep);
       if (deepCard) {
         var deepSrc = deepCard.getAttribute('data-video-src');
-        var norm = deepCard === leftCard ? 'why-bolt' : 'how-bolt';
+        var norm = deepCard === heroCard ? 'bolt-aeira'
+                 : deepCard === leftCard ? 'why-bolt'
+                 : 'how-bolt';
         openModal(deepSrc, norm, true);
       }
       if (modal.style.display !== 'flex') playLeftPreview();

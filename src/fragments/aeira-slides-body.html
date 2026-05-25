@@ -675,4 +675,139 @@
         setTimeout(apPlay, 600);
     }
     // ── END AUTOPLAY ──────────────────────────────────────────────────────
+
+    // ── NARRATION AUDIO (floating play button) ────────────────────────────
+    // 88-second voiceover of the Aeira script. Plays in the background
+    // while slides continue advancing (or while the deck is iframed in a
+    // product page). Browsers block auto-play with sound, so the button
+    // is always present and the user clicks once to enable.
+    (function () {
+        const audio = document.createElement('audio');
+        audio.preload = 'metadata';
+        // Source order: opus first (smaller, modern browsers); mp3
+        // fallback for older Safari and any browser without opus.
+        const sOpus = document.createElement('source');
+        sOpus.src = '/media/aeira-script.opus';
+        sOpus.type = 'audio/ogg; codecs=opus';
+        const sMp3 = document.createElement('source');
+        sMp3.src = '/media/aeira-script.mp3';
+        sMp3.type = 'audio/mpeg';
+        audio.appendChild(sOpus);
+        audio.appendChild(sMp3);
+        document.body.appendChild(audio);
+
+        const btn = document.createElement('button');
+        btn.id = 'narration-btn';
+        btn.type = 'button';
+        btn.title = 'Play narration (voiceover continues across slides)';
+        btn.setAttribute('aria-label', 'Play narration');
+        btn.innerHTML = `
+            <svg class="narr-icon-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <svg class="narr-icon-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <span class="narr-label">Listen</span>
+        `;
+        Object.assign(btn.style, {
+            position: 'fixed',
+            top: '1.25rem',
+            left: '50%',
+            transform: 'translate(-50%, -6px)',
+            zIndex: '9999',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.55rem 1rem 0.55rem 0.75rem',
+            borderRadius: '999px',
+            border: '1px solid rgba(255,255,255,0.18)',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.95), rgba(79,70,229,0.95))',
+            color: '#ffffff',
+            fontFamily: 'inherit',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(15,23,42,0.25), 0 2px 6px rgba(15,23,42,0.15)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            opacity: '0',
+            pointerEvents: 'none',
+            transition: 'opacity 0.2s ease, transform 0.2s ease, box-shadow 0.15s ease',
+        });
+
+        // Reveal logic: button appears when the cursor enters the top
+        // 80px of the viewport, hides ~600ms after the cursor leaves
+        // that band. Tracked via document-level mousemove so the
+        // detection never intercepts clicks on content below.
+        const TOP_BAND = 80;
+        let revealTimer = null;
+        let inTopBand = false;
+        function showBtn() {
+            if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; }
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+            btn.style.transform = 'translate(-50%, 0)';
+        }
+        function scheduleHide(delay) {
+            if (revealTimer) clearTimeout(revealTimer);
+            // Keep the button visible whenever audio is playing —
+            // users need to be able to pause without re-hunting for it.
+            if (!audio.paused) return;
+            revealTimer = setTimeout(() => {
+                btn.style.opacity = '0';
+                btn.style.pointerEvents = 'none';
+                btn.style.transform = 'translate(-50%, -6px)';
+            }, delay);
+        }
+        document.addEventListener('mousemove', (e) => {
+            const nowInBand = e.clientY <= TOP_BAND;
+            if (nowInBand && !inTopBand) {
+                inTopBand = true;
+                showBtn();
+            } else if (!nowInBand && inTopBand) {
+                inTopBand = false;
+                scheduleHide(600);
+            }
+        });
+        // Touch devices: tap near the top to reveal.
+        document.addEventListener('touchstart', (e) => {
+            const t = e.touches && e.touches[0];
+            if (t && t.clientY <= TOP_BAND) showBtn();
+        }, { passive: true });
+        btn.addEventListener('mouseenter', showBtn);
+        btn.addEventListener('mouseleave', () => scheduleHide(600));
+
+        btn.addEventListener('mousedown', () => {
+            btn.style.boxShadow = '0 14px 36px rgba(15,23,42,0.3), 0 4px 8px rgba(15,23,42,0.18)';
+        });
+        document.body.appendChild(btn);
+
+        const iconPlay = btn.querySelector('.narr-icon-play');
+        const iconPause = btn.querySelector('.narr-icon-pause');
+        const label = btn.querySelector('.narr-label');
+
+        function setUiPlaying(on) {
+            iconPlay.style.display = on ? 'none' : 'inline-block';
+            iconPause.style.display = on ? 'inline-block' : 'none';
+            label.textContent = on ? 'Pause narration' : 'Listen';
+        }
+
+        btn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().then(() => setUiPlaying(true)).catch(() => {});
+            } else {
+                audio.pause();
+                setUiPlaying(false);
+            }
+        });
+        audio.addEventListener('ended', () => setUiPlaying(false));
+        audio.addEventListener('pause', () => setUiPlaying(false));
+        audio.addEventListener('play', () => setUiPlaying(true));
+
+        // Hide narration button when the slide deck is being printed.
+        const mql = window.matchMedia && window.matchMedia('print');
+        if (mql && mql.addEventListener) {
+            mql.addEventListener('change', () => {
+                btn.style.display = mql.matches ? 'none' : 'inline-flex';
+            });
+        }
+    })();
+    // ── END NARRATION AUDIO ───────────────────────────────────────────────
 </script>

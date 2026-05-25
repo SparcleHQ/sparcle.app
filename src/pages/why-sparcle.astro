@@ -51,7 +51,21 @@ const outcomes = [
       eyebrow="Our Mission"
       title="Reclaim time. Unlock potential."
       lede="Sparcle exists for one reason: to give every organization the freedom to use AI on their own terms — without vendor lock-in, without compromising data privacy, and without surrendering control of their intellectual property."
-    />
+    >
+      <video
+        slot="media"
+        class="why-hero-video"
+        controls
+        playsinline
+        preload="metadata"
+        poster="/images/aeira-logo.svg"
+        aria-label="Bolt and Aeira. Intelligent execution. Defensible answers. 90-second overview."
+      >
+        <source src="/media/bolt-eera-90s-1080p.mp4" type="video/mp4" />
+        <source src="/media/bolt-eera-90s.mp4" type="video/mp4" />
+        Your browser does not support embedded video.
+      </video>
+    </Hero>
 
     <PageSection stripe="b" width="content">
       <BlockQuote
@@ -175,3 +189,18 @@ const outcomes = [
     </CTAStrip>
   </main>
 </BaseLayout>
+
+<style>
+  /* Hero video frame: 16:9, capped width, soft shadow + rounded corners
+     so it visually anchors the mission hero without dominating it. */
+  .why-hero-video {
+    display: block;
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-xl, 16px);
+    background: #0f172a;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08);
+  }
+</style>

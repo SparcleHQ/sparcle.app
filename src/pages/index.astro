@@ -60,19 +60,49 @@ const proofs = [
           </div>
 
           <div class="hero-video-full">
-            <div class="hero-video-grid" id="heroVideoGrid">
-              <div class="hero-video-card" data-video-src="media/Bolt-Walkthrough.mp4" data-video-title="Bolt Walkthrough" role="button" tabindex="0" aria-label="Open Bolt Walkthrough with audio">
+            <!-- Hero video — Bolt + Aeira combined story (1:43). Bigger than the
+                 two-tile row below to signal "start here." -->
+            <div class="hero-video-hero" id="heroVideoHero">
+              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-eera-90s.mp4" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
                 <video class="hero-preview-video" muted playsinline preload="metadata" loop autoplay>
-                  <source src="media/Bolt-Walkthrough.mp4" type="video/mp4">
+                  <source src="media/bolt-eera-90s.mp4" type="video/mp4">
                 </video>
                 <div class="video-controls-overlay video-preview-overlay">
-                  <div class="video-play-btn" title="Preview on hover, click for audio">
+                  <div class="video-play-btn" title="Click to watch with audio">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polygon points="6,4 6,20 16,12" fill="white" stroke="none" />
                       <path d="M18 8.5c1.2 1 2 2.2 2 3.5s-.8 2.5-2 3.5" opacity="0.7" />
                       <path d="M20 6c2 1.5 3 3.5 3 6s-1 4.5-3 6" opacity="0.4" />
                     </svg>
                   </div>
+                </div>
+                <div class="video-card-label">
+                  <span class="video-card-label__eyebrow">Start here · 1:43</span>
+                  <span class="video-card-label__title">Bolt + Aeira: the full story</span>
+                  <span class="video-card-label__sub">Why your AI lives in your network, not theirs</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Supporting row — product walkthrough + brand video. -->
+            <div class="hero-video-grid" id="heroVideoGrid">
+              <div class="hero-video-card" data-video-src="media/Bolt-Walkthrough.mp4" data-video-title="Bolt Walkthrough" role="button" tabindex="0" aria-label="Open Bolt Walkthrough with audio">
+                <video class="hero-preview-video" muted playsinline preload="metadata" loop>
+                  <source src="media/Bolt-Walkthrough.mp4" type="video/mp4">
+                </video>
+                <div class="video-controls-overlay video-preview-overlay">
+                  <div class="video-play-btn" title="Click to watch with audio">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="6,4 6,20 16,12" fill="white" stroke="none" />
+                      <path d="M18 8.5c1.2 1 2 2.2 2 3.5s-.8 2.5-2 3.5" opacity="0.7" />
+                      <path d="M20 6c2 1.5 3 3.5 3 6s-1 4.5-3 6" opacity="0.4" />
+                    </svg>
+                  </div>
+                </div>
+                <div class="video-card-label">
+                  <span class="video-card-label__eyebrow">Product · 1:27</span>
+                  <span class="video-card-label__title">Why Bolt</span>
+                  <span class="video-card-label__sub">See it in action</span>
                 </div>
               </div>
 
@@ -81,13 +111,18 @@ const proofs = [
                   <source src="media/Bolt-pure-intelligent-execution.mp4" type="video/mp4">
                 </video>
                 <div class="video-controls-overlay video-preview-overlay">
-                  <div class="video-play-btn" title="Preview on hover, click for audio">
+                  <div class="video-play-btn" title="Click to watch with audio">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polygon points="6,4 6,20 16,12" fill="white" stroke="none" />
                       <path d="M18 8.5c1.2 1 2 2.2 2 3.5s-.8 2.5-2 3.5" opacity="0.7" />
                       <path d="M20 6c2 1.5 3 3.5 3 6s-1 4.5-3 6" opacity="0.4" />
                     </svg>
                   </div>
+                </div>
+                <div class="video-card-label">
+                  <span class="video-card-label__eyebrow">Vision · 1:17</span>
+                  <span class="video-card-label__title">How Bolt</span>
+                  <span class="video-card-label__sub">Pure intelligent execution</span>
                 </div>
               </div>
             </div>

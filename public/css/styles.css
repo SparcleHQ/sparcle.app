@@ -1015,15 +1015,9 @@ section {
     border-top: 1px solid var(--border-default);
 }
 
-.problem-stats-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    margin-bottom: 4rem;
-}
-.problem-stats-grid > .stat-card {
-    flex: 1 1 240px;
-}
+/* Legacy .problem-stats-grid removed — no markup uses it (migrated pages
+   use <CardGrid cols=4>). Kept .stat-card below in case any LegacyPage
+   fragment still renders it. */
 
 .stat-card {
     background: var(--bg-surface);
@@ -1093,15 +1087,8 @@ section {
     background: var(--bg-body);
 }
 
-.solution-pillars {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    align-items: stretch;
-}
-.solution-pillars > .pillar {
-    flex: 1 1 240px;
-}
+/* Legacy .solution-pillars removed — no markup uses it. .pillar kept
+   below for any legacy fragments. */
 
 .pillar {
     position: relative;
@@ -1163,11 +1150,7 @@ section {
     border-bottom: 1px solid var(--border-default);
 }
 
-.products-showcase {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-}
+/* Legacy .products-showcase removed — no markup uses it. */
 
 .product-main,
 .product-secondary {
@@ -1292,14 +1275,8 @@ section {
     background: var(--bg-body);
 }
 
-.proof-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-}
-.proof-grid > .proof-card {
-    flex: 1 1 280px;
-}
+/* Legacy .proof-grid removed — no markup uses it (pages now use
+   <CardGrid cols=3>). .proof-card retained for any LegacyPage. */
 
 .proof-card {
     text-align: center;
@@ -1340,78 +1317,11 @@ section {
     margin: 0;
 }
 
-/* ==================================================================================================
-   CTA SECTION
-   ================================================================================================== */
-.section-cta {
-    background: linear-gradient(135deg, var(--blue-700) 0%, var(--blue-600) 100%);
-    position: relative;
-    overflow: hidden;
-}
-
-.section-cta::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 50%, var(--bg-surface-glass) 0%, var(--bg-body) 70%);
-}
-
-.cta-box {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.cta-box h2 {
-    color: white;
-    margin-bottom: 1.5rem;
-}
-
-.cta-box p {
-    font-size: 1.125rem;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.8;
-    margin-bottom: 2.5rem;
-}
-
-.cta-actions {
-    margin-bottom: 2rem;
-}
-
-.section-cta .btn-primary {
-    background: white;
-    color: var(--blue-600);
-    box-shadow: var(--shadow-lg);
-}
-
-.section-cta .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-xl);
-}
-
-.cta-resources {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.cta-resources a {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    color: rgba(255, 255, 255, 0.85);
-    transition: color var(--transition-fast);
-}
-
-.cta-resources a:hover {
-    color: white;
-    text-decoration: underline;
-}
+/* Legacy .section-cta / .cta-box / .cta-actions / .cta-resources block
+   removed — superseded by .cta-strip--band primitive. No source uses
+   any of these classes anymore. Per the lesson from the FAQ accordion
+   bug, leaving such orphan rules around creates silent cascade landmines
+   the next time a class name happens to collide. */
 
 /* ==================================================================================================
    FOOTER
@@ -2205,10 +2115,7 @@ h3 {
     text-decoration: none;
 }
 
-/* Compact proof grid (3 columns on homepage) — inherits flex from .proof-grid */
-.proof-grid--compact > .proof-card {
-    flex: 1 1 220px;
-}
+/* .proof-grid--compact removed — orphan; no markup uses it. */
 
 /* Platform section product grid */
 .platform-grid {
@@ -2328,21 +2235,7 @@ h3 {
     flex-wrap: wrap;
 }
 
-/* Page prose (replaces inline max-width/font-size on dedicated pages) */
-.page-prose {
-    margin: 0 auto 2rem;
-}
-
-.page-prose p {
-    text-align: left;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: var(--text-body);
-}
-
-.page-prose p+p {
-    margin-top: 1rem;
-}
+/* Legacy .page-prose removed — superseded by the Prose primitive. */
 
 /* Spaced section header (sub-section within a page) */
 .section-header--spaced {
@@ -2684,78 +2577,12 @@ h3 {
     }
 }
 
-/* ── FAQ Accordion ── */
-.offering-faq {
-    padding: 3rem 0 5rem;
-}
-
-.faq-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.faq-card {
-    flex: 1 1 360px;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-xl);
-    background: var(--bg-surface);
-    overflow: hidden;
-    transition: border-color var(--transition-fast),
-        box-shadow var(--transition-fast);
-}
-
-.faq-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: var(--shadow-md);
-}
-
-.faq-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 1.15rem 1.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-heading);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    gap: 0.75rem;
-    font-family: var(--font-sans);
-}
-
-.faq-chevron {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    transition: transform var(--transition-fast);
-}
-
-.faq-card.open .faq-chevron {
-    transform: rotate(180deg);
-}
-
-.faq-answer {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height var(--transition-base);
-}
-
-.faq-card.open .faq-answer {
-    max-height: 300px;
-}
-
-.faq-answer p {
-    padding: 0 1.25rem 1.15rem;
-    margin: 0;
-    font-size: 0.93rem;
-    line-height: 1.65;
-    color: var(--text-body);
-}
+/* Legacy .faq-grid / .faq-card / .faq-toggle / .faq-chevron / .faq-answer
+   block removed — superseded by the .faq-accordion + native <details>
+   pattern below. The deleted .faq-answer { max-height: 0 } rule was
+   silently clamping the new accordion's answers to ~1 line because the
+   selectors share the same class name and the unlock rule was tied to
+   .faq-card.open (a markup pattern no page uses anymore). */
 
 /* ── Product page responsive ── */
 @media (max-width: 900px) {

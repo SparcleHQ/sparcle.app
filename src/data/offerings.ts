@@ -72,7 +72,7 @@ export interface PricingPageContent {
 export const boltProductContent: ProductPageContent = {
   title: "Bolt — Patent-Pending Sovereign Enterprise AI Agent (BYO LLM) | Sparcle",
   description:
-    "Bolt is the enterprise AI agent runtime with governance built in — durable agents, BYO LLM, PII masking at the LLM boundary, multi-layer security pipeline, Authority Policy SDK, MCP-native. For any enterprise; deployable for the most regulated (on-prem, VPC, fully air-gapped).",
+    "Bolt is the enterprise AI agent runtime with governance built in — durable agents, BYO LLM, PII masking at the LLM boundary, multi-layer security pipeline, Authority Policy SDK, MCP-native. For regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI (on-prem, VPC, fully air-gapped).",
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
   productKicker: "Enterprise Agent Platform",
@@ -93,7 +93,7 @@ export const boltProductContent: ProductPageContent = {
     "<strong>Zero token markup</strong> — bring your own API keys; burn down your existing cloud commits without per-token surcharge",
     "<strong>Reclaim productive time</strong> — eliminate context-switching and tool-hopping with one agent across your stack",
     "<strong>BYO LLM</strong> — OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model. Hot-swappable.",
-    "<strong>Designed for regulated industries</strong> — HIPAA, GDPR, DPDPA, sovereign-AI workflows; architecture built for regulated environments from day one",
+    "<strong>For regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI</strong> — deployable for HIPAA, GDPR, DPDPA, SOX, ITAR; same architecture works for any enterprise that wants its IP and data inside the firewall",
     "<strong>Open MCP integrations</strong> — connect to your enterprise systems via Model Context Protocol; no vendor lock-in",
     "<strong>Annual contracts, 25-seat minimum</strong> — Bolt Absolute starts at $30/seat/month. Founding Customer pricing available through 2026.",
   ],
@@ -203,13 +203,13 @@ export const boltProductContent: ProductPageContent = {
 export const aeiraProductContent: ProductPageContent = {
   title: "Aeira — Sovereign Enterprise Data Plane with ACL-Aware Hybrid Search | Sparcle",
   description:
-    "Aeira is the 100% self-hosted enterprise data plane with governance built in. 4-axis ACL, per-tenant KMS, crypto-shred erasure for GDPR/HIPAA, weighted RRF hybrid search. For any enterprise; air-gap deployable for the most regulated (defense, finance, healthcare, federal).",
+    "Aeira is the 100% self-hosted enterprise data plane with governance built in. 4-axis ACL, per-tenant KMS, crypto-shred erasure for GDPR/HIPAA, weighted RRF hybrid search. For regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI (on-prem, VPC, fully air-gapped).",
   canonical: "https://sparcle.app/products/aeira.html",
   productName: "Aeira",
-  productKicker: "Compliance-Grade Search · Regulated Industries",
+  productKicker: "Sovereign Enterprise Data Plane",
   productHeadline: "The data plane your CISO will actually approve.",
   productIntro:
-    "Aeira is the 100% self-hosted enterprise data plane for regulated industries — defense, finance, healthcare, federal. Identity-bound search, provable erasure for GDPR / HIPAA obligations, audit-trail responses your compliance team can actually point to. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped — your data never leaves your perimeter. Architecture details available under NDA.",
+    "Aeira is the 100% self-hosted enterprise data plane for regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI. Identity-bound search, provable erasure for GDPR / HIPAA obligations, audit-trail responses your compliance team can actually point to. Especially relevant for defense, finance, healthcare, and federal — same architecture works for any enterprise that wants its data inside the firewall. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped. Architecture details available under NDA.",
   primaryCtaLabel: "Design Aeira Deployment",
   primaryCtaHref: "#contact:Aeira Deployment Design",
   secondaryCtaLabel: "Pricing & Tiers",
@@ -223,7 +223,7 @@ export const aeiraProductContent: ProductPageContent = {
     "<strong>Provable erasure for GDPR / HIPAA</strong> — cryptographically destroy the data, not just delete the row; auditor-acceptable proof",
     "<strong>100% self-hosted</strong> — AWS, Azure, GCP, on-prem, or fully air-gapped; data never leaves your perimeter",
     "<strong>Audit-trail responses</strong> — every result carries the why-filtered context regulators ask for during reviews",
-    "<strong>Standalone or with Bolt</strong> — buy Aeira alone for ACL-aware regulated search, or get Catalog free with every Bolt plan",
+    "<strong>Standalone or with Bolt</strong> — buy Aeira alone for ACL-aware enterprise search, or get Catalog free with every Bolt plan",
     "<strong>Stable API across all tiers</strong> — start with Catalog, scale to Federated without integration rewrites",
     "<strong>License-validated</strong> — Catalog (free with Bolt) → Dynamic ($999/mo) → Enhanced ($4,999/mo) → Federated (from $500K/yr)",
   ],

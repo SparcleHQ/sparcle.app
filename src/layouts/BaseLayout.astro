@@ -10,7 +10,7 @@ interface Props {
 
 const {
   title,
-  description = "Sparcle - Unified intelligence for the enterprise.",
+  description = "Sparcle — Sovereign enterprise AI with governance built in. BYO LLM, runs inside your perimeter, data sovereignty by design.",
   canonical,
   ogTitle = title,
   ogDescription = description,
@@ -24,7 +24,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 // public/js/shared-nav.js — Cloudflare's edge cache otherwise serves the
 // stale file for up to 24h (cache-control: max-age=86400). The dashboard
 // cache-purge works too, but bumping this is the zero-click path.
-const sharedNavVersion = "20260526b";
+const sharedNavVersion = "20260526c";
 ---
 
 <!doctype html>
@@ -83,7 +83,7 @@ const sharedNavVersion = "20260526b";
         "legalName": "Sparcle, LLC",
         "url": "https://sparcle.app",
         "logo": "https://sparcle.app/images/bolt-logo.svg",
-        "description": "Sparcle builds sovereign AI infrastructure for regulated enterprises — deploy on-prem, bring your own LLM, protect your IP and data at every layer.",
+        "description": "Sparcle builds sovereign AI infrastructure for any enterprise that takes governance and data sovereignty seriously — deploy on-prem or VPC, bring your own LLM, protect your IP and data at every layer. Deployable for the most regulated industries (HIPAA, GDPR, DPDPA, SOX, ITAR).",
         "foundingDate": "2024",
         "email": "bolt@sparcle.app",
         "sameAs": [

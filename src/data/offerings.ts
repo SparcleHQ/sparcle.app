@@ -70,9 +70,9 @@ export interface PricingPageContent {
 }
 
 export const boltProductContent: ProductPageContent = {
-  title: "Bolt — Patent-pending Enterprise Agent Runtime | Sparcle",
+  title: "Bolt — Patent-Pending Sovereign Enterprise AI Agent (BYO LLM) | Sparcle",
   description:
-    "Bolt is the patent-pending enterprise agent runtime — durable agents, MCP-native architecture, multi-tier caching, multi-layer security, priority scoring engine, and adaptive overlay UI. Deployed inside your perimeter.",
+    "Bolt is the enterprise AI agent runtime with governance built in — durable agents, BYO LLM, PII masking at the LLM boundary, multi-layer security pipeline, Authority Policy SDK, MCP-native. For any enterprise; deployable for the most regulated (on-prem, VPC, fully air-gapped).",
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
   productKicker: "Enterprise Agent Platform",
@@ -201,9 +201,9 @@ export const boltProductContent: ProductPageContent = {
 };
 
 export const aeiraProductContent: ProductPageContent = {
-  title: "Aeira — Air-Gap-Ready Hybrid Search for Regulated Industries | Sparcle",
+  title: "Aeira — Sovereign Enterprise Data Plane with ACL-Aware Hybrid Search | Sparcle",
   description:
-    "Aeira is the 100% self-hosted enterprise data plane for regulated industries. 4-level ACL, KMS-enveloped storage with crypto-shred for GDPR/HIPAA erasure, weighted RRF hybrid search, license-validated tiers. Defense, finance, healthcare, federal.",
+    "Aeira is the 100% self-hosted enterprise data plane with governance built in. 4-axis ACL, per-tenant KMS, crypto-shred erasure for GDPR/HIPAA, weighted RRF hybrid search. For any enterprise; air-gap deployable for the most regulated (defense, finance, healthcare, federal).",
   canonical: "https://sparcle.app/products/aeira.html",
   productName: "Aeira",
   productKicker: "Compliance-Grade Search · Regulated Industries",

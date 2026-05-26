@@ -66,7 +66,6 @@ Aeira is a sovereign enterprise knowledge index. It indexes internal documents, 
 - Why Sparcle: https://sparcle.app/why-sparcle
 - Pricing: https://sparcle.app/pricing
 - Founding Customers Program: https://sparcle.app/pricing#founding-customers
-- Early Partners: https://sparcle.app/early-partners
 - Download (Bolt Personal — free, BYOK): https://sparcle.app/download
 - Careers: https://sparcle.app/careers
 - Privacy Policy: https://sparcle.app/privacy

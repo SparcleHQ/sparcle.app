@@ -25,6 +25,13 @@
 /js/*
   Cache-Control: public, max-age=300, must-revalidate
 
+# /media/* (mp4, mp3, opus, pdf) — same posture as CSS/JS. Cloudflare's
+# default was 4h, which wedged a stale hero video after a re-render
+# despite the bytes shipping correctly. 5 min + ?v= cache-bust on the
+# <video src> URLs gives us instant updates without disabling cache.
+/media/*
+  Cache-Control: public, max-age=300, must-revalidate
+
 # Never cache the contact endpoint
 /api/contact
   Cache-Control: no-store

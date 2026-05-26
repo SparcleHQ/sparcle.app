@@ -1,0 +1,64 @@
+schema_version: 1
+id: workday
+chip: =workday
+title: Workday
+icon: users
+description: Search Workday workers.
+emits: Person
+auth_profile_ref: workday_user
+
+requires:
+  - mcp: workday
+    version: ^1
+    tools: ["search_workers"]
+    scopes: ["worker.read"]
+
+scopes:
+  - id: search
+    label: Search
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: workday
+          tool: search_workers
+          args:
+        query: '{{query}}'
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /workers
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: name
+  list_fields:
+    - id
+    - name
+    - title
+    - department
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

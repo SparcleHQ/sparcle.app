@@ -1,0 +1,63 @@
+schema_version: 1
+id: trello
+chip: =trello
+title: Trello
+icon: trello
+description: My open cards.
+emits: Issue
+auth_profile_ref: trello_user
+
+requires:
+  - mcp: trello
+    version: ^1
+    tools: ["my_cards"]
+    scopes: ["read"]
+
+scopes:
+  - id: my_cards
+    label: My cards
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: trello
+          tool: my_cards
+          args:
+        filter: open
+        out: r
+      - emit: r
+        path: /cards
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: name
+  list_fields:
+    - id
+    - name
+    - board_name
+    - list_name
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

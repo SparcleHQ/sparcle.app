@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "./scripts/sync-docs.sh",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

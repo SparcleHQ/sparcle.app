@@ -1,0 +1,65 @@
+schema_version: 1
+id: freshdesk
+chip: =freshdesk
+title: Freshdesk
+icon: life-buoy
+description: My assigned tickets.
+emits: Issue
+auth_profile_ref: freshdesk_user
+
+requires:
+  - mcp: freshdesk
+    version: ^1
+    tools: ["my_tickets"]
+    scopes: ["tickets.read"]
+
+scopes:
+  - id: my_open
+    label: My open tickets
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: freshdesk
+          tool: my_tickets
+          args:
+        status: open
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /tickets
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: subject
+  list_fields:
+    - id
+    - subject
+    - status
+    - priority
+    - requester_name
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

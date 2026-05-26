@@ -1,0 +1,63 @@
+schema_version: 1
+id: monday
+chip: =monday
+title: Monday
+icon: trello
+description: Items from boards I follow.
+emits: Issue
+auth_profile_ref: monday_user
+
+requires:
+  - mcp: monday
+    version: ^1
+    tools: ["my_items"]
+    scopes: ["boards:read"]
+
+scopes:
+  - id: my_items
+    label: My items
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: monday
+          tool: my_items
+          args:
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /items
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: name
+  list_fields:
+    - id
+    - name
+    - board_name
+    - state
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

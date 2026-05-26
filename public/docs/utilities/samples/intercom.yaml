@@ -1,0 +1,64 @@
+schema_version: 1
+id: intercom
+chip: =intercom
+title: Intercom
+icon: message-square
+description: My open conversations.
+emits: Document
+auth_profile_ref: intercom_user
+
+requires:
+  - mcp: intercom
+    version: ^1
+    tools: ["my_conversations"]
+    scopes: ["conversations.read"]
+
+scopes:
+  - id: my_open
+    label: My open
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: intercom
+          tool: my_conversations
+          args:
+        state: open
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /conversations
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: subject
+  list_fields:
+    - id
+    - subject
+    - preview
+    - updated_at
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

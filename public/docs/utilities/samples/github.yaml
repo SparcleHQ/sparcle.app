@@ -1,0 +1,117 @@
+# =github — pull requests and issues across the user's repos.
+schema_version: 1
+id: github
+chip: =github
+title: GitHub
+icon: github
+description: Search pull requests + issues, or look up by owner/repo#N.
+emits: Issue
+auth_profile_ref: github_user
+
+requires:
+  - mcp: github
+    version: ^1
+    tools: [list_my_prs, get_issue, search_issues]
+    scopes: [repo, read:user]
+
+scopes:
+  - id: my_prs
+    label: My open PRs
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: github
+          tool: list_my_prs
+          args:
+            state: open
+            limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /pull_requests
+
+  - id: search
+    label: Search
+    match:
+      - regex: '^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#\d+$'
+        bind:
+          repo_pr: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: github
+              tool: get_issue
+              args:
+                identifier: '{{repo_pr}}'
+            out: issue
+          - emit:
+              - issue
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: github
+              tool: search_issues
+              args:
+                q: '{{query}}'
+                limit: '{{limit}}'
+            out: r
+          - emit: r
+            path: /items
+
+filters:
+  - id: state
+    kind: enum
+    label: State
+    apply: pre
+    maps_to: q.state
+    static: [open, closed]
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open on GitHub
+    icon: external_link
+    url_template: '{{row.html_url}}'
+
+  - id: comment
+    kind: composer
+    target: row
+    label: Comment
+    icon: message-square
+    insert: '=github comment {{row.repo}}#{{row.number}} '
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: repo
+  list_fields:
+    - number
+    - title
+    - state
+    - repo
+  search_fields:
+    - title
+    - repo
+  sort_field: updated_at
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      subtitle: '{{row.repo}}#{{row.number}} | {{row.state}}'
+      image_url: '{{row.user.avatar_url}}'
+      fields:
+        - { label: Author, value: '{{row.user.login}}' }
+        - { label: Updated, value: '{{row.updated_at | date:''rel''}}' }
+      actions: [open, comment]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

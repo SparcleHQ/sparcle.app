@@ -1,0 +1,347 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+// Utility manifest quickstart — hand-authored walkthrough.
+// Writes the smallest useful manifest end to end. A single public HTTP fetch,
+// one emit, one row. Once this works, the rest of the spec is incremental.
+//
+// Voice: short, plain punctuation, no em-dashes, no section symbol.
+// Examples use generic placeholder names (Acme) so this is safe to publish.
+---
+<BaseLayout
+  title="Quickstart: write your first Bolt utility | Sparcle"
+  description="Build your first custom Bolt utility manifest in under 5 minutes. A single YAML file, one HTTP call, one typed row. End-to-end walkthrough with a runnable example."
+  canonical="https://sparcle.app/docs/utilities/quickstart"
+>
+  <main class="qs-page">
+    <section class="qs-hero">
+      <div class="container">
+        <p class="qs-eyebrow"><a href="/docs/utilities">&larr; Utilities</a></p>
+        <h1>Quickstart.</h1>
+        <p class="qs-lede">
+          Write your first Bolt utility manifest in under 5 minutes. We'll build
+          a tiny <code>=worldclock</code> chip that hits a public HTTP endpoint
+          and emits one <code>Event</code> row showing the current time in a
+          given zone. Once this works, every richer manifest (MCP calls, multiple
+          scopes, filters, actions) is incremental.
+        </p>
+        <ul class="qs-pills">
+          <li><a href="/docs/utilities/spec">Full spec (v1) &rarr;</a></li>
+          <li><a href="/docs/utilities/gallery">Sample gallery &rarr;</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>What you'll write</h2>
+        <p>
+          A single YAML file. Bolt loads it at startup (or hot-reloads it from
+          the admin UI). When the user types <code>=worldclock tokyo</code> in
+          the launcher, Bolt parses the manifest, runs the declared HTTP call,
+          and shows the result row in the autocomplete dropdown.
+        </p>
+        <p>
+          Every manifest has the same shape. You're declaring four things:
+        </p>
+        <ol class="qs-bullets numbered">
+          <li><strong>Identity.</strong> How the chip is named, versioned, and what type of row it emits.</li>
+          <li><strong>Scopes.</strong> Sub-commands the user can pick. The minimum is one.</li>
+          <li><strong>Flow.</strong> A list of declarative steps (<code>call</code>, <code>parallel</code>, <code>merge</code>, <code>transform</code>, <code>emit</code>).</li>
+          <li><strong>Emit.</strong> How response fields map into the canonical row type.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>The whole file</h2>
+        <p class="qs-section-blurb">
+          Save this as <code>worldclock.yaml</code> under your Bolt utilities
+          directory (or paste it into the YAML side panel in the admin UI). The
+          full reference for every field is in the <a href="/docs/utilities/spec">manifest spec</a>.
+        </p>
+        <pre class="qs-block"><code>{`schema_version: 1
+id: worldclock
+chip: =worldclock
+title: World Clock
+description: Current time for a given timezone.
+emits: Event
+
+scopes:
+  - id: lookup
+    match: "{zone:string}"
+    flow:
+      - call:
+          id: fetch_time
+          kind: http
+          public: true
+          method: GET
+          url: "https://worldtimeapi.org/api/timezone/\${zone}"
+      - emit:
+          from: fetch_time
+          fields:
+            title: "Current time in \${zone}"
+            subtitle: "\${.datetime}"
+            timezone: "\${.timezone}"
+            utc_offset: "\${.utc_offset}"
+
+presentation:
+  empty_state: "Try =worldclock America/New_York"
+`}</code></pre>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>What each block does</h2>
+
+        <h3>Identity</h3>
+        <p>
+          <code>schema_version: 1</code> pins this manifest to the v1 parser.
+          <code>id</code> is the unique key used in audit logs and admin UI.
+          <code>chip: =worldclock</code> is what the user types in the launcher.
+          <code>emits: Event</code> tells Bolt which canonical row type the
+          emitted rows conform to. Bolt knows how to render <code>Event</code> in
+          the launcher and the right rail without any extra config.
+        </p>
+
+        <h3>Scopes</h3>
+        <p>
+          Every manifest needs at least one scope. <code>match</code> is the
+          pattern that follows the chip. <code>{`"{zone:string}"`}</code> means
+          the user types one free-form string after <code>=worldclock</code>,
+          and it's captured as the template variable <code>${`\${zone}`}</code>.
+          See the <a href="/docs/utilities/spec#5-scopes">Scopes section</a> for
+          the full set of match patterns.
+        </p>
+
+        <h3>Flow</h3>
+        <p>
+          A flow is a list of steps. <code>call</code> runs one tool. This call
+          is <code>kind: http</code> with <code>public: true</code>, which lets
+          Bolt skip the per-user OAuth handshake (the endpoint requires no
+          credentials). Most real utilities hit private MCP tools or
+          authenticated HTTP endpoints; see
+          <a href="/docs/utilities/spec#6-flow-dag">Flow DAG</a> for
+          <code>parallel</code>, <code>merge</code>, and <code>transform</code>.
+        </p>
+
+        <h3>Emit</h3>
+        <p>
+          The <code>emit</code> step takes the response of a prior call and
+          binds its fields into a row of the declared canonical type.
+          <code>${`\${.field}`}</code> reads from the most recent call's response
+          body. <code>${`\${zone}`}</code> reads from the scope match. The full
+          binding grammar is in
+          <a href="/docs/utilities/spec#6-5-emit-produce-the-final-row-set">Emit</a>.
+        </p>
+
+        <h3>Presentation</h3>
+        <p>
+          Optional. <code>empty_state</code> is what the launcher shows when
+          the chip has no input yet. The
+          <a href="/docs/utilities/spec#11-presentation">Presentation</a> section
+          covers the full list (icons, right-rail widget binding, empty-state
+          variants).
+        </p>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>Try it</h2>
+        <ol class="qs-bullets numbered">
+          <li>Open the admin UI, go to <strong>Utilities &rarr; Custom</strong>, click <strong>New manifest</strong>.</li>
+          <li>Paste the YAML above. Save.</li>
+          <li>Open the launcher. Type <code>=worldclock America/New_York</code>.</li>
+          <li>You should see one row with the current time. The right rail shows the full timezone block.</li>
+        </ol>
+        <p class="qs-section-blurb">
+          If the manifest fails to parse, the admin UI shows the line and column
+          of the first error. Validation rules are listed in the
+          <a href="/docs/utilities/spec#4-2-validation">spec section on validation</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="qs-section">
+      <div class="container">
+        <h2>Where to go next</h2>
+        <ul class="qs-bullets">
+          <li><a href="/docs/utilities/gallery">Sample gallery.</a> Real-world manifests for Jira, Salesforce, Slack, Notion, Linear, GitHub, and more. Fork one as a starting point for your own.</li>
+          <li><a href="/docs/utilities/spec">Full manifest spec (v1).</a> Every field, every step kind, every validation rule. The source of truth.</li>
+          <li><a href="/docs/utilities/spec#5-scopes">Scopes.</a> Add a second scope (e.g. <code>=acme my</code> vs <code>=acme search</code>).</li>
+          <li><a href="/docs/utilities/spec#6-flow-dag">Flow DAG.</a> Fan out with <code>parallel</code>, merge with <code>merge</code>, reshape with <code>transform</code>.</li>
+          <li><a href="/docs/utilities/spec#8-actions">Actions.</a> Add typed actions on rows (open in source, run a tool, pipe into the composer).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="qs-section qs-section-final">
+      <div class="container">
+        <p class="qs-footnote">
+          Stuck on something this page should have covered? Reach the team via
+          the contact link in the footer. Manifest authoring questions get
+          priority routing.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .qs-page {
+      background: var(--bg-body);
+      min-height: 100vh;
+    }
+    .qs-page .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .qs-hero {
+      padding: calc(var(--nav-height, 80px) + 2.5rem) 0 1.5rem;
+    }
+    .qs-eyebrow {
+      margin: 0 0 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .qs-eyebrow a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .qs-eyebrow a:hover { color: var(--brand-accent); }
+    .qs-hero h1 {
+      font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+      letter-spacing: -0.02em;
+      color: var(--text-heading);
+      margin: 0 0 1rem 0;
+      line-height: 1.05;
+    }
+    .qs-lede {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: var(--text-body);
+      margin: 0 0 1.5rem;
+      max-width: 65ch;
+    }
+    .qs-pills {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .qs-pills a {
+      display: inline-block;
+      padding: 0.55rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 0.5rem;
+      color: var(--text-heading);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .qs-pills a:hover {
+      border-color: var(--brand-primary);
+      background: var(--brand-primary-light);
+    }
+
+    .qs-section {
+      padding: 2rem 0;
+      border-top: 1px solid var(--border-default);
+    }
+    .qs-section-final {
+      padding-bottom: 5rem;
+    }
+    .qs-section h2 {
+      margin: 0 0 1rem;
+      font-size: 1.5rem;
+      color: var(--text-heading);
+      letter-spacing: -0.01em;
+    }
+    .qs-section h3 {
+      margin: 1.25rem 0 0.4rem;
+      font-size: 1.05rem;
+      color: var(--text-heading);
+      font-weight: 700;
+    }
+    .qs-section p {
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--text-body);
+      max-width: 72ch;
+    }
+    .qs-section-blurb {
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-body);
+    }
+    .qs-footnote {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .qs-bullets {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--text-body);
+      max-width: 72ch;
+    }
+    .qs-bullets li {
+      margin-bottom: 0.4rem;
+    }
+    .qs-bullets.numbered {
+      list-style: decimal;
+    }
+    .qs-bullets a,
+    .qs-section p a {
+      color: var(--brand-accent);
+      text-decoration: none;
+    }
+    .qs-bullets a:hover,
+    .qs-section p a:hover {
+      text-decoration: underline;
+    }
+
+    .qs-block {
+      margin: 0.5rem 0 1.25rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 0.5rem;
+      padding: 0.85rem 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+    .qs-block code,
+    p code,
+    li code {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      color: var(--text-body);
+    }
+    .qs-block code {
+      background: transparent;
+      padding: 0;
+      font-size: inherit;
+    }
+    p code,
+    li code {
+      background: var(--bg-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 0.08em 0.35em;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+  </style>
+</BaseLayout>

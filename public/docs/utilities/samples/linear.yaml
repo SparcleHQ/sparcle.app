@@ -1,0 +1,79 @@
+schema_version: 1
+id: linear
+chip: =linear
+title: Linear
+icon: zap
+description: Search Linear issues across your teams.
+emits: Issue
+auth_profile_ref: linear_user
+
+requires:
+  - mcp: linear
+    version: ^1
+    tools: [my_issues, get_issue]
+    scopes: [read]
+
+scopes:
+  - id: my
+    label: My open issues
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: linear
+          tool: my_issues
+          args:
+            state: open
+            limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /issues
+
+  - id: lookup
+    label: Lookup
+    match:
+      - regex: '^[A-Z]{2,5}-\d+$'
+        bind: { id: '{{match}}' }
+        flow:
+          - call:
+              kind: mcp
+              mcp: linear
+              tool: get_issue
+              args: { id: '{{id}}' }
+            out: issue
+          - emit: [issue]
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Linear
+    icon: external_link
+    url_template: '{{row.url}}'
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: identifier
+  list_fields: [identifier, title, state.name, priority]
+  search_fields: [title, identifier]
+  sort_field: updatedAt
+  sort_order: desc
+  row_key_field: identifier
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      subtitle: '{{row.identifier}} | {{row.state.name | default:''-''}}'
+      fields:
+        - { label: Priority, value: '{{row.priority | default:''-''}}' }
+        - { label: Updated, value: '{{row.updatedAt | date:''rel''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

@@ -1,0 +1,63 @@
+schema_version: 1
+id: bamboo
+chip: =bamboo
+title: BambooHR
+icon: users
+description: List BambooHR employees.
+emits: Person
+auth_profile_ref: bamboo_user
+
+requires:
+  - mcp: bamboo
+    version: ^1
+    tools: ["list_employees"]
+    scopes: ["employees.read"]
+
+scopes:
+  - id: all
+    label: Employees
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: bamboo
+          tool: list_employees
+          args:
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /employees
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: displayName
+  list_fields:
+    - id
+    - displayName
+    - jobTitle
+    - department
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

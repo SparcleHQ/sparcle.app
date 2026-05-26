@@ -1,0 +1,63 @@
+schema_version: 1
+id: teams
+chip: =teams
+title: Microsoft Teams
+icon: message-circle
+description: Recent messages from Teams chats.
+emits: Document
+auth_profile_ref: teams_user
+
+requires:
+  - mcp: microsoft-teams
+    version: ^1
+    tools: ["search_messages"]
+    scopes: ["Chat.Read"]
+
+scopes:
+  - id: recent
+    label: Recent
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: microsoft-teams
+          tool: search_messages
+          args:
+        top: '{{limit}}'
+        out: r
+      - emit: r
+        path: /value
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: from
+  subtitle_field: subject
+  list_fields:
+    - from
+    - subject
+    - preview
+    - createdDateTime
+  search_fields:
+    - from
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.from}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

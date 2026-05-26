@@ -1,0 +1,415 @@
+# =jira — Atlassian Jira issues, sprints, and direct ticket lookup.
+# Reference manifest demonstrating: per-user OAuth via MCP, multiple
+# scopes, regex match dispatch (PROJ-123 → get_issue), enum filters
+# (project populated from list_projects, status static), all four action
+# kinds (url, tool with confirm + flow, composer), Issue canonical type
+# with right_widget card.
+#
+# Cross-flavor portability:
+#   The Atlassian "site URL" (used to build `/browse/{key}` links) is
+#   derived from each issue's REST `self` field by stripping `/rest/...`
+#   — every Jira MCP returns a real REST URL there, so this manifest no
+#   longer depends on any one MCP exposing a `getAccessibleResources`
+#   style tool that varies across implementations. If `self` is missing
+#   or malformed, we fall back to a placeholder so empty result sets
+#   still render.
+#
+# Response-shape tolerance:
+#   MCP servers can return tool data in three wire shapes, and every
+#   transform here normalizes through them in fall-through order:
+#     1. {issues: [...]}                              # flat — common across community MCPs and test fixtures
+#     2. {structured_content: {issues: [...]}}        # MCP spec `structuredContent`
+#     3. {structured_content: {data: {issues: [...]}}}# some MCPs wrap structured payloads under an inner `data` key
+#   The bolt-api dispatcher captures any MCP `structuredContent` under
+#   `structured_content` (see streamable_http.rs). We pick the first
+#   shape that's an object via `// {}` so a missing layer doesn't crash
+#   subsequent `.issues` lookups.
+schema_version: 1
+id: jira
+chip: =jira
+title: Jira Work
+icon: jira
+description: Search Jira issues, browse sprints, and look up tickets by key.
+# Rotating placeholder examples shown in the input bar after =jira is
+# selected. Each one teaches a different query shape: ticket-key direct
+# lookup, JQL-style search, sprint-scoped queries, and action-style
+# invocations. Keep them short, concrete, and copy-pasteable.
+placeholder_examples:
+  - "ENG-123"
+  - "open bugs assigned to me"
+  - "tickets in current sprint"
+  - "comment on PROJ-456 — looks good to ship"
+  - "high-priority issues in BACKEND project"
+  - "what's blocking the auth refactor?"
+emits: Issue
+auth_profile_ref: jira_user_obo
+
+requires:
+  - mcp: atlassian-jira
+    version: ^3
+    # Minimum tool set every Jira MCP must expose for =jira to work.
+    # Deliberately small — no `get_accessible_resources` or sprint-specific
+    # tools, since those vary across flavors. Site URL is derived from
+    # issue REST `self` (see transform steps below).
+    tools:
+      - search_issues
+      - get_issue
+      - list_projects
+      - update_issue
+    scopes:
+      - read:jira-work
+      - write:jira-work
+
+scopes:
+  - id: my
+    label: My open issues
+    default: true
+    # Single-call shape: fetch issues, derive `_siteUrl` from each issue's
+    # REST `self`. No second call to a capability-shaped tool that varies
+    # across Jira MCP flavors.
+    flow:
+      - call:
+          kind: mcp
+          mcp: atlassian-jira
+          tool: search_issues
+          args:
+            jql: 'assignee=currentUser() AND resolution=Unresolved'
+            maxResults: '{{limit}}'
+            fields:
+              - summary
+              - status
+              - priority
+              - assignee
+              - reporter
+              - updated
+        out: r
+      # Unwrap the MCP `structured_content` envelope (and any inner
+      # `data` envelope some MCPs nest below it) before reading `issues`.
+      # See header comment for the three wire shapes we tolerate. Strip
+      # `/rest/...` off the first issue's `self` to recover the site
+      # origin (e.g. `https://your-jira.example.com`).
+      #
+      # The `map(...)` projection slims each issue to just the fields the
+      # `presentation:` block actually reads. Raw Jira responses include
+      # `expand`, `versionedRepresentations`, and 4-size `avatarUrls` maps
+      # for every user object — ~15 KB per issue we don't render. Trimming
+      # here drops the wire size 10×+ for the trace/audit path. We also
+      # normalize `assignee.avatarUrl` (singular) by falling through
+      # `avatarUrls["48x48"]` (plural, real Jira shape) so the right-widget
+      # image binding renders on production responses, not just fixtures.
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $payload
+          | ($payload.issues // []) as $issues
+          | (($issues[0] // {}).self) as $raw
+          | (if ($raw | type) == "string" and ($raw | length) > 0
+               then ($raw | split("/rest/")[0])
+               else ""
+             end) as $derived
+          | (if ($derived | startswith("https://")) or ($derived | startswith("http://"))
+               then $derived
+               else "https://example.atlassian.net"
+             end) as $base
+          | ($issues | map(
+                . as $iss
+                | ($iss.fields // {}) as $f
+                | ($f.assignee // {}) as $a
+                | ($f.reporter // {}) as $rp
+                | ($f.status // {}) as $st
+                | ($f.priority // {}) as $pr
+                | ($a.avatarUrls // {}) as $av
+                | {
+                    key: $iss.key,
+                    _siteUrl: $base,
+                    fields: {
+                      summary: ($f.summary // ""),
+                      status: { name: ($st.name // "") },
+                      priority: { name: ($pr.name // "") },
+                      assignee: {
+                        displayName: ($a.displayName // ""),
+                        avatarUrl: ($a.avatarUrl // $av["48x48"] // "")
+                      },
+                      reporter: { displayName: ($rp.displayName // "") },
+                      updated: ($f.updated // "")
+                    }
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  - id: sprint
+    label: Active sprint
+    # Atlassian Cloud's official MCP doesn't expose sprint endpoints, so we
+    # query open-sprint issues via JQL directly. `openSprints()` is the JQL
+    # function that resolves to the active sprint(s) on the issue's board.
+    flow:
+      - call:
+          kind: mcp
+          mcp: atlassian-jira
+          tool: search_issues
+          args:
+            jql: 'sprint in openSprints() AND assignee = currentUser() ORDER BY updated DESC'
+            maxResults: '{{limit}}'
+            fields:
+              - summary
+              - status
+              - priority
+              - assignee
+              - reporter
+              - updated
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $payload
+          | ($payload.issues // []) as $issues
+          | (($issues[0] // {}).self) as $raw
+          | (if ($raw | type) == "string" and ($raw | length) > 0
+               then ($raw | split("/rest/")[0])
+               else ""
+             end) as $derived
+          | (if ($derived | startswith("https://")) or ($derived | startswith("http://"))
+               then $derived
+               else "https://example.atlassian.net"
+             end) as $base
+          | ($issues | map(
+                . as $iss
+                | ($iss.fields // {}) as $f
+                | ($f.assignee // {}) as $a
+                | ($f.reporter // {}) as $rp
+                | ($f.status // {}) as $st
+                | ($f.priority // {}) as $pr
+                | ($a.avatarUrls // {}) as $av
+                | {
+                    key: $iss.key,
+                    _siteUrl: $base,
+                    fields: {
+                      summary: ($f.summary // ""),
+                      status: { name: ($st.name // "") },
+                      priority: { name: ($pr.name // "") },
+                      assignee: {
+                        displayName: ($a.displayName // ""),
+                        avatarUrl: ($a.avatarUrl // $av["48x48"] // "")
+                      },
+                      reporter: { displayName: ($rp.displayName // "") },
+                      updated: ($f.updated // "")
+                    }
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  - id: search
+    label: Search
+    match:
+      - regex: '^[A-Z]{2,10}-\d+$'
+        bind:
+          key: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: atlassian-jira
+              tool: get_issue
+              args:
+                issueIdOrKey: '{{key}}'
+            out: issue
+          - transform: |
+              (.issue // null) as $raw_issue
+              | (if ($raw_issue | type) == "object"
+                   then ($raw_issue.structured_content?.data? // $raw_issue.structured_content? // $raw_issue)
+                   else null
+                 end) as $issue
+              | (($issue // {}).self) as $raw
+              | (if ($raw | type) == "string" and ($raw | length) > 0
+                   then ($raw | split("/rest/")[0])
+                   else ""
+                 end) as $derived
+              | (if ($derived | startswith("https://")) or ($derived | startswith("http://"))
+                   then $derived
+                   else "https://example.atlassian.net"
+                 end) as $base
+              | (($issue.fields // {}) as $f
+                 | ($f.assignee // {}) as $a
+                 | ($f.reporter // {}) as $rp
+                 | ($f.status // {}) as $st
+                 | ($f.priority // {}) as $pr
+                 | ($a.avatarUrls // {}) as $av
+                 | if ($issue | type) == "object"
+                   then [{
+                       key: $issue.key,
+                       _siteUrl: $base,
+                       fields: {
+                         summary: ($f.summary // ""),
+                         status: { name: ($st.name // "") },
+                         priority: { name: ($pr.name // "") },
+                         assignee: {
+                           displayName: ($a.displayName // ""),
+                           avatarUrl: ($a.avatarUrl // $av["48x48"] // "")
+                         },
+                         reporter: { displayName: ($rp.displayName // "") },
+                         updated: ($f.updated // "")
+                       }
+                     }]
+                   else [] end)
+            out: enriched
+          - emit: enriched
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: atlassian-jira
+              tool: search_issues
+              args:
+                jql: 'text ~ "{{query | jql_escape}}" ORDER BY updated DESC'
+                maxResults: '{{limit}}'
+                fields:
+                  - summary
+                  - status
+                  - priority
+                  - assignee
+                  - reporter
+                  - updated
+            out: r
+          - transform: |
+              ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $payload
+              | ($payload.issues // []) as $issues
+              | (($issues[0] // {}).self) as $raw
+              | (if ($raw | type) == "string" and ($raw | length) > 0
+                   then ($raw | split("/rest/")[0])
+                   else ""
+                 end) as $derived
+              | (if ($derived | startswith("https://")) or ($derived | startswith("http://"))
+                   then $derived
+                   else "https://example.atlassian.net"
+                 end) as $base
+              | ($issues | map(
+                    . as $iss
+                    | ($iss.fields // {}) as $f
+                    | ($f.assignee // {}) as $a
+                    | ($f.reporter // {}) as $rp
+                    | ($f.status // {}) as $st
+                    | ($f.priority // {}) as $pr
+                    | ($a.avatarUrls // {}) as $av
+                    | {
+                        key: $iss.key,
+                        _siteUrl: $base,
+                        fields: {
+                          summary: ($f.summary // ""),
+                          status: { name: ($st.name // "") },
+                          priority: { name: ($pr.name // "") },
+                          assignee: {
+                            displayName: ($a.displayName // ""),
+                            avatarUrl: ($a.avatarUrl // $av["48x48"] // "")
+                          },
+                          reporter: { displayName: ($rp.displayName // "") },
+                          updated: ($f.updated // "")
+                        }
+                      }
+                  ))
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: project
+    kind: enum
+    label: Project
+    apply: pre
+    maps_to: jql.project
+    populate:
+      - call:
+          kind: mcp
+          mcp: atlassian-jira
+          tool: list_projects
+        out: r
+      # Same three-shape unwrap as the issue scopes — list_projects responses
+      # come back wrapped on `structured_content`-aware MCPs (Atlassian Cloud
+      # and several community variants) and flat elsewhere. Normalize before
+      # emit so `path: /values` always finds the array.
+      - transform: |
+          (.r.structured_content?.data? // .r.structured_content? // .r) // {}
+        out: projects
+      - emit: projects
+        path: /values
+
+  - id: status
+    kind: enum
+    label: Status
+    apply: pre
+    maps_to: jql.status
+    static:
+      - Open
+      - In Progress
+      - Done
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Jira
+    icon: external_link
+    # `_siteUrl` is enriched per-row by the scope's transform step, derived
+    # from the issue's REST `self` URL (e.g. issue
+    # `https://your-jira.example.com/rest/api/2/issue/12345` →
+    # base `https://your-jira.example.com`). Falls back to the placeholder
+    # for empty result sets or malformed `self` values.
+    url_template: '{{row._siteUrl | default:''https://example.atlassian.net''}}/browse/{{row.key}}'
+
+  - id: assign_me
+    kind: tool
+    target: row
+    label: Assign to me
+    confirm: 'Assign {{row.key}} to me?'
+    flow:
+      - call:
+          kind: mcp
+          mcp: atlassian-jira
+          tool: update_issue
+          args:
+            issueIdOrKey: '{{row.key}}'
+            fields:
+              assignee:
+                accountId: '{{user.id}}'
+        out: r
+      - emit: r
+
+  - id: create
+    kind: composer
+    target: list
+    label: Create issue
+    insert: '=jira create '
+
+presentation:
+  widget: list
+  title_field: fields.summary
+  subtitle_field: key
+  list_fields:
+    - key
+    - fields.summary
+    - fields.status.name
+    - fields.priority.name
+  search_fields:
+    - key
+    - fields.summary
+  sort_field: fields.updated
+  sort_order: desc
+  row_key_field: key
+  searchable: true
+  filterable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.fields.summary}}'
+      subtitle: '{{row.key}} | {{row.fields.status.name}}'
+      image_url: '{{row.fields.assignee.avatarUrl}}'
+      fields:
+        - { label: Priority, value: '{{row.fields.priority.name | default:''-''}}' }
+        - { label: Assignee, value: '{{row.fields.assignee.displayName | default:''Unassigned''}}' }
+        - { label: Reporter, value: '{{row.fields.reporter.displayName | default:''-''}}' }
+        - { label: Updated,  value: '{{row.fields.updated | date:''rel''}}' }
+      actions:
+        - open
+        - assign_me
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

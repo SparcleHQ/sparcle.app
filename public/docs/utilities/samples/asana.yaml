@@ -1,0 +1,64 @@
+schema_version: 1
+id: asana
+chip: =asana
+title: Asana
+icon: check-circle
+description: My open tasks.
+emits: Issue
+auth_profile_ref: asana_user
+
+requires:
+  - mcp: asana
+    version: ^1
+    tools: ["my_tasks"]
+    scopes: ["default"]
+
+scopes:
+  - id: my_tasks
+    label: My tasks
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: asana
+          tool: my_tasks
+          args:
+        completed: false
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /data
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: gid
+  subtitle_field: name
+  list_fields:
+    - gid
+    - name
+    - project_name
+    - due_on
+  search_fields:
+    - gid
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.gid}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

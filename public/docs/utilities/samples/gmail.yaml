@@ -1,0 +1,65 @@
+schema_version: 1
+id: gmail
+chip: =gmail
+title: Gmail
+icon: mail
+description: Search Gmail (uses Gmail's standard query operators).
+emits: Document
+auth_profile_ref: gmail_user
+
+requires:
+  - mcp: gmail
+    version: ^1
+    tools: [search_messages]
+    scopes: [gmail.readonly]
+
+scopes:
+  - id: search
+    label: Search
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: gmail
+          tool: search_messages
+          args:
+            q: '{{query | default:''is:unread''}}'
+            max_results: '{{limit}}'
+        out: r
+      - emit: r
+        path: /messages
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Gmail
+    icon: external_link
+    url_template: 'https://mail.google.com/mail/u/0/#inbox/{{row.id}}'
+
+presentation:
+  widget: list
+  title_field: subject
+  subtitle_field: from
+  list_fields: [from, subject, date]
+  search_fields: [subject, from]
+  sort_field: date
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.subject | truncate:100}}'
+      subtitle: '{{row.from}}'
+      fields:
+        - { label: When, value: '{{row.date | date:''rel''}}' }
+        - { label: Snippet, value: '{{row.snippet | truncate:200 | default:''-''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

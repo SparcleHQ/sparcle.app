@@ -1,0 +1,64 @@
+schema_version: 1
+id: bitbucket
+chip: =bitbucket
+title: Bitbucket
+icon: git-branch
+description: Pull requests assigned to me.
+emits: Issue
+auth_profile_ref: bitbucket_user
+
+requires:
+  - mcp: bitbucket
+    version: ^1
+    tools: ["list_my_prs"]
+    scopes: ["pullrequest", "account"]
+
+scopes:
+  - id: my_prs
+    label: My open PRs
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: bitbucket
+          tool: list_my_prs
+          args:
+        state: open
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /values
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: title
+  list_fields:
+    - id
+    - title
+    - repository.full_name
+    - state
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

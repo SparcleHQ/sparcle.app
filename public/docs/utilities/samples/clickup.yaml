@@ -1,0 +1,63 @@
+schema_version: 1
+id: clickup
+chip: =clickup
+title: ClickUp
+icon: check-square
+description: My open tasks.
+emits: Issue
+auth_profile_ref: clickup_user
+
+requires:
+  - mcp: clickup
+    version: ^1
+    tools: ["my_tasks"]
+    scopes: ["task:read"]
+
+scopes:
+  - id: my_tasks
+    label: My tasks
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: clickup
+          tool: my_tasks
+          args:
+        page: 0
+        out: r
+      - emit: r
+        path: /tasks
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: name
+  list_fields:
+    - id
+    - name
+    - status.status
+    - priority
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

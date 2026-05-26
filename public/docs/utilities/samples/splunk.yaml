@@ -1,0 +1,64 @@
+schema_version: 1
+id: splunk
+chip: =splunk
+title: Splunk
+icon: search
+description: Run a Splunk search.
+emits: Generic
+auth_profile_ref: splunk_user
+
+requires:
+  - mcp: splunk
+    version: ^1
+    tools: ["search"]
+    scopes: ["search"]
+
+scopes:
+  - id: search
+    label: Search
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: splunk
+          tool: search
+          args:
+        spl: '{{query}}'
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /results
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: _time
+  subtitle_field: host
+  list_fields:
+    - _time
+    - host
+    - sourcetype
+    - _raw
+  search_fields:
+    - _time
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row._time}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

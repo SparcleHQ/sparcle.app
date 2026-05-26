@@ -1,0 +1,62 @@
+schema_version: 1
+id: newrelic
+chip: =newrelic
+title: New Relic
+icon: activity
+description: Run a NRQL query.
+emits: Generic
+auth_profile_ref: newrelic_user
+
+requires:
+  - mcp: newrelic
+    version: ^1
+    tools: ["query"]
+    scopes: ["user.read"]
+
+scopes:
+  - id: query
+    label: Query
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: newrelic
+          tool: query
+          args:
+        nrql: '{{query}}'
+        out: r
+      - emit: r
+        path: /results
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: timestamp
+  subtitle_field: appName
+  list_fields:
+    - timestamp
+    - appName
+    - value
+  search_fields:
+    - timestamp
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.timestamp}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

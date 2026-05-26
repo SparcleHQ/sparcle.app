@@ -1,0 +1,63 @@
+schema_version: 1
+id: outlook
+chip: =outlook
+title: Outlook
+icon: mail
+description: Search Outlook mail.
+emits: Document
+auth_profile_ref: outlook_user
+
+requires:
+  - mcp: outlook
+    version: ^1
+    tools: ["search_messages"]
+    scopes: ["Mail.Read"]
+
+scopes:
+  - id: search
+    label: Search
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: outlook
+          tool: search_messages
+          args:
+        q: '{{query | default:''isread:false''}}'
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /value
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: from
+  subtitle_field: subject
+  list_fields:
+    - from
+    - subject
+    - receivedDateTime
+  search_fields:
+    - from
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.from}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

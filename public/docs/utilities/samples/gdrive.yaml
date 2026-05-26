@@ -1,0 +1,64 @@
+schema_version: 1
+id: gdrive
+chip: =gdrive
+title: Google Drive
+icon: hard-drive
+description: Recent files from your Google Drive.
+emits: File
+auth_profile_ref: gdrive_user
+
+requires:
+  - mcp: google-drive
+    version: ^1
+    tools: ["list_files"]
+    scopes: ["drive.readonly"]
+
+scopes:
+  - id: recent
+    label: Recent
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: google-drive
+          tool: list_files
+          args:
+        order_by: modifiedTime desc
+        page_size: '{{limit}}'
+        out: r
+      - emit: r
+        path: /files
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: name
+  subtitle_field: mime_type
+  list_fields:
+    - name
+    - mime_type
+    - modifiedTime
+    - owner_name
+  search_fields:
+    - name
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.name}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

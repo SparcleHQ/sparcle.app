@@ -1,0 +1,249 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Pill from "../../../components/ui/Pill.astro";
+import samplesRaw from "../../../data/utility-samples.json";
+
+// Sample utility gallery — one card per bundled manifest.
+// Sort alphabetically by id so the grid is stable across edits to the
+// upstream JSON.
+type Sample = {
+  id: string;
+  title: string;
+  chip: string;
+  description: string;
+  emits: string;
+  filename: string;
+};
+const samples: Sample[] = [...(samplesRaw as Sample[])].sort((a, b) =>
+  a.id.localeCompare(b.id)
+);
+const sampleCount = samples.length;
+
+// Map emit types to pill variants so the grid is glanceable.
+function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" {
+  switch (emits) {
+    case "Person":   return "brand";
+    case "Issue":    return "warning";
+    case "Document": return "neutral";
+    case "File":     return "neutral";
+    case "Event":    return "success";
+    case "Place":    return "success";
+    case "Account":  return "brand";
+    case "Incident": return "warning";
+    case "Generic":  return "neutral";
+    default:         return "neutral";
+  }
+}
+---
+<BaseLayout
+  title={`Sample integrations: ${sampleCount} bundled utility manifests | Sparcle`}
+  description={`Browse ${sampleCount} ready-to-use Bolt utility manifests. Jira, Salesforce, Slack, Notion, Linear, GitHub, Zendesk, and more. Each ships as YAML you can read, fork, or enable as-is.`}
+  canonical="https://sparcle.app/docs/utilities/gallery"
+>
+  <main class="gallery-page">
+    <section class="gallery-hero">
+      <div class="container">
+        <p class="gallery-eyebrow"><a href="/docs/utilities">&larr; Utilities</a></p>
+        <h1>Sample integrations.</h1>
+        <p class="gallery-lede">
+          {sampleCount} ready-to-use utility manifests, bundled with Bolt. Enable
+          one in the Gallery, sign in over OAuth, and the chip is live in your
+          launcher. Each manifest is plain YAML you can read, fork, or extend.
+        </p>
+        <ul class="gallery-pills">
+          <li><a href="/docs/utilities/quickstart">Write your own &rarr;</a></li>
+          <li><a href="/docs/utilities/spec">Manifest spec (v1) &rarr;</a></li>
+          <li><a href="/docs/utilities">Utilities overview &rarr;</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gallery-section">
+      <div class="container">
+        <div class="gallery-grid">
+          {samples.map((s) => (
+            <article class="util-card">
+              <header class="util-card__head">
+                <code class="util-card__chip">{s.chip}</code>
+                <Pill variant={variantFor(s.emits)} size="sm">{s.emits}</Pill>
+              </header>
+              <h3 class="util-card__title">{s.title}</h3>
+              <p class="util-card__desc">{s.description}</p>
+              <div class="util-card__actions">
+                <a
+                  href={`/docs/utilities/samples/${s.filename}`}
+                  download={s.filename}
+                  class="util-card__btn"
+                >
+                  Download YAML
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery-section gallery-section-final">
+      <div class="container">
+        <p class="gallery-footnote">
+          Don't see what you need? <a href="/docs/utilities/quickstart">Write a custom utility</a>
+          in a few lines of YAML, or
+          <a href="#" onclick="openContactModal('Utility Manifest Request'); return false;">tell us what's missing</a>.
+        </p>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .gallery-page {
+    background: var(--bg-body);
+    min-height: 100vh;
+  }
+  .gallery-page .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  .gallery-hero {
+    padding: calc(var(--nav-height, 80px) + 2.5rem) 0 1.5rem;
+  }
+  .gallery-eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .gallery-eyebrow a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .gallery-eyebrow a:hover { color: var(--brand-accent); }
+  .gallery-hero h1 {
+    font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+    letter-spacing: -0.02em;
+    color: var(--text-heading);
+    margin: 0 0 1rem 0;
+    line-height: 1.05;
+  }
+  .gallery-lede {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--text-body);
+    margin: 0 0 1.5rem;
+    max-width: 65ch;
+  }
+  .gallery-pills {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .gallery-pills a {
+    display: inline-block;
+    padding: 0.55rem 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 0.5rem;
+    color: var(--text-heading);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .gallery-pills a:hover {
+    border-color: var(--brand-primary);
+    background: var(--brand-primary-light);
+  }
+
+  .gallery-section {
+    padding: 2rem 0;
+    border-top: 1px solid var(--border-default);
+  }
+  .gallery-section-final {
+    padding-bottom: 5rem;
+    border-top: none;
+  }
+  .gallery-footnote {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .gallery-footnote a {
+    color: var(--brand-accent);
+    text-decoration: none;
+  }
+  .gallery-footnote a:hover { text-decoration: underline; }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  .util-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg, 0.75rem);
+    padding: 1.25rem 1.25rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .util-card:hover {
+    border-color: var(--brand-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .util-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+  .util-card__chip {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    padding: 0.18rem 0.5rem;
+    border-radius: 0.35rem;
+    color: var(--text-heading);
+  }
+  .util-card__title {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+    color: var(--text-heading);
+    font-weight: 700;
+    letter-spacing: -0.005em;
+  }
+  .util-card__desc {
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-body);
+    flex: 1;
+  }
+  .util-card__actions {
+    margin-top: auto;
+  }
+  .util-card__btn {
+    display: inline-block;
+    padding: 0.4rem 0.85rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 0.4rem;
+    color: var(--text-heading);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .util-card__btn:hover {
+    border-color: var(--brand-primary);
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+  }
+</style>

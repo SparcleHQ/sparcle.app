@@ -1,0 +1,151 @@
+# =team — directory lookup of teammates with composite actions.
+# Reference manifest demonstrating: Person canonical type, the transform:
+# jq node (filtering out self from peer list), composite actions
+# (email/chat composer + schedule_meeting tool + profile url).
+schema_version: 1
+id: team
+chip: =team
+title: My Team
+icon: users
+description: List your direct reports or peers under your manager.
+emits: Person
+auth_profile_ref: directory_user
+
+requires:
+  - mcp: company-directory
+    version: ^1
+    tools:
+      - list_directs
+      - get_user
+    scopes:
+      - directory.read
+  - mcp: google-calendar
+    version: ^1
+    tools:
+      - create_event
+    scopes:
+      - calendar.events.write
+
+scopes:
+  - id: directs
+    label: My direct reports
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: company-directory
+          tool: list_directs
+          args:
+            user: '{{user.email}}'
+        out: r
+      - emit: r
+        path: /reports
+
+  - id: peers
+    label: Peers under my manager
+    flow:
+      - call:
+          kind: mcp
+          mcp: company-directory
+          tool: get_user
+          args:
+            email: '{{user.email}}'
+        out: me
+      - call:
+          kind: mcp
+          mcp: company-directory
+          tool: list_directs
+          args:
+            user: '{{me.manager_email}}'
+        out: r
+      - transform: '.r.reports | map(select(.email != $self))'
+        vars:
+          self: '{{user.email}}'
+        out: peers
+      - emit: peers
+
+filters: []
+
+actions:
+  - id: email
+    kind: composer
+    target: row
+    label: Email
+    icon: mail
+    insert: '=email to:{{row.email}} subject:'
+
+  - id: chat
+    kind: composer
+    target: row
+    label: Chat
+    icon: message-square
+    insert: '=chat to:{{row.email}} '
+
+  - id: meeting
+    kind: tool
+    target: row
+    label: Schedule 1:1
+    icon: calendar
+    confirm: 'Schedule a 30-min 1:1 with {{row.name}}?'
+    flow:
+      - call:
+          kind: mcp
+          mcp: google-calendar
+          tool: create_event
+          args:
+            attendees:
+              - '{{row.email}}'
+              - '{{user.email}}'
+            duration_min: 30
+            title: '1:1 with {{row.name}}'
+        out: r
+      - emit: r
+
+  - id: profile
+    kind: url
+    target: row
+    label: Open profile
+    icon: external_link
+    url_template: 'https://hr.{{org.domain | default:''example.com''}}/u/{{row.id | url_escape}}'
+
+presentation:
+  widget: list
+  title_field: name
+  subtitle_field: title
+  image_field: photo_url
+  list_fields:
+    - name
+    - title
+    - department
+  search_fields:
+    - name
+    - title
+    - email
+  searchable: true
+  sort_field: name
+  sort_order: asc
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.name}}'
+      subtitle: '{{row.title}} | {{row.department | default:''-''}}'
+      image_url: '{{row.photo_url}}'
+      fields:
+        - { label: Manager,  value: '{{row.manager_name | default:''-''}}' }
+        - { label: Location, value: '{{row.location | default:''-''}}' }
+        - { label: Pronouns, value: '{{row.pronouns | default:''-''}}' }
+        - { label: Joined,   value: '{{row.start_date | date:''long''}}' }
+      actions:
+        - email
+        - chat
+        - meeting
+        - profile
+    links_for_type: Person
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

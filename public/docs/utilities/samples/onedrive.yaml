@@ -1,0 +1,62 @@
+schema_version: 1
+id: onedrive
+chip: =onedrive
+title: OneDrive
+icon: hard-drive
+description: Recent files from your OneDrive.
+emits: File
+auth_profile_ref: onedrive_user
+
+requires:
+  - mcp: onedrive
+    version: ^1
+    tools: ["list_files"]
+    scopes: ["Files.Read"]
+
+scopes:
+  - id: recent
+    label: Recent
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: onedrive
+          tool: list_files
+          args:
+        top: '{{limit}}'
+        out: r
+      - emit: r
+        path: /value
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: name
+  subtitle_field: modified
+  list_fields:
+    - name
+    - modified
+    - createdBy
+  search_fields:
+    - name
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.name}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

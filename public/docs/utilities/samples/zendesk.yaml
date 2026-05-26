@@ -1,0 +1,66 @@
+schema_version: 1
+id: zendesk
+chip: =zendesk
+title: Zendesk
+icon: life-buoy
+description: Search Zendesk support tickets.
+emits: Issue
+auth_profile_ref: zendesk_user
+
+requires:
+  - mcp: zendesk
+    version: ^1
+    tools: [search_tickets]
+    scopes: [tickets.read]
+
+scopes:
+  - id: my_open
+    label: My open tickets
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: zendesk
+          tool: search_tickets
+          args:
+            query: 'assignee:{{user.email}} status<solved'
+            limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /tickets
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Zendesk
+    icon: external_link
+    url_template: 'https://{{org.zendesk_subdomain | default:''acme''}}.zendesk.com/agent/tickets/{{row.id}}'
+
+presentation:
+  widget: list
+  title_field: subject
+  subtitle_field: requester_name
+  list_fields: [id, subject, status, priority, requester_name]
+  search_fields: [subject, requester_name]
+  sort_field: updated_at
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.subject}}'
+      subtitle: '#{{row.id}} | {{row.status}}'
+      fields:
+        - { label: Priority, value: '{{row.priority | default:''normal''}}' }
+        - { label: Requester, value: '{{row.requester_name | default:''-''}}' }
+        - { label: Updated, value: '{{row.updated_at | date:''rel''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

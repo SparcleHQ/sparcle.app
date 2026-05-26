@@ -1,0 +1,64 @@
+schema_version: 1
+id: slack
+chip: =slack
+title: Slack
+icon: message-square
+description: Search Slack messages across channels you belong to.
+emits: Document
+auth_profile_ref: slack_user
+
+requires:
+  - mcp: slack
+    version: ^1
+    tools: [search_messages]
+    scopes: [search:read]
+
+scopes:
+  - id: search
+    label: Search messages
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: slack
+          tool: search_messages
+          args:
+            query: '{{query | default:''from:me''}}'
+            count: '{{limit}}'
+        out: r
+      - emit: r
+        path: /messages
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Slack
+    icon: external_link
+    url_template: '{{row.permalink}}'
+
+presentation:
+  widget: list
+  title_field: text
+  subtitle_field: channel_name
+  list_fields: [channel_name, user_name, text, ts]
+  search_fields: [text, channel_name]
+  sort_field: ts
+  sort_order: desc
+  row_key_field: ts
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.text | truncate:140}}'
+      subtitle: '#{{row.channel_name}} | {{row.user_name}}'
+      fields:
+        - { label: When, value: '{{row.ts | date:''rel''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

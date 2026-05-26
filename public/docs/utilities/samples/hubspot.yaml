@@ -1,0 +1,64 @@
+schema_version: 1
+id: hubspot
+chip: =hubspot
+title: HubSpot
+icon: users
+description: Search HubSpot contacts.
+emits: Person
+auth_profile_ref: hubspot_user
+
+requires:
+  - mcp: hubspot
+    version: ^1
+    tools: ["search_contacts"]
+    scopes: ["crm.objects.contacts.read"]
+
+scopes:
+  - id: search
+    label: Search
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: hubspot
+          tool: search_contacts
+          args:
+        query: '{{query}}'
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /results
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: firstname
+  subtitle_field: lastname
+  list_fields:
+    - firstname
+    - lastname
+    - email
+    - company
+  search_fields:
+    - firstname
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.firstname}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

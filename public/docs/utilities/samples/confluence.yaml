@@ -1,0 +1,65 @@
+schema_version: 1
+id: confluence
+chip: =confluence
+title: Confluence
+icon: book-open
+description: Search Confluence pages.
+emits: Document
+auth_profile_ref: confluence_user
+
+requires:
+  - mcp: confluence
+    version: ^1
+    tools: [search]
+    scopes: [read:confluence-content]
+
+scopes:
+  - id: search
+    label: Search pages
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: confluence
+          tool: search
+          args:
+            cql: 'type=page AND text ~ "{{query | jql_escape}}"'
+            limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /results
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url}}'
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: space_name
+  list_fields: [title, space_name, last_modified]
+  search_fields: [title]
+  sort_field: last_modified
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      subtitle: '{{row.space_name | default:''-''}}'
+      fields:
+        - { label: Modified, value: '{{row.last_modified | date:''rel''}}' }
+        - { label: Author, value: '{{row.author_name | default:''-''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

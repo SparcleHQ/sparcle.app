@@ -1,0 +1,63 @@
+schema_version: 1
+id: salesforce
+chip: =salesforce
+title: Salesforce
+icon: cloud
+description: Search Salesforce accounts, contacts, and opportunities.
+emits: Account
+auth_profile_ref: salesforce_user
+
+requires:
+  - mcp: salesforce
+    version: ^1
+    tools: [query]
+    scopes: [api]
+
+scopes:
+  - id: my_accounts
+    label: My accounts
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: salesforce
+          tool: query
+          args:
+            soql: 'SELECT Id, Name, Industry, Owner.Name FROM Account WHERE Owner.Email = ''{{user.email | sql_escape}}'' LIMIT {{limit}}'
+        out: r
+      - emit: r
+        path: /records
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Salesforce
+    icon: external_link
+    url_template: 'https://{{org.salesforce_host | default:''acme.lightning.force.com''}}/lightning/r/Account/{{row.Id}}/view'
+
+presentation:
+  widget: list
+  title_field: Name
+  subtitle_field: Industry
+  list_fields: [Name, Industry, Owner.Name]
+  search_fields: [Name]
+  sort_field: Name
+  sort_order: asc
+  row_key_field: Id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.Name}}'
+      subtitle: '{{row.Industry | default:''-''}}'
+      fields:
+        - { label: Owner, value: '{{row.Owner.Name | default:''-''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

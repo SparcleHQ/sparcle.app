@@ -1,0 +1,63 @@
+schema_version: 1
+id: sharepoint
+chip: =sharepoint
+title: SharePoint
+icon: layers
+description: Search SharePoint sites + pages.
+emits: Document
+auth_profile_ref: sharepoint_user
+
+requires:
+  - mcp: sharepoint
+    version: ^1
+    tools: ["search"]
+    scopes: ["Sites.Read.All"]
+
+scopes:
+  - id: search
+    label: Search
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: sharepoint
+          tool: search
+          args:
+        query: '{{query}}'
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /results
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: path
+  list_fields:
+    - title
+    - path
+    - modified
+  search_fields:
+    - title
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

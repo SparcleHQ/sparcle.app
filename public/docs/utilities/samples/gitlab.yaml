@@ -1,0 +1,64 @@
+schema_version: 1
+id: gitlab
+chip: =gitlab
+title: GitLab
+icon: git-merge
+description: Open merge requests assigned to me.
+emits: Issue
+auth_profile_ref: gitlab_user
+
+requires:
+  - mcp: gitlab
+    version: ^1
+    tools: ["list_my_mrs"]
+    scopes: ["read_api"]
+
+scopes:
+  - id: my_mrs
+    label: My open MRs
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: gitlab
+          tool: list_my_mrs
+          args:
+        state: opened
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /merge_requests
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: iid
+  subtitle_field: title
+  list_fields:
+    - iid
+    - title
+    - project_path
+    - state
+  search_fields:
+    - iid
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.iid}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

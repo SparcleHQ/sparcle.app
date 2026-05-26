@@ -1,0 +1,64 @@
+schema_version: 1
+id: box
+chip: =box
+title: Box
+icon: package
+description: Recent items from Box.
+emits: File
+auth_profile_ref: box_user
+
+requires:
+  - mcp: box
+    version: ^1
+    tools: ["list_items"]
+    scopes: ["items.read"]
+
+scopes:
+  - id: recent
+    label: Recent
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: box
+          tool: list_items
+          args:
+        sort: modified_at
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /entries
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: name
+  subtitle_field: type
+  list_fields:
+    - name
+    - type
+    - modified_at
+    - owner_name
+  search_fields:
+    - name
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.name}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

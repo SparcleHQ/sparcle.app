@@ -1,0 +1,64 @@
+schema_version: 1
+id: pipedrive
+chip: =pipedrive
+title: Pipedrive
+icon: trending-up
+description: My open deals.
+emits: Account
+auth_profile_ref: pipedrive_user
+
+requires:
+  - mcp: pipedrive
+    version: ^1
+    tools: ["my_deals"]
+    scopes: ["deals:read"]
+
+scopes:
+  - id: my_deals
+    label: My open deals
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: pipedrive
+          tool: my_deals
+          args:
+        status: open
+        limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /data
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+
+presentation:
+  widget: list
+  title_field: id
+  subtitle_field: title
+  list_fields:
+    - id
+    - title
+    - value
+    - org_name
+  search_fields:
+    - id
+  searchable: true
+  row_key_field: id
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.id}}'
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

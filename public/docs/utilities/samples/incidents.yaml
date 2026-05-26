@@ -1,0 +1,151 @@
+# =incidents — unified active-incident view across PagerDuty, Datadog, and
+# ServiceNow. Reference manifest demonstrating: parallel: fan-out, merge:
+# combining heterogeneous arrays into a unified row shape with per-source
+# JSON-pointer mappings, source_tag_field for routing per-source actions,
+# tolerate_failures so a single bad MCP doesn't break the whole utility.
+schema_version: 1
+id: incidents
+chip: =incidents
+title: Active Incidents
+icon: alert-triangle
+description: PagerDuty + Datadog + ServiceNow incidents in one list.
+emits: Incident
+auth_profile_ref: pagerduty_user
+
+requires:
+  - mcp: pagerduty
+    version: ^1
+    tools: [list_incidents, ack_incident]
+    scopes: [incidents.read, incidents.write]
+  - mcp: datadog
+    version: ^1
+    tools: [list_alerts]
+    scopes: [monitors.read]
+  - mcp: servicenow
+    version: ^1
+    tools: [query]
+    scopes: [incident.read]
+
+scopes:
+  - id: all
+    label: All active incidents
+    default: true
+    flow:
+      - parallel:
+          - call:
+              kind: mcp
+              mcp: pagerduty
+              tool: list_incidents
+              args:
+                status: triggered
+            out: pd
+          - call:
+              kind: mcp
+              mcp: datadog
+              tool: list_alerts
+              args:
+                state: alert
+            out: dd
+          - call:
+              kind: mcp
+              mcp: servicenow
+              tool: query
+              args:
+                table: incident
+                query: 'active=true^stateIN1,2,3'
+            out: sn
+        tolerate_failures: true
+      - merge:
+          inputs:
+            - { from: pd, path: /incidents, tag: pagerduty }
+            - { from: dd, path: /alerts,    tag: datadog }
+            - { from: sn, path: /result,    tag: servicenow }
+          schema:
+            id:
+              pagerduty: id
+              datadog: id
+              servicenow: number
+            title:
+              pagerduty: title
+              datadog: alert_name
+              servicenow: short_description
+            severity:
+              pagerduty: urgency
+              datadog: priority
+              servicenow: severity
+            opened:
+              pagerduty: created_at
+              datadog: triggered_at
+              servicenow: opened_at
+            url:
+              pagerduty: html_url
+              datadog: url
+              servicenow: link
+          source_tag_field: source
+          dedupe_by: [title]
+          sort_by: opened
+          sort_order: desc
+        out: rows
+      - emit: rows
+
+filters: []
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.url}}'
+
+  - id: ack
+    kind: tool
+    target: row
+    label: Acknowledge
+    icon: check-circle
+    confirm: 'Acknowledge {{row.title}}? (PagerDuty only)'
+    flow:
+      - call:
+          kind: mcp
+          mcp: pagerduty
+          tool: ack_incident
+          args:
+            id: '{{row.id}}'
+        out: r
+      - emit: r
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: source
+  list_fields:
+    - severity
+    - title
+    - source
+    - opened
+  search_fields:
+    - title
+    - source
+  sort_field: opened
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      subtitle: '{{row.source}} | sev {{row.severity}}'
+      fields:
+        - { label: Opened, value: '{{row.opened | date:''rel''}}' }
+        - { label: Source, value: '{{row.source | upper}}' }
+        - { label: Severity, value: '{{row.severity}}' }
+      actions:
+        - open
+        - ack
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

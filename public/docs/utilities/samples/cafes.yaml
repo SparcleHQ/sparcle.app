@@ -1,0 +1,90 @@
+# =cafes — cafes near the user's office, via OpenStreetMap Overpass API.
+#
+# Reference manifest for the 1P IDENTITY-PASSTHROUGH pattern. The office
+# coordinates flow from {{user.attrs.office_lat/lon}} when wired against a
+# real IdP/directory (Entra / Google Workspace / Okta); the `default:'...'`
+# fallback supplies a San Francisco HQ location so the demo works for a
+# personal Google account too. In a real 1P deployment the `url:` would
+# point at your /api/cafes endpoint and the request would carry user
+# identity headers (e.g. X-Bolt-Identity: {{user.email}}, X-Bolt-Tenant:
+# {{org.id}}) — the manifest pattern is identical.
+schema_version: 1
+id: cafes
+chip: =cafes
+title: Office Cafes
+icon: coffee
+description: Cafes near your office via OpenStreetMap.
+placeholder_examples:
+  - "with wifi"
+  - "outdoor seating"
+  - "Starbucks"
+  - "open right now"
+emits: Place
+auth_profile_ref: osm_public
+
+scopes:
+  - id: nearby
+    label: Near my office
+    default: true
+    flow:
+      - call:
+          kind: http
+          method: GET
+          url: https://overpass-api.de/api/interpreter
+          query:
+            data: '[out:json][timeout:15];node["amenity"~"cafe|coffee_shop"](around:1500,{{user.attrs.office_lat | default:''37.7849''}},{{user.attrs.office_lon | default:''-122.4094''}});out body 30;'
+          headers:
+            User-Agent: 'Bolt/{{org.name | default:''demo''}} (bolt@sparcle.app)'
+        out: r
+      - emit: r
+        path: /elements
+
+filters: []
+
+actions:
+  - id: open_map
+    kind: url
+    target: row
+    label: Open in Map
+    icon: map
+    url_template: 'https://www.openstreetmap.org/?mlat={{row.lat}}&mlon={{row.lon}}#map=18/{{row.lat}}/{{row.lon}}'
+  - id: directions
+    kind: url
+    target: row
+    label: Directions
+    icon: navigation
+    url_template: 'https://www.google.com/maps/dir/?api=1&destination={{row.lat | url_escape}},{{row.lon | url_escape}}'
+
+presentation:
+  widget: list
+  title_field: tags.name
+  subtitle_field: tags.cuisine
+  list_fields:
+    - tags.name
+    - tags.cuisine
+    - tags.internet_access
+    - tags.opening_hours
+  search_fields:
+    - tags.name
+    - tags.brand
+    - tags.cuisine
+  searchable: true
+  sort_field: tags.name
+  sort_order: asc
+  row_key_field: id
+  right_widget:
+    kind: map
+    mode: selected_row
+    bind:
+      lat: '{{row.lat}}'
+      lon: '{{row.lon}}'
+      pin_label: '{{row.tags.name | default:''Cafe'' | truncate:60}}'
+      actions:
+        - open_map
+        - directions
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

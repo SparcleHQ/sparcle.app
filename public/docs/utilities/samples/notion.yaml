@@ -1,0 +1,65 @@
+schema_version: 1
+id: notion
+chip: =notion
+title: Notion
+icon: file-text
+description: Search Notion pages across your workspaces.
+emits: Document
+auth_profile_ref: notion_user
+
+requires:
+  - mcp: notion
+    version: ^1
+    tools: [search]
+    scopes: [read_content]
+
+scopes:
+  - id: search
+    label: Search pages
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: notion
+          tool: search
+          args:
+            query: '{{query}}'
+            limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /results
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Notion
+    icon: external_link
+    url_template: '{{row.url}}'
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: parent_title
+  list_fields: [title, parent_title, last_edited_time]
+  search_fields: [title]
+  sort_field: last_edited_time
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      subtitle: '{{row.parent_title | default:''-''}}'
+      fields:
+        - { label: Last edited, value: '{{row.last_edited_time | date:''rel''}}' }
+        - { label: Author, value: '{{row.last_edited_by.name | default:''-''}}' }
+      actions: [open]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

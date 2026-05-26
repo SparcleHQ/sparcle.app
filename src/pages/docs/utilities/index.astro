@@ -1,0 +1,123 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Hero from "../../../components/ui/Hero.astro";
+import PageSection from "../../../components/ui/PageSection.astro";
+import CardGrid from "../../../components/ui/CardGrid.astro";
+import Card from "../../../components/ui/Card.astro";
+import Pill from "../../../components/ui/Pill.astro";
+import samples from "../../../data/utility-samples.json";
+
+// Utilities docs landing — a router page.
+// Two tracks: no-code (Use a sample) vs engineer (Author your own).
+// Keep it terse. Real content lives one click away.
+
+const sampleCount = samples.length;
+---
+<BaseLayout
+  title="Utilities: Bundled Integrations and Custom Manifests | Sparcle"
+  description="Bolt utilities are launcher chips backed by declarative YAML manifests. Use a bundled integration from the gallery, or author a custom utility against your own MCP servers and HTTP endpoints."
+  canonical="https://sparcle.app/docs/utilities"
+>
+  <main class="page-utilities">
+    <Hero
+      eyebrow="Documentation · Utilities"
+      title="Utilities."
+      lede="Launcher chips backed by declarative YAML manifests. Each one runs MCP tool calls or HTTP fetches, emits typed rows (Person, Issue, Document, ...), and renders them in the launcher and the right rail. Two ways to get one running."
+    >
+      <Pill href="/docs/utilities/gallery" variant="brand" size="lg">Browse sample integrations &rarr;</Pill>
+      <Pill href="/docs/utilities/quickstart" variant="neutral" size="lg">Write your first custom utility &rarr;</Pill>
+      <Pill href="/docs/utilities/spec" variant="neutral" size="lg">Full spec &rarr;</Pill>
+    </Hero>
+
+    <PageSection stripe="b">
+      <CardGrid cols={2}>
+        <Card title="Use a sample">
+          <p>
+            No code required. Pick from {sampleCount} bundled manifests covering common
+            sources like Jira, Salesforce, Slack, Notion, Linear, GitHub, and more.
+            Enable one in the Gallery, sign in to the source over OAuth, and the chip
+            shows up in your launcher.
+          </p>
+          <p>
+            Best when an existing source matches your need and you want the
+            shortest path to value.
+          </p>
+          <p>
+            <a href="/docs/utilities/gallery"><strong>Browse the gallery &rarr;</strong></a>
+          </p>
+        </Card>
+        <Card title="Author your own">
+          <p>
+            Write a YAML manifest that calls your own MCP servers or public HTTP
+            endpoints, then bind the response to a typed row shape. The wizard
+            introspects MCP tools and helps you bind fields by point-and-click;
+            the YAML side panel is there when you want full control.
+          </p>
+          <p>
+            Best when you have an internal API, a custom MCP server, or a source
+            we don't bundle.
+          </p>
+          <p>
+            <a href="/docs/utilities/quickstart"><strong>Quickstart walkthrough &rarr;</strong></a>
+            &nbsp;·&nbsp;
+            <a href="/docs/utilities/spec"><strong>Full manifest spec (v1) &rarr;</strong></a>
+          </p>
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      title="What's in the box"
+      lede="Every utility, bundled or custom, shares the same primitives. Once you know one manifest you know them all."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        <Card title="Scopes">
+          Sub-commands a user can pick after typing the chip. <code>=jira my</code>,
+          <code>=jira sprint</code>, <code>=jira PROJ-123</code> are three scopes
+          under one chip.
+        </Card>
+        <Card title="Flow DAG">
+          Declarative steps: <code>call</code>, <code>parallel</code>, <code>merge</code>,
+          <code>transform</code>, <code>emit</code>. No code, no callbacks. The runtime
+          handles concurrency, retries, and timeouts.
+        </Card>
+        <Card title="Typed emits">
+          Rows come out as a canonical type (<code>Person</code>, <code>Issue</code>,
+          <code>Document</code>, <code>File</code>, <code>Event</code>, ...). The
+          launcher and right rail know how to render every type.
+        </Card>
+        <Card title="Per-user OAuth">
+          Auth is per-user OAuth. No service accounts, ever. Every action a utility
+          takes is attributable to the human who ran it.
+        </Card>
+        <Card title="Actions on rows">
+          Typed actions (<code>url</code>, <code>tool</code>, <code>utility</code>,
+          <code>composer</code>) let users open, edit, or pipe rows into the next
+          step without leaving the launcher.
+        </Card>
+        <Card title="Audit by default">
+          Every call, every emit, every action lands in the same audit chain as
+          the rest of Bolt + Aeira. Nothing in a utility manifest bypasses it.
+        </Card>
+      </CardGrid>
+    </PageSection>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-utilities code {
+    font-family: var(--font-mono, "SF Mono", Menlo, Consolas, monospace);
+    font-size: 0.88em;
+    padding: 0.08em 0.35em;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+  }
+  .page-utilities .card__body p {
+    margin: 0 0 0.75rem;
+  }
+  .page-utilities .card__body p:last-child {
+    margin-bottom: 0;
+  }
+</style>

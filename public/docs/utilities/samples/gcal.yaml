@@ -1,0 +1,74 @@
+schema_version: 1
+id: gcal
+chip: =gcal
+title: Google Calendar
+icon: calendar
+description: Show today's events from your primary calendar.
+emits: Event
+auth_profile_ref: gcal_user
+
+requires:
+  - mcp: google-calendar
+    version: ^1
+    tools: [list_events]
+    scopes: [calendar.events.read]
+
+scopes:
+  - id: today
+    label: Today's events
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: google-calendar
+          tool: list_events
+          args:
+            calendar_id: primary
+            time_min: today
+            time_max: tomorrow
+            limit: '{{limit}}'
+        out: r
+      - emit: r
+        path: /events
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open
+    icon: external_link
+    url_template: '{{row.htmlLink}}'
+
+  - id: join
+    kind: url
+    target: row
+    label: Join
+    icon: video
+    url_template: '{{row.hangoutLink | default:row.location}}'
+
+presentation:
+  widget: list
+  title_field: summary
+  subtitle_field: start.dateTime
+  list_fields: [start.dateTime, summary, location]
+  search_fields: [summary]
+  sort_field: start.dateTime
+  sort_order: asc
+  row_key_field: id
+  searchable: true
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: '{{row.summary}}'
+      subtitle: '{{row.start.dateTime | date:''short''}}'
+      fields:
+        - { label: When, value: '{{row.start.dateTime | date:''short''}} - {{row.end.dateTime | date:''short''}}' }
+        - { label: Where, value: '{{row.location | default:''-''}}' }
+      actions: [open, join]
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

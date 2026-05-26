@@ -29,20 +29,37 @@ DST_SAMPLES_DIR="${DST_REPO}/public/docs/utilities/samples"
 DST_INDEX="${DST_REPO}/src/data/utility-samples.json"
 
 # --- pre-flight ----------------------------------------------------------------
-[[ -f "${SRC_SPEC}" ]]      || { echo "missing source spec: ${SRC_SPEC}" >&2; exit 1; }
-[[ -d "${SRC_MANIFESTS_DIR}" ]] || { echo "missing source manifests dir: ${SRC_MANIFESTS_DIR}" >&2; exit 1; }
+# In environments where bolt-api isn't checked out alongside (Cloudflare Pages
+# build container, CI runners that only clone this repo, contributors who don't
+# have bolt-api locally), skip the sync and trust the pre-synced artifacts that
+# are already committed to this repo. The script must exit 0 here, not 1 —
+# `set -e` + non-zero exit from a prebuild step kills the entire `astro build`
+# and Cloudflare serves the previous successful deploy indefinitely.
+if [[ ! -f "${SRC_SPEC}" || ! -d "${SRC_MANIFESTS_DIR}" ]]; then
+  echo "sync-docs: source repo not present (${SRC_REPO}); using committed snapshot of"
+  echo "  src/content/utility-manifest-spec.md + public/docs/utilities/samples/*.yaml +"
+  echo "  src/data/utility-samples.json. Run from a checkout with bolt-api alongside"
+  echo "  to refresh."
+  exit 0
+fi
 
 mkdir -p "$(dirname "${DST_SPEC}")"
 mkdir -p "$(dirname "${DST_INDEX}")"
 mkdir -p "${DST_SAMPLES_DIR}"
 
 # --- 1. spec markdown ----------------------------------------------------------
+# Source uses bolt-api's repo-relative paths like `examples/utility-jira.yaml`,
+# but the site serves samples at `/docs/utilities/samples/jira.yaml` (no
+# `utility-` prefix). Rewrite during sync so deep links work.
 {
   printf '%s\n' '<!--'
   printf '%s\n' '  synced from bolt-api/docs/UTILITY_MANIFEST.md by scripts/sync-docs.sh'
   printf '%s\n' '  do not edit by hand — edits will be overwritten on next build'
   printf '%s\n' '-->'
-  cat "${SRC_SPEC}"
+  sed -E \
+    -e 's#\(examples/utility-([a-z0-9-]+)\.yaml\)#(/docs/utilities/samples/\1.yaml)#g' \
+    -e 's#\[examples/utility-([a-z0-9-]+)\.yaml\]#[samples/\1.yaml]#g' \
+    "${SRC_SPEC}"
 } > "${DST_SPEC}"
 
 # --- 2. manifest YAML samples --------------------------------------------------

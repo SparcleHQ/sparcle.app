@@ -786,19 +786,19 @@ A built-in mock MCP server replays fixture JSON for any `tools/list` and `tools/
 
 ### 15.1 `=jira` (single MCP, multiple scopes)
 
-See [examples/utility-jira.yaml](examples/utility-jira.yaml) (shipped with bundled catalog).
+See [samples/jira.yaml](/docs/utilities/samples/jira.yaml) (shipped with bundled catalog).
 
 ### 15.2 `=team` (Person type, composite actions)
 
-See [examples/utility-team.yaml](examples/utility-team.yaml).
+See [samples/team.yaml](/docs/utilities/samples/team.yaml).
 
 ### 15.3 `=incidents` (multi-MCP parallel + merge)
 
-See [examples/utility-incidents.yaml](examples/utility-incidents.yaml).
+See [samples/incidents.yaml](/docs/utilities/samples/incidents.yaml).
 
 ### 15.4 `=cafes` (HTTP-only public API, type Place)
 
-See [examples/utility-cafes.yaml](examples/utility-cafes.yaml).
+See [samples/cafes.yaml](/docs/utilities/samples/cafes.yaml).
 
 ---
 

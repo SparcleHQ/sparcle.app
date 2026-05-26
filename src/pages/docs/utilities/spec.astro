@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { Content as SpecContent, headings } from "../../../content/utility-manifest-spec.md";
+import { Content as SpecContent, getHeadings } from "../../../content/utility-manifest-spec.md";
 
 // Utility manifest spec — full reference, rendered from the synced markdown.
 //
@@ -18,7 +18,7 @@ import { Content as SpecContent, headings } from "../../../content/utility-manif
 // Build a flat ToC of h2 + h3 only; depth 1 is the page title (already in
 // the markdown, also rendered as h1), depth >= 4 is too granular for a side
 // rail.
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const toc = getHeadings().filter((h) => h.depth === 2 || h.depth === 3);
 ---
 <BaseLayout
   title="Utility Manifest Spec (v1) | Sparcle"

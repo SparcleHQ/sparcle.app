@@ -1,0 +1,175 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+import Pill from "../../components/ui/Pill.astro";
+import Prose from "../../components/ui/Prose.astro";
+---
+<BaseLayout
+  title="Retrieval: ACL-gated Corpus Search on Aeira | Sparcle"
+  description="Retrieval is Bolt's indexed-corpus integration surface, powered by Aeira. Connectors ingest your sources. Aeira indexes them. ACLs gate the data at retrieval, not as a postprocess filter. Fast at query time. Full docs coming as the surface ships."
+  canonical="https://sparcle.app/docs/retrieval"
+>
+  <main class="page-retrieval">
+    <Hero
+      eyebrow="Documentation &middot; Mode 3 &middot; Roadmap"
+      title="Retrieval."
+      lede="The indexed-corpus integration surface. Powered by Aeira. Connectors ingest your sources, Aeira indexes them, ACLs gate the data at retrieval. Fast at query time, cheap per query."
+    >
+      <a href="/docs/integrate" class="btn btn-primary btn-lg">
+        See all three surfaces
+      </a>
+      <a href="/docs/utilities" class="btn btn-secondary btn-lg">
+        Start with Apps today &rarr;
+      </a>
+    </Hero>
+
+    <PageSection stripe="b" width="prose">
+      <div class="roadmap-banner">
+        <Pill variant="brand" size="sm">Production today &middot; docs landing</Pill>
+        <p>
+          The Retrieval engine is in production with a deep data-ingestor
+          catalog, ACL-aware hybrid search, and customer-tunable ranking. This
+          page covers what ships today. The full public API reference and
+          authoring docs land here as the surface stabilizes. See
+          <a href="/architecture">the architecture page</a> for Aeira's
+          ACL-aware index in more depth, or <a href="/integrations">the
+          integrations catalog</a> for vendor coverage.
+        </p>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Capabilities"
+      title="What Retrieval ships today."
+      lede="Concrete capabilities running in customer deployments. The public authoring API and detailed docs are still being stabilized; the engine underneath is not."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        <Card title="100+ in-house data ingestors">
+          Ingestors cover knowledge sources, ticketing, CRM, code, files,
+          observability, and data warehouses. New ingestors land weekly.
+          Data ingestors are distinct from MCP servers, which power Apps and
+          Agent tool calls. Many vendors offer both.
+        </Card>
+        <Card title="Airbyte bridge for the long tail">
+          Beyond the in-house ingestor catalog, the Airbyte bridge extends
+          Retrieval to hundreds more SaaS and database sources. Anything in
+          the Airbyte ecosystem can become a Retrieval source.
+        </Card>
+        <Card title="Hybrid search">
+          Keyword, vector, and entity-graph traversal in one query. The engine
+          picks the right mix per query. Customers do not have to choose a
+          search mode; they get the best of all three.
+        </Card>
+        <Card title="Customer-extensible ranking, trust, authority">
+          Relevance, recency, source quality, trust signals: all shapable
+          through policy code. The engine ships sensible defaults; customers
+          extend with their own rules. Authorization stays platform-enforced
+          and is never customer-overridable.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Architectural commitments"
+      title="The shape of Retrieval."
+      lede="Four things hold across every release of the surface. Everything else is implementation that will evolve."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        <Card title="ACLs gate at the index">
+          Authorization is an architectural property, not a postprocess filter.
+          Documents the user cannot read never enter the candidate set. Ranking
+          and authority are kept separate from authorization.
+        </Card>
+        <Card title="Authority is customer-shapable. Authorization is not.">
+          Ranking, relevance, recency, and trust signals are yours to shape.
+          Access control is enforced by the platform and is not customer-overridable.
+          Two contracts, one floor.
+        </Card>
+        <Card title="Aeira is the engine">
+          Aeira is Sparcle's retrieval and policy engine. It owns the index,
+          the authorization graph, and the audit chain. The same code paths
+          run in trial mode and in production.
+        </Card>
+        <Card title="No data leaves your perimeter">
+          The index lives where you deploy Bolt. Embeddings are generated by
+          a model you choose. Sparcle does not host a hosted-corpus tier.
+          The data stays where you put it.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Decision rule"
+      title="When to reach for Retrieval."
+      stripe="a"
+      width="prose"
+    >
+      <Prose>
+        <p>
+          Use Retrieval when the answer lives across a large corpus and the
+          right document isn't predictable from the question. If the answer
+          is in one of three known APIs, it's an App. If the answer is one of
+          ten thousand documents you've written internally over five years,
+          it's Retrieval.
+        </p>
+        <p>
+          Retrieval pairs naturally with the other two surfaces. An Agent
+          can use Retrieval as a tool to ground its reasoning. An App can
+          link to a Retrieval result as a typed row. The three surfaces are
+          composable, not exclusive.
+        </p>
+      </Prose>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      eyebrow="In the meantime"
+      title="Apps is live. Retrieval shares its primitives."
+      lede="The same identity, ACL, and audit-chain machinery you wire up for Apps today is what gates Retrieval tomorrow. Get the platform wired in now, light up Retrieval when the surface ships."
+    >
+      <a href="/docs/utilities/quickstart" class="btn btn-primary btn-xl">
+        Try Apps today
+      </a>
+      <a href="/architecture" class="btn btn-secondary btn-xl">
+        Read the architecture
+      </a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  /* Same roadmap-banner treatment as /docs/agents. Scoped to the page so the
+     two surfaces can diverge later without leaking into each other. */
+  .page-retrieval .roadmap-banner {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.3rem;
+  }
+  .page-retrieval .roadmap-banner > .pill {
+    margin-top: 0.15rem;
+  }
+  .page-retrieval .roadmap-banner p {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+  @media (max-width: 600px) {
+    .page-retrieval .roadmap-banner {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+  }
+</style>

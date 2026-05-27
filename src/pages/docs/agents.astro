@@ -1,0 +1,310 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+import Prose from "../../components/ui/Prose.astro";
+---
+<BaseLayout
+  title="Agents: The Agent Platform for Your Org | Sparcle"
+  description="Bolt is the agent platform: discovery, routing, identity, audit, and composition. Your teams build specialized agents wherever they want; Bolt finds them, connects them, and routes user queries to the right one based on skills, keywords, and triggers. Three flavors: Local (define in Bolt or sync from your repo), Remote (wrap an existing service), System (shipped out of the box)."
+  canonical="https://sparcle.app/docs/agents"
+>
+  <main class="page-agents">
+    <Hero
+      eyebrow="Documentation · Mode 2 · Available now"
+      title="Agents."
+      lede="Bolt is the superagent. The interface your users talk to. It handles tasks on its own when it can, and delegates to specialized agents your teams ship when they're a better fit. Local, Remote, or System: Bolt discovers them, routes to them, and composes them as subagents."
+    >
+      <a href="/docs/integrate" class="btn btn-primary btn-lg">
+        See all three surfaces
+      </a>
+      <a href="/docs/utilities" class="btn btn-secondary btn-lg">
+        Compare with Apps &rarr;
+      </a>
+    </Hero>
+
+    <PageSection
+      eyebrow="The architecture"
+      title="Bolt at the top. Subagents below."
+      lede="Your SRE team ships an incident-triaging agent. The Bolt admin enables it for engineering. Now any engineer asking about an incident is routed to that agent automatically. Multiply by every team, every persona, every domain. One interface, every team's expertise one routed query away."
+      stripe="b"
+    >
+      <CardGrid cols={3}>
+        <Card eyebrow="SRE" title="Incident triaging">
+          On-call engineer asks "what broke?" Bolt routes to the SRE team's
+          triaging agent. It correlates alerts, recent deploys, and runbook
+          guidance, then proposes next steps.
+        </Card>
+        <Card eyebrow="UX Design" title="Design review">
+          A PM asks "is this flow accessible?" Bolt routes to the design
+          team's review agent. It runs heuristics, references your system,
+          and flags issues against your design guidelines.
+        </Card>
+        <Card eyebrow="Data" title="Data quality checks">
+          An analyst asks "is this dashboard right?" Bolt routes to the data
+          team's quality agent. It traces lineage, validates row counts, and
+          highlights drift since the last verified snapshot.
+        </Card>
+        <Card eyebrow="Security" title="Threat hunting">
+          A SOC analyst asks "is this alert real?" Bolt routes to the
+          security team's threat-hunt agent. It pulls related telemetry,
+          checks IOCs, and recommends an action.
+        </Card>
+        <Card eyebrow="Legal" title="Contract review">
+          A salesperson asks "can we accept these terms?" Bolt routes to
+          legal's contract agent. It compares against your playbook, flags
+          deviations, and suggests fallbacks.
+        </Card>
+        <Card eyebrow="Finance" title="Expense and policy">
+          An employee asks "can I expense this?" Bolt routes to finance's
+          policy agent. It checks your written policy, your manager's
+          approval limits, and the team's budget state.
+        </Card>
+      </CardGrid>
+      <p class="enables-note" style="margin: 2.5rem auto 0; max-width: 56ch; text-align: center; font-size: 1.05rem; line-height: 1.6;">
+        The user does not need to know which agent handled their query.
+        They talk to Bolt. <strong style="color: var(--brand-primary);">Bolt decides.</strong>
+      </p>
+    </PageSection>
+
+    <PageSection
+      stripe="a"
+      width="prose"
+    >
+      <Prose>
+        <p>
+          Bolt is the top-level agent the user interacts with. It can answer
+          directly when the question is in its lane: pick the right App, hit
+          Retrieval, call the LLM with your tools. When a specialized agent
+          is a better fit, Bolt delegates and treats it as a subagent.
+          Identity, ACLs, and the audit chain follow the call through the
+          chain.
+        </p>
+        <p>
+          Most agent platforms ask you to migrate every agent your teams
+          write into their runtime. Bolt does the opposite. Build agents
+          wherever makes sense for your team. Publish them, or wrap services
+          you already run, or define them in the Bolt admin. Bolt becomes
+          the supervisor: it discovers the agents, routes user queries to
+          the right one, composes calls when a single agent isn't enough,
+          and records the whole chain.
+        </p>
+      </Prose>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Three flavors"
+      title="Local, Remote, System."
+      lede="Bolt does not force one way of building agents. Define one in-app, sync a directory your team publishes to, point at an existing service, or enable a bundled one. All four paths produce an Agent that Bolt can route to."
+      stripe="b"
+    >
+      <CardGrid cols={3}>
+        <Card eyebrow="Flavor 1" title="Local agents" accent="success">
+          <p>
+            Define an agent in the Bolt admin, or sync a directory your team
+            publishes to (<code>~/.bolt</code> by default). Each agent gets a
+            name, description, system prompt, trigger keywords, max iterations,
+            and scope (Personal or Organization). Bolt runs the agent loop
+            with your model. Your tokens, your bill.
+          </p>
+          <p>
+            Best when your engineering or ops team is shipping specialized
+            internal agents and wants them auto-discovered.
+          </p>
+        </Card>
+
+        <Card eyebrow="Flavor 2" title="Remote agents" accent="success">
+          <p>
+            Already have an agent service? LangChain, an OpenAI Assistant, a
+            Slack bot, an internal agent platform, a vendor product. Point
+            Bolt at it as a Remote agent. Bolt becomes the launcher, identity,
+            ACL, and audit layer. Your existing service does the reasoning.
+            Zero migration.
+          </p>
+          <p>
+            Best when you have AI investments you don't want to rewrite.
+          </p>
+        </Card>
+
+        <Card eyebrow="Flavor 3" title="System agents" accent="success">
+          <p>
+            Three bundled agents ship with Bolt today: <strong>Meeting Prep</strong>
+            (structured briefings for upcoming meetings), <strong>Email
+            Drafter</strong> (responses by analyzing thread context and tone),
+            and <strong>Research Assistant</strong> (deep research across web
+            and enterprise knowledge).
+          </p>
+          <p>
+            Best when you want value on day one without authoring anything.
+          </p>
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Routing"
+      title="How Bolt picks the right agent."
+      lede="Build as many specialized agents as your teams want. Bolt routes user queries to the right one automatically. Authors declare what their agent is for; the router does the matching."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        <Card title="Trigger keywords">
+          Each agent declares a comma-separated list of keywords. When a user
+          types or @mentions one of them, Bolt routes the query to that agent.
+          Simple, predictable, deterministic.
+        </Card>
+        <Card title="Skills">
+          Agents declare the skills they expose (a domain, a verb, a capability).
+          Bolt matches user intent against the skill registry and picks the
+          best-fit agent for the task.
+        </Card>
+        <Card title="Scope">
+          Personal agents are visible only to their author. Organization
+          agents show up for everyone (or for ACL-matched personas). Your IdP
+          groups decide who sees what.
+        </Card>
+        <Card title="Explicit invocation">
+          The user can always override. Slash commands, chip selection, and
+          direct mentions skip the router and target a specific agent.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Discovery and composition"
+      title="Publish once. Compose freely."
+      lede="Bolt is built so that engineering teams ship agents the same way they ship code: a manifest in a directory, a sync, a working agent. Once an agent is registered, other agents can call it as a subagent."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        <Card title="Publish from your repo">
+          Drop an agent manifest into the Bolt sync directory and the next
+          sync picks it up. Versioning lives in your repo. Org-wide
+          distribution is one push.
+        </Card>
+        <Card title="Discovery is automatic">
+          Local agents are visible to the user (and the router) as soon as
+          they're synced. Remote agents register once and stay reachable.
+          System agents ship enabled.
+        </Card>
+        <Card title="Subagents and composition">
+          An agent can call another agent as a tool. A coordinator can fan
+          out to specialists. A specialist can defer to a higher-context
+          agent. Identity, ACLs, and the audit chain follow the chain.
+        </Card>
+        <Card title="System events as triggers">
+          Agents fire on user queries and on system events: new email,
+          calendar invite, alert, webhook, watch result. The same agent,
+          two front doors.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Architectural commitments"
+      title="What holds across every agent."
+      lede="Whichever flavor, whichever team built it, whichever model it uses, the platform guarantees are constant."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        <Card title="Bring your own model">
+          OpenAI, Anthropic, Google, local Ollama, on-prem open-weight. The
+          LLM is at the boundary, not at the core. Bolt does not host or
+          fine-tune your model. Remote agents may use their own model
+          entirely. Bolt does not constrain you.
+        </Card>
+        <Card title="Tools come from the same place as Apps">
+          Local agent tools are the same MCP and HTTP calls Apps use. One
+          manifest format, two execution modes. An Agent can call any tool
+          any App could call, gated by the same ACLs. Remote agents reach
+          their own tools, but identity carries through.
+        </Card>
+        <Card title="PII masks at the LLM boundary">
+          For local agents, tools see real values; the model sees redacted
+          ones. The masking contract is enforced before the prompt is built
+          and verified after the response comes back. For remote agents, the
+          same contract is honored at the wire.
+        </Card>
+        <Card title="Audit chain captures every step">
+          Every routing decision, every reasoning turn, every tool selection,
+          every tool call, every subagent invocation. The same chain Apps
+          and Retrieval use. Remote and subagent calls are recorded with the
+          requesting user's identity through the full chain.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Decision rule"
+      title="When to reach for an Agent."
+      stripe="b"
+      width="prose"
+    >
+      <Prose>
+        <p>
+          Use an Agent when the question doesn't have a known shape. If you
+          could write the query as a fixed flow ("get my Jira tickets, then
+          join against Linear, then summarize"), it's an App. If the question
+          is "what should our team prioritize this sprint and why," it's an
+          Agent.
+        </p>
+        <p>
+          Agents cost tokens. That's not a bug. It's the budget knob you
+          control: the customer decides which queries deserve a model and
+          which don't. On most agent platforms every query goes through an
+          LLM, whether reasoning is needed or not. On Bolt you opt in.
+        </p>
+        <p>
+          The platform wedge is composition. Most agent products want to be
+          the one agent your team uses. Bolt assumes you'll have many, each
+          specialized for a domain, and provides the substrate that lets
+          them be discovered, routed to, and composed.
+        </p>
+      </Prose>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      eyebrow="Get started"
+      title="Build many. Route smart. Compose freely."
+      lede="Open the Bolt admin under Core Setup, Agents to define a Local agent, point at a Remote one, sync from a directory your team publishes to, or enable a System agent. Anything you author once becomes a tool any other agent can call."
+    >
+      <a href="/docs/integrate" class="btn btn-primary btn-xl">
+        Compare all three surfaces
+      </a>
+      <a href="/docs/utilities" class="btn btn-secondary btn-xl">
+        Read about Apps
+      </a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-agents code {
+    font-family: var(--font-mono, "SF Mono", Menlo, Consolas, monospace);
+    font-size: 0.88em;
+    padding: 0.08em 0.35em;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+  }
+  .page-agents .enables-note {
+    margin: 2rem auto 0;
+    max-width: 56ch;
+    text-align: center;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+  .page-agents .enables-note strong {
+    color: var(--brand-primary);
+  }
+  /* Two-paragraph card bodies (Three Flavors): collapse the first p's
+     browser-default top margin so text sits flush with card padding. */
+  .page-agents .card__body p:first-child {
+    margin-top: 0;
+  }
+</style>

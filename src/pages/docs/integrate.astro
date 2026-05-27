@@ -1,0 +1,298 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+// Platform-story landing. Three integration surfaces, three cost/latency
+// profiles. Pick the surface per use case; security is constant.
+//
+// Mode 1 is shipped (Apps = /docs/utilities). Mode 2 (Agents) and Mode 3
+// (Retrieval) are stub pages today; they'll grow as content lands.
+
+// Scenario buckets per mode. Reframed from "given X, use Z" (table) to
+// "reach for Z when X" (cards) — easier to scan, no fragile table CSS.
+const fitByMode = [
+  {
+    mode: "Apps",
+    eyebrow: "Reach for Apps when",
+    accent: "success",
+    scenarios: [
+      "You have Jira, Slack, GitHub, or Salesforce APIs your team uses daily and want one-click access from the launcher.",
+      "You have a custom 1P internal API or MCP server and want low-code authoring with instant queries.",
+      "The question has a known shape and you don't want to pay tokens to answer it.",
+    ],
+  },
+  {
+    mode: "Agents",
+    eyebrow: "Reach for Agents when",
+    accent: "success",
+    scenarios: [
+      "The question is vague or open-ended and needs an assistant to plan and execute.",
+      "Your teams are shipping specialized internal agents and you want Bolt to discover and route to them.",
+      "You already have an agent service (LangChain, OpenAI Assistant, internal platform) you want Bolt to call.",
+    ],
+  },
+  {
+    mode: "Retrieval",
+    eyebrow: "Reach for Retrieval when",
+    accent: "default",
+    scenarios: [
+      "You have millions of internal documents and want to search them with ACLs respected.",
+      "The corpus is large and context matters, and you want RAG with real authorization gating.",
+      "The right document isn't predictable from the question.",
+    ],
+  },
+];
+---
+<BaseLayout
+  title="Bring your stack into Bolt: Apps, Agents, Retrieval | Sparcle"
+  description="Bolt offers three integration surfaces with three cost and latency profiles: Apps (declarative, no LLM, zero tokens), Agents (LLM-driven reasoning), and Retrieval (Aeira-indexed corpus search). Pick the surface per use case. Identity, ACLs, and audit chain apply to all three."
+  canonical="https://sparcle.app/docs/integrate"
+>
+  <main class="page-integrate">
+    <Hero
+      eyebrow="Documentation"
+      title="Bring your stack into <strong>Bolt</strong>."
+      lede="Bolt is the superagent your users talk to. Three integration surfaces let you bring your stack to it: Apps (declarative, no LLM tax), Agents (LLM reasoning, delegate to subagents your teams build), Retrieval (Aeira-indexed corpus search). Pick the surface per query. Your identity, your ACLs, and your audit chain apply to all three."
+    >
+      <a href="/docs/utilities" class="btn btn-primary btn-lg">
+        Start with Apps &rarr;
+      </a>
+      <a href="#surfaces" class="btn btn-secondary btn-lg">
+        See the three surfaces
+      </a>
+    </Hero>
+
+    <PageSection
+      id="surfaces"
+      eyebrow="The three surfaces"
+      title="Three ways to bring your stack in."
+      lede="Same security model, same audit chain, same identity. Different cost, latency, and authoring profile. Pick per integration, not per platform."
+      stripe="b"
+    >
+      <CardGrid cols={3}>
+        <Card eyebrow="Mode 1 &middot; Available now" title="Apps" accent="success">
+          <p class="mode-tagline">
+            Declarative integrations. No LLM in the loop. Zero LLM tokens on
+            standard flows. Instant.
+          </p>
+          <ul class="mode-meta">
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Cost</span><span class="meta-val">Zero LLM tokens</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Latency</span><span class="meta-val">Instant</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Authoring</span><span class="meta-val">Wizard or YAML</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Best for</span><span class="meta-val">Known-shape queries</span></li>
+          </ul>
+          <p slot="footer">
+            <a href="/docs/utilities"><strong>Explore Apps &rarr;</strong></a>
+          </p>
+        </Card>
+
+        <Card eyebrow="Mode 2 &middot; Available now" title="Agents" accent="success">
+          <p class="mode-tagline">
+            The agent platform for your org. Define agents in Bolt, sync from
+            your team's repo, or wrap services you already run. Bolt routes,
+            composes, and audits.
+          </p>
+          <ul class="mode-meta">
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Cost</span><span class="meta-val">Tokens per query</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Latency</span><span class="meta-val">Bound by LLM</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Flavors</span><span class="meta-val">Local, Remote, System</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Best for</span><span class="meta-val">Reasoning + routing</span></li>
+          </ul>
+          <p slot="footer">
+            <a href="/docs/agents"><strong>Read about Agents &rarr;</strong></a>
+          </p>
+        </Card>
+
+        <Card eyebrow="Mode 3 &middot; Roadmap" title="Retrieval">
+          <p class="mode-tagline">
+            Indexed corpus search at scale. Powered by Aeira. ACLs gate the
+            data at the index, not as a postprocess filter.
+          </p>
+          <ul class="mode-meta">
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Cost</span><span class="meta-val">Index once, query cheap</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Latency</span><span class="meta-val">Fast at query time</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Authoring</span><span class="meta-val">Connector config</span></li>
+            <li><span class="meta-key" style="display: inline-block; min-width: 5.5rem;">Best for</span><span class="meta-val">Millions of docs with ACLs</span></li>
+          </ul>
+          <p slot="footer">
+            <a href="/docs/retrieval"><strong>Read about Retrieval &rarr;</strong></a>
+          </p>
+        </Card>
+      </CardGrid>
+      <p style="margin: 2.5rem auto 0; max-width: 64ch; text-align: center; font-size: 0.98rem; line-height: 1.6; color: var(--text-body);">
+        <strong>One unified integrations catalog.</strong> Apps and Agent tools
+        run on MCP servers; Retrieval runs on data ingestors. Both kinds appear
+        side-by-side in the catalog, and many vendors (Jira, Slack, Confluence,
+        GitHub, Salesforce, and more) offer both. Connect to a source once and,
+        where the vendor supports it, get a launcher chip, an indexed corpus,
+        and a tool any Agent can call. Browse the
+        <a href="/integrations" style="color: var(--brand-primary); font-weight: 500;">full integrations catalog</a>.
+      </p>
+    </PageSection>
+
+    <PageSection
+      id="compare"
+      eyebrow="Decision guide"
+      title="Which surface fits your use case?"
+      lede="The same question can land in any of the three surfaces. Pick by how structured the query is, how much latency you tolerate, and whether the answer is worth tokens."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {fitByMode.map((bucket) => (
+          <Card eyebrow={bucket.eyebrow} title={bucket.mode} accent={bucket.accent as any}>
+            <ul class="scenarios">
+              {bucket.scenarios.map((s) => <li>{s}</li>)}
+            </ul>
+          </Card>
+        ))}
+      </CardGrid>
+      <p class="compose-note" style="margin: 2.5rem auto 0; max-width: 56ch; text-align: center; font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); font-style: italic;">
+        The three surfaces compose. A workflow can use Apps to fetch
+        structured data, Retrieval to ground the answer in your corpus, and
+        an Agent to reason across the result.
+      </p>
+    </PageSection>
+
+    <PageSection
+      id="security"
+      eyebrow="Architecture as governance"
+      title="Governance is the architecture, not a feature."
+      lede="Bolt and Aeira were built with governance as the first design decision, not the last. Four commitments hold across every surface, every agent, every subagent call. They are properties of the system, not options you turn on."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        <Card title="Per-user OAuth only. No service accounts. Ever.">
+          Every call carries the requesting human's identity through the full
+          chain, including subagent delegation. An integration cannot escalate
+          beyond what the human running it can do. There is no service-account
+          mode, and there will not be one.
+        </Card>
+        <Card title="Authorization runs before the LLM, not after.">
+          ACLs gate retrieval at the index. Tool calls run with the user's
+          permissions. Documents the user cannot read never enter the candidate
+          set in the first place. Postprocess filtering is a leak surface; this
+          architecture does not have one.
+        </Card>
+        <Card title="The audit chain holds across composition.">
+          Every routing decision, every reasoning turn, every tool call, every
+          subagent invocation, every emit. Tamper-evident receipts. The same
+          chain across Apps, Agents, and Retrieval. When Bolt delegates to a
+          subagent, the chain follows.
+        </Card>
+        <Card title="The LLM is at the boundary, not at the core.">
+          Tools see real values so they work. The model sees redacted ones,
+          only when you opt in to a model. Bring your own model. Your data does
+          not leave your perimeter to train a vendor's. The system works
+          without an LLM, and works better with one.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      eyebrow="Start with what's live today"
+      title="Apps ships. Agents and Retrieval are next."
+      lede="Five minutes from gallery to chip-in-launcher for a bundled App. Fifteen minutes for your first custom manifest. Agents and Retrieval grow into the same surface as they land."
+    >
+      <a href="/docs/utilities/quickstart" class="btn btn-primary btn-xl">
+        Write your first App
+      </a>
+      <a href="/docs/utilities/gallery" class="btn btn-secondary btn-xl">
+        Browse 36 integrations
+      </a>
+      <p slot="note">
+        Or read the <a href="/docs/utilities/spec">full manifest spec</a>.
+      </p>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  /* Mode card body: tagline -> compact meta list -> footer link.
+     We deliberately avoid the dense dl + bullets pattern; the comparison
+     panel below the cards carries the cross-mode tradeoff story. */
+  .page-integrate .mode-tagline {
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--text-heading);
+    margin: 0 0 1.1rem;
+    line-height: 1.55;
+  }
+  .page-integrate .mode-meta {
+    list-style: none;
+    padding: 1rem 0 0;
+    margin: 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .page-integrate .mode-meta li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding: 0.3rem 0;
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+  .page-integrate .mode-meta li + li {
+    border-top: 1px dashed var(--border-subtle);
+  }
+  .page-integrate .mode-meta .meta-key {
+    flex: 0 0 5.5rem;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .page-integrate .mode-meta .meta-val {
+    flex: 1 1 auto;
+    color: var(--text-body);
+    font-weight: 500;
+  }
+
+  /* Scenario list inside each decision-guide card. */
+  .page-integrate .scenarios {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .page-integrate .scenarios li {
+    position: relative;
+    padding: 0.45rem 0 0.45rem 1.1rem;
+    font-size: 0.93rem;
+    line-height: 1.5;
+    color: var(--text-body);
+  }
+  .page-integrate .scenarios li + li {
+    border-top: 1px dashed var(--border-subtle);
+  }
+  .page-integrate .scenarios li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.95rem;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    opacity: 0.6;
+  }
+  .page-integrate .compose-note {
+    margin: 1.75rem auto 0;
+    max-width: 56ch;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  /* Reset paragraph margins inside card footer slot so the link sits
+     flush with the footer's own padding (no double-spacing from default
+     `p { margin-bottom: 1rem }` plus footer padding-top). */
+  .page-integrate .card__footer p {
+    margin: 0;
+  }
+</style>

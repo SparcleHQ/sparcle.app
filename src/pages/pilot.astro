@@ -1,0 +1,342 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CardGrid from "../components/ui/CardGrid.astro";
+import Card from "../components/ui/Card.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+import Pill from "../components/ui/Pill.astro";
+import FAQ from "../components/ui/FAQ.astro";
+
+const inclusions = [
+  {
+    metric: "Up to 30",
+    label: "Real users, real teams",
+    body: "Department-scale Pilot. Up to 30 named users. Enough headcount for adoption signal to be unambiguous.",
+  },
+  {
+    metric: "90 days",
+    label: "Two weeks deploy, six weeks use, six weeks decide",
+    body: "Time to install in your infrastructure, ingest real corpora, and run on month-cycle workflows (board prep, quarter close, deal cycles).",
+  },
+  {
+    metric: "$15,000",
+    label: "Flat, all-in",
+    body: "Production deployment, founder-led onboarding, weekly check-ins, and 90 days of trial license. Optional 5+10 split (5K at kickoff, 10K at day 30). Credits against year-one annual.",
+  },
+];
+
+const youGet = [
+  "<strong>Production Bolt deployment</strong> in your infrastructure &mdash; Docker compose (single-host, <code>docker-compose.ha.yml</code>) for smaller scenarios, Helm (multi-node, multi-cluster) for larger ones. Runs in your VPC, on-prem datacenter, or your cloud account.",
+  "<strong>Aeira Dynamic tier</strong> deployed alongside &mdash; identity-bound search across the corpora you authorize: DMS, mailbox, file shares, code repos, ticketing, CRM.",
+  "<strong>Identity integration</strong> with Microsoft Entra, Google Workspace, Okta, or any OIDC provider. SCIM 2.0 server for provisioning.",
+  "<strong>MCP connectors</strong> wired to the tools your team already uses (Microsoft 365, Google Workspace, Slack, GitHub, Jira, Salesforce, Confluence, ServiceNow, and more on request).",
+  "<strong>BYO LLM</strong> &mdash; Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic, on-prem Llama, anything OpenAI-compatible. Zero token markup.",
+  "<strong>Governance enabled by default</strong> &mdash; sealed Merkle audit chain, per-tenant CMK envelopes, crypto-shred for right-to-erasure, audit-trail responses on every query.",
+  "<strong>Weekly 30-minute check-in</strong> with the founding team for the full 90 days. Dedicated Slack channel for the pilot duration.",
+  "Optional anonymized reference logo and case study (mutual approval).",
+];
+
+const inScope = [
+  "Production install in your environment (VPC / on-prem / cloud account)",
+  "Up to 30 named users with SSO",
+  "Up to 5 MCP connectors wired to your tools (more on request)",
+  "Up to 250GB of corpus ingestion (larger by scope letter)",
+  "Pre-filled SIG Lite + draft DPA + draft MSA",
+  "Architecture diagram + threat model for your security review",
+  "90 days of trial license + weekly founder time",
+];
+
+const outOfScope = [
+  "Air-gapped or classified-network install &mdash; that is the <a href=\"/pricing\">Federated Aeira tier</a>",
+  "Custom MCP connector development beyond the standard catalog",
+  "Custom Aeira reranker or authority policy beyond the 3 reference impls (available as paid Customization, not in Pilot scope)",
+  "FedRAMP / IL4 / IL5 deployment &mdash; not authorized today; talk to us about the federal roadmap",
+  "24x7 production SLA (available at Founding Customer)",
+];
+
+const faqs = [
+  {
+    question: "How is Pilot different from Discovery?",
+    answer:
+      "<p><strong>Discovery</strong> ($5K, 30 days, up to 10 seats) is the Bolt <em>trial sidecar</em> binary on user laptops &mdash; no server install. <strong>Pilot</strong> ($15K, 90 days, up to 30 seats) is a real <em>production deployment</em> in your infrastructure via Docker or Helm. Different scale, different deployment shape, different validation question. Most customers do one or the other based on team size, not both. <a href=\"/discovery-pilot\">See Discovery &rarr;</a></p>",
+  },
+  {
+    question: "Docker or Helm? How do you decide?",
+    answer:
+      "<p>Single-host <code>docker-compose.ha.yml</code> is the default for a 30-seat Pilot. Helm multi-node is the right call if you already run Kubernetes, want HA from day one, or expect to scale past 100 seats. We confirm in the architecture call before kickoff. Both ship the same product image; switching topologies later is a config change, not a re-architect.</p>",
+  },
+  {
+    question: "Does my data ever leave my network during the Pilot?",
+    answer:
+      "<p>No. The Bolt and Aeira services run on the infrastructure you control. Sparcle has no inbound or outbound access to your deployment. The only egress is from your servers to the LLM endpoint you pick. If you BYO a self-hosted model (Llama on your own GPUs, on-prem Bedrock, Azure private endpoint), even that egress stays inside your network.</p>",
+  },
+  {
+    question: "What does the Pilot fee cover?",
+    answer:
+      "<p>Production deployment effort, founder-led onboarding, weekly check-ins for 90 days, dedicated Slack support, pre-filled SIG Lite, draft DPA and MSA, and 90 days of trial license for up to 30 users. The $15K credits against year-one annual if you convert.</p>",
+  },
+  {
+    question: "Can the $15K be split?",
+    answer:
+      "<p>Yes. Default is $15K up front. If cash flow is the constraint, we offer a 5+10 split: $5,000 at kickoff and $10,000 at day 30. Same total, same scope. We will not split below 5+10 (collecting beyond day 30 changes the engagement risk too much for the price point).</p>",
+  },
+  {
+    question: "What does success look like at day 90?",
+    answer:
+      "<p>You have measurable adoption signal across the pilot users, audit logs that map cleanly to your compliance framework, and a one-page outcomes memo we sign jointly. You decide: convert to Founding Customer (40% off list, 24-month lock, with the $15K credited), continue at standard pricing, expand the scope, or end with no further obligation.</p>",
+  },
+  {
+    question: "Who needs to sign?",
+    answer:
+      "<p>Typically an Innovation Officer, AI executive, CIO, or COO with $15K-$50K signing authority. Security review (CISO) usually happens in parallel using the SIG Lite + threat model + DPA we ship before kickoff. We expect most security reviews to take 1-3 weeks; we will not start the deployment timer until you are ready.</p>",
+  },
+  {
+    question: "Can the Pilot scale past 30 seats during the 90 days?",
+    answer:
+      "<p>Yes, but the right move is to convert to Founding Customer at that point. The Pilot price is calibrated for up to 30 seats; if you need more, the price-per-seat math becomes much better under the Founding Customer 40%-off rate.</p>",
+  },
+];
+---
+
+<BaseLayout
+  title="Pilot — $15K, up to 30 seats, 90 days, production deployment | Sparcle"
+  description="The 90-day production pilot. Bolt + Aeira deployed via Docker or Helm inside your VPC, on-prem, or cloud. Up to 30 seats. Flat $15K. Founder-led."
+  canonical="https://sparcle.app/pilot"
+>
+  <main class="page-pilot">
+    <Hero
+      eyebrow="Pilot"
+      title="<strong>$15,000.</strong> Up to 30 seats. <br>90 days. Production deployment."
+      lede="The 90-day stress test. Bolt and Aeira deployed via Docker or Helm inside your VPC, on-prem, or cloud account. Real users, real corpora, real audit chain &mdash; before you commit to a multi-year Founding Customer engagement."
+    >
+      <a href="#apply" class="btn btn-primary btn-lg">Apply for Pilot</a>
+      <a href="/discovery-pilot" class="btn btn-secondary btn-lg">Smaller? See Discovery &rarr;</a>
+    </Hero>
+
+    <PageSection stripe="b">
+      <CardGrid cols={3}>
+        {inclusions.map((i) => (
+          <Card variant="proof" metric={i.metric} title={i.label}>
+            <span set:html={i.body} />
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Deployment shape"
+      title="Your infrastructure, not ours"
+      lede="Bolt Pilot is a <strong>production deployment</strong>. Same Docker images and Helm charts customers use at Founding Customer scale &mdash; just scoped to 30 seats and 90 days."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <div class="pilot-deploy-grid">
+        <div class="pilot-deploy-card">
+          <h3>Docker</h3>
+          <p class="pilot-deploy-card__sub">Single-host, high-availability</p>
+          <p>
+            <code>docker-compose.ha.yml</code> on a single Linux host (your VPC, your on-prem rack, your
+            cloud VM). Right shape for a 30-seat Pilot in most environments. Backed by Postgres + Redis,
+            both running in the compose stack.
+          </p>
+        </div>
+        <div class="pilot-deploy-card">
+          <h3>Helm</h3>
+          <p class="pilot-deploy-card__sub">Multi-node, multi-cluster</p>
+          <p>
+            Helm chart on your Kubernetes cluster (EKS, AKS, GKE, OpenShift, or self-managed).
+            Right shape if you already run K8s, need HA from day one, or expect to scale past
+            100 seats during or after the Pilot.
+          </p>
+        </div>
+      </div>
+
+      <p class="pilot-deploy-note">
+        We confirm topology in the architecture call before kickoff. Switching between Docker and Helm
+        later is a config and image change, not a re-architect &mdash; both run the same product code.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What is included"
+      title="Production, not sandbox"
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="dp-checklist">
+        {youGet.map((line) => (<li set:html={line} />))}
+      </ul>
+
+      <div class="dp-pill-strip">
+        <Pill variant="neutral" size="sm">VPC / On-prem / Cloud</Pill>
+        <Pill variant="neutral" size="sm">SSO + SCIM</Pill>
+        <Pill variant="neutral" size="sm">Sealed Merkle audit chain</Pill>
+        <Pill variant="neutral" size="sm">Per-tenant CMK</Pill>
+        <Pill variant="neutral" size="sm">$15K credits year one</Pill>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Scope"
+      title="In and out of Pilot"
+      stripe="a"
+    >
+      <CardGrid cols={2} gap="lg">
+        <article class="dp-fit-card dp-fit-card--good">
+          <div class="dp-fit-card__head">
+            <span class="dp-fit-card__badge dp-fit-card__badge--good">In scope</span>
+            <h3>What the $15K covers</h3>
+          </div>
+          <ul class="dp-fit-list">
+            {inScope.map((line) => (<li>{line}</li>))}
+          </ul>
+        </article>
+
+        <article class="dp-fit-card dp-fit-card--avoid">
+          <div class="dp-fit-card__head">
+            <span class="dp-fit-card__badge dp-fit-card__badge--avoid">Out of scope</span>
+            <h3>What the Pilot does not include</h3>
+          </div>
+          <ul class="dp-fit-list">
+            {outOfScope.map((line) => (<li set:html={line} />))}
+          </ul>
+        </article>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="How it compares"
+      title="Three on-ramps, one product"
+      stripe="b"
+    >
+      <div class="dp-compare">
+        <table class="dp-compare__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Discovery</th>
+              <th>Pilot</th>
+              <th>Founding Customer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Validates</th>
+              <td>"Does this work for my team?"</td>
+              <td>"Can we run this at scale safely?"</td>
+              <td>"We are building on this."</td>
+            </tr>
+            <tr>
+              <th scope="row">Deployment</th>
+              <td>Trial sidecar on user laptops</td>
+              <td><strong>Docker</strong> single-host or <strong>Helm</strong> multi-node in your infra</td>
+              <td>Same as Pilot + roadmap influence</td>
+            </tr>
+            <tr>
+              <th scope="row">Seats</th>
+              <td>Up to 10</td>
+              <td>Up to 30</td>
+              <td>Departmental to org-wide</td>
+            </tr>
+            <tr>
+              <th scope="row">Term</th>
+              <td>30 days</td>
+              <td>90 days</td>
+              <td>24-month lock</td>
+            </tr>
+            <tr>
+              <th scope="row">Price</th>
+              <td>$5,000 flat</td>
+              <td><strong>$15,000 flat</strong></td>
+              <td>40% off list, 24-mo</td>
+            </tr>
+            <tr>
+              <th scope="row">Buyer profile</th>
+              <td>Partner / principal / dept head</td>
+              <td>Innovation officer, CIO, AI exec</td>
+              <td>CIO, CISO, AI exec, CFO</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </PageSection>
+
+    <a id="apply" class="anchor" aria-hidden="true"></a>
+    <CTAStrip
+      variant="band"
+      title="Architecture call. Two weeks deploy. Then run it."
+      lede="Tell us about your environment (cloud or on-prem), tool stack, and which 20-30 users would use it. We scope the deployment, run security review in parallel, and have you live in two weeks."
+    >
+      <a href="#" onclick="openContactModal('Pilot Application'); return false;" class="btn btn-primary btn-xl">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span>Apply for Pilot ($15K)</span>
+      </a>
+      <a href="/pricing" class="btn btn-secondary btn-xl">See full pricing</a>
+      <Fragment slot="note">
+        Or email <a href="mailto:bolt@sparcle.app?subject=Pilot%20Application">bolt@sparcle.app</a>
+        &middot; <a href="/demo">book an architecture review</a>
+      </Fragment>
+    </CTAStrip>
+
+    <FAQ items={faqs} stripe="a" />
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .pilot-deploy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin: 0 0 1.5rem;
+  }
+  .pilot-deploy-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 4px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.25rem;
+  }
+  .pilot-deploy-card h3 {
+    margin: 0 0 0.15rem;
+    font-size: 1.1rem;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .pilot-deploy-card__sub {
+    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .pilot-deploy-card p:last-child {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+  .pilot-deploy-card code {
+    background: var(--bg-elevated);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+  .pilot-deploy-note {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    border-left: 2px solid var(--border-default);
+    padding-left: 0.85rem;
+    margin: 0 0 1rem;
+  }
+  @media (max-width: 720px) {
+    .pilot-deploy-grid { grid-template-columns: 1fr; }
+  }
+</style>

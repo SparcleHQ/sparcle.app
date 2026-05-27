@@ -41,16 +41,80 @@
                 <span class="trial-note">Desktop app &middot; macOS, Windows, Linux &middot; No credit card</span>
             </div>
 
-            <div class="billing-toggle">
-                <span id="bolt-monthly-label">Monthly</span>
-                <button class="toggle-track annual" id="bolt-billing-toggle" onclick="toggleBoltBilling()"
-                    aria-label="Toggle annual billing" aria-pressed="true">
-                    <div class="toggle-knob"></div>
-                </button>
-                <span class="active" id="bolt-annual-label">Annual</span>
-                <span class="save-badge">2 months free</span>
-            </div>
         </section>
+
+        <!-- ENTRY-RAMP LADDER — Discovery → Pilot → Founding Customer.
+             Sits between the hero and the per-seat tier cards so prospects
+             not ready for a full annual see the lower-friction starter SKUs.
+             Monthly/Annual toggle moved BELOW this band so it sits adjacent
+             to the per-seat cards it actually controls (the entry rungs are
+             flat-priced and don't use the toggle). -->
+        <section class="entry-ramp container" aria-label="Pre-annual evaluation paths">
+            <div class="entry-ramp__head">
+                <span class="entry-ramp__eyebrow">Not ready for annual? Start here.</span>
+                <h2 class="entry-ramp__title">Three on-ramps to Bolt + Aeira</h2>
+                <p class="entry-ramp__lede">Validate fit, validate scale, then commit. Each rung credits toward the next.</p>
+            </div>
+            <div class="entry-ramp__grid">
+                <a href="/discovery-pilot" class="entry-ramp__card">
+                    <div class="entry-ramp__rung">Rung 1</div>
+                    <div class="entry-ramp__name">Discovery</div>
+                    <div class="entry-ramp__price">$5,000 flat</div>
+                    <ul class="entry-ramp__features">
+                        <li>30-day trial</li>
+                        <li>Up to 10 seats</li>
+                        <li><strong>Trial sidecar</strong> on user laptops</li>
+                        <li>Founder call + 1 check-in</li>
+                    </ul>
+                    <div class="entry-ramp__validates">Validates <em>"does this work for my team?"</em></div>
+                    <span class="entry-ramp__cta">See Discovery &rarr;</span>
+                </a>
+                <a href="/pilot" class="entry-ramp__card entry-ramp__card--featured">
+                    <div class="entry-ramp__rung">Rung 2</div>
+                    <div class="entry-ramp__name">Pilot</div>
+                    <div class="entry-ramp__price">$15,000 flat <span class="entry-ramp__price-sub">or 5+10 split</span></div>
+                    <ul class="entry-ramp__features">
+                        <li>90-day production POC</li>
+                        <li>Up to 30 seats</li>
+                        <li><strong>Docker or Helm</strong> in your VPC / on-prem / cloud</li>
+                        <li>Weekly founder check-ins</li>
+                    </ul>
+                    <div class="entry-ramp__validates">Validates <em>"can we run this at scale safely?"</em></div>
+                    <span class="entry-ramp__cta">See Pilot &rarr;</span>
+                </a>
+                <a href="#founding" class="entry-ramp__card">
+                    <div class="entry-ramp__rung">Rung 3</div>
+                    <div class="entry-ramp__name">Founding Customer</div>
+                    <div class="entry-ramp__price">40% off list <span class="entry-ramp__price-sub">24-month lock</span></div>
+                    <ul class="entry-ramp__features">
+                        <li>90-day pilot + 24-month term</li>
+                        <li>Departmental to org-wide</li>
+                        <li>Same production deployment as Pilot</li>
+                        <li>Roadmap influence + dedicated channel</li>
+                    </ul>
+                    <div class="entry-ramp__validates">Commits <em>"we are building on this."</em></div>
+                    <span class="entry-ramp__cta">See Founding Customer &darr;</span>
+                </a>
+            </div>
+            <p class="entry-ramp__note">
+                Most customers do Discovery <em>or</em> Pilot first &mdash; not both.
+                Pick by team size and whether you have IT to support a production install.
+                Discovery $5K credits toward Pilot; Pilot $15K credits toward year one at Founding Customer.
+            </p>
+        </section>
+
+        <!-- Monthly/Annual toggle. Lives right above the per-seat tier cards
+             because it ONLY controls those cards' price display. The entry
+             rungs above are flat-priced and ignore this toggle. -->
+        <div class="billing-toggle billing-toggle--standalone">
+            <span id="bolt-monthly-label">Monthly</span>
+            <button class="toggle-track annual" id="bolt-billing-toggle" onclick="toggleBoltBilling()"
+                aria-label="Toggle annual billing" aria-pressed="true">
+                <div class="toggle-knob"></div>
+            </button>
+            <span class="active" id="bolt-annual-label">Annual</span>
+            <span class="save-badge">2 months free</span>
+        </div>
 
         <!-- BOLT PRICING CARDS -->
         <div class="pricing-grid container">
@@ -186,6 +250,7 @@
         </div>
 
         <!-- FOUNDING CUSTOMERS PROGRAM -->
+        <a id="founding" class="anchor" aria-hidden="true"></a>
         <div class="container">
             <div class="founding-banner">
                 <div class="founding-badge">Founding Customers Program</div>
@@ -805,7 +870,7 @@
                             <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
                         </summary>
                         <div class="faq-answer-wrapper">
-                            <div class="faq-answer"><p><strong>Bolt Personal is completely free</strong> &mdash; private AI chat with your own API key, no login required. For enterprise features (IDP, email, calendar, agentic actions), <a href="/download">download Bolt Enterprise Trial</a> and get a 7-day trial with the full platform. No credit card required, no data leaves your machine. For a production pilot, we offer a 30-day evaluation with dedicated onboarding.</p></div>
+                            <div class="faq-answer"><p><strong>Bolt Personal is completely free</strong> &mdash; private AI chat with your own API key, no login required. For enterprise features (IDP, email, calendar, agentic actions), <a href="/download">download Bolt Enterprise Trial</a> and get a 7-day trial with the full platform. No credit card required, no data leaves your machine. Paid evaluation rungs: <a href="/discovery-pilot">Discovery</a> ($5K, 30 days, trial sidecar on up to 10 user laptops) or <a href="/pilot">Pilot</a> ($15K, 90 days, production Docker or Helm deployment in your infrastructure for up to 30 seats).</p></div>
                         </div>
                     </details>
                     <details class="faq-details">

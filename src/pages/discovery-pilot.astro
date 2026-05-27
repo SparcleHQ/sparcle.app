@@ -1,0 +1,383 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CardGrid from "../components/ui/CardGrid.astro";
+import Card from "../components/ui/Card.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+import Pill from "../components/ui/Pill.astro";
+import FAQ from "../components/ui/FAQ.astro";
+
+const inclusions = [
+  {
+    metric: "Up to 10",
+    label: "Seats, your pick",
+    body: "Default ask is 5 named users; add up to 10 anytime without renegotiating. One partner, one practice group, or one small team.",
+  },
+  {
+    metric: "30 days",
+    label: "Trial-license window",
+    body: "Long enough for daily usage to show up, short enough that no one drifts. License is time-bombed; renew, upgrade, or walk.",
+  },
+  {
+    metric: "$5,000",
+    label: "Flat, all-in",
+    body: "One invoice, paid up front. Founder-led onboarding is the line item; the binary is the deliverable.",
+  },
+];
+
+const youGet = [
+  "Bolt <strong>trial sidecar</strong> binary on up to 10 user laptops (macOS, Linux, Windows). Single process, embedded Postgres, trial license, no server install required.",
+  "Aeira Catalog tier baked into the sidecar &mdash; identity-bound search across whatever corpus the user chooses to ingest locally (DMS folder, mailbox, Drive sync, code repo).",
+  "MCP connectors pre-configured for the tools your users already use: Microsoft 365, Google Workspace, Slack, GitHub, Jira, Salesforce, and more on request.",
+  "BYO LLM or use a Sparcle-provided test key for the 30-day window.",
+  "Sealed Merkle audit chain and crypto-shred enabled by default. Even at trial scale, every query carries auditor-grade evidence.",
+  "One 60-minute founder-led onboarding call + a single 30-minute check-in mid-window.",
+  "Optional reference rights at day 30. Declining does not affect the engagement.",
+];
+
+const notFor = [
+  "Production rollouts. If you need server-side install in your VPC or on-prem, start at the <a href=\"/pilot\">Pilot tier</a> ($15K, 30 seats, Docker/Helm).",
+  "Air-gapped or classified networks. Trial sidecar requires outbound to your chosen LLM; air-gap is the Federated Aeira tier.",
+  "Pure curiosity with no internal champion. Discovery works when one named person on your side owns the outcome.",
+  "Free pilots. We do not run them; paid pilots produce decisions, free pilots produce stalls.",
+];
+
+const faqs = [
+  {
+    question: "How is Discovery different from the Pilot tier?",
+    answer:
+      "<p>Different deployment shape, different validation question. <strong>Discovery</strong> ships the Bolt <em>trial sidecar</em> binary &mdash; each user runs it locally on their laptop. There is no install in your data center. Best for &ldquo;does this work for my team?&rdquo; <strong>Pilot</strong> ships the production server build via Docker compose (single-host) or Helm (multi-node) inside your VPC, on-prem, or cloud account. Best for &ldquo;can we run this at department scale safely?&rdquo; <a href=\"/pilot\">See the Pilot tier &rarr;</a></p>",
+  },
+  {
+    question: "Can Discovery convert into a Pilot or Founding Customer engagement?",
+    answer:
+      "<p>Yes. If you decide to expand at day 30, the $5K applies as a credit against the Pilot tier or against year one of any Bolt or Aeira annual.</p>",
+  },
+  {
+    question: "Why a trial sidecar and not a real install?",
+    answer:
+      "<p>At 10 seats and 30 days the install-and-tear-down cost of a production deployment outweighs the validation signal. The trial sidecar is the same product code as production &mdash; just packaged for laptop-local execution. You learn whether the workflow works; later you graduate to production for the scale and uptime guarantees.</p>",
+  },
+  {
+    question: "Is the price negotiable?",
+    answer:
+      "<p>Not at this entry rung. The $5K is intentionally flat so the conversation is about fit, not price. If $5K is the wrong scale, the free Aeira Catalog tier is a lower-friction technical fit-test.</p>",
+  },
+  {
+    question: "What does success look like at day 30?",
+    answer:
+      "<p>Three to five of your users can each name the 3 workflows Bolt changed for them. We sign off on a one-page outcomes note together. You decide: graduate to Pilot, sign Founding Customer, run a second Discovery in a different scope, or walk.</p>",
+  },
+  {
+    question: "Who signs?",
+    answer:
+      "<p>One partner, founder, principal, or department head with budget authority. No procurement loop required at $5K in most firms. We provide a 2-page agreement and DPA; turnaround is typically same week.</p>",
+  },
+];
+---
+
+<BaseLayout
+  title="Discovery — $5K, up to 10 seats, 30 days | Sparcle"
+  description="The entry rung for Bolt + Aeira. Bolt trial sidecar on up to 10 user laptops for 30 days. Flat $5K. Founder-led. For partners and dept heads ready to put AI on confidential work."
+  canonical="https://sparcle.app/discovery-pilot"
+>
+  <main class="page-discovery-pilot">
+    <Hero
+      eyebrow="Discovery"
+      title="<strong>$5,000.</strong> Up to 10 seats. <br>30 days. Trial sidecar."
+      lede="The lowest-friction way to put Bolt on real work, with real users, on your team's own laptops &mdash; before any production rollout."
+    >
+      <a href="#apply" class="btn btn-primary btn-lg">Apply for Discovery</a>
+      <a href="/demo" class="btn btn-secondary btn-lg">See it first &rarr;</a>
+    </Hero>
+
+    <PageSection stripe="b">
+      <CardGrid cols={3}>
+        {inclusions.map((i) => (
+          <Card variant="proof" metric={i.metric} title={i.label}>
+            <span set:html={i.body} />
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What is included"
+      title="Trial sidecar, real product"
+      lede="The Discovery sidecar is the same Rust code as production Bolt. Only the packaging differs &mdash; single binary, embedded Postgres, trial-licensed for 30 days."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <ul class="dp-checklist">
+        {youGet.map((line) => (<li set:html={line} />))}
+      </ul>
+
+      <div class="dp-pill-strip">
+        <Pill variant="neutral" size="sm">Founder-led onboarding</Pill>
+        <Pill variant="neutral" size="sm">BYO LLM &middot; BYOK</Pill>
+        <Pill variant="neutral" size="sm">No auto-renew</Pill>
+        <Pill variant="neutral" size="sm">$5K credits any expansion</Pill>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="How it compares"
+      title="Three on-ramps, one product"
+      lede="Pick the rung that matches the question you are trying to answer. Discovery validates fit; Pilot validates scale; Founding Customer commits."
+      stripe="b"
+    >
+      <div class="dp-compare">
+        <table class="dp-compare__table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Discovery</th>
+              <th>Pilot</th>
+              <th>Founding Customer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Validates</th>
+              <td>"Does this work for my team?"</td>
+              <td>"Can we run this at scale safely?"</td>
+              <td>"We are building on this."</td>
+            </tr>
+            <tr>
+              <th scope="row">Deployment</th>
+              <td><strong>Trial sidecar</strong> on user laptops</td>
+              <td><strong>Docker</strong> single-host or <strong>Helm</strong> multi-node in your VPC / on-prem / cloud</td>
+              <td>Same as Pilot + roadmap influence</td>
+            </tr>
+            <tr>
+              <th scope="row">Seats</th>
+              <td>Up to 10</td>
+              <td>Up to 30</td>
+              <td>Departmental to org-wide</td>
+            </tr>
+            <tr>
+              <th scope="row">Term</th>
+              <td>30 days</td>
+              <td>90 days</td>
+              <td>24-month lock</td>
+            </tr>
+            <tr>
+              <th scope="row">Price</th>
+              <td><strong>$5,000 flat</strong></td>
+              <td><strong>$15,000 flat</strong></td>
+              <td>40% off list, 24-mo</td>
+            </tr>
+            <tr>
+              <th scope="row">Onboarding</th>
+              <td>Founder call + 1 check-in</td>
+              <td>Founder-led + weekly check-ins</td>
+              <td>Founder-led + dedicated channel</td>
+            </tr>
+            <tr>
+              <th scope="row">Buyer profile</th>
+              <td>Partner / principal / dept head</td>
+              <td>Innovation officer, CIO, AI exec</td>
+              <td>CIO, CISO, AI exec, CFO</td>
+            </tr>
+            <tr>
+              <th scope="row">Path to next rung</th>
+              <td>$5K credits toward Pilot or annual</td>
+              <td>Pilot fee credits year one</td>
+              <td>Grandfathered pricing as you grow</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Who it is for"
+      title="The right shape, the wrong shape"
+      stripe="a"
+    >
+      <CardGrid cols={2} gap="lg">
+        <article class="dp-fit-card dp-fit-card--good">
+          <div class="dp-fit-card__head">
+            <span class="dp-fit-card__badge dp-fit-card__badge--good">Strong fit</span>
+            <h3>Discovery is right if you are</h3>
+          </div>
+          <ul class="dp-fit-list">
+            <li>A partner, principal, or department head with $5K signing authority.</li>
+            <li>Sitting on confidential client work, deal flow, source code, IP, or patient data.</li>
+            <li>Already paying for ChatGPT or Copilot but unable to use it on the work that matters.</li>
+            <li>Five to ten people on your team who would use AI tomorrow if they could.</li>
+            <li>Comfortable making a 30-day call without a procurement committee.</li>
+          </ul>
+        </article>
+
+        <article class="dp-fit-card dp-fit-card--avoid">
+          <div class="dp-fit-card__head">
+            <span class="dp-fit-card__badge dp-fit-card__badge--avoid">Not the right shape</span>
+            <h3>Skip Discovery if you are</h3>
+          </div>
+          <ul class="dp-fit-list">
+            {notFor.map((line) => (<li set:html={line} />))}
+          </ul>
+        </article>
+      </CardGrid>
+    </PageSection>
+
+    <a id="apply" class="anchor" aria-hidden="true"></a>
+    <CTAStrip
+      variant="band"
+      title="Two emails. One call. Sidecar in motion."
+      lede="Tell us the work, the team, and a date. We confirm fit, send a 2-page agreement, and ship the trial binary within the week."
+    >
+      <a href="#" onclick="openContactModal('Discovery Application'); return false;" class="btn btn-primary btn-xl">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <span>Apply for Discovery ($5K)</span>
+      </a>
+      <a href="/pilot" class="btn btn-secondary btn-xl">Need production? See Pilot &rarr;</a>
+      <Fragment slot="note">
+        Or email <a href="mailto:bolt@sparcle.app?subject=Discovery%20Application">bolt@sparcle.app</a>
+        &middot; <a href="/demo">book a demo first</a>
+      </Fragment>
+    </CTAStrip>
+
+    <FAQ items={faqs} stripe="a" />
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .dp-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .dp-checklist li {
+    position: relative;
+    padding-left: 1.75rem;
+    color: var(--text-body);
+    line-height: 1.65;
+  }
+  .dp-checklist li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    color: var(--color-success-strong);
+    font-weight: 700;
+  }
+  .dp-pill-strip {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+
+  .dp-compare {
+    overflow-x: auto;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+  }
+  .dp-compare__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .dp-compare__table th,
+  .dp-compare__table td {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-body);
+    vertical-align: top;
+  }
+  .dp-compare__table thead th {
+    color: var(--text-heading);
+    font-weight: 700;
+    background: var(--bg-surface);
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .dp-compare__table tbody th {
+    color: var(--text-muted);
+    font-weight: 600;
+    width: 22%;
+  }
+  .dp-compare__table tbody tr:last-child th,
+  .dp-compare__table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .dp-fit-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+    height: 100%;
+  }
+  .dp-fit-card--good { border-left: 4px solid var(--color-success-strong); }
+  .dp-fit-card--avoid { border-left: 4px solid var(--text-muted); }
+  .dp-fit-card__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .dp-fit-card__head h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .dp-fit-card__badge {
+    align-self: flex-start;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-full);
+  }
+  .dp-fit-card__badge--good {
+    color: var(--color-success-strong);
+    background: rgba(34, 197, 94, 0.12);
+  }
+  .dp-fit-card__badge--avoid {
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+  }
+  .dp-fit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .dp-fit-list li {
+    position: relative;
+    padding-left: 1.25rem;
+    color: var(--text-body);
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+  .dp-fit-card--good .dp-fit-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-success-strong);
+    font-weight: 700;
+  }
+  .dp-fit-card--avoid .dp-fit-list li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+</style>

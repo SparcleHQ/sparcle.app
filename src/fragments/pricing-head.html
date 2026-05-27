@@ -1545,4 +1545,151 @@
             font-size: 0.88rem;
         }
     }
+
+    /* ENTRY-RAMP — Discovery → Pilot → Founding Customer.
+       Sits between hero and per-seat tier cards. Three-up grid on desktop,
+       stacked on mobile. */
+    .entry-ramp {
+        max-width: 1180px;
+        margin: 0 auto 56px;
+        padding: 0 24px;
+    }
+    .entry-ramp__head {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    .entry-ramp__eyebrow {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--brand-primary, #2563eb);
+        background: var(--brand-primary-light, rgba(37, 99, 235, 0.1));
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        margin-bottom: 0.85rem;
+    }
+    .entry-ramp__title {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 700;
+        color: var(--text-heading, #0f172a);
+        margin: 0 0 0.6rem;
+        letter-spacing: -0.02em;
+    }
+    .entry-ramp__lede {
+        font-size: 1.025rem;
+        color: var(--text-muted, #64748b);
+        margin: 0 auto;
+        max-width: 56ch;
+    }
+    .entry-ramp__grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    .entry-ramp__card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1.5rem 1.5rem 1.25rem;
+        background: var(--bg-surface-solid, #ffffff);
+        border: 1px solid var(--border-default, #e2e8f0);
+        border-radius: 14px;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .entry-ramp__card:hover {
+        transform: translateY(-3px);
+        border-color: var(--brand-primary-light, rgba(37, 99, 235, 0.4));
+        box-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
+    }
+    .entry-ramp__card--featured {
+        border-color: var(--brand-primary, #2563eb);
+        border-width: 2px;
+        box-shadow: 0 8px 28px rgba(37, 99, 235, 0.12);
+    }
+    .entry-ramp__rung {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted, #64748b);
+    }
+    .entry-ramp__name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-heading, #0f172a);
+        letter-spacing: -0.015em;
+    }
+    .entry-ramp__price {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--brand-primary, #2563eb);
+        margin-bottom: 0.5rem;
+    }
+    .entry-ramp__price-sub {
+        font-weight: 500;
+        color: var(--text-muted, #64748b);
+        font-size: 0.875rem;
+    }
+    .entry-ramp__features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 0.85rem;
+        display: grid;
+        gap: 0.4rem;
+        font-size: 0.92rem;
+        color: var(--text-body, #334155);
+    }
+    .entry-ramp__features li {
+        position: relative;
+        padding-left: 1.2rem;
+        line-height: 1.5;
+    }
+    .entry-ramp__features li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--color-success-strong, #16a34a);
+        font-weight: 700;
+    }
+    .entry-ramp__validates {
+        font-size: 0.85rem;
+        color: var(--text-muted, #64748b);
+        line-height: 1.4;
+        border-top: 1px solid var(--border-subtle, #f1f5f9);
+        padding-top: 0.75rem;
+        margin-top: auto;
+    }
+    .entry-ramp__validates em {
+        color: var(--text-body, #334155);
+        font-style: italic;
+    }
+    .entry-ramp__cta {
+        display: inline-block;
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--brand-primary, #2563eb);
+    }
+    .entry-ramp__note {
+        text-align: center;
+        font-size: 0.88rem;
+        color: var(--text-muted, #64748b);
+        max-width: 70ch;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    .entry-ramp__note em {
+        color: var(--text-body, #334155);
+        font-style: italic;
+    }
+    @media (max-width: 900px) {
+        .entry-ramp__grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>

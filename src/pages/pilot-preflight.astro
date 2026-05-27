@@ -1,0 +1,378 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import Pill from "../components/ui/Pill.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+
+const phases = [
+  {
+    title: "Week -2 to -1: Architecture + scoping",
+    owner: "Sparcle founder + your Innovation/AI lead",
+    items: [
+      "30-minute architecture call. Confirm deployment topology: Docker single-host (<code>docker-compose.ha.yml</code>) or Helm multi-node on your Kubernetes.",
+      "Confirm <strong>cloud target</strong> (AWS / Azure / GCP), on-prem datacenter, or VPC.",
+      "Identify the 20 to 30 pilot users (named list, SSO accounts).",
+      "Identify the corpora to ingest (DMS folders, mailbox scopes, file shares, code repos, ticketing, CRM). Cap default 250GB.",
+      "Choose LLM endpoint: Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic, on-prem Llama, or other OpenAI-compatible. Share endpoint URL + key handling preference.",
+      "Choose 2 to 5 MCP connectors to wire from the standard catalog (Microsoft 365, Google Workspace, Slack, GitHub, Jira, Salesforce, Confluence, ServiceNow, etc.).",
+      "Pre-filled SIG Lite + draft DPA + draft MSA delivered for legal review.",
+    ],
+  },
+  {
+    title: "Week 0: Kickoff + paperwork",
+    owner: "You + Sparcle founder",
+    items: [
+      "Counter-sign MSA + DPA. Optional: 5+10 payment plan (5K at kickoff, 10K at day 30).",
+      "Confirm pilot acceptance criteria in a one-page outcomes note (we provide template).",
+      "Schedule recurring weekly 30-minute check-in for the next 12 weeks.",
+      "Provision the deployment target (single VM, AKS/EKS/GKE cluster, or on-prem host) with the requirements doc you receive at architecture call.",
+      "Stand up SSO connection (Entra / Google / Okta / OneLogin / Auth0 / any OIDC).",
+    ],
+  },
+  {
+    title: "Week 1 to 2: Production deployment",
+    owner: "Sparcle (founder-led)",
+    items: [
+      "Bolt + Aeira services deployed via Docker compose or Helm chart inside your infrastructure. Same product image used at Founding Customer scale.",
+      "Per-tenant CMK (envelope encryption keys) provisioned. Crypto-shred enabled.",
+      "Sealed Merkle audit chain initialized. Audit verifier endpoint exposed to your security team.",
+      "SSO + SCIM 2.0 wired to your IdP. First 5 users provisioned end-to-end as smoke test.",
+      "LLM endpoint connected and round-tripped.",
+      "MCP connectors authenticated against your identity stack.",
+      "Aeira ingest sagas configured for the chosen corpora. First ingest run completes.",
+    ],
+  },
+  {
+    title: "Week 3 to 10: Real usage, weekly check-ins",
+    owner: "You (your users) + Sparcle (founder support)",
+    items: [
+      "All pilot users provisioned. Onboarding walk-through delivered (60 minutes, recorded).",
+      "Weekly 30-minute check-in to triage friction, add connectors on request, tune Aeira ranking, surface adoption metrics.",
+      "Dedicated Slack channel between your pilot team and the founding team for the duration.",
+      "Security team validates: audit chain on every query, ACL enforcement across personas, crypto-shred test on at least one user's data.",
+      "Optional: CISO-led architecture review using the threat model document we share at kickoff.",
+      "Mid-pilot health check at week 6: continue, pivot scope, or end early.",
+    ],
+  },
+  {
+    title: "Week 11 to 12: Outcomes + decision",
+    owner: "You + Sparcle",
+    items: [
+      "Draft one-page outcomes note jointly. Three to five workflows your users say Bolt has changed for them.",
+      "Audit chain export + verifier walk-through for your compliance team.",
+      "TCO walkthrough for finance: per-seat cost at Founding Customer terms vs. Pilot list price.",
+      "Decision: convert to Founding Customer (40% off list, 24-month lock, $15K credits year one), continue at standard pricing, expand the scope, or end with no further obligation.",
+      "If converting: counter-sign annual MSA + revised DPA. No reinstall required &mdash; same deployment continues under the new contract.",
+    ],
+  },
+];
+
+const youBring = [
+  "<strong>Deployment target</strong> &mdash; one Linux host (Docker compose path) or a Kubernetes cluster (Helm path). 4 vCPU / 16GB RAM is the comfortable floor for 30 seats.",
+  "<strong>LLM endpoint</strong> &mdash; Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic API, OpenAI API, on-prem Llama / vLLM, or any OpenAI-compatible endpoint. Bring your own API key.",
+  "<strong>IdP</strong> &mdash; Microsoft Entra, Google Workspace, Okta, OneLogin, Auth0, or any OIDC provider. We need OAuth Client ID + Secret, and a service account for SCIM if you want provisioning.",
+  "<strong>Pilot user list</strong> &mdash; up to 30 named users with SSO accounts. They will use Bolt as their daily AI tool for the duration.",
+  "<strong>Corpora list</strong> &mdash; the DMS folders, mailbox scopes, drive folders, code repos, ticketing, CRM scopes you authorize for indexing. Up to 250GB default; larger by scope letter.",
+  "<strong>Security reviewer</strong> &mdash; one named contact who will run the architecture review, sign off on the DPA, and validate the audit chain.",
+];
+
+const sparcleBrings = [
+  "<strong>Production deployment</strong> &mdash; Docker compose or Helm chart, founder-led install.",
+  "<strong>Founder onboarding</strong> &mdash; kickoff call, weekly 30-min check-ins for 12 weeks, dedicated Slack channel.",
+  "<strong>Trial license</strong> &mdash; valid for 90 days for up to 30 users.",
+  "<strong>SIG Lite + threat model + DPA + MSA drafts</strong> for your security and legal review.",
+  "<strong>2 to 5 MCP connectors</strong> wired from our standard catalog.",
+  "<strong>Architecture diagram + audit-chain primer</strong> for your CISO conversation.",
+];
+
+const successCriteria = [
+  "<strong>Adoption:</strong> 70%+ of pilot users log in at least once per week by week 8.",
+  "<strong>Workflow impact:</strong> each user can name 3 to 5 workflows Bolt has changed for them at day 90.",
+  "<strong>Governance:</strong> audit chain verifier passes on every query in the pilot window. Crypto-shred test succeeds on at least one user.",
+  "<strong>Performance:</strong> p95 query latency stays within your environment's expected range (architecture call sets the target).",
+  "<strong>Security sign-off:</strong> your CISO or security lead countersigns the threat model + DPA review with no blocking issues.",
+];
+
+const outOfScope = [
+  "Air-gapped or classified-network installs &mdash; that requires the Federated Aeira tier and a separate architecture engagement.",
+  "Custom MCP connector development beyond the standard catalog (available as paid Customization).",
+  "Custom Aeira authority policy or reranker beyond the 3 reference impls (Default, Regulated, Healthcare).",
+  "FedRAMP / IL4 / IL5 deployment (not authorized today).",
+  "24x7 production SLA (that ships at Founding Customer).",
+  "Multi-region / multi-cluster failover (Founding Customer or later).",
+];
+---
+
+<BaseLayout
+  title="Pilot pre-flight checklist — Sparcle"
+  description="What you bring, what we bring, week-by-week activities for the 90-day Bolt + Aeira Pilot ($15K, up to 30 seats, production Docker or Helm deployment)."
+  canonical="https://sparcle.app/pilot-preflight"
+>
+  <main class="page-pilot-preflight">
+    <Hero
+      eyebrow="Pilot pre-flight"
+      title="What it takes to land a <strong>90-day Pilot</strong> in two weeks."
+      lede="Pre-flight checklist for the $15K Pilot rung. Use this to scope a kickoff with us, brief your security and IT teams, and align stakeholders before the architecture call."
+    >
+      <a href="/pilot" class="btn btn-secondary btn-lg">&larr; Back to Pilot SKU</a>
+      <a href="#" onclick="openContactModal('Pilot Application'); return false;" class="btn btn-primary btn-lg">Apply for Pilot</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Scope reminder"
+      title="What Pilot is, in one paragraph"
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <p>
+        The Pilot rung is a <strong>production deployment</strong> of Bolt and Aeira inside your VPC,
+        on-prem datacenter, or cloud account. Docker compose for single-host scenarios; Helm chart for
+        multi-node Kubernetes. Up to 30 seats. 90 days of trial license. Founder-led onboarding plus a
+        weekly 30-minute check-in for the full duration. Flat <strong>$15,000</strong>, or 5+10 split
+        (5K at kickoff, 10K at day 30). $15K credits against year-one annual if you convert to
+        Founding Customer.
+      </p>
+      <p>
+        Pilot is <em>not</em> the trial sidecar. That is the <a href="/discovery-pilot">Discovery rung</a>
+        &mdash; 30 days, up to 10 seats, $5K, a single binary that runs locally on each user's laptop with
+        no server install. Most customers do Discovery <em>or</em> Pilot first based on team size and
+        whether they have IT to support a deployment, not both.
+      </p>
+      <div class="dp-pill-strip">
+        <Pill variant="neutral" size="sm">Production Docker or Helm</Pill>
+        <Pill variant="neutral" size="sm">Up to 30 seats</Pill>
+        <Pill variant="neutral" size="sm">90 days</Pill>
+        <Pill variant="neutral" size="sm">$15K flat or 5+10 split</Pill>
+        <Pill variant="neutral" size="sm">Founder-led</Pill>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Phase by phase"
+      title="The 12 weeks, week by week"
+      stripe="a"
+    >
+      <div class="preflight-phases">
+        {phases.map((phase) => (
+          <article class="preflight-phase">
+            <header class="preflight-phase__head">
+              <h3>{phase.title}</h3>
+              <span class="preflight-phase__owner">Owner: {phase.owner}</span>
+            </header>
+            <ul class="preflight-phase__items">
+              {phase.items.map((item) => (<li set:html={item} />))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Division of labor"
+      title="What you bring, what we bring"
+      stripe="b"
+    >
+      <div class="preflight-bring-grid">
+        <article class="preflight-bring-card">
+          <h3>You bring</h3>
+          <ul>
+            {youBring.map((item) => (<li set:html={item} />))}
+          </ul>
+        </article>
+        <article class="preflight-bring-card preflight-bring-card--accent">
+          <h3>Sparcle brings</h3>
+          <ul>
+            {sparcleBrings.map((item) => (<li set:html={item} />))}
+          </ul>
+        </article>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Acceptance criteria"
+      title="What &ldquo;successful Pilot&rdquo; means at day 90"
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <p>
+        We sign off on a one-page outcomes note together at week 12. Default criteria below; adjust by
+        agreement in the kickoff call:
+      </p>
+      <ul class="preflight-criteria">
+        {successCriteria.map((item) => (<li set:html={item} />))}
+      </ul>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Out of scope"
+      title="What the Pilot does not include"
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="preflight-out">
+        {outOfScope.map((item) => (<li set:html={item} />))}
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Ready? Architecture call is the next step."
+      lede="One 30-minute call to confirm topology (Docker or Helm), cloud target, LLM endpoint, IdP, pilot users, and connectors. We send the SIG Lite, DPA, and MSA drafts within 48 hours of that call."
+    >
+      <a href="#" onclick="openContactModal('Pilot Architecture Call'); return false;" class="btn btn-primary btn-xl">
+        Book the architecture call
+      </a>
+      <a href="/pilot" class="btn btn-secondary btn-xl">&larr; Pilot SKU details</a>
+      <Fragment slot="note">
+        Or email <a href="mailto:bolt@sparcle.app?subject=Pilot%20Architecture%20Call">bolt@sparcle.app</a>
+        &middot; <a href="/discovery-pilot">smaller scope? see Discovery</a>
+      </Fragment>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .preflight-phases {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .preflight-phase {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 4px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.5rem 1.25rem;
+  }
+  .preflight-phase__head {
+    margin-bottom: 0.75rem;
+  }
+  .preflight-phase__head h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.15rem;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .preflight-phase__owner {
+    display: inline-block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .preflight-phase__items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .preflight-phase__items li {
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--text-body);
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+  .preflight-phase__items li::before {
+    content: "\25A1";
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    color: var(--brand-primary);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .preflight-phase__items li code {
+    background: var(--bg-elevated);
+    padding: 0.05rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.86em;
+  }
+
+  .preflight-bring-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .preflight-bring-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+  .preflight-bring-card--accent {
+    border-left: 4px solid var(--brand-primary);
+  }
+  .preflight-bring-card h3 {
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .preflight-bring-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .preflight-bring-card li {
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--text-body);
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+  .preflight-bring-card li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-success-strong);
+    font-weight: 700;
+  }
+  @media (max-width: 760px) {
+    .preflight-bring-grid { grid-template-columns: 1fr; }
+  }
+
+  .preflight-criteria,
+  .preflight-out {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .preflight-criteria li,
+  .preflight-out li {
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+  .preflight-criteria li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-success-strong);
+    font-weight: 700;
+  }
+  .preflight-out li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .dp-pill-strip {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+</style>

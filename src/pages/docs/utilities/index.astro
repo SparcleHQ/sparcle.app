@@ -25,7 +25,7 @@ const sampleCount = samples.length;
       lede="The declarative integration surface. Launcher chips backed by YAML manifests (codename: utilities, used throughout the runtime, the gallery, and the in-app admin). Each App runs MCP tool calls or HTTP fetches, emits typed rows (Person, Issue, Document, ...), and renders them in the launcher and the right rail. No LLM in the loop, no tokens per query."
     >
       <Pill href="/docs/utilities/gallery" variant="brand" size="lg">Browse sample integrations &rarr;</Pill>
-      <Pill href="/docs/utilities/quickstart" variant="neutral" size="lg">Write your first custom utility &rarr;</Pill>
+      <Pill href="/docs/utilities/quickstart" variant="neutral" size="lg">Write your first custom App &rarr;</Pill>
       <Pill href="/docs/utilities/spec" variant="neutral" size="lg">Full spec &rarr;</Pill>
     </Hero>
 
@@ -68,7 +68,7 @@ const sampleCount = samples.length;
 
     <PageSection
       title="What's in the box"
-      lede="Every utility, bundled or custom, shares the same primitives. Once you know one manifest you know them all."
+      lede="Every App, bundled or custom, shares the same primitives. Once you know one manifest you know them all."
       stripe="a"
     >
       <CardGrid cols={3}>
@@ -88,7 +88,7 @@ const sampleCount = samples.length;
           launcher and right rail know how to render every type.
         </Card>
         <Card title="Per-user OAuth">
-          Auth is per-user OAuth. No service accounts, ever. Every action a utility
+          Auth is per-user OAuth. No service accounts, ever. Every action an App
           takes is attributable to the human who ran it.
         </Card>
         <Card title="Actions on rows">
@@ -98,7 +98,7 @@ const sampleCount = samples.length;
         </Card>
         <Card title="Audit by default">
           Every call, every emit, every action lands in the same audit chain as
-          the rest of Bolt + Aeira. Nothing in a utility manifest bypasses it.
+          the rest of Bolt + Aeira. Nothing in an App manifest bypasses it.
         </Card>
       </CardGrid>
     </PageSection>

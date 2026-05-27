@@ -922,6 +922,25 @@ install_linux_deb() {
   # Remove old AppImage if switching to .deb
   rm -f "${APPIMAGE_PATH}" 2>/dev/null || true
 
+  # Wipe stale WebKitGTK cache dirs on upgrade so the freshly-installed
+  # PWA bundle is what the WebView serves on first launch. Without this,
+  # an upgrade install (e.g. 0.1.35 → 0.1.38) leaves caches.delete /
+  # indexedDB.deleteDatabase unable to evict the cached service-worker
+  # bundle, and the in-app "Build ID mismatch — Self-heal did not stick"
+  # error fires on every launch (see bolt-pwa build-id-watcher.ts).
+  # Fresh installs no-op (dirs don't exist yet). Run as the invoking user
+  # (NOT under sudo) because the dirs are user-owned in $HOME.
+  CACHE_IDENTIFIER="app.sparcle.bolt.personal"
+  if [ "$EDITION" = "trial" ]; then
+    CACHE_IDENTIFIER="app.sparcle.bolt.enterprise"
+  fi
+  CACHE_BASE="${HOME}/.local/share/${CACHE_IDENTIFIER}"
+  for cache_dir in CacheStorage WebKitCache databases localstorage mediakeys storage; do
+    rm -rf "${CACHE_BASE}/${cache_dir}" 2>/dev/null || true
+  done
+  rm -f "${CACHE_BASE}/hsts-storage.sqlite" 2>/dev/null || true
+  rm -f "${CACHE_BASE}/.last-build-id" 2>/dev/null || true
+
   sudo dpkg -i "${DL_PATH}" < /dev/tty \
     || { sudo apt-get install -f -y < /dev/tty 2>/dev/null || true; sudo dpkg -i "${DL_PATH}" < /dev/tty; } \
     || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"

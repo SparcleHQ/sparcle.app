@@ -25,7 +25,7 @@ const tiers = [
       ["Where it runs", "Inside the customer perimeter, via the customer's Bolt service"],
       ["What hits the network", "Org-connected systems (Jira, Stripe, Confluence, internal APIs, ...)"],
       ["Whose identity it runs as", "Per-user OAuth, scoped to the calling user"],
-      ["What Sparcle servers see", "Nothing about the request body. Audit-chain hashes only."],
+      ["What Sparcle servers see", "Nothing. Sparcle has no servers in any customer request path."],
       ["Audit", "Full call, emit, action chain. Same chain as the rest of Bolt and Aeira."],
       ["Removable", "Admin disables in Settings; per-org policy"],
     ],
@@ -37,12 +37,12 @@ const tiers = [
     title: "Bring your shell. Bring your script. Bring your tools.",
     intro: "An individual drops a .yaml in a local folder. Only they have it. Runs as their OS identity on their own machine. Sparcle servers are not in the request path. Admins can disable the entire tier on managed devices.",
     rows: [
-      ["Who authors", "The individual user (or a teammate whose YAML they trust)"],
+      ["Who authors", "The organization's employee or team"],
       ["Who installs", "User drops .yaml in a local folder, clicks Reload"],
       ["Where it runs", "On the user's own machine, end-to-end local"],
       ["What hits the network", "Whatever the user's script asks for. With the user's auth, from the user's machine."],
       ["Whose identity it runs as", "The user's OS identity. Same as their terminal."],
-      ["What Sparcle servers see", "Nothing. Optional audit ping is metadata only: App id, timestamp, ok flag, duration ms. No query. No arguments. No output."],
+      ["What Sparcle servers see", "Nothing. Sparcle has no servers in any customer request path."],
       ["Audit", "Optional metadata ping per call. No body, ever."],
       ["Removable", "User deletes the file; admin can disable the whole tier on a managed device"],
     ],
@@ -134,14 +134,14 @@ actions:
 ---
 <BaseLayout
   title="Bolt Apps: Admin and User tiers | Sparcle"
-  description="Bolt Apps are keyboard shortcuts you summon from any context on any OS. Two tiers, one trust contract: Admin Apps your org admin enables centrally, User Apps an individual drops in a local folder. Same YAML schema, different runtime, different boundary. Bring your daily workflows into Bolt without data crossing a boundary it should not."
+  description="Bolt Apps are integrated, inline access to the first-party and third-party systems you depend on, without leaving where you are. Two tiers, one trust contract: Admin Apps your org admin enables centrally, User Apps an individual drops in a local folder. Same YAML schema, different runtime, different boundary. No data crossing a boundary it should not."
   canonical="https://sparcle.app/docs/utilities"
 >
   <main class="page-utilities">
     <Hero
       eyebrow="Bolt Apps"
       title="Bring your daily workflows into Bolt."
-      lede="Wherever you are, terminal or browser or a specific app, Bolt is one keystroke away. Apps are how you summon a workflow without leaving where you are. Two tiers, one schema. Admin Apps connect the systems your org already runs. User Apps run on your own machine, under your own identity. Same trust contract for both, enforced at exec time."
+      lede="Wherever you are, terminal or browser or a specific app, Bolt is one keystroke away. Bolt Apps are integrated, inline access to the first-party and third-party systems you depend on, without leaving where you are. Two tiers, one schema. Admin Apps connect what your org already runs. User Apps run on your own machine, under your own identity. Same trust contract for both, enforced at exec time."
     >
       <a href="#tiers" class="btn btn-primary btn-lg">Compare the two tiers</a>
       <a href="#trust" class="btn btn-secondary btn-lg">Read the trust contract</a>

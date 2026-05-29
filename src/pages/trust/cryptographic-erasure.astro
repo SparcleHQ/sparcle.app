@@ -1,0 +1,388 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const mechanismSteps = [
+  [
+    "1. Per-tenant Customer Master Key",
+    "Every tenant's data — index entries, embeddings, audit chain payloads, PII vault — is encrypted at rest with a tenant-specific Customer Master Key (CMK) wrapped by your KMS. The CMK never leaves the KMS; the wrapped data-encryption keys live alongside the ciphertext.",
+  ],
+  [
+    "2. WORM ciphertext retention",
+    "The encrypted bytes remain in their write-once-read-many store after erasure. Regulators that require retention (SOX, SEC, HIPAA record-keeping) see the ciphertext on the shelf; nobody can read it. The same physical bytes satisfy both the retention duty and the erasure right.",
+  ],
+  [
+    "3. Cryptographic disposal of the CMK",
+    "When a subject erasure request is approved, the tenant CMK is destroyed inside the KMS. Every wrapped data-encryption key that depended on it becomes mathematically unrecoverable. The ciphertext is now indistinguishable from random noise to every party — including Sparcle, the operator, and any future court order.",
+  ],
+  [
+    "4. Tamper-evident audit receipt",
+    "The disposal event is recorded as a signed receipt under the operator-root key — a key distinct from the disposed tenant CMK. The receipt is verifiable after the tenant key is gone. The receipt is appended to the BoltAuditSink Merkle chain so it cannot be removed or backdated.",
+  ],
+];
+
+const whyItWorks = [
+  [
+    "Erasure right satisfied",
+    "GDPR Art. 17 and HIPAA Right to be Forgotten require that the data subject's information cease to be available. Cryptographic destruction of the only key capable of decrypting the data delivers that result without depending on every downstream backup, replica, or archive cooperating with a row-level delete.",
+  ],
+  [
+    "Retention duty preserved",
+    "SOX, SEC Rule 17a-4, FINRA 4511, HIPAA record-retention, and equivalent obligations require that records persist for defined windows. The encrypted bytes remain. The retention auditor sees the artifact; only the readability has been revoked. This is the construction's central design point — both obligations satisfied by the same primitive.",
+  ],
+  [
+    "Receipt independently verifiable",
+    "The signing key for the receipt is the operator-root key, kept under separate KMS isolation from the tenant CMK. Destruction of the tenant CMK does not affect the receipt's signature. A future auditor can verify the receipt long after the tenant key is gone.",
+  ],
+  [
+    "Chain integrity preserved",
+    "The receipt is added to the BoltAuditSink Merkle chain. Removing or modifying the receipt would break the chain hash for every later event. The receipt is therefore as durable as the audit chain itself.",
+  ],
+];
+
+const kmsBackends = [
+  ["LocalKms", "File-backed, production-tested. Used in pilots, development, and air-gapped deployments where customer policy forbids cloud KMS."],
+  ["AwsKms", "Reference implementation in the aeira-rs trait library. Cloud-service integration testing in flight."],
+  ["VaultKms", "Reference implementation against HashiCorp Vault Transit. Cloud-service integration testing in flight."],
+  ["PKCS#11 HSM", "Reference implementation on the roadmap for buyers with HSM-mandated key custody (defense, federal, FFI)."],
+  ["Azure Key Vault, GCP KMS", "On the roadmap. Track this page or contact security@sparcle.app for target dates."],
+];
+
+const honestLimits = [
+  "The construction is auditor-acceptable, not auditor-asserted. Sparcle does not claim a third-party cryptographer has certified this implementation. A customer whose external auditor or regulator requires an independent attestation should treat that as a separate engagement; reference materials and a threat model are available under NDA for that work.",
+  "The construction protects ciphertext at rest. Plaintext that has already been delivered to a downstream system the customer controls (a SIEM, a data warehouse, an external archive) is outside Sparcle's reach. The customer's erasure runbook needs to address those surfaces directly.",
+  "The construction does not erase the audit-receipt itself. The receipt records that the subject's data was disposed of; the receipt is durable by design. Regulators reading GDPR Art. 17 in conjunction with audit-retention obligations treat that as the correct outcome.",
+  "Quantum-resistance is not a property of the construction today. The CMK destruction guarantees readability removal under classical assumptions. A migration path to post-quantum KMS backends is on the roadmap; the construction is backend-agnostic.",
+];
+---
+<BaseLayout
+  title="Cryptographic Erasure: How Bolt and Aeira Satisfy GDPR Art. 17 and HIPAA | Sparcle"
+  description="The construction Bolt and Aeira use to satisfy GDPR Art. 17, HIPAA Right to be Forgotten, and CCPA erasure rights while simultaneously preserving SOX, SEC, and HIPAA retention obligations. Per-tenant CMK destruction, WORM ciphertext, tamper-evident audit receipt."
+  canonical="https://sparcle.app/trust/cryptographic-erasure"
+>
+  <main class="page-crypto-erasure">
+    <Hero
+      eyebrow="Cryptographic Erasure"
+      title="Disposal you can prove. Retention you can keep."
+      lede="GDPR Art. 17, HIPAA Right to be Forgotten, and CCPA erasure rights pull in one direction. SOX, SEC Rule 17a-4, FINRA 4511, and HIPAA record-retention pull in the other. Bolt and Aeira use a single cryptographic construction that satisfies both — by destroying the only key that can read the data while preserving the ciphertext and an independently verifiable receipt."
+    >
+      <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Request the architecture brief</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="The construction"
+      title="Four primitives, composed."
+      lede="The mechanism has four pieces. The novelty is in the composition: each piece is a well-understood cryptographic primitive; combined, they deliver erasure-with-retention without sacrificing either obligation."
+      stripe="b"
+    >
+      <div class="mech-diagram" data-expandable tabindex="0" role="button" aria-label="Expand cryptographic-erasure construction diagram">
+        <svg viewBox="0 0 880 460" class="crypto-erasure-svg" role="img" aria-labelledby="crypto-title crypto-desc">
+          <title id="crypto-title">Cryptographic-erasure construction flow</title>
+          <desc id="crypto-desc">Per-tenant Customer Master Key wraps data-encryption keys. Encrypted bytes are stored in WORM ciphertext. Erasure destroys the tenant CMK in the KMS; the operator-root key signs a tamper-evident receipt that is appended to the BoltAuditSink Merkle chain. An auditor can verify the receipt after disposal because the operator-root key is distinct from the destroyed tenant CMK.</desc>
+
+          <defs>
+            <marker id="ce-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="ce-arrow-head" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+          </defs>
+
+          <style>
+            .ce-box { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .ce-box--destroyed { fill: var(--bg-surface-solid); stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 6 4; opacity: 0.9; }
+            .ce-box--receipt { fill: var(--brand-primary-light); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .ce-box-label { font: 600 13px var(--font-sans, system-ui); fill: var(--text-heading); text-anchor: middle; }
+            .ce-box-sub { font: 500 11px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .ce-badge { font: 700 10px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; letter-spacing: 0.12em; }
+            .ce-flow { fill: none; stroke: var(--brand-primary); stroke-width: 2; }
+            .ce-flow-soft { fill: none; stroke: var(--text-muted); stroke-width: 1.5; opacity: 0.7; }
+            .ce-annotation { font: italic 10.5px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .ce-section-label { font: 700 11px var(--font-sans, system-ui); fill: var(--text-muted); letter-spacing: 0.12em; }
+            .ce-arrow-head { fill: var(--brand-primary); }
+          </style>
+
+          <text class="ce-section-label" x="30" y="40">BEFORE ERASURE — NORMAL OPERATION</text>
+
+          <rect class="ce-box" x="30" y="60" width="180" height="80" rx="8" />
+          <text class="ce-badge" x="120" y="82">1</text>
+          <text class="ce-box-label" x="120" y="104">Per-tenant CMK</text>
+          <text class="ce-box-sub" x="120" y="122">held in your KMS</text>
+
+          <path class="ce-flow" d="M215 100 L295 100" marker-end="url(#ce-arrow)" />
+          <text class="ce-annotation" x="255" y="90">wraps DEKs</text>
+
+          <rect class="ce-box" x="300" y="60" width="180" height="80" rx="8" />
+          <text class="ce-badge" x="390" y="82">2</text>
+          <text class="ce-box-label" x="390" y="104">WORM ciphertext</text>
+          <text class="ce-box-sub" x="390" y="122">retained for SOX / SEC / HIPAA</text>
+
+          <text class="ce-section-label" x="30" y="190">ERASURE REQUEST APPROVED</text>
+
+          <path class="ce-flow-soft" d="M120 145 L120 215" marker-end="url(#ce-arrow)" />
+          <path class="ce-flow-soft" d="M390 145 L390 215" />
+
+          <rect class="ce-box--destroyed" x="30" y="220" width="180" height="80" rx="8" />
+          <text class="ce-badge" x="120" y="242">3</text>
+          <text class="ce-box-label" x="120" y="264">CMK destroyed</text>
+          <text class="ce-box-sub" x="120" y="282">disposal inside the KMS</text>
+
+          <rect class="ce-box" x="300" y="220" width="180" height="80" rx="8" />
+          <text class="ce-box-label" x="390" y="248">WORM ciphertext</text>
+          <text class="ce-box-sub" x="390" y="266">bytes remain on the shelf</text>
+          <text class="ce-box-sub" x="390" y="284">no key exists to read them</text>
+
+          <path class="ce-flow" d="M215 260 L295 260" marker-end="url(#ce-arrow)" />
+          <text class="ce-annotation" x="255" y="250">unreadable</text>
+
+          <rect class="ce-box--receipt" x="570" y="220" width="280" height="80" rx="8" />
+          <text class="ce-badge" x="710" y="242">4</text>
+          <text class="ce-box-label" x="710" y="264">Tamper-evident receipt</text>
+          <text class="ce-box-sub" x="710" y="282">signed under operator-root key</text>
+
+          <path class="ce-flow" d="M495 260 L565 260" marker-end="url(#ce-arrow)" />
+          <text class="ce-annotation" x="530" y="250">emit</text>
+
+          <path class="ce-flow" d="M710 305 L710 350" marker-end="url(#ce-arrow)" />
+
+          <rect class="ce-box" x="570" y="355" width="280" height="60" rx="8" />
+          <text class="ce-box-label" x="710" y="380">BoltAuditSink Merkle chain</text>
+          <text class="ce-box-sub" x="710" y="398">receipt appended at signed position</text>
+
+          <text class="ce-annotation" x="430" y="440">Operator-root key is distinct from the destroyed tenant CMK — receipt remains verifiable after disposal.</text>
+        </svg>
+      </div>
+
+      <ol class="mech-steps">
+        {mechanismSteps.map((row) => (
+          <li class="mech-step">
+            <h3 class="mech-step__title">{row[0]}</h3>
+            <p class="mech-step__body">{row[1]}</p>
+          </li>
+        ))}
+      </ol>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Why this satisfies both obligations"
+      title="The single primitive that closes the gap."
+      stripe="a"
+    >
+      <div class="why-grid">
+        {whyItWorks.map((row) => (
+          <article class="why-card">
+            <h3 class="why-card__title">{row[0]}</h3>
+            <p class="why-card__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="KMS backends"
+      title="Where the key lives is your choice."
+      lede="The construction is backend-agnostic; the trait-level abstraction lets each customer pick the KMS that fits their custody bar. The trait surface is identical, so swapping backends never changes the security model."
+      stripe="b"
+    >
+      <div class="data-table data-table--cols2">
+        <div class="data-table__row data-table__row--head">
+          <div>Backend</div>
+          <div>Status</div>
+        </div>
+        {kmsBackends.map((row) => (
+          <div class="data-table__row">
+            <div class="data-table__label">{row[0]}</div>
+            <div>{row[1]}</div>
+          </div>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What an auditor receives"
+      title="The packet your DPO or external auditor uses."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <p>
+        When a subject erasure request is processed, the customer's compliance officer can extract,
+        for that request:
+      </p>
+      <ul class="auditor-list">
+        <li>The signed disposal receipt, with the operator-root public key needed to verify it.</li>
+        <li>The Merkle inclusion proof showing the receipt is sealed in the audit chain at a specific
+          position, with the chain hash before and after.</li>
+        <li>A timestamped record of which tenant CMK was destroyed, which ciphertext objects were
+          dependent on it, and which retention policy applied to each.</li>
+        <li>A reference to the KMS audit log entry recording the destruction, signed by the KMS itself.</li>
+      </ul>
+      <p>
+        Customers running a SOC&nbsp;2 or HIPAA audit feed this packet directly to their auditor.
+        For GDPR Art. 17 Supervisory-Authority response, the packet provides the verifiable
+        statement of completion that data-protection regulators look for.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What this page does not claim"
+      title="Where the construction's edges sit."
+      lede="The construction is precise about what it delivers. It is equally precise about what it does not. This section names the limits buyers and auditors should understand before relying on the receipt."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="limits-list">
+        {honestLimits.map((line) => <li>{line}</li>)}
+      </ul>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Related controls"
+      title="How this primitive sits next to the rest of the trust posture."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <p>
+        Cryptographic erasure is one control in a broader compliance architecture. The pages below
+        cover the surrounding pieces:
+      </p>
+      <ul class="related-list">
+        <li><a href="/trust/controls">Controls evidence map</a> — where this primitive maps in SOC&nbsp;2, HIPAA, GDPR, and ISO&nbsp;27001 control matrices.</li>
+        <li><a href="/trust/where-the-model-runs">Where the model runs</a> — how PII never reaches the LLM in plaintext, so the erasure surface stays small.</li>
+        <li><a href="/trust/subprocessors">Sub-processor disclosure</a> — why the customer's KMS, not Sparcle, holds the keys this construction destroys.</li>
+        <li><a href="/trust/questionnaire">Security questionnaire</a> — pre-filled answers covering encryption posture, key custody, and audit chain integrity.</li>
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want the threat model and the formal write-up?"
+      lede="The full construction document — threat model, formal definitions, KMS-backend conformance test, and integration test report — is available under a mutual NDA during pilot evaluation."
+    >
+      <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">security@sparcle.app</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Browse the Trust Center</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-crypto-erasure .mech-diagram {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 920px;
+    margin: 0 auto 1.75rem;
+  }
+  .page-crypto-erasure .crypto-erasure-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .page-crypto-erasure .mech-steps {
+    list-style: none;
+    counter-reset: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .page-crypto-erasure .mech-step {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+  }
+  .page-crypto-erasure .mech-step__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .page-crypto-erasure .mech-step__body {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+  .page-crypto-erasure .why-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .page-crypto-erasure .why-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+  }
+  .page-crypto-erasure .why-card__title {
+    margin: 0 0 0.55rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .page-crypto-erasure .why-card__body {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.6;
+    font-size: 0.93rem;
+  }
+  @media (max-width: 760px) {
+    .page-crypto-erasure .why-grid { grid-template-columns: 1fr; }
+  }
+  .page-crypto-erasure .auditor-list,
+  .page-crypto-erasure .related-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .page-crypto-erasure .auditor-list li,
+  .page-crypto-erasure .related-list li {
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+  .page-crypto-erasure .limits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .page-crypto-erasure .limits-list li {
+    padding: 0.85rem 1rem 0.85rem 2.4rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    line-height: 1.6;
+    color: var(--text-body);
+    position: relative;
+    font-size: 0.93rem;
+  }
+  .page-crypto-erasure .limits-list li::before {
+    content: "!";
+    position: absolute;
+    left: 0.95rem;
+    top: 0.85rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    font-weight: 700;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

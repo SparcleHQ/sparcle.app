@@ -1,0 +1,113 @@
+/*
+ * Pilot funnel stepper — shared across /discovery-pilot, /pilot, and
+ * /pilot-preflight. Renders as a 3-step horizontal stepper that contextually
+ * highlights the current page. Each non-current step is a link to its
+ * page, so the three URLs read as one buyer journey.
+ */
+
+.pilot-stages {
+  background: var(--bg-surface-solid);
+  border-top: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
+  padding: 1.5rem var(--w-padding-x, 2rem);
+}
+
+.pilot-stages__list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: var(--w-content, 1120px);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.pilot-stages__step {
+  flex: 1 1 240px;
+  min-width: 220px;
+  max-width: 320px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.pilot-stages__step--current {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+  border-width: 2px;
+  padding: calc(1rem - 1px) calc(1.15rem - 1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.pilot-stages__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: inherit;
+  text-decoration: none;
+  margin: -1rem -1.15rem;
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius-md);
+}
+
+.pilot-stages__step:has(.pilot-stages__link):hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.pilot-stages__num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.pilot-stages__step--current .pilot-stages__num {
+  color: var(--brand-primary);
+}
+
+.pilot-stages__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.pilot-stages__step--current .pilot-stages__title {
+  color: var(--brand-primary);
+}
+
+.pilot-stages__sub {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.pilot-stages__sep {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  opacity: 0.5;
+  list-style: none;
+}
+
+@media (max-width: 760px) {
+  .pilot-stages__sep {
+    display: none;
+  }
+  .pilot-stages__step {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}

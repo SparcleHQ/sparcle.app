@@ -43,6 +43,23 @@
 
         </section>
 
+    <aside class="trust-callout" aria-label="Trust dossier">
+      <div class="trust-callout__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      </div>
+      <div class="trust-callout__body">
+        <h3 class="trust-callout__title">Reading this for security review?</h3>
+        <p class="trust-callout__lede">
+          The complete trust dossier &mdash; sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy &mdash; lives at the Trust Center.
+        </p>
+        <a href="/trust" class="trust-callout__cta">
+          Browse the Trust Center &nearr;
+        </a>
+      </div>
+    </aside>
+
         <!-- ENTRY-RAMP LADDER — Discovery → Pilot → Founding Customer.
              Sits between the hero and the per-seat tier cards so prospects
              not ready for a full annual see the lower-friction starter SKUs.
@@ -506,7 +523,7 @@
                             </svg>
                         </div>
                         <div class="trust-label">Self-hosted</div>
-                        <div class="trust-desc">Data never leaves your infrastructure on Absolute &amp; Bundled</div>
+                        <div class="trust-desc">Absolute: data stays inside your infrastructure. Bundled: your infra plus Sparcle's zero-retention AI gateway, covered by DPA.</div>
                     </div>
                     <div class="trust-item">
                         <div class="trust-icon">
@@ -951,7 +968,7 @@
 
             <p class="compliance-line">
                 <span class="ip-badge">Identity-Bound Access</span>
-                <span class="ip-badge">Provable Erasure</span>
+                <a class="ip-badge" href="/trust/cryptographic-erasure">Provable Erasure &rarr;</a>
                 <span class="ip-badge">Audit-Trail Responses</span>
                 <br>
                 <span class="compliance-roadmap">Designed for HIPAA, GDPR, and DPDPA workflows &middot; SOC 2 alignment on roadmap</span>

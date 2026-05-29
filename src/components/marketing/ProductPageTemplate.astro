@@ -47,6 +47,7 @@ function renderIcon(iconId: string | undefined): string {
   description={hasDual ? "Bolt and Aeira — two products, one vision for enterprise AI." : content.description}
   canonical={content.canonical}
 >
+  <slot name="head" slot="head" />
   <main class="offering-page" aria-labelledby="offering-title">
 
     {hasDual && (
@@ -98,6 +99,8 @@ function renderIcon(iconId: string | undefined): string {
           </div>
         </div>
       </section>
+
+      <slot name="afterHero" />
 
       {content.architectureHtml && (
         <section class="offering-architecture" aria-label={`${content.productName} architecture`}>

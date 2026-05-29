@@ -1,0 +1,433 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+import Pill from "../../components/ui/Pill.astro";
+
+// Three deployment modes for the LLM endpoint Bolt drives. The runtime is
+// invariant; only the model location changes between modes. Ordered from
+// most private (on-prem inference) to least private (public vendor API).
+const modes = [
+  {
+    badge: "Mode A",
+    title: "On-prem inference",
+    intent: "Strongest data-residency. Customer-owned GPUs.",
+    customerSetup: "vLLM, llama.cpp, TGI, Ollama — any OpenAI-compatible server on your hardware.",
+    network: "Nothing. Stays inside your perimeter.",
+    privacyTier: "Local-only",
+    suitedFor: "Classified, ITAR, air-gapped, sovereign cloud.",
+  },
+  {
+    badge: "Mode B",
+    title: "In-tenant cloud LLM",
+    intent: "No GPUs to run. Prompts never leave your cloud tenant.",
+    customerSetup: "Azure OpenAI (Private Endpoints), Bedrock (VPC interface), Vertex (Private Service Connect), or equivalent.",
+    network: "Stays inside your cloud tenant. No public internet.",
+    privacyTier: "No-train-default",
+    suitedFor: "The common regulated config. Reuses your existing cloud-LLM contract.",
+  },
+  {
+    badge: "Mode C",
+    title: "Public vendor LLM API",
+    intent: "Trials, lower-sensitivity workloads, accepted vendor-API contract.",
+    customerSetup: "OpenAI, Anthropic, OpenRouter, Gemini — any OpenAI-compatible public API.",
+    network: "PII-masked prompt to vendor API. Unmasked record stays in your audit log.",
+    privacyTier: "No-train-default · Trains-by-default (Gemini free)",
+    suitedFor: "Eval, internal-only, public-scope content. Not the posture for regulated data.",
+  },
+];
+
+// The five-tier privacy taxonomy used to label every configured endpoint.
+// Derived purely from (provider, base URL, model). Ordinal so a "minimum
+// acceptable tier" check is a single comparison.
+const tiers = [
+  ["1. Local-only", "No data leaves the host. Local inference servers running on customer hardware."],
+  ["2. ZDR", "Contractual zero-data-retention. Either ZDR routes on a routing layer, or an enterprise ZDR contract the customer holds with the provider."],
+  ["3. No-train-default", "Provider does not train on inputs by default. May retain briefly for abuse review."],
+  ["4. Trains-by-default", "Provider may train on inputs unless the customer has opted out elsewhere."],
+  ["5. Unknown", "Endpoint policy is not knowable from the request side. Custom base URLs that are not obviously local fall here."],
+];
+
+const masking = [
+  ["Detect before the call", "Every request body is scanned for PII before the LLM adapter is invoked. Detected values are replaced with opaque tokens, and a mapping between tokens and real values is stashed in the per-request context."],
+  ["Restore on the way out", "When the LLM response comes back, an outbound layer rehydrates the tokens before the response leaves the process. The model sees masked text; the calling user sees the real values."],
+  ["Tools see real values", "Tool calls bypass the masking layer by design. A tool that needs a real customer ID gets the real customer ID; only the LLM boundary is masked. This is a deliberate contract — masking the tool surface would corrupt the workflow."],
+  ["Audit log holds the truth", "The Bolt audit log records the unmasked prompt and the unmasked response, because it lives inside your perimeter and your retention rules govern it. Outside the perimeter, only the masked form is observable."],
+];
+
+const honest = [
+  ["What is shipped", "The five-tier privacy taxonomy, the per-endpoint tier derivation, the PII-masking layer that runs before every outbound LLM call, the outbound-restoration layer, and the audit-log capture of unmasked records. These are operational today across all three deployment modes."],
+  ["What is rolling out", "A configurable minimum-tier policy floor enforced at boot. The taxonomy is in place; the boot-time refusal-to-start-on-misconfiguration gate is being wired across all the call sites that read endpoint config. Customers who want this enforced today can have it as a contractual requirement."],
+  ["What we do not claim", "We do not claim that data never leaves your perimeter in Mode C. It does — in masked form. We do not claim ZDR by default; ZDR is a contract the customer holds with their provider, and Bolt reflects that label without verifying it from the request side. The runtime is conservative in both directions: when in doubt, it labels an endpoint as less private than it might actually be."],
+];
+---
+<BaseLayout
+  title="Where the model runs: Bolt's BYO LLM deployment modes | Sparcle Trust"
+  description="How Bolt keeps the model inside your perimeter. The three deployment modes (on-prem inference, in-tenant cloud LLM, public vendor API), the five-tier endpoint privacy taxonomy, and the PII-masking layer that runs before every outbound LLM call."
+  canonical="https://sparcle.app/trust/where-the-model-runs"
+>
+  <main class="page-trust-model">
+    <Hero
+      eyebrow="Trust"
+      title="Where the model runs."
+      lede="Sparcle does not ship a model. We ship the runtime that drives a model you chose. The prompt assembly, the access-controlled retrieval, the PII masking, and the audit log all live inside your perimeter — regardless of where the model itself lives. This page explains the three deployment modes our customers actually use, the privacy taxonomy the runtime applies to every endpoint, and the masking guarantee that holds even when the customer points us at a public LLM API."
+    >
+      <a href="#modes" class="btn btn-primary btn-lg">Read the three modes</a>
+      <a href="/architecture" class="btn btn-secondary btn-lg">See the architecture</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="The architectural decomposition"
+      title="The runtime is invariant. Only the model location changes."
+      lede="Bolt's runtime — the agent loop, the prompt assembly, the retrieval ACL, the PII masking, the audit log — runs inside the customer's perimeter in every shipping topology. The LLM adapter is a thin HTTP client whose base URL points at whichever inference endpoint the customer configured. Swapping the model location does not change the security posture of anything else."
+      stripe="b"
+    >
+      <div class="model-runtime-diagram" data-expandable tabindex="0" role="button" aria-label="Expand topology diagram">
+        <svg viewBox="0 0 800 600" class="topology-svg" role="img" aria-labelledby="topology-title topology-desc">
+          <title id="topology-title">Bolt deployment topology — three model-location modes</title>
+          <desc id="topology-desc">The customer perimeter contains the Bolt UI, agent runtime, Aeira retrieval with ACL pre-filter, PII masking layer, and the LLM adapter. The LLM adapter exits the perimeter and routes to one of three modes: Mode A on-prem inference, Mode B in-tenant cloud LLM, or Mode C public vendor API.</desc>
+
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="arrow-head" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+          </defs>
+
+          <style>
+            .perimeter { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 8 5; opacity: 0.55; }
+            .perimeter-label { font: 700 11px var(--font-sans, system-ui); fill: var(--text-muted); letter-spacing: 0.12em; }
+            .box { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .box--soft { fill: var(--bg-surface-solid); stroke: var(--text-muted); stroke-width: 1; opacity: 0.92; }
+            .box-label { font: 600 13px var(--font-sans, system-ui); fill: var(--text-heading); text-anchor: middle; }
+            .box-sub { font: 500 11px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .mode-badge { font: 700 10px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; letter-spacing: 0.12em; }
+            .flow { fill: none; stroke: var(--brand-primary); stroke-width: 2; }
+            .branch { fill: none; stroke: var(--brand-primary); stroke-width: 1.5; opacity: 0.85; }
+            .annotation { font: italic 10.5px var(--font-sans, system-ui); fill: var(--text-muted); }
+            .arrow-head { fill: var(--brand-primary); }
+          </style>
+
+          <rect class="perimeter" x="30" y="55" width="740" height="380" rx="14" />
+          <text class="perimeter-label" x="46" y="44">CUSTOMER PERIMETER</text>
+
+          <rect class="box" x="65" y="95" width="135" height="60" rx="8" />
+          <text class="box-label" x="132.5" y="122">Bolt UI</text>
+          <text class="box-sub" x="132.5" y="140">user query</text>
+
+          <path class="flow" d="M205 125 L295 125" marker-end="url(#arrow)" />
+
+          <rect class="box" x="300" y="95" width="170" height="60" rx="8" />
+          <text class="box-label" x="385" y="122">Agent runtime</text>
+          <text class="box-sub" x="385" y="140">orchestration</text>
+
+          <path class="flow" d="M475 125 L555 125" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+
+          <rect class="box" x="560" y="80" width="180" height="90" rx="8" />
+          <text class="box-label" x="650" y="108">Aeira retrieval</text>
+          <text class="box-sub" x="650" y="128">+ ACL pre-filter</text>
+          <text class="box-sub" x="650" y="148">identity-bound</text>
+
+          <path class="flow" d="M385 158 L385 213" marker-end="url(#arrow)" />
+          <text class="annotation" x="395" y="190">prompt + scoped context</text>
+
+          <rect class="box" x="280" y="215" width="210" height="56" rx="8" />
+          <text class="box-label" x="385" y="240">PII masking layer</text>
+          <text class="box-sub" x="385" y="258">tokenize before every LLM call</text>
+
+          <path class="flow" d="M385 274 L385 318" marker-end="url(#arrow)" />
+
+          <rect class="box" x="270" y="320" width="230" height="64" rx="8" />
+          <text class="box-label" x="385" y="346">LLM adapter</text>
+          <text class="box-sub" x="385" y="366">OpenAI-compatible HTTP client</text>
+
+          <path class="flow" d="M385 387 L385 450" marker-end="url(#arrow)" />
+          <text class="annotation" x="395" y="420">outbound HTTP</text>
+          <text class="annotation" x="395" y="436">base URL = customer-configured</text>
+
+          <path class="branch" d="M385 462 L160 462 L160 480" marker-end="url(#arrow)" />
+          <path class="branch" d="M385 462 L385 480" marker-end="url(#arrow)" />
+          <path class="branch" d="M385 462 L610 462 L610 480" marker-end="url(#arrow)" />
+
+          <rect class="box--soft" x="60" y="490" width="200" height="92" rx="8" />
+          <text class="mode-badge" x="160" y="512">MODE A</text>
+          <text class="box-label" x="160" y="534">On-prem inference</text>
+          <text class="box-sub" x="160" y="554">private hostname</text>
+          <text class="box-sub" x="160" y="571">inside your perimeter</text>
+
+          <rect class="box--soft" x="285" y="490" width="200" height="92" rx="8" />
+          <text class="mode-badge" x="385" y="512">MODE B</text>
+          <text class="box-label" x="385" y="534">In-tenant cloud LLM</text>
+          <text class="box-sub" x="385" y="554">Azure / Bedrock / Vertex</text>
+          <text class="box-sub" x="385" y="571">private endpoint, your tenant</text>
+
+          <rect class="box--soft" x="510" y="490" width="200" height="92" rx="8" />
+          <text class="mode-badge" x="610" y="512">MODE C</text>
+          <text class="box-label" x="610" y="534">Public vendor API</text>
+          <text class="box-sub" x="610" y="554">OpenAI / Anthropic / Gemini</text>
+          <text class="box-sub" x="610" y="571">PII-masked prompt egresses</text>
+        </svg>
+      </div>
+
+      <p class="model-runtime-note">
+        The adapter speaks the OpenAI-compatible chat-completions API.
+        That single interface covers every major inference server in
+        production today — your own GPU stack, your cloud tenant's
+        managed LLM, or any public vendor API — without changing the
+        Bolt runtime.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="The three modes"
+      title="What customers actually configure."
+      lede="Ordered from most private to least private. Mode A and Mode B are the configurations regulated industries adopt. Mode C is useful for evaluation and lower-sensitivity workloads, and degrades gracefully via the masking layer described below."
+      stripe="a"
+      id="modes"
+    >
+      <div class="model-modes">
+        {modes.map((m) => (
+          <article class="model-mode-card">
+            <header class="model-mode-card__header">
+              <Pill variant="brand" size="sm">{m.badge}</Pill>
+              <h3>{m.title}</h3>
+              <p class="model-mode-card__intent">{m.intent}</p>
+            </header>
+            <dl class="model-mode-card__rows">
+              <div>
+                <dt>Customer setup</dt>
+                <dd>{m.customerSetup}</dd>
+              </div>
+              <div>
+                <dt>What leaves the perimeter</dt>
+                <dd>{m.network}</dd>
+              </div>
+              <div>
+                <dt>Endpoint privacy tier</dt>
+                <dd><strong>{m.privacyTier}</strong></dd>
+              </div>
+              <div>
+                <dt>Suited for</dt>
+                <dd>{m.suitedFor}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Endpoint privacy taxonomy"
+      title="Every configured endpoint gets a tier."
+      lede="The Bolt runtime derives a privacy tier from the provider, the base URL, and the model. The derivation is a pure function — no I/O, no provider call. The tiers are an ordinal scale so 'minimum acceptable tier' is a single comparison."
+      stripe="b"
+      width="prose"
+    >
+      <ol class="model-tiers">
+        {tiers.map(([t, body]) => (
+          <li>
+            <strong>{t}.</strong> {body}
+          </li>
+        ))}
+      </ol>
+      <p class="model-tiers-footnote">
+        The derivation is conservative. When in doubt, the runtime
+        labels an endpoint as less private than it might actually be.
+        A customer with a ZDR contract on top of an OpenAI deployment,
+        for example, will see the endpoint labelled No-train-default
+        in the runtime; the contractual upgrade lives in their record
+        of the agreement, not in a probe the runtime can perform.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="The masking layer"
+      title="PII is masked before any outbound LLM call."
+      lede="Mode A and Mode B already keep the prompt inside the perimeter. The masking layer is what protects Mode C, and what keeps every other mode's audit log free of model-side exposure."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {masking.map(([t, body]) => (
+          <Card title={t}>{body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Shipped, rolling out, and not claimed"
+      title="Honest about which parts are operational."
+      lede="The trust center's voice across every page on this site. We will tell you what is in production today, what is in flight, and what we deliberately do not claim."
+      stripe="b"
+      width="prose"
+    >
+      <div class="model-honest">
+        {honest.map(([t, body]) => (
+          <section>
+            <h3>{t}</h3>
+            <p>{body}</p>
+          </section>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What this means for your edge AI inspection"
+      title="The AI workload no longer routes through it."
+      stripe="a"
+      width="prose"
+    >
+      <p>
+        Inline AI gateways exist to inspect outbound prompts on their
+        way to a public LLM. In Mode A and Mode B, the call never
+        reaches the public internet, so the inline gateway has no
+        traffic to inspect for AI use. In Mode C, the traffic that
+        does leave carries the masked form; the proxy can still log
+        the connection, but the masking has already done the work the
+        DLP layer of an inline gateway exists to do.
+      </p>
+      <p>
+        The AI Protect line item of an edge gateway can be retired
+        once Bolt becomes the sanctioned AI surface. The general SWG
+        and ZTNA spend stays, because that protects web browsing and
+        SaaS access — workloads Sparcle does not replace. We are the
+        AI runtime, not the network.
+      </p>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Architecture review."
+      lede="If your security or network team wants to walk this in detail against your current edge configuration, a 30-minute architecture review covers the deployment mode, the masking layer, the audit-log surface, and the endpoint privacy floor your policy team wants enforced."
+    >
+      <a href="#" onclick="openContactModal('Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule architecture review</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">security@sparcle.app</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-trust-model .model-runtime-diagram {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .page-trust-model .topology-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .page-trust-model .model-runtime-note {
+    max-width: 720px;
+    margin: 1.25rem auto 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    text-align: center;
+  }
+
+  /* Mode cards — three deployment options, equal weight.
+     auto-fit with minmax 260px = packs as many columns as fit at that
+     min width. At full content-width (1120px) this resolves to 3-up;
+     below ~800px it gracefully collapses to 2-up, then 1-up on phones.
+     Independent of viewport breakpoint, so it survives narrow panes,
+     DevTools open, Retina-scaled previews, etc. */
+  .page-trust-model .model-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+  .page-trust-model .model-mode-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .page-trust-model .model-mode-card__header h3 {
+    margin: 0.75rem 0 0.4rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .page-trust-model .model-mode-card__intent {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  .page-trust-model .model-mode-card__rows {
+    margin: 0;
+    display: grid;
+    gap: 0.95rem;
+  }
+  .page-trust-model .model-mode-card__rows > div {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .page-trust-model .model-mode-card__rows dt {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .page-trust-model .model-mode-card__rows dd {
+    margin: 0;
+    color: var(--text-body);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  /* Tier list. */
+  .page-trust-model .model-tiers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .page-trust-model .model-tiers li {
+    padding: 1rem 1.25rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+  .page-trust-model .model-tiers-footnote {
+    margin: 1.5rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* Honest section — three short sections stacked, prose-width. */
+  .page-trust-model .model-honest {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .page-trust-model .model-honest h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .page-trust-model .model-honest p {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.7;
+  }
+</style>

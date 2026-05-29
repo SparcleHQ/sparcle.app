@@ -63,6 +63,139 @@ const notDoes = [
     </Hero>
 
     <PageSection
+      eyebrow="At a glance"
+      title="The asymmetric topology, visualized."
+      lede="Customer data is processed by sub-processors the customer configures, inside the customer's perimeter. Sparcle's own sub-processors handle software delivery, not customer data. The two sets do not touch — and the only flow that crosses the boundary is from Sparcle outward, in the form of container images, Helm charts, and advisories."
+      stripe="a"
+    >
+      <div class="subproc-diagram" data-expandable tabindex="0" role="button" aria-label="Expand sub-processor topology diagram">
+        <svg viewBox="0 0 940 500" class="subproc-topology-svg" role="img" aria-labelledby="subproc-topology-title subproc-topology-desc">
+          <title id="subproc-topology-title">Sub-processor topology — Sparcle is not in the customer data path</title>
+          <desc id="subproc-topology-desc">The customer perimeter contains every sub-processor that touches customer data: identity provider, cloud compute, managed Postgres and Redis, object storage, LLM provider, KMS, MCP integrations, and SIEM. Sparcle sits outside the perimeter as a software vendor with its own sub-processors that handle source delivery and corporate operations only. The only flow that crosses the boundary is one-way from Sparcle to the customer perimeter: container images, Helm charts, and security advisories. Customer data never flows back to Sparcle.</desc>
+
+          <defs>
+            <marker id="sp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="sp-arrow-head" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+            <marker id="sp-arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="sp-arrow-head-soft" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+          </defs>
+
+          <style>
+            .sp-perimeter { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 8 5; opacity: 0.55; }
+            .sp-perimeter-label { font: 700 11px var(--font-sans, system-ui); fill: var(--text-muted); letter-spacing: 0.12em; }
+            .sp-vendor-box { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .sp-vendor-label { font: 700 11px var(--font-sans, system-ui); fill: var(--brand-primary); letter-spacing: 0.12em; }
+            .sp-vendor-sub { font: 500 11px var(--font-sans, system-ui); fill: var(--text-muted); }
+            .sp-chip { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1.2; }
+            .sp-chip-name { font: 700 11.5px var(--font-sans, system-ui); fill: var(--text-heading); text-anchor: middle; }
+            .sp-chip-sub { font: 500 9.5px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .sp-flow-deliver { fill: none; stroke: var(--brand-primary); stroke-width: 2; }
+            .sp-flow-blocked { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 6 4; opacity: 0.55; }
+            .sp-flow-label { font: 600 11px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; }
+            .sp-blocked-label { font: 600 11px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .sp-x { fill: var(--bg-body); stroke: var(--text-muted); stroke-width: 2; }
+            .sp-x-glyph { stroke: var(--text-muted); stroke-width: 2.5; stroke-linecap: round; }
+            .sp-arrow-head { fill: var(--brand-primary); }
+            .sp-arrow-head-soft { fill: var(--text-muted); opacity: 0.6; }
+          </style>
+
+          <rect class="sp-perimeter" x="20" y="30" width="560" height="450" rx="14" />
+          <text class="sp-perimeter-label" x="36" y="20">CUSTOMER PERIMETER &middot; CUSTOMER-CONFIGURED SUB-PROCESSORS</text>
+
+          <rect class="sp-chip" x="50" y="60" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="130" y="86">Identity provider</text>
+          <text class="sp-chip-sub" x="130" y="104">Entra · Okta · Workspace</text>
+          <text class="sp-chip-sub" x="130" y="118">Zoho · OIDC · SAML</text>
+
+          <rect class="sp-chip" x="220" y="60" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="300" y="86">Cloud compute</text>
+          <text class="sp-chip-sub" x="300" y="104">AWS · Azure · GCP</text>
+          <text class="sp-chip-sub" x="300" y="118">on-prem k8s · private cloud</text>
+
+          <rect class="sp-chip" x="390" y="60" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="470" y="86">Object storage</text>
+          <text class="sp-chip-sub" x="470" y="104">S3 · GCS · Azure Blob</text>
+          <text class="sp-chip-sub" x="470" y="118">backup · WORM archive</text>
+
+          <rect class="sp-chip" x="50" y="155" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="130" y="181">Managed Postgres</text>
+          <text class="sp-chip-sub" x="130" y="199">RDS · Cloud SQL · Aurora</text>
+          <text class="sp-chip-sub" x="130" y="213">audit · sessions · PII vault</text>
+
+          <rect class="sp-chip" x="220" y="155" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="300" y="181">Managed cache</text>
+          <text class="sp-chip-sub" x="300" y="199">ElastiCache · Memorystore</text>
+          <text class="sp-chip-sub" x="300" y="213">session ephemera</text>
+
+          <rect class="sp-chip" x="390" y="155" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="470" y="181">MCP integrations</text>
+          <text class="sp-chip-sub" x="470" y="199">Jira · Slack · GitHub</text>
+          <text class="sp-chip-sub" x="470" y="213">customer-chosen tools</text>
+
+          <rect class="sp-chip" x="50" y="250" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="130" y="276">LLM provider (BYO)</text>
+          <text class="sp-chip-sub" x="130" y="294">OpenAI · Anthropic · Bedrock</text>
+          <text class="sp-chip-sub" x="130" y="308">customer-held BAA / DPA</text>
+
+          <rect class="sp-chip" x="220" y="250" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="300" y="276">KMS</text>
+          <text class="sp-chip-sub" x="300" y="294">AWS KMS · Vault · HSM</text>
+          <text class="sp-chip-sub" x="300" y="308">customer keys, Sparcle has no access</text>
+
+          <rect class="sp-chip" x="390" y="250" width="160" height="70" rx="6" />
+          <text class="sp-chip-name" x="470" y="276">SIEM / logging</text>
+          <text class="sp-chip-sub" x="470" y="294">Splunk · Sentinel · Datadog</text>
+          <text class="sp-chip-sub" x="470" y="308">customer-deployed forwarder</text>
+
+          <text class="sp-perimeter-label" x="160" y="370" style="text-anchor: start; letter-spacing: 0.06em; text-transform: none; font-style: italic; font-weight: 500; fill: var(--text-muted); font-size: 11px">
+            Customer-owned credentials. Customer-held contracts. Sparcle has no access.
+          </text>
+
+          <rect class="sp-vendor-box" x="640" y="80" width="280" height="260" rx="14" />
+          <text class="sp-vendor-label" x="656" y="68">SPARCLE — SOFTWARE VENDOR</text>
+          <text class="sp-vendor-sub" x="656" y="105">Sparcle's own sub-processors:</text>
+
+          <rect class="sp-chip" x="660" y="120" width="240" height="46" rx="6" />
+          <text class="sp-chip-name" x="780" y="140" text-anchor="middle">GitHub (source + GHCR)</text>
+          <text class="sp-chip-sub" x="780" y="156" text-anchor="middle">code · container images · CI/CD</text>
+
+          <rect class="sp-chip" x="660" y="174" width="240" height="46" rx="6" />
+          <text class="sp-chip-name" x="780" y="194" text-anchor="middle">Cloudflare</text>
+          <text class="sp-chip-sub" x="780" y="210" text-anchor="middle">DNS · marketing site · contact form</text>
+
+          <rect class="sp-chip" x="660" y="228" width="240" height="46" rx="6" />
+          <text class="sp-chip-name" x="780" y="248" text-anchor="middle">Anthropic (internal dev only)</text>
+          <text class="sp-chip-sub" x="780" y="264" text-anchor="middle">code authoring · never customer data</text>
+
+          <rect class="sp-chip" x="660" y="282" width="240" height="46" rx="6" />
+          <text class="sp-chip-name" x="780" y="302" text-anchor="middle">Google Workspace</text>
+          <text class="sp-chip-sub" x="780" y="318" text-anchor="middle">Sparcle team email · never customer data</text>
+
+          <path class="sp-flow-deliver" d="M635 175 L580 175" marker-end="url(#sp-arrow)" />
+          <text class="sp-flow-label" x="610" y="160">deliver</text>
+          <text class="sp-flow-label" x="610" y="195" style="font-weight: 500; font-size: 9.5px">container images</text>
+          <text class="sp-flow-label" x="610" y="208" style="font-weight: 500; font-size: 9.5px">Helm charts · advisories</text>
+
+          <path class="sp-flow-blocked" d="M580 275 L635 275" />
+          <circle class="sp-x" cx="608" cy="275" r="13" />
+          <line class="sp-x-glyph" x1="601" y1="268" x2="615" y2="282" />
+          <line class="sp-x-glyph" x1="615" y1="268" x2="601" y2="282" />
+          <text class="sp-blocked-label" x="608" y="252">no customer data</text>
+          <text class="sp-blocked-label" x="608" y="305" style="font-weight: 500; font-size: 10px">no telemetry · no phone-home</text>
+
+          <text class="sp-perimeter-label" x="640" y="380" style="text-anchor: start; letter-spacing: 0.06em; text-transform: none; font-style: italic; font-weight: 500; fill: var(--text-muted); font-size: 11px">
+            Outside the customer perimeter.
+          </text>
+          <text class="sp-perimeter-label" x="640" y="396" style="text-anchor: start; letter-spacing: 0.06em; text-transform: none; font-style: italic; font-weight: 500; fill: var(--text-muted); font-size: 11px">
+            Software delivery only.
+          </text>
+        </svg>
+      </div>
+    </PageSection>
+
+    <PageSection
       eyebrow="Scope"
       title="Who this disclosure is for."
       stripe="b"
@@ -229,16 +362,32 @@ const notDoes = [
 </BaseLayout>
 
 <style is:global>
+  .page-subprocessors .subproc-diagram {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .page-subprocessors .subproc-topology-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 920px;
+    margin: 0 auto;
+  }
   .page-subprocessors .subprocessor-list {
     display: grid;
     gap: 0.85rem;
   }
   .page-subprocessors .subprocessor-card {
     background: var(--bg-surface-solid);
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--border-strong);
     border-left: 3px solid var(--brand-primary);
     border-radius: var(--radius-md);
     padding: 1.1rem 1.25rem;
+    box-shadow: var(--shadow-sm);
   }
   .page-subprocessors .subprocessor-card__header {
     display: flex;

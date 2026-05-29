@@ -2,12 +2,10 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/ui/Hero.astro";
 import PageSection from "../components/ui/PageSection.astro";
-import CardGrid from "../components/ui/CardGrid.astro";
-import Card from "../components/ui/Card.astro";
 import FAQ from "../components/ui/FAQ.astro";
 
 // Set PUBLIC_CALENDLY_URL in .env (or Cloudflare env) to enable inline booking.
-// e.g. PUBLIC_CALENDLY_URL=https://calendly.com/rajendra-sparcle/sparcle-demo
+// e.g. PUBLIC_CALENDLY_URL=https://calendly.com/your-org/sparcle-demo
 // Until then the page renders the contact-modal CTA as the primary path.
 const calendlyUrl = import.meta.env.PUBLIC_CALENDLY_URL ?? "";
 
@@ -71,71 +69,75 @@ const faqs = [
     />
 
     <PageSection stripe="b" width="content">
-      {calendlyUrl ? (
-        <div class="demo-calendly-wrap">
-          <iframe
-            src={calendlyUrl}
-            class="demo-calendly-iframe"
-            title="Book a demo with Sparcle"
-            loading="lazy"
-          />
-          <p class="demo-calendly-fallback">
-            Trouble seeing the calendar?
-            <a href="#" onclick="openContactModal('Demo Booking'); return false;">Send us your preferred times</a>
-            and we will confirm within one business day.
-          </p>
-        </div>
-      ) : (
-        <div class="demo-cta-stack">
-          <div class="demo-cta-card">
-            <div class="demo-cta-card__eyebrow">Reach the founding team</div>
-            <h3 class="demo-cta-card__title">Request a demo slot</h3>
-            <p class="demo-cta-card__lede">
-              Tell us 1) what work you want AI to help with, 2) the tools your team already uses, and
-              3) two windows that work this week or next. We confirm within one business day.
-            </p>
-            <div class="demo-cta-card__actions">
-              <a href="#" onclick="openContactModal('Demo Booking'); return false;" class="btn btn-primary btn-lg">
-                Request a Demo
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </a>
-              <a href="/download" class="btn btn-secondary btn-lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Try it now (7-day Trial)
-              </a>
+      <div class="demo-booking-split">
+        <div class="demo-booking-split__left">
+          {calendlyUrl ? (
+            <div class="demo-calendly-wrap">
+              <iframe
+                src={calendlyUrl}
+                class="demo-calendly-iframe"
+                title="Book a demo with Sparcle"
+                loading="lazy"
+              />
+              <p class="demo-calendly-fallback">
+                Trouble seeing the calendar?
+                <a href="#" onclick="openContactModal('Demo Booking'); return false;">Send us your preferred times</a>
+                and we will confirm within one business day.
+              </p>
             </div>
-            <p class="demo-cta-card__note">
-              Or email <a href="mailto:bolt@sparcle.app?subject=Demo%20Booking">bolt@sparcle.app</a>
-              and we will route directly to a founder.
-            </p>
-          </div>
+          ) : (
+            <div class="demo-cta-card">
+              <div class="demo-cta-card__eyebrow">Reach the founding team</div>
+              <h3 class="demo-cta-card__title">Request a demo slot</h3>
+              <p class="demo-cta-card__lede">
+                Tell us 1) what work you want AI to help with, 2) the tools your team already uses, and
+                3) two windows that work this week or next. We confirm within one business day.
+              </p>
+              <div class="demo-cta-card__actions">
+                <a href="#" onclick="openContactModal('Demo Booking'); return false;" class="btn btn-primary btn-lg">
+                  Request a Demo
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </a>
+                <a href="/download" class="btn btn-secondary btn-lg">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Try it now (7-day Trial)
+                </a>
+              </div>
+              <p class="demo-cta-card__note">
+                Or email <a href="mailto:bolt@sparcle.app?subject=Demo%20Booking">bolt@sparcle.app</a>
+                and we will route directly to a founder.
+              </p>
+            </div>
+          )}
         </div>
-      )}
-    </PageSection>
 
-    <PageSection
-      eyebrow="Demo Formats"
-      title="Pick the call that matches your stage"
-      lede="There is no &ldquo;standard&rdquo; demo. The right format depends on whether you are scoping the problem or scoping the rollout."
-      stripe="a"
-    >
-      <CardGrid cols={3}>
-        {formats.map((f) => (
-          <Card variant="proof" metric={f.metric} title={f.label}>
-            <span set:html={f.body} />
-          </Card>
-        ))}
-      </CardGrid>
+        <aside class="demo-booking-split__right">
+          <p class="demo-formats-eyebrow">Pick the format</p>
+          <h3 class="demo-formats-heading">Three calls, your choice.</h3>
+          <p class="demo-formats-sub">No standard demo. The right format depends on whether you are scoping the problem or scoping the rollout.</p>
+          <ul class="demo-format-list">
+            {formats.map((f) => (
+              <li class="demo-format-item">
+                <div class="demo-format-item__metric">{f.metric}</div>
+                <div class="demo-format-item__copy">
+                  <h4 class="demo-format-item__label">{f.label}</h4>
+                  <p class="demo-format-item__body" set:html={f.body} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
     </PageSection>
 
     <PageSection
       eyebrow="What you will see"
       title="A real product, not a recording"
-      stripe="b"
+      stripe="a"
       width="prose"
       align="left"
     >
@@ -180,10 +182,91 @@ const faqs = [
     margin-left: 0.25rem;
   }
 
-  .demo-cta-stack {
-    display: flex;
-    justify-content: center;
+  /* 2-column booking split — left holds the Calendly iframe OR the
+     request-card fallback; right holds the format previews. Keeps the
+     section visually balanced when the iframe isn't wired yet. */
+  .demo-booking-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
   }
+  @media (max-width: 880px) {
+    .demo-booking-split {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+  .demo-booking-split__left {
+    min-width: 0;
+  }
+  .demo-booking-split__right {
+    min-width: 0;
+  }
+
+  .demo-formats-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 0.5rem;
+  }
+  .demo-formats-heading {
+    font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .demo-formats-sub {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0 0 1.5rem;
+  }
+  .demo-format-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.85rem;
+  }
+  .demo-format-item {
+    display: grid;
+    grid-template-columns: 78px 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.1rem;
+  }
+  .demo-format-item__metric {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    letter-spacing: -0.01em;
+    padding-top: 0.1rem;
+  }
+  .demo-format-item__copy {
+    min-width: 0;
+  }
+  .demo-format-item__label {
+    margin: 0 0 0.25rem;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .demo-format-item__body {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
   .demo-cta-card {
     background: var(--bg-surface-solid);
     border: 1px solid var(--border-default);

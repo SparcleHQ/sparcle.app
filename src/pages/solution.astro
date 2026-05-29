@@ -71,6 +71,71 @@ const icons = {
       lede="ACL-aware retrieval governs who can see what. Authority Policy decides how to rank what they can see — using freshness, approval status, audience targeting, and vertical-specific evidence ladders. Three reference packs ship in the box; customers extend or write their own."
       stripe="a"
     >
+      <div class="retrieval-diagram" data-expandable tabindex="0" role="button" aria-label="Expand identity-bound retrieval diagram">
+        <svg viewBox="0 0 920 360" class="retrieval-svg" role="img" aria-labelledby="retrieval-title retrieval-desc">
+          <title id="retrieval-title">Identity-bound retrieval flow</title>
+          <desc id="retrieval-desc">A user query carries identity into Aeira. Aeira applies an ACL pre-filter against the full corpus before retrieval, leaving only rows the calling user is entitled to see. The Authority Policy SDK ranks what remains. The final scoped result is returned with a receipt explaining why each item is included.</desc>
+
+          <defs>
+            <marker id="r-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="r-arrow-head" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+          </defs>
+
+          <style>
+            .r-box { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .r-box--inner { fill: var(--bg-surface-solid); stroke: var(--text-muted); stroke-width: 1; opacity: 0.9; }
+            .r-box--filtered { fill: var(--brand-primary-light); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .r-container { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 8 5; opacity: 0.55; }
+            .r-container-label { font: 700 11px var(--font-sans, system-ui); fill: var(--text-muted); letter-spacing: 0.12em; }
+            .r-box-label { font: 600 13px var(--font-sans, system-ui); fill: var(--text-heading); text-anchor: middle; }
+            .r-box-sub { font: 500 11px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .r-id-badge { font: 700 10px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; letter-spacing: 0.08em; }
+            .r-flow { fill: none; stroke: var(--brand-primary); stroke-width: 2; }
+            .r-flow-drop { fill: none; stroke: var(--brand-primary); stroke-width: 1.5; }
+            .r-annotation { font: italic 10.5px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .r-arrow-head { fill: var(--brand-primary); }
+          </style>
+
+          <rect class="r-box" x="20" y="130" width="160" height="90" rx="8" />
+          <text class="r-id-badge" x="100" y="152">QUERY + IDENTITY</text>
+          <text class="r-box-label" x="100" y="178">user@org.com</text>
+          <text class="r-box-sub" x="100" y="196">role, group, region</text>
+          <text class="r-box-sub" x="100" y="212">attached to request</text>
+
+          <path class="r-flow" d="M185 175 L215 175" marker-end="url(#r-arrow)" />
+
+          <rect class="r-container" x="220" y="50" width="380" height="260" rx="14" />
+          <text class="r-container-label" x="236" y="38">AEIRA — INSIDE YOUR PERIMETER</text>
+
+          <rect class="r-box--inner" x="245" y="90" width="330" height="60" rx="8" />
+          <text class="r-box-label" x="410" y="116">Full corpus</text>
+          <text class="r-box-sub" x="410" y="134">every indexed document, every row</text>
+
+          <path class="r-flow-drop" d="M410 155 L410 195" marker-end="url(#r-arrow)" />
+          <text class="r-annotation" x="410" y="178">ACL pre-filter applied at the index</text>
+
+          <rect class="r-box--filtered" x="245" y="200" width="330" height="60" rx="8" />
+          <text class="r-box-label" x="410" y="226">Entitled candidates</text>
+          <text class="r-box-sub" x="410" y="244">only rows this identity is authorized to see</text>
+
+          <text class="r-annotation" x="410" y="290">unauthorized rows never enter the candidate set</text>
+
+          <path class="r-flow" d="M605 230 L645 230" marker-end="url(#r-arrow)" />
+
+          <rect class="r-box" x="650" y="190" width="160" height="80" rx="8" />
+          <text class="r-box-label" x="730" y="216">Authority Policy</text>
+          <text class="r-box-sub" x="730" y="234">rank what's visible</text>
+          <text class="r-box-sub" x="730" y="252">freshness, approval, ladder</text>
+
+          <path class="r-flow" d="M815 230 L850 230" marker-end="url(#r-arrow)" />
+
+          <rect class="r-box--filtered" x="820" y="190" width="80" height="80" rx="8" />
+          <text class="r-box-label" x="860" y="220">Result</text>
+          <text class="r-box-sub" x="860" y="240">+ receipt</text>
+        </svg>
+      </div>
+
       <div class="receipt-grid grid-3">
         <article class="receipt-card">
           <div class="receipt-card__eyebrow">Generic</div>
@@ -243,6 +308,28 @@ const icons = {
 </BaseLayout>
 
 <style is:global>
+  /* ---------------------------------------------------------------
+     RETRIEVAL DIAGRAM — identity-bound retrieval flow visualization
+     above the receipt-grid on /solution. Container provides surface
+     + padding; SVG scales to fit. Theme-tracks via CSS vars in the
+     embedded <style> inside the SVG.
+     --------------------------------------------------------------- */
+  .retrieval-diagram {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 960px;
+    margin: 0 auto 2rem;
+  }
+  .retrieval-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
   /* ---------------------------------------------------------------
      SECTION-LEVEL TAGLINE — a short closing line after a card grid.
      Used after the receipt-grid and action-grid on /solution.

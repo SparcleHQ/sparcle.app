@@ -35,7 +35,7 @@ const governance = [
 const outcomes = [
   { metric: "Hours",     label: "Time reclaimed",              body: "Launcher utilities save hours per person per week before AI fires. The product earns its keep before the LLM bill starts." },
   { metric: "Prevented", label: "Policy violations stopped",   body: "ACL pre-filter blocks cross-role exposure at the database. Not detected after; prevented before." },
-  { metric: "Hidden",    label: "PII never leaves",            body: "Private information masked at the LLM boundary with deterministic tokens that survive a full conversation." },
+  { metric: "Hidden",    label: "PII masked at the LLM boundary", body: "Deterministic tokens replace private values before any LLM call; restoration happens on the return path. In Mode A and Mode B the prompt stays inside your perimeter; in Mode C the masked form leaves while the unmasked record stays in your audit log." },
   { metric: "Bounded",   label: "Spend contained",             body: "20+ utilities and 20+ scopes cost zero tokens. AI fires only when reasoning is genuinely needed." },
   { metric: "Enforced",  label: "Compliance met",              body: "Role, model, and source governance enforced automatically. Your rules become your guardrails." },
   { metric: "Sealed",    label: "Audit evidence preserved",    body: "Tamper-evident Merkle chain ready when the regulator calls. No \"trust our SOC report.\"" },
@@ -46,6 +46,7 @@ const outcomes = [
   description="Sparcle exists to give every enterprise freedom to use AI on their own terms — without vendor lock-in, without surrendering IP, without compromising data privacy. Sovereign AI, BYO LLM, built-in AI governance. Essential for regulated industries; valuable for any IT org."
   canonical="https://sparcle.app/why-sparcle"
 >
+  <link slot="head" rel="stylesheet" href="/css/trust-callout.css" />
   <main class="page-why-sparcle">
     <Hero
       eyebrow="Our Mission"
@@ -65,6 +66,23 @@ const outcomes = [
         Your browser does not support embedded video.
       </video>
     </Hero>
+
+    <aside class="trust-callout" aria-label="Trust dossier">
+      <div class="trust-callout__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      </div>
+      <div class="trust-callout__body">
+        <h3 class="trust-callout__title">Reading this for security review?</h3>
+        <p class="trust-callout__lede">
+          The complete trust dossier &mdash; sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy &mdash; lives at the Trust Center.
+        </p>
+        <a href="/trust" class="trust-callout__cta">
+          Browse the Trust Center &nearr;
+        </a>
+      </div>
+    </aside>
 
     <PageSection stripe="b" width="content">
       <BlockQuote

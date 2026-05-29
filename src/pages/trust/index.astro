@@ -28,9 +28,24 @@ const publicArtifacts = [
     href: "/trust/subprocessors",
   },
   {
+    title: "Where the model runs",
+    body: "How Bolt's BYO LLM architecture keeps the runtime inside your perimeter regardless of where the model itself lives. The three deployment modes (on-prem inference, in-tenant cloud LLM, public vendor API), the five-tier endpoint privacy taxonomy, and the PII-masking layer that runs before every outbound LLM call.",
+    href: "/trust/where-the-model-runs",
+  },
+  {
     title: "Controls evidence map",
     body: "Maps SOC 2 Trust Services Criteria, HIPAA Security Rule, GDPR articles, and ISO 27001 Annex A controls to concrete evidence in our codebase and runbook.",
     href: "/trust/controls",
+  },
+  {
+    title: "Cryptographic erasure",
+    body: "The construction Bolt and Aeira use to satisfy GDPR Art. 17 and HIPAA Right to be Forgotten while preserving SOX, SEC, and HIPAA retention. Per-tenant CMK destruction, WORM ciphertext, tamper-evident receipt. The packet your DPO or external auditor receives.",
+    href: "/trust/cryptographic-erasure",
+  },
+  {
+    title: "Verify our claims yourself",
+    body: "The standalone audit-chain verifier. A statically-linked Rust binary your auditor runs offline against an exported Bolt chain — no network calls, no Sparcle dependencies. Sample chain + operator-root public key available pre-NDA so your security team can run end-to-end before installing anything.",
+    href: "/trust/verify",
   },
   {
     title: "Vulnerability disclosure",

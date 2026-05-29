@@ -1,0 +1,391 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const procedure = [
+  [
+    "1. Pull the audit chain you want to verify",
+    "Bolt's audit chain is stored in your Postgres. Export it with the bundled CLI: bolt audit export --from <ts> --to <ts> --out chain.ndjson. The export is byte-stable; running the same command twice produces identical bytes. The export is independently parseable and includes the per-epoch Merkle roots, the operator-root signature, and the leaf event hashes.",
+  ],
+  [
+    "2. Pull the operator-root public key",
+    "The operator-root key is the one Sparcle uses to sign Merkle epoch roots. The public half lives in your tenant's KMS-managed bundle and is also published in your release-signing manifest. Pulling it twice from different sources is the first sanity check.",
+  ],
+  [
+    "3. Run the verifier",
+    "sparcle-verify-chain --chain chain.ndjson --key operator-root.pub. The verifier (a single statically-linked Rust binary) checks: leaf-hash → epoch-root membership; epoch-root signature under the operator-root key; chain continuity across epochs; absence of orphan epochs. No network calls, no Sparcle dependencies — runs offline on air-gapped hardware.",
+  ],
+  [
+    "4. Inspect the result",
+    "Verifier exits 0 on a valid chain and prints a per-epoch summary. Exit non-zero on any failure with a precise reason (broken hash chain, invalid signature, missing epoch, tampered receipt). The output is structured JSON and can feed directly into your SOC's audit-evidence pipeline.",
+  ],
+];
+
+const properties = [
+  [
+    "Sparcle is not in the verification loop",
+    "The verifier runs entirely inside your perimeter. No outbound calls. The operator-root key is the only Sparcle artifact you need, and it's a public key — there's nothing for an attacker to extract.",
+  ],
+  [
+    "Bit-stable across versions",
+    "The hashing canonicalization is byte-stable across Bolt and Aeira versions. A chain produced by Bolt 1.0 is verifiable by sparcle-verify-chain 1.5. The conformance test suite gates this; any change that would break replay refuses to ship.",
+  ],
+  [
+    "Tamper-evident, not tamper-proof",
+    "The chain cannot be silently modified — every tampered byte invalidates downstream signatures. It can, in principle, be deleted, which is why retention is contractually specified and the storage substrate (WORM or audit-replicated Postgres) is the customer's choice, not Sparcle's.",
+  ],
+  [
+    "Post-erasure verification still works",
+    "If a tenant CMK has been cryptographically shredded (per the crypto-shred construction at /trust/cryptographic-erasure), the audit-receipt for the disposal is still verifiable. The receipt is signed under the operator-root key, which is distinct from the destroyed tenant CMK.",
+  ],
+];
+
+const availability = [
+  [
+    "Sample audit chain",
+    "A 500-event sample chain with the corresponding operator-root public key. Lets you run sparcle-verify-chain end-to-end against a known-good input before installing anything. Available on request.",
+  ],
+  [
+    "Verifier binary",
+    "The statically-linked Rust binary, signed and SBOM-attested. Builds for macOS · Linux · Windows. Distributed during pilot evaluation; the binary is the same one shipped with the production Bolt and Aeira packages.",
+  ],
+  [
+    "Verifier source",
+    "The verifier is intended for source release under a permissive license so a customer's auditor can build it themselves and confirm there is no Sparcle-only inspection path. Source distribution is gated on the OSS-release sign-off currently in flight.",
+  ],
+  [
+    "Conformance test suite",
+    "The byte-stability test suite that gates every Bolt and Aeira release. Lets your auditor confirm that the verifier they ran six months ago is still the correct binary to run today against a fresh chain. Available under NDA during pilot evaluation; intended for public release alongside the verifier source.",
+  ],
+];
+
+const limits = [
+  "The verifier confirms chain integrity. It does not confirm that the events recorded are complete. Detecting a missing event requires comparing chain content against a complementary signal — typically the customer's SIEM or their own access logs.",
+  "The verifier does not validate the operator-root key's chain-of-custody. That is a separate trust decision the customer makes when they accept the key bundle.",
+  "Verifying a chain that spans multiple operator-root key rotations requires the verifier to be given the full operator-root key history. The rotation manifest is included in the release-signing bundle for that reason.",
+  "Quantum-resistance for Ed25519 signatures is not in scope today. A migration path to post-quantum signature schemes is on the roadmap; the verifier is signature-scheme-agnostic by design.",
+];
+---
+<BaseLayout
+  title="Verify Our Claims: Standalone Audit-Chain Verifier | Sparcle Trust"
+  description="Bolt's audit chain is independently verifiable. Your auditor runs a single statically-linked binary against an exported chain — no network calls, no Sparcle dependencies, no inspection path Sparcle controls. The verifier model, the procedure, and how to get the binary."
+  canonical="https://sparcle.app/trust/verify"
+>
+  <main class="page-verify">
+    <Hero
+      eyebrow="Verify our claims"
+      title="Your auditor runs the verifier. Not us."
+      lede="A Bolt audit chain is a sealed sequence of Ed25519-signed Merkle epochs. The verifier is a single statically-linked binary that takes the chain and the operator-root public key and returns a yes/no per epoch. It runs offline. It has no Sparcle dependencies. It is the strongest trust signal we can ship: your auditor never has to take our word for it."
+    >
+      <a href="#" onclick="openContactModal('Verifier Access Request'); return false;" class="btn btn-primary btn-lg">Request verifier access</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="The model"
+      title="Sparcle does not get to verify its own claims."
+      lede="A vendor that says &ldquo;trust us, the audit log is good&rdquo; is asking the buyer to accept an asymmetry. Bolt's audit chain inverts that: your auditor runs the verifier on hardware you control, against bytes you exported, using a public key whose private half you never need to see. There is no point in the verification path where Sparcle can lie."
+      stripe="b"
+    >
+      <div class="verify-properties">
+        {properties.map((row) => (
+          <article class="verify-property">
+            <h3 class="verify-property__title">{row[0]}</h3>
+            <p class="verify-property__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="The procedure"
+      title="Four commands, zero network calls."
+      lede="The verification path is small by design. Each step has a specific failure mode and a structured exit code so it can be wrapped by your auditor's existing tooling without ceremony."
+      stripe="a"
+    >
+      <ol class="verify-steps">
+        {procedure.map((row) => (
+          <li class="verify-step">
+            <h3 class="verify-step__title">{row[0]}</h3>
+            <p class="verify-step__body">{row[1]}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div class="verify-command">
+        <p class="verify-command__label">The full canonical verification, in one block:</p>
+        <pre class="verify-command__pre"><code><span class="hl-comment"># export the chain you want to verify</span>
+<span class="hl-cmd">bolt</span> <span class="hl-sub">audit export</span> <span class="hl-flag">--from</span> <span class="hl-val">2026-01-01</span> <span class="hl-flag">--to</span> <span class="hl-val">2026-01-31</span> <span class="hl-flag">--out</span> <span class="hl-val">chain.ndjson</span>
+
+<span class="hl-comment"># run the standalone verifier — no network calls, no Sparcle deps</span>
+<span class="hl-cmd">sparcle-verify-chain</span> <span class="hl-cont">\</span>
+  <span class="hl-flag">--chain</span> <span class="hl-val">chain.ndjson</span> <span class="hl-cont">\</span>
+  <span class="hl-flag">--key</span> <span class="hl-val">operator-root.pub</span> <span class="hl-cont">\</span>
+  <span class="hl-flag">--output</span> <span class="hl-val">report.json</span>
+
+<span class="hl-comment"># exit 0 = valid; non-zero with a precise reason on failure</span>
+<span class="hl-cmd">echo</span> <span class="hl-str">"exit: <span class="hl-var">$?</span>"</span></code></pre>
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What's available"
+      title="What you can get today, what activates with pilot."
+      lede="The same honest framing the rest of the trust center uses. The sample chain and the verifier are designed to be in your hands well before any contract is signed."
+      stripe="b"
+    >
+      <div class="verify-availability">
+        {availability.map((row) => (
+          <article class="verify-availability__item">
+            <h3 class="verify-availability__title">{row[0]}</h3>
+            <p class="verify-availability__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What the verifier does not claim"
+      title="The edges of the construction."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <ul class="verify-limits">
+        {limits.map((line) => <li>{line}</li>)}
+      </ul>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Related trust artifacts"
+      title="How this primitive sits next to the rest of the trust posture."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="verify-related">
+        <li><a href="/trust/cryptographic-erasure">Cryptographic erasure</a> &mdash; the construction that makes erasure auditable; the verifier confirms the disposal receipt.</li>
+        <li><a href="/trust/controls">Controls evidence map</a> &mdash; where the verifier maps in SOC&nbsp;2, HIPAA, GDPR, and ISO&nbsp;27001 control matrices.</li>
+        <li><a href="/trust/where-the-model-runs">Where the model runs</a> &mdash; how PII never reaches the LLM in plaintext, so the events the verifier confirms are the events that matter.</li>
+        <li><a href="/trust/questionnaire">Security questionnaire</a> &mdash; pre-filled answers covering audit-chain integrity, signing-key custody, and replay testing.</li>
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want to run the verifier against a sample chain?"
+      lede="Ask for verifier access. We send a sample chain, the operator-root public key, and the binary for your platform. Your auditor can run it on a laptop in under five minutes. No NDA required for the sample run."
+    >
+      <a href="#" onclick="openContactModal('Verifier Access Request'); return false;" class="btn btn-primary btn-lg">Request verifier access</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">security@sparcle.app</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-verify .verify-properties {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .page-verify .verify-property {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-strong);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .page-verify .verify-property__title {
+    margin: 0 0 0.55rem;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .page-verify .verify-property__body {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.6;
+    font-size: 0.92rem;
+  }
+
+  .page-verify .verify-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto 2rem;
+    display: grid;
+    gap: 1rem;
+    max-width: 960px;
+  }
+  .page-verify .verify-step {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-strong);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.2rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .page-verify .verify-step__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .page-verify .verify-step__body {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
+  .page-verify .verify-command {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+    max-width: 960px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-sm);
+  }
+  .page-verify .verify-command__label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+  }
+  .page-verify .verify-command__pre {
+    margin: 0;
+    padding: 1.1rem 1.25rem;
+    background: var(--bg-muted);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    white-space: pre;
+    overflow-x: auto;
+    /* Disable mono-font ligatures (e.g. -- → em-dash) so flags read
+       as the actual characters they are. */
+    font-feature-settings: "calt" off, "liga" off;
+    font-variant-ligatures: none;
+  }
+  .page-verify .verify-command__pre code {
+    font-family: inherit;
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+  /* Syntax-highlighting tokens — hand-coded for the small canonical
+     verification block. Palette intentionally restrained: brand-primary
+     for the executable, success-strong for values, warning-strong for
+     variables. Theme-tracks via CSS vars. */
+  .page-verify .verify-command__pre .hl-comment {
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 0.85;
+  }
+  .page-verify .verify-command__pre .hl-cmd {
+    color: var(--brand-primary);
+    font-weight: 700;
+  }
+  .page-verify .verify-command__pre .hl-sub {
+    color: var(--text-heading);
+    font-weight: 600;
+  }
+  .page-verify .verify-command__pre .hl-flag {
+    color: var(--color-info, var(--brand-primary-hover));
+    font-weight: 600;
+  }
+  .page-verify .verify-command__pre .hl-val {
+    color: var(--color-success-strong, #15803d);
+  }
+  .page-verify .verify-command__pre .hl-str {
+    color: var(--color-success-strong, #15803d);
+  }
+  .page-verify .verify-command__pre .hl-var {
+    color: var(--color-warning, #a16207);
+    font-weight: 700;
+  }
+  .page-verify .verify-command__pre .hl-cont {
+    color: var(--text-muted);
+    opacity: 0.55;
+  }
+
+  .page-verify .verify-availability {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .page-verify .verify-availability__item {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .page-verify .verify-availability__title {
+    margin: 0 0 0.55rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+  }
+  .page-verify .verify-availability__body {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.6;
+    font-size: 0.92rem;
+  }
+
+  .page-verify .verify-limits {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .page-verify .verify-limits li {
+    padding: 0.85rem 1rem 0.85rem 2.4rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    line-height: 1.6;
+    color: var(--text-body);
+    position: relative;
+    font-size: 0.93rem;
+  }
+  .page-verify .verify-limits li::before {
+    content: "!";
+    position: absolute;
+    left: 0.95rem;
+    top: 0.85rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: var(--brand-primary-light);
+    color: var(--brand-primary);
+    font-weight: 700;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-verify .verify-related {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .page-verify .verify-related li {
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+</style>

@@ -66,10 +66,34 @@ const partial = '<span class="cmp-partial"><svg width="14" height="14" viewBox="
     </PageSection>
 
     <PageSection
+      eyebrow="Comparison brief"
+      title="Take this to your decision committee."
+      lede="A 1-page Bolt + Aeira vs. Glean / Hebbia / Harvey / Microsoft Copilot — 14-dimension comparison with honest framing on where we win, where we tie, and where the incumbents win today. Designed to forward to your security and procurement teams without scheduling a call."
+      stripe="b"
+    >
+      <div class="cmp-brief-cta">
+        <a href="/docs/pdfs/bolt-aeira-comparison.pdf" class="btn btn-primary btn-lg" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download comparison brief (PDF)
+        </a>
+        <a href="/docs/pdfs/bolt-aeira-comparison.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">
+          Open in new tab &nearr;
+        </a>
+      </div>
+      <p class="cmp-brief-note">
+        Honest framing: the brief includes a "Where they win today" section &mdash; Web UX polish, brand recognition, paying-customer references. We are not pretending those gaps don't exist.
+      </p>
+    </PageSection>
+
+    <PageSection
       eyebrow="Comparison"
       title="Bolt vs. Copilot 365 &amp; Gemini Workspace"
       lede="Microsoft Copilot 365 is a $30/seat add-on charged <em>on top of</em> existing M365 licenses ($12–22/seat), totaling $42–52/seat — and requires your data to route through Microsoft's Azure OpenAI cloud. Gemini Workspace similarly processes your documents externally."
-      stripe="b"
+      stripe="a"
     >
       <div class="cmp-wrap">
         <table class="cmp">
@@ -126,7 +150,7 @@ const partial = '<span class="cmp-partial"><svg width="14" height="14" viewBox="
       eyebrow="Comparison"
       title="Aeira vs. Glean"
       lede="Glean is the leading enterprise search tool. It's cloud-hosted, SaaS-only, and routes all document indexing through Glean's infrastructure. Aeira offers equivalent search capability — with full data sovereignty."
-      stripe="a"
+      stripe="b"
     >
       <div class="cmp-wrap">
         <table class="cmp">
@@ -169,6 +193,68 @@ const partial = '<span class="cmp-partial"><svg width="14" height="14" viewBox="
       </div>
     </PageSection>
 
+    <PageSection
+      eyebrow="Comparison"
+      title="Bolt vs. Harvey"
+      lede="Harvey is the leading vertical-AI assistant for legal teams — purpose-built workflows for diligence, drafting, and review. It is SaaS-only, cloud-routed, and centered on a fixed model provider. Bolt covers the same legal workflows and extends to the rest of the enterprise (M&amp;A, IP, healthcare, defense, finance) — with full sovereignty."
+      stripe="a"
+    >
+      <div class="cmp-wrap">
+        <table class="cmp">
+          <colgroup><col/><col/><col/></colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th class="cmp-th-ours">Bolt</th>
+              <th>Harvey</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Self-hosted / air-gapped deployment</td>
+              <td set:html={yes}></td>
+              <td set:html={`${no}<span class="cmp-note">SaaS only</span>`}></td>
+            </tr>
+            <tr>
+              <td>Data stays inside your perimeter</td>
+              <td set:html={yes}></td>
+              <td set:html={`${no}<span class="cmp-note">Routed to vendor cloud</span>`}></td>
+            </tr>
+            <tr>
+              <td>Bring Your Own LLM &middot; swap models without re-certifying</td>
+              <td set:html={yes}></td>
+              <td set:html={`${no}<span class="cmp-note">Vendor-selected model</span>`}></td>
+            </tr>
+            <tr>
+              <td>IP &amp; PII protected from the AI model</td>
+              <td set:html={yes}></td>
+              <td set:html={no}></td>
+            </tr>
+            <tr>
+              <td>Identity-bound retrieval across every connected source</td>
+              <td set:html={yes}></td>
+              <td set:html={`${partial}<span class="cmp-note">Workspace-scoped</span>`}></td>
+            </tr>
+            <tr>
+              <td>Covers legal + M&amp;A + IP + healthcare + defense + finance</td>
+              <td set:html={yes}></td>
+              <td set:html={`${partial}<span class="cmp-note">Legal-vertical focus</span>`}></td>
+            </tr>
+            <tr>
+              <td>Open MCP integrations &middot; not locked to one ecosystem</td>
+              <td set:html={yes}></td>
+              <td set:html={no}></td>
+            </tr>
+            <tr>
+              <td>Price per seat / month</td>
+              <td><span class="cmp-hero-val">$30</span><span class="cmp-note">Bolt Absolute &middot; published rate</span></td>
+              <td><strong>Enterprise contract</strong><span class="cmp-note">Not publicly disclosed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </PageSection>
+
     <CTAStrip
       variant="band"
       title="There is a way out."
@@ -190,6 +276,25 @@ const partial = '<span class="cmp-partial"><svg width="14" height="14" viewBox="
 </BaseLayout>
 
 <style is:global>
+  /* Comparison brief CTA — promotes the downloadable 1-page PDF that
+     covers all four competitors at once (Glean · Hebbia · Harvey ·
+     Copilot). Sits above the in-page vendor-by-vendor tables. */
+  .page-crisis .cmp-brief-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  .page-crisis .cmp-brief-note {
+    margin: 1.5rem auto 0;
+    max-width: 720px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
   /* Comparison-table primitive. Reused on /crisis for Bolt-vs-Copilot and
      Aeira-vs-Glean. Anchored to canonical tokens so it inherits theme. */
   .cmp-wrap {

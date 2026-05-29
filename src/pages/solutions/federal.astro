@@ -1,0 +1,136 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const frameworks = [
+  ["FedRAMP (Moderate target)", "FedRAMP Moderate is a multi-quarter effort that requires a sponsoring agency. Sparcle's controls evidence map walks every NIST 800-53 Moderate control to a concrete implementation; the architecture is built for the assessment, not retrofitted after."],
+  ["StateRAMP", "Many state and local agencies require StateRAMP-aligned posture before procurement. The same controls evidence map satisfies the StateRAMP requirements; deployment to AWS GovCloud or Azure Government is supported out of the box."],
+  ["FISMA / NIST 800-53", "Bolt and Aeira run inside the agency's authorization boundary. The Authority Policy SDK and ACL pre-filter enforce information-system access decisions mechanically; the audit chain is the artifact your Assessor pulls during ATO review."],
+  ["OMB M-22-09 · M-24-10", "Zero-trust architecture and the federal AI memos. Bolt's PII-masking layer at the LLM boundary, identity-bound retrieval, and audit-trail responses are the building blocks the OMB memos require."],
+];
+
+const residency = [
+  ["GovCloud regions", "AWS GovCloud (US-East / US-West), Azure Government, and Google Cloud Assured Workloads. Helm chart supports each; configuration is a values.yaml flag, not a fork."],
+  ["Agency-held KMS", "Vault Transit, AWS KMS GovCloud, Azure Key Vault Premium, or PKCS#11 HSM. Sparcle does not hold tenant master keys."],
+  ["Sponsoring agency assessment path", "Sparcle works alongside the sponsoring agency's authorizing official. The trust-center artifacts (sub-processor list, controls evidence, incident-response framework, vulnerability disclosure policy) are pre-populated for assessor review."],
+  ["No transfer outside the boundary", "Customer data does not transit Sparcle infrastructure in the Helm or air-gap topologies. The sub-processor disclosure is asymmetric by design: customer-configured sub-processors handle customer data; Sparcle's own sub-processors handle Sparcle's software delivery."],
+];
+
+const workflows = [
+  ["FOIA response drafting", "Pull authoritative source-of-record material for FOIA exemption review; identity-bound retrieval respects sensitivity tags; audit chain records every retrieval for IG review."],
+  ["Grant review and vendor risk", "Cross-source synthesis across applications, prior award history, and risk indicators. Authority Policy ranks authoritative sources above unverified content."],
+  ["Policy drafting with citation hygiene", "The Authority Policy SDK's evidence-ladder pack demotes deprecated, rescinded, or superseded policy documents below the cut. Every cited authority resolves to a current source-of-record."],
+  ["IG and audit response", "Time-bounded audit-chain export with the standalone verifier binary. The IG runs the verifier; Sparcle is not in the verification loop."],
+];
+
+const trustDossier = [
+  ["/trust/controls", "Controls evidence map walking SOC 2, HIPAA, GDPR, and ISO 27001 Annex A controls to concrete implementations. Pre-positioned for assessor review."],
+  ["/trust/where-the-model-runs", "Five-tier endpoint privacy taxonomy; the PII-masking layer at the LLM boundary; the three deployment modes."],
+  ["/trust/incident-response", "Five-phase response framework with severity SLAs (SEV1 1bd ack · 7d patch). The runbook a sponsoring agency's Security Operations expects."],
+  ["/trust/subprocessors", "Asymmetric sub-processor topology. Why customer data does not reach Sparcle infrastructure in the Helm or air-gap topologies."],
+];
+---
+<BaseLayout
+  title="Sparcle for Federal Civilian | FedRAMP · StateRAMP · FISMA"
+  description="Sovereign AI for federal civilian agencies and contractors. GovCloud-deployable, agency-held keys, FedRAMP Moderate roadmap, NIST 800-53 controls evidence map. Trust artifacts, vertical workflows, and a 1-page printable brief."
+  canonical="https://sparcle.app/solutions/federal"
+>
+  <link slot="head" rel="stylesheet" href="/css/vertical-page.css" />
+  <main class="page-vertical">
+    <Hero
+      eyebrow="Sparcle for Federal Civilian"
+      title="GovCloud-deployable. Agency-held keys. Assessor-ready trust dossier."
+      lede="Federal civilian agencies and their contractors operate inside an authorization boundary. Bolt and Aeira deploy inside that boundary — GovCloud or sovereign-cloud topology, agency-held KMS, controls evidence pre-mapped to NIST 800-53. The FedRAMP Moderate path is multi-quarter; the trust dossier is ready today."
+    >
+      <a href="#" onclick="openContactModal('Federal Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule federal review</a>
+      <a href="/docs/pdfs/vertical-federal.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Compliance frameworks"
+      title="What Sparcle ships against."
+      lede="The federal civilian posture is the intersection of FedRAMP (sponsoring-agency gated), StateRAMP, FISMA, and the OMB AI memos. Each frame below maps to concrete implementation that the assessor walks during the authorization process."
+      stripe="b"
+    >
+      <div class="vertical-list">
+        {frameworks.map((row) => (
+          <article class="vertical-list__item">
+            <h3 class="vertical-list__title">{row[0]}</h3>
+            <p class="vertical-list__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Data residency posture"
+      title="Inside the authorization boundary."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {residency.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="1-page brief"
+      title="Take this to your authorizing official."
+      lede="The federal-vertical brief covers GovCloud deployment topologies, agency-held KMS posture, the FedRAMP Moderate roadmap, and the trust artifacts an authorizing official reviews."
+      stripe="b"
+    >
+      <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand federal vertical brief">
+        <iframe
+          src="/docs/pdfs/vertical-federal.pdf#view=FitH"
+          title="Sparcle for Federal Civilian — 1-page brief"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p class="vertical-pdf-actions">
+        <a href="/docs/pdfs/vertical-federal.pdf" class="btn btn-secondary btn-lg" download>Download PDF</a>
+        <a href="/docs/pdfs/vertical-federal.pdf" target="_blank" rel="noopener" class="btn btn-tertiary btn-lg">Open in new tab &nearr;</a>
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Workflows the founding team has built for"
+      title="Four anchor use cases."
+      lede="The workflows below are scoped with federal design partners. The Authority Policy SDK and connector configuration are the per-agency tuning points."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {workflows.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Trust dossier for federal"
+      title="The four artifacts your authorizing official will ask for."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="vertical-dossier">
+        {trustDossier.map((row) => (
+          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+        ))}
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want to walk this against your specific ATO process?"
+      lede="A 30-minute federal architecture review covers your GovCloud posture, your sponsoring-agency relationship, your KMS choice, and the workflows your team needs. Founder-led; the engineering team is on the call."
+    >
+      <a href="#" onclick="openContactModal('Federal Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule federal review</a>
+      <a href="/solutions" class="btn btn-secondary btn-lg">All industries</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>

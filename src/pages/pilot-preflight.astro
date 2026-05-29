@@ -109,6 +109,7 @@ const outOfScope = [
   description="What you bring, what we bring, week-by-week activities for the 90-day Bolt + Aeira Pilot ($15K, up to 30 seats, production Docker or Helm deployment)."
   canonical="https://sparcle.app/pilot-preflight"
 >
+  <link slot="head" rel="stylesheet" href="/css/pilot-stages.css" />
   <main class="page-pilot-preflight">
     <Hero
       eyebrow="Pilot pre-flight"
@@ -118,6 +119,32 @@ const outOfScope = [
       <a href="/pilot" class="btn btn-secondary btn-lg">&larr; Back to Pilot SKU</a>
       <a href="#" onclick="openContactModal('Pilot Application'); return false;" class="btn btn-primary btn-lg">Apply for Pilot</a>
     </Hero>
+
+    <nav class="pilot-stages" aria-label="Pilot funnel stages">
+      <ol class="pilot-stages__list">
+        <li class="pilot-stages__step">
+          <a href="/discovery-pilot" class="pilot-stages__link">
+            <span class="pilot-stages__num">01</span>
+            <span class="pilot-stages__title">Discovery</span>
+            <span class="pilot-stages__sub">30 days &middot; up to 10 seats &middot; $5,000</span>
+          </a>
+        </li>
+        <li class="pilot-stages__sep" aria-hidden="true">&rarr;</li>
+        <li class="pilot-stages__step">
+          <a href="/pilot" class="pilot-stages__link">
+            <span class="pilot-stages__num">02</span>
+            <span class="pilot-stages__title">Pilot</span>
+            <span class="pilot-stages__sub">90 days &middot; up to 30 seats &middot; $15,000</span>
+          </a>
+        </li>
+        <li class="pilot-stages__sep" aria-hidden="true">&rarr;</li>
+        <li class="pilot-stages__step pilot-stages__step--current" aria-current="step">
+          <span class="pilot-stages__num">03</span>
+          <span class="pilot-stages__title">Preflight</span>
+          <span class="pilot-stages__sub">Kickoff sequence &middot; week-by-week</span>
+        </li>
+      </ol>
+    </nav>
 
     <PageSection
       eyebrow="Scope reminder"

@@ -1,0 +1,118 @@
+/*
+ * Vertical solution pages — shared chrome for /solutions/{defense,federal,
+ * healthcare,finance,eu-finance,legal}. All six pages share the same
+ * three section primitives (framework list, residency cards, workflows,
+ * trust dossier) and the same PDF embed block; this file centralizes
+ * those styles so each page only carries its vertical-specific content.
+ */
+
+.page-vertical .vertical-list {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.page-vertical .vertical-list__item {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--brand-primary);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1.4rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.page-vertical .vertical-list__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.page-vertical .vertical-list__body {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.page-vertical .vertical-pdf-embed {
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.page-vertical .vertical-pdf-embed iframe {
+  display: block;
+  width: 100%;
+  height: 760px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: #f5f7fa;
+}
+
+.page-vertical .vertical-pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin: 1.5rem 0 0;
+}
+
+.page-vertical .vertical-dossier {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.page-vertical .vertical-dossier li {
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+.page-vertical .vertical-dossier a {
+  color: var(--brand-primary);
+  text-decoration: underline;
+  font-weight: 600;
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+
+.page-vertical .vertical-dossier a:hover {
+  color: var(--brand-primary-hover);
+}
+
+/* Legal-vertical "brief pending" placeholder — the legal-vertical PDF
+   hasn't been authored yet. The placeholder card communicates that
+   honestly while keeping the page layout intact. */
+.page-vertical .vertical-brief-pending {
+  background: var(--bg-surface-solid);
+  border: 1px dashed var(--text-muted);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.5rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.page-vertical .vertical-brief-pending h3 {
+  margin: 0 0 0.5rem;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.page-vertical .vertical-brief-pending p {
+  margin: 0 auto;
+  max-width: 600px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}

@@ -301,6 +301,24 @@
             gap: 0.4rem;
         }
 
+        /* Summary variant — synthesis card, no green/red flex row. */
+        .compare-card--summary {
+            background: var(--brand-primary-light);
+            border-color: var(--brand-primary);
+            border-left-width: 3px;
+        }
+        .compare-card .compare-summary {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--text-body);
+            margin: 0.5rem 0 0;
+        }
+        .compare-card .compare-summary em {
+            color: var(--brand-primary);
+            font-style: italic;
+            font-weight: 600;
+        }
+
         /* Bold callout */
         .research-callout {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 211, 238, 0.06));
@@ -414,9 +432,9 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            color: #fbbf24;
+            background: var(--brand-primary-light);
+            border: 1px solid var(--brand-primary);
+            color: var(--brand-primary);
             font-size: 0.78rem;
             font-weight: 600;
             padding: 0.4rem 1rem;

@@ -63,6 +63,86 @@ const honestFraming = [
       lede="The same shape the major incident-response frameworks (NIST SP 800-61, ISO 27035, FIRST) prescribe, sized to a software vendor that ships into customer infrastructure rather than operating customer data plane."
       stripe="b"
     >
+      <div class="ir-diagram" data-expandable tabindex="0" role="button" aria-label="Expand incident-response timeline diagram">
+        <svg viewBox="0 0 940 380" class="ir-timeline-svg" role="img" aria-labelledby="ir-timeline-title ir-timeline-desc">
+          <title id="ir-timeline-title">Five-phase incident response timeline</title>
+          <desc id="ir-timeline-desc">A horizontal timeline showing the five response phases: Detect, Triage, Stabilize, Mitigate, and Validate and Communicate. Severity is assigned during Triage and drives the acknowledgement and patch SLAs across the remaining phases. SEV1 receives one-business-day acknowledgement and a seven-day patch SLA. SEV2 receives one business day and 30 days. SEV3 receives three business days and 90 days. SEV4 lands in the next quarterly release window.</desc>
+
+          <defs>
+            <marker id="ir-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="ir-arrow-head" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+          </defs>
+
+          <style>
+            .ir-track { fill: none; stroke: var(--brand-primary); stroke-width: 2; opacity: 0.5; }
+            .ir-node { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 2; }
+            .ir-node-num { font: 700 14px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; }
+            .ir-node-label { font: 700 13px var(--font-sans, system-ui); fill: var(--text-heading); text-anchor: middle; }
+            .ir-node-sub { font: 500 10.5px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .ir-endpoint { font: italic 10.5px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .ir-callout { fill: var(--brand-primary-light); stroke: var(--brand-primary); stroke-width: 1.5; }
+            .ir-callout-title { font: 700 10.5px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; letter-spacing: 0.08em; }
+            .ir-callout-row { font: 500 11px var(--font-sans, system-ui); fill: var(--text-body); }
+            .ir-callout-tag { font: 700 11px var(--font-sans, system-ui); fill: var(--brand-primary); }
+            .ir-arrow-head { fill: var(--brand-primary); }
+            .ir-tick { fill: none; stroke: var(--brand-primary); stroke-width: 1; opacity: 0.4; stroke-dasharray: 3 3; }
+          </style>
+
+          <text class="ir-endpoint" x="60" y="270">incoming event</text>
+
+          <path class="ir-track" d="M120 240 L880 240" marker-end="url(#ir-arrow)" />
+
+          <circle class="ir-node" cx="160" cy="240" r="22" />
+          <text class="ir-node-num" x="160" y="246">1</text>
+          <text class="ir-node-label" x="160" y="295">Detect</text>
+          <text class="ir-node-sub" x="160" y="313">monitoring · report</text>
+          <text class="ir-node-sub" x="160" y="328">advisory · disclosure</text>
+
+          <circle class="ir-node" cx="320" cy="240" r="22" />
+          <text class="ir-node-num" x="320" y="246">2</text>
+          <text class="ir-node-label" x="320" y="295">Triage</text>
+          <text class="ir-node-sub" x="320" y="313">severity assigned</text>
+          <text class="ir-node-sub" x="320" y="328">incident lead · channel</text>
+
+          <circle class="ir-node" cx="480" cy="240" r="22" />
+          <text class="ir-node-num" x="480" y="246">3</text>
+          <text class="ir-node-label" x="480" y="295">Stabilize</text>
+          <text class="ir-node-sub" x="480" y="313">shortest path to</text>
+          <text class="ir-node-sub" x="480" y="328">reduce customer impact</text>
+
+          <circle class="ir-node" cx="640" cy="240" r="22" />
+          <text class="ir-node-num" x="640" y="246">4</text>
+          <text class="ir-node-label" x="640" y="295">Mitigate</text>
+          <text class="ir-node-sub" x="640" y="313">ship + verify fix</text>
+          <text class="ir-node-sub" x="640" y="328">controlled rollout</text>
+
+          <circle class="ir-node" cx="800" cy="240" r="22" />
+          <text class="ir-node-num" x="800" y="246">5</text>
+          <text class="ir-node-label" x="800" y="295">Validate</text>
+          <text class="ir-node-sub" x="800" y="313">closure confirmed</text>
+          <text class="ir-node-sub" x="800" y="328">post-incident review</text>
+
+          <text class="ir-endpoint" x="900" y="270">closure</text>
+
+          <path class="ir-tick" d="M320 218 L320 180" />
+          <rect class="ir-callout" x="160" y="40" width="500" height="140" rx="10" />
+          <text class="ir-callout-title" x="410" y="62">SEVERITY ASSIGNED HERE — DRIVES ACKNOWLEDGEMENT AND PATCH SLAs</text>
+
+          <text class="ir-callout-tag" x="180" y="92">SEV1</text>
+          <text class="ir-callout-row" x="225" y="92">Critical · active exploit, signing-key or sub-processor breach</text>
+          <text class="ir-callout-row" x="225" y="108" style="fill: var(--brand-primary); font-weight: 600">1 business day ack · 7-day patch SLA</text>
+
+          <text class="ir-callout-tag" x="180" y="130">SEV2</text>
+          <text class="ir-callout-row" x="225" y="130">High · confirmed exploitable, no active exploitation</text>
+          <text class="ir-callout-row" x="225" y="146" style="fill: var(--brand-primary); font-weight: 600">1 business day ack · 30-day patch SLA</text>
+
+          <text class="ir-callout-tag" x="180" y="168">SEV3 / SEV4</text>
+          <text class="ir-callout-row" x="245" y="168">Medium with workaround / Low or cosmetic</text>
+          <text class="ir-callout-row" x="245" y="184" style="fill: var(--brand-primary); font-weight: 600">3 business days ack · 90 days / next quarterly</text>
+        </svg>
+      </div>
+
       <ol class="phase-list">
         {phases.map(([t, body]) => (
           <li>
@@ -186,6 +266,21 @@ const honestFraming = [
 </BaseLayout>
 
 <style is:global>
+  .page-ir .ir-diagram {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 960px;
+    margin: 0 auto 2rem;
+  }
+  .page-ir .ir-timeline-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 920px;
+    margin: 0 auto;
+  }
   .page-ir .phase-list {
     list-style: none;
     counter-reset: phase;

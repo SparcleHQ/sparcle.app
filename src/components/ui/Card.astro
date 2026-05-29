@@ -63,6 +63,14 @@ const Tag = href ? 'a' : 'article';
       {Astro.slots.has('footer') && (
         <div class="card__footer"><slot name="footer" /></div>
       )}
+      {href && !Astro.slots.has('footer') && (
+        <div class="card__link-cue" aria-hidden="true">
+          <span>Read</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+      )}
     </>
   )}
 </Tag>
@@ -86,9 +94,54 @@ const Tag = href ? 'a' : 'article';
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
-  /* Anchor variant: no underline; only the title carries the link affordance via color. */
-  a.card:hover .card__title {
+  /* Anchor variant: the card is clickable, so title + "Read →" cue render
+     in brand-primary at rest. That's the visual contract that signals
+     "this is a link" without requiring the user to hover. On hover the
+     title and cue darken to brand-primary-hover, the arrow shifts right,
+     and the card lifts (existing .card:hover rules above). */
+  a.card {
+    cursor: pointer;
+  }
+  a.card .card__title {
     color: var(--brand-primary);
+  }
+  a.card:hover .card__title {
+    color: var(--brand-primary-hover);
+  }
+  .card__link-cue {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  /* Belt-and-braces: force brand-primary on the span + svg children so
+     the cue reads as a button-like affordance regardless of any
+     cascading color from .card__body or the parent stripe. */
+  .card__link-cue span {
+    color: var(--brand-primary);
+  }
+  .card__link-cue svg {
+    color: var(--brand-primary);
+    stroke: var(--brand-primary);
+    transition: transform var(--transition-fast);
+  }
+  a.card:hover .card__link-cue span,
+  a.card:hover .card__link-cue svg {
+    color: var(--brand-primary-hover);
+    stroke: var(--brand-primary-hover);
+  }
+  a.card:hover .card__link-cue {
+    color: var(--brand-primary-hover);
+  }
+  a.card:hover .card__link-cue svg {
+    transform: translateX(3px);
   }
 
   /* Muted variant: lives inside section-stripe-a (body bg); the muted bg

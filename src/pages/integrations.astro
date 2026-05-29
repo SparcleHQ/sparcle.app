@@ -146,9 +146,124 @@ const iconPaths: Record<string, string> = {
       <a href="#categories" class="btn btn-secondary btn-lg">Browse Categories &darr;</a>
     </Hero>
 
+    <PageSection
+      eyebrow="Topology"
+      title="One MCP fabric. Everything attaches."
+      lede="Your users sit in front of Bolt; Bolt and Aeira sit inside your perimeter; the systems your team already uses attach over the open Model Context Protocol. The LLM endpoint is the only piece you can configure outside the perimeter, and which mode it runs in is your choice."
+      stripe="b"
+    >
+      <div class="ints-diagram" data-expandable tabindex="0" role="button" aria-label="Expand integration topology diagram">
+        <svg viewBox="0 0 920 540" class="ints-topology-svg" role="img" aria-labelledby="ints-topology-title ints-topology-desc">
+          <title id="ints-topology-title">Sparcle integration topology</title>
+          <desc id="ints-topology-desc">Users connect to Bolt and Aeira running inside the customer perimeter. Bolt and Aeira attach to nine categories of customer-owned systems via the open Model Context Protocol: identity, productivity, engineering, sales and CRM, ITSM, knowledge, data warehouses, storage, and LLM providers. The LLM endpoint is the only attachment point that can sit outside the perimeter.</desc>
+
+          <defs>
+            <marker id="i-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="i-arrow-head" d="M0,0 L10,5 L0,10 z" />
+            </marker>
+          </defs>
+
+          <style>
+            .i-perimeter { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 8 5; opacity: 0.55; }
+            .i-perimeter-label { font: 700 11px var(--font-sans, system-ui); fill: var(--text-muted); letter-spacing: 0.12em; }
+            .i-platform { fill: var(--brand-primary-light); stroke: var(--brand-primary); stroke-width: 2; }
+            .i-user { fill: var(--bg-surface-solid); stroke: var(--text-muted); stroke-width: 1.5; }
+            .i-mcp-band { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.9; }
+            .i-chip { fill: var(--bg-surface-solid); stroke: var(--brand-primary); stroke-width: 1.2; }
+            .i-llm-chip { fill: var(--bg-surface-solid); stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 5 3; }
+            .i-cat-name { font: 700 12px var(--font-sans, system-ui); fill: var(--text-heading); }
+            .i-cat-items { font: 500 10.5px var(--font-sans, system-ui); fill: var(--text-muted); }
+            .i-platform-label { font: 700 16px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; }
+            .i-platform-sub { font: 500 11.5px var(--font-sans, system-ui); fill: var(--text-body); text-anchor: middle; }
+            .i-mcp-label { font: 700 11px var(--font-sans, system-ui); fill: var(--brand-primary); text-anchor: middle; letter-spacing: 0.12em; }
+            .i-user-label { font: 700 13px var(--font-sans, system-ui); fill: var(--text-heading); text-anchor: middle; }
+            .i-user-sub { font: 500 10.5px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+            .i-flow { fill: none; stroke: var(--brand-primary); stroke-width: 1.8; }
+            .i-flow-soft { fill: none; stroke: var(--text-muted); stroke-width: 1.2; opacity: 0.55; }
+            .i-arrow-head { fill: var(--brand-primary); }
+            .i-annotation { font: italic 10px var(--font-sans, system-ui); fill: var(--text-muted); text-anchor: middle; }
+          </style>
+
+          <rect class="i-perimeter" x="120" y="30" width="780" height="430" rx="14" />
+          <text class="i-perimeter-label" x="136" y="20">CUSTOMER PERIMETER</text>
+
+          <rect class="i-user" x="20" y="220" width="80" height="60" rx="8" />
+          <text class="i-user-label" x="60" y="244">Users</text>
+          <text class="i-user-sub" x="60" y="263">your team</text>
+
+          <path class="i-flow" d="M105 250 L165 250" marker-end="url(#i-arrow)" />
+
+          <rect class="i-platform" x="170" y="180" width="190" height="140" rx="12" />
+          <text class="i-platform-label" x="265" y="218">Bolt + Aeira</text>
+          <text class="i-platform-sub" x="265" y="240">runtime &middot; data plane</text>
+          <text class="i-platform-sub" x="265" y="258">identity-bound retrieval</text>
+          <text class="i-platform-sub" x="265" y="276">PII masking</text>
+          <text class="i-platform-sub" x="265" y="294">audit chain</text>
+
+          <rect class="i-mcp-band" x="385" y="220" width="140" height="60" rx="6" />
+          <text class="i-mcp-label" x="455" y="244">MCP</text>
+          <text class="i-cat-items" x="455" y="264" text-anchor="middle">open protocol</text>
+
+          <path class="i-flow" d="M360 250 L385 250" />
+          <path class="i-flow" d="M525 250 L555 250" marker-end="url(#i-arrow)" />
+
+          <rect class="i-chip" x="560" y="65" width="170" height="58" rx="6" />
+          <text class="i-cat-name" x="572" y="84">Identity</text>
+          <text class="i-cat-items" x="572" y="103">Entra · Okta · Workspace</text>
+          <text class="i-cat-items" x="572" y="117">Zoho · OIDC · SAML</text>
+
+          <rect class="i-chip" x="740" y="65" width="155" height="58" rx="6" />
+          <text class="i-cat-name" x="752" y="84">Productivity</text>
+          <text class="i-cat-items" x="752" y="103">M365 · Google · Slack</text>
+          <text class="i-cat-items" x="752" y="117">Teams · Notion · Zoom</text>
+
+          <rect class="i-chip" x="560" y="135" width="170" height="58" rx="6" />
+          <text class="i-cat-name" x="572" y="154">Engineering</text>
+          <text class="i-cat-items" x="572" y="173">GitHub · GitLab · Jira</text>
+          <text class="i-cat-items" x="572" y="187">Linear · Sentry · Datadog</text>
+
+          <rect class="i-chip" x="740" y="135" width="155" height="58" rx="6" />
+          <text class="i-cat-name" x="752" y="154">Sales / CRM</text>
+          <text class="i-cat-items" x="752" y="173">Salesforce · HubSpot</text>
+          <text class="i-cat-items" x="752" y="187">Dynamics · Gong</text>
+
+          <rect class="i-chip" x="560" y="205" width="170" height="58" rx="6" />
+          <text class="i-cat-name" x="572" y="224">ITSM &amp; Support</text>
+          <text class="i-cat-items" x="572" y="243">ServiceNow · Zendesk</text>
+          <text class="i-cat-items" x="572" y="257">Freshdesk · Intercom</text>
+
+          <rect class="i-chip" x="740" y="205" width="155" height="58" rx="6" />
+          <text class="i-cat-name" x="752" y="224">Knowledge</text>
+          <text class="i-cat-items" x="752" y="243">Aeira · Confluence</text>
+          <text class="i-cat-items" x="752" y="257">SharePoint · Glean · Elastic</text>
+
+          <rect class="i-chip" x="560" y="275" width="170" height="58" rx="6" />
+          <text class="i-cat-name" x="572" y="294">Warehouses &amp; BI</text>
+          <text class="i-cat-items" x="572" y="313">Snowflake · Databricks</text>
+          <text class="i-cat-items" x="572" y="327">BigQuery · Tableau · Power BI</text>
+
+          <rect class="i-chip" x="740" y="275" width="155" height="58" rx="6" />
+          <text class="i-cat-name" x="752" y="294">Storage</text>
+          <text class="i-cat-items" x="752" y="313">Box · Dropbox · S3</text>
+          <text class="i-cat-items" x="752" y="327">Azure Blob · GCS</text>
+
+          <rect class="i-llm-chip" x="560" y="345" width="335" height="58" rx="6" />
+          <text class="i-cat-name" x="572" y="364">LLM providers (BYO)</text>
+          <text class="i-cat-items" x="572" y="383">OpenAI · Anthropic · Bedrock · Vertex · Azure OpenAI</text>
+          <text class="i-cat-items" x="572" y="397">NVIDIA NIM · Ollama · vLLM · your own model</text>
+
+          <text class="i-annotation" x="265" y="345">all attachments via MCP</text>
+          <text class="i-annotation" x="265" y="360">no proprietary APIs</text>
+          <text class="i-annotation" x="265" y="375">customer-owned credentials</text>
+
+          <text class="i-annotation" x="455" y="490">LLM endpoint is the only attachment that may sit outside the perimeter — see /trust/where-the-model-runs</text>
+        </svg>
+      </div>
+    </PageSection>
+
     <a id="categories" class="anchor" aria-hidden="true"></a>
 
-    <PageSection stripe="b">
+    <PageSection stripe="a">
       <div class="ints-list">
         {categories.map((cat) => (
           <div class="ints-category">
@@ -175,7 +290,7 @@ const iconPaths: Record<string, string> = {
     <PageSection
       eyebrow="Bring your own"
       title="Don't see your system? Bring it."
-      stripe="a"
+      stripe="b"
       width="prose"
     >
       <Prose align="center">
@@ -213,6 +328,26 @@ const iconPaths: Record<string, string> = {
     margin-top: calc(var(--nav-height, 80px) * -1);
     padding-top: var(--nav-height, 80px);
     visibility: hidden;
+  }
+
+  /* Topology diagram container — same visual grammar as the other six
+     SVGs on the site (where-the-model-runs, cryptographic-erasure,
+     solution, architecture x3). Theme-tracks via CSS vars embedded in
+     the SVG. */
+  .page-integrations .ints-diagram {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .page-integrations .ints-topology-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 920px;
+    margin: 0 auto;
   }
 
   .ints-list {

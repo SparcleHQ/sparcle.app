@@ -1,0 +1,136 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const frameworks = [
+  ["HIPAA Privacy / Security / Breach Notification", "Bolt and Aeira are architecturally deployable for HIPAA-covered workloads. The PII-masking layer keeps PHI from reaching the LLM in plaintext; the audit chain captures the unmasked record inside your perimeter for the auditor. A BAA template is available under NDA during pilot evaluation."],
+  ["21 CFR Part 11", "Electronic-record and electronic-signature requirements for FDA-regulated workflows. Bolt's Ed25519-signed audit chain satisfies the integrity, retention, and verifiability requirements; the standalone verifier is the artifact your validation team runs."],
+  ["HITECH + HHS-OCR Final Rule on AI", "The 2024 OCR Final Rule on nondiscrimination in algorithmic clinical decision-making. The Authority Policy SDK lets clinical informatics encode evidence-ladder ranking that demotes non-current guidance below the cut."],
+  ["GDPR Art. 17 + retention duties", "Cryptographic erasure satisfies the Right to be Forgotten while preserving SOX, SEC, and HHS record-retention duties via the same primitive. Detailed construction at /trust/cryptographic-erasure."],
+];
+
+const residency = [
+  ["PHI never leaves your perimeter", "Bolt's runtime, the agent loop, the prompt assembly, the PII masking, and the audit log all live inside your perimeter in every shipping topology. PHI does not transit Sparcle infrastructure."],
+  ["BAA-ready architecture", "Sparcle's sub-processor disclosure is asymmetric by design. Customer-configured sub-processors (your IdP, your cloud, your KMS, your LLM provider) hold customer data; Sparcle's own sub-processors handle software delivery."],
+  ["Customer-held KMS", "Vault Transit, AWS KMS, Azure Key Vault, or PKCS#11 HSM. Provable cryptographic erasure for HIPAA Right-to-be-Forgotten — Sparcle cannot read tenant data even with access to the ciphertext."],
+  ["Audit-trail responses your compliance team can sign off on", "Every result carries the why-filtered context regulators ask for during HHS-OCR reviews. What was shown, what was suppressed, why. The artifact a compliance officer points to during audit."],
+];
+
+const workflows = [
+  ["Prior-authorization review", "Cross-source synthesis across payer policy, clinical guidelines, and chart documentation. The Authority Policy ranks current clinical guidelines above superseded versions; the audit chain records every retrieval for case review."],
+  ["Clinical-evidence Q&A with current-CME demotion", "The healthcare Authority Policy pack demotes expired CME, retracted papers, and superseded guidelines below the cut. Cited evidence resolves to current source-of-record."],
+  ["MAC and OCR audit response", "Time-bounded audit-chain export with the standalone verifier binary. The OCR investigator runs the verifier; Sparcle is not in the verification loop."],
+  ["M&A and IPO due-diligence response", "Privilege-walled retrieval across diligence corpora. Per-matter ACLs keep restricted material out of partner review packets unless explicitly authorized."],
+];
+
+const trustDossier = [
+  ["/trust/cryptographic-erasure", "The construction that satisfies HIPAA Right-to-be-Forgotten while preserving HIPAA record-retention. The packet your DPO or external auditor receives."],
+  ["/trust/where-the-model-runs", "How PHI is masked before any outbound LLM call; how the three deployment modes (on-prem, in-tenant cloud, public vendor) compare for HIPAA-covered workloads."],
+  ["/trust/verify", "The standalone audit-chain verifier. Your compliance team runs it offline; no network calls, no Sparcle dependencies. The artifact a 21 CFR Part 11 validation pack relies on."],
+  ["/trust/controls", "Controls evidence map walking HIPAA Security Rule controls to concrete implementations. Pre-positioned for OCR review."],
+];
+---
+<BaseLayout
+  title="Sparcle for Healthcare | HIPAA · 21 CFR Part 11 · BAA-ready"
+  description="Sovereign AI for healthcare. PHI never leaves your perimeter, BAA-ready architecture, customer-held KMS, provable cryptographic erasure for HIPAA Right-to-be-Forgotten. Trust artifacts, vertical workflows, and a 1-page printable brief."
+  canonical="https://sparcle.app/solutions/healthcare"
+>
+  <link slot="head" rel="stylesheet" href="/css/vertical-page.css" />
+  <main class="page-vertical">
+    <Hero
+      eyebrow="Sparcle for Healthcare"
+      title="PHI stays in your perimeter. The auditor verifies."
+      lede="HIPAA-covered, 21 CFR Part 11-eligible workloads have a non-negotiable boundary: PHI cannot leave the covered-entity perimeter. Bolt and Aeira ship for that boundary &mdash; PII masked at the LLM call, audit chain inside your perimeter, cryptographic erasure that satisfies Right-to-be-Forgotten while preserving record-retention duties."
+    >
+      <a href="#" onclick="openContactModal('Healthcare Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule healthcare review</a>
+      <a href="/docs/pdfs/vertical-healthcare.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Compliance frameworks"
+      title="What Sparcle ships against."
+      lede="Healthcare compliance is the intersection of HIPAA, 21 CFR Part 11 for FDA-regulated workflows, HITECH, and the OCR Final Rule on AI in healthcare. Each frame below maps to a concrete implementation."
+      stripe="b"
+    >
+      <div class="vertical-list">
+        {frameworks.map((row) => (
+          <article class="vertical-list__item">
+            <h3 class="vertical-list__title">{row[0]}</h3>
+            <p class="vertical-list__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Data residency posture"
+      title="The covered-entity boundary, enforced."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {residency.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="1-page brief"
+      title="Take this to your compliance officer."
+      lede="The healthcare-vertical brief covers HIPAA posture, 21 CFR Part 11 validation artifacts, BAA-readiness, and the trust artifacts a compliance officer reviews."
+      stripe="b"
+    >
+      <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand healthcare vertical brief">
+        <iframe
+          src="/docs/pdfs/vertical-healthcare.pdf#view=FitH"
+          title="Sparcle for Healthcare — 1-page brief"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p class="vertical-pdf-actions">
+        <a href="/docs/pdfs/vertical-healthcare.pdf" class="btn btn-secondary btn-lg" download>Download PDF</a>
+        <a href="/docs/pdfs/vertical-healthcare.pdf" target="_blank" rel="noopener" class="btn btn-tertiary btn-lg">Open in new tab &nearr;</a>
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Workflows the founding team has built for"
+      title="Four anchor use cases."
+      lede="The workflows below are scoped with healthcare design partners. The healthcare Authority Policy pack is the per-customer tuning point."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {workflows.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Trust dossier for healthcare"
+      title="The four artifacts your compliance officer will ask for."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="vertical-dossier">
+        {trustDossier.map((row) => (
+          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+        ))}
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want to walk this against your specific covered-entity posture?"
+      lede="A 30-minute healthcare architecture review covers your HIPAA posture, your KMS choice, your clinical-evidence ranking needs, and the workflows your team needs. Founder-led; the engineering team is on the call."
+    >
+      <a href="#" onclick="openContactModal('Healthcare Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule healthcare review</a>
+      <a href="/solutions" class="btn btn-secondary btn-lg">All industries</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>

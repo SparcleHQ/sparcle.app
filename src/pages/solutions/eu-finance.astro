@@ -1,0 +1,136 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const frameworks = [
+  ["DORA (Digital Operational Resilience Act)", "EU regulation applying to financial entities and their ICT third-party providers, effective January 2025. Bolt and Aeira ship as customer-deployed software inside the financial entity's perimeter — the lighter-touch posture under DORA's ICT-third-party register."],
+  ["GDPR Art. 17 / 28 / 35", "Right to be Forgotten via cryptographic erasure; Art. 28 data-processor responsibilities; Art. 35 DPIA for high-risk processing. Sparcle's sub-processor disclosure is asymmetric &mdash; customer data does not reach Sparcle infrastructure in the shipping topologies."],
+  ["NIS2 (Network and Information Security Directive 2)", "Stricter cybersecurity baseline across EU essential and important entities. The five-phase incident-response framework, the audit chain integrity primitive, and the customer-held KMS posture map to NIS2 risk-management requirements."],
+  ["EU AI Act (high-risk AI in finance)", "Sparcle is the runtime, not the model. The Authority Policy SDK lets the financial entity encode the EU AI Act risk-management and human-oversight provisions; the audit-trail responses are the artifact the supervisor reviews."],
+];
+
+const residency = [
+  ["EU-region key residency", "Customer-held KMS in an EU region (Vault Transit, AWS KMS Frankfurt/Ireland, Azure Key Vault EU). The crypto-shred construction means Sparcle cannot read tenant data even with access to the ciphertext."],
+  ["No transfer outside the EEA", "Bolt and Aeira run inside the customer's EU perimeter. Customer data does not transit Sparcle infrastructure; sub-processor disclosure makes the transfer mechanism (or lack thereof) explicit."],
+  ["DORA-aligned ICT third-party register", "Sparcle is the customer-deployed software vendor under DORA; the customer's ICT-third-party register reflects that role. Sub-processor disclosure, MSA, and DPA template support the customer's register update."],
+  ["DPO-verifiable artifacts inside the bloc", "The standalone audit-chain verifier runs offline inside the EU perimeter. Your DPO does not need to transfer audit material outside the bloc to verify integrity."],
+];
+
+const workflows = [
+  ["DORA self-attestation prep", "Cross-source synthesis across vendor risk register, control attestations, and incident-response runbook. Authority Policy ranks current attestation versions above superseded ones."],
+  ["GDPR DSAR response with crypto-shred", "Subject erasure requests trigger the cryptographic-disposal construction; the disposal receipt is the artifact the supervisory authority receives. Erasure-with-retention via one primitive."],
+  ["AML / KYC research with citation hygiene", "Multi-source synthesis with provenance. The Authority Policy demotes outdated screening sources; every cited authority resolves to a current source-of-record."],
+  ["NIS2 incident-notification drafting", "Structured incident records pulled from the audit chain feed the 24-hour, 72-hour, and 1-month NIS2 notifications. The audit chain is the source-of-record the regulator reviews."],
+];
+
+const trustDossier = [
+  ["/trust/cryptographic-erasure", "The construction satisfying GDPR Art. 17 while preserving regulatory retention duties. The packet your DPO and supervisory authority receive."],
+  ["/trust/subprocessors", "Asymmetric topology + cross-border transfer mechanisms (SCCs, UK IDTA addendum). Why customer data does not reach Sparcle infrastructure in EU deployments."],
+  ["/trust/verify", "The standalone audit-chain verifier. Your DPO runs it offline inside the EU perimeter; the artifact a supervisory-authority audit relies on."],
+  ["/trust/incident-response", "Five-phase response framework aligned with the NIS2 notification timeline. The runbook a CISO at an EU financial institution expects."],
+];
+---
+<BaseLayout
+  title="Sparcle for EU Finance | DORA · GDPR · NIS2 · MiCA"
+  description="Sovereign AI for EU financial institutions. EU-region key residency, customer-held KMS, DORA-aligned ICT third-party posture, DPO-verifiable audit artifacts. Trust dossier, vertical workflows, and a 1-page printable brief."
+  canonical="https://sparcle.app/solutions/eu-finance"
+>
+  <link slot="head" rel="stylesheet" href="/css/vertical-page.css" />
+  <main class="page-vertical">
+    <Hero
+      eyebrow="Sparcle for EU Finance"
+      title="DORA-aligned. EU-region keys. DPO-verifiable inside the bloc."
+      lede="EU financial institutions operate inside the bloc and inside DORA. Bolt and Aeira ship as customer-deployed software in EU regions, with customer-held KMS inside the EEA, an audit chain your DPO verifies offline, and a sub-processor topology where customer data does not transit Sparcle infrastructure."
+    >
+      <a href="#" onclick="openContactModal('EU Finance Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule EU finance review</a>
+      <a href="/docs/pdfs/vertical-eu-finance.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Compliance frameworks"
+      title="What Sparcle ships against."
+      lede="EU financial-services compliance is the intersection of DORA, GDPR, NIS2, and the EU AI Act. Each frame below maps to a concrete implementation."
+      stripe="b"
+    >
+      <div class="vertical-list">
+        {frameworks.map((row) => (
+          <article class="vertical-list__item">
+            <h3 class="vertical-list__title">{row[0]}</h3>
+            <p class="vertical-list__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Data residency posture"
+      title="Inside the bloc. Inside your perimeter."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {residency.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="1-page brief"
+      title="Take this to your DPO and your CCO."
+      lede="The EU finance brief covers DORA posture, GDPR + NIS2 alignment, EU-region key residency, and the trust artifacts a DPO and CCO review."
+      stripe="b"
+    >
+      <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand EU finance vertical brief">
+        <iframe
+          src="/docs/pdfs/vertical-eu-finance.pdf#view=FitH"
+          title="Sparcle for EU Finance — 1-page brief"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p class="vertical-pdf-actions">
+        <a href="/docs/pdfs/vertical-eu-finance.pdf" class="btn btn-secondary btn-lg" download>Download PDF</a>
+        <a href="/docs/pdfs/vertical-eu-finance.pdf" target="_blank" rel="noopener" class="btn btn-tertiary btn-lg">Open in new tab &nearr;</a>
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Workflows the founding team has built for"
+      title="Four anchor use cases."
+      lede="The workflows below are scoped with EU-finance design partners. The Authority Policy SDK and connector configuration are the per-customer tuning points."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {workflows.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Trust dossier for EU finance"
+      title="The four artifacts your DPO and supervisor will ask for."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="vertical-dossier">
+        {trustDossier.map((row) => (
+          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+        ))}
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want to walk this against your specific DORA register and DPIA?"
+      lede="A 30-minute EU finance architecture review covers your DORA ICT-third-party posture, your KMS custody inside the EEA, your DPIA needs, and the workflows your team needs. Founder-led; the engineering team is on the call."
+    >
+      <a href="#" onclick="openContactModal('EU Finance Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule EU finance review</a>
+      <a href="/solutions" class="btn btn-secondary btn-lg">All industries</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>

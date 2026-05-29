@@ -7,4 +7,23 @@ import ProductPageTemplate from "../../components/marketing/ProductPageTemplate.
 import { aeiraProductContent } from "../../data/offerings";
 ---
 
-<ProductPageTemplate content={aeiraProductContent} />
+<ProductPageTemplate content={aeiraProductContent}>
+  <link slot="head" rel="stylesheet" href="/css/trust-callout.css" />
+
+    <aside slot="afterHero" class="trust-callout" aria-label="Trust dossier">
+      <div class="trust-callout__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      </div>
+      <div class="trust-callout__body">
+        <h3 class="trust-callout__title">Reading this for security review?</h3>
+        <p class="trust-callout__lede">
+          The complete trust dossier &mdash; sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy &mdash; lives at the Trust Center.
+        </p>
+        <a href="/trust" class="trust-callout__cta">
+          Browse the Trust Center &nearr;
+        </a>
+      </div>
+    </aside>
+</ProductPageTemplate>

@@ -1,0 +1,237 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+// Per-vertical landing pages. Each card maps to a /solutions/{slug} page
+// that surfaces the vertical-specific PDF inline plus bespoke copy on the
+// compliance bar and data-residency posture for that industry.
+//
+// briefPath = "" means the vertical PDF is on the roadmap, not shipped.
+// The page still ships; the PDF embed renders the "brief pending" state.
+const verticals = [
+  {
+    slug: "defense",
+    title: "Defense",
+    compliance: "ITAR · CMMC · IL4/IL5",
+    pitch: "Sovereign AI for classified, controlled, and ITAR-bounded workloads. Air-gap ready by default, BYO LLM mandate, key custody under your KMS.",
+    href: "/solutions/defense",
+    briefPath: "/docs/pdfs/vertical-defense.pdf",
+  },
+  {
+    slug: "federal",
+    title: "Federal civilian",
+    compliance: "FedRAMP roadmap · StateRAMP · FISMA",
+    pitch: "Designed for federal civilian agencies and contractors that cannot route prompts through a vendor cloud. Sovereign cloud deployments, agency-held keys, and a defensible FedRAMP path.",
+    href: "/solutions/federal",
+    briefPath: "/docs/pdfs/vertical-federal.pdf",
+  },
+  {
+    slug: "healthcare",
+    title: "Healthcare",
+    compliance: "HIPAA · 21 CFR Part 11 · HITECH",
+    pitch: "PHI never leaves your perimeter. BAA-ready architecture, provable cryptographic erasure for Right-to-be-Forgotten, audit-trail responses your compliance team can sign off on.",
+    href: "/solutions/healthcare",
+    briefPath: "/docs/pdfs/vertical-healthcare.pdf",
+  },
+  {
+    slug: "finance",
+    title: "Financial services",
+    compliance: "SOX · FINRA 4511 · SEC 17a-4 · GLBA",
+    pitch: "Erasure-with-retention via cryptographic disposal — satisfies SOX/SEC record-keeping and GDPR Art. 17 with the same primitive. WORM-eligible audit chain, customer-held keys, sovereign deployment.",
+    href: "/solutions/finance",
+    briefPath: "/docs/pdfs/vertical-finance.pdf",
+  },
+  {
+    slug: "eu-finance",
+    title: "EU finance",
+    compliance: "DORA · GDPR · NIS2 · MiCA",
+    pitch: "EU-region key residency, customer-held KMS, audit-chain artifacts your DPO can verify without leaving the bloc. Built for the Operational Resilience Act and the next generation of EU AI rules.",
+    href: "/solutions/eu-finance",
+    briefPath: "/docs/pdfs/vertical-eu-finance.pdf",
+  },
+  {
+    slug: "legal",
+    title: "Legal",
+    compliance: "Attorney-client privilege · Matter ACL · Conflicts",
+    pitch: "Privileged data stays inside the matter that owns it. Per-matter ACLs, conflicts-of-interest gates at the retrieval layer, and an audit chain that the partner-in-charge can read end-to-end.",
+    href: "/solutions/legal",
+    briefPath: "",
+  },
+];
+
+const consistent = [
+  {
+    title: "One runtime",
+    body: "Same Bolt + Aeira binaries everywhere. The vertical isn't a fork of the product; it's a configuration of the same Authority Policy SDK and the same audit chain.",
+  },
+  {
+    title: "One audit chain",
+    body: "Every invocation across every vertical produces the same Ed25519-signed Merkle audit chain. The standalone verifier runs against any tenant's chain, regardless of industry.",
+  },
+  {
+    title: "One boundary",
+    body: "Customer perimeter is the boundary in every vertical. Customer holds the KMS keys, the IdP, the LLM endpoint. Sparcle ships software; Sparcle does not host customer data.",
+  },
+];
+---
+<BaseLayout
+  title="Solutions by Industry | Sparcle"
+  description="Bolt + Aeira for the verticals where vendor cloud is not an option: defense, federal civilian, healthcare, financial services, EU finance, and legal. Same runtime; the vertical pages name the compliance bar each one ships against."
+  canonical="https://sparcle.app/solutions"
+>
+  <main class="page-solutions">
+    <Hero
+      eyebrow="By industry"
+      title="Built for the rooms where vendor cloud isn't an option."
+      lede="Defense. Federal civilian. BigLaw. Regulated finance. Healthcare M&amp;A. EU institutions bound by DORA, GDPR, and the next wave of EU AI rules. Same Bolt and Aeira runtime across all of them. The vertical pages below name the compliance bar each one ships against, and the workflows the founding team has built for."
+    >
+      <a href="#verticals" class="btn btn-primary btn-lg">Pick your industry &darr;</a>
+      <a href="#" onclick="openContactModal('Vertical Architecture Review'); return false;" class="btn btn-secondary btn-lg">Vertical architecture review</a>
+    </Hero>
+
+    <a id="verticals" class="anchor" aria-hidden="true"></a>
+
+    <PageSection
+      eyebrow="Pick your industry"
+      title="Six verticals, one platform."
+      lede="Each page below contains a 1-page printable brief, the compliance frameworks Sparcle ships against in that vertical, the workflows the founding team has built for, and the trust-center artifacts most relevant to that vertical's CISO."
+      stripe="b"
+    >
+      <div class="vertical-grid">
+        {verticals.map((v) => (
+          <a class="vertical-card" href={v.href} aria-label={`Sparcle for ${v.title}`}>
+            <div class="vertical-card__head">
+              <h3 class="vertical-card__title">{v.title}</h3>
+              <p class="vertical-card__compliance">{v.compliance}</p>
+            </div>
+            <p class="vertical-card__pitch">{v.pitch}</p>
+            <p class="vertical-card__link">
+              Read &rarr;
+            </p>
+          </a>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What's consistent across every vertical"
+      title="The product doesn't fork. The compliance bar does."
+      lede="Sparcle ships one Bolt and one Aeira. Every vertical configuration sits on the same runtime, the same audit chain, and the same customer-held boundary. What changes is the Authority Policy ranking pack, the connector set, the data-residency configuration, and the regulatory framing on the trust center artifacts."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {consistent.map((c) => (
+          <Card title={c.title}>{c.body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Two products"
+      title="Bolt for the agent loop. Aeira for the substrate."
+      lede="Most prospects evaluate Bolt and Aeira together; some buy one or the other. Both products work across every vertical above."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        <Card title="Bolt — Sovereign AI agent" href="/products.html">
+          The launcher, the agent loop, the prompt assembly, the PII masking layer, the multi-layer security pipeline. Bolt is the runtime your users interact with; runs inside your perimeter with your LLM.
+        </Card>
+        <Card title="Aeira — ACL-aware substrate" href="/products/aeira.html">
+          The 4-axis ACL pre-filter at index time, the keyword + vector + graph retrieval, the Authority Policy SDK, the cryptographically-verifiable audit chain. Aeira is the data plane Bolt rides on, or any MCP-compatible client can ride on.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want a walk-through against your specific compliance bar?"
+      lede="A 30-minute vertical architecture review covers your data-residency requirements, your IdP and KMS posture, the workflows that matter for your team, and a candid read on whether Bolt and Aeira ship for your environment yet."
+    >
+      <a href="#" onclick="openContactModal('Vertical Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule vertical review</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Browse the Trust Center</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-solutions .anchor {
+    display: block;
+    height: 1px;
+    margin-top: calc(var(--nav-height, 80px) * -1);
+    padding-top: var(--nav-height, 80px);
+    visibility: hidden;
+  }
+
+  .page-solutions .vertical-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+  .page-solutions .vertical-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-strong);
+    border-left: 4px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.6rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    cursor: pointer;
+  }
+  .page-solutions .vertical-card:hover {
+    border-color: var(--brand-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .page-solutions .vertical-card__head {
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.85rem;
+  }
+  .page-solutions .vertical-card__title {
+    margin: 0 0 0.4rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .page-solutions .vertical-card:hover .vertical-card__title {
+    color: var(--brand-primary-hover);
+  }
+  .page-solutions .vertical-card__compliance {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .page-solutions .vertical-card__pitch {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.6;
+    font-size: 0.94rem;
+    flex-grow: 1;
+  }
+  .page-solutions .vertical-card__link {
+    margin: 0;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .page-solutions .vertical-card:hover .vertical-card__link {
+    color: var(--brand-primary-hover);
+  }
+</style>

@@ -1,0 +1,84 @@
+/*
+ * Trust-dossier callout — a compact horizontal callout pointing at /trust
+ * from any decision-stage page (architecture, security, pricing, products,
+ * solutions/vertical, why-sparcle). The Trust Center is the strongest
+ * section on the site; this callout ensures a CISO arriving at a buying-
+ * stage page realizes the dossier is one click away.
+ */
+
+.trust-callout {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-strong);
+  border-left: 4px solid var(--brand-primary);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  max-width: var(--w-content, 1120px);
+  margin: 2rem auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.trust-callout__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trust-callout__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.trust-callout__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.trust-callout__title {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.trust-callout__lede {
+  margin: 0 0 0.65rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+.trust-callout__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--brand-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: gap var(--transition-fast), color var(--transition-fast);
+}
+
+.trust-callout__cta:hover {
+  color: var(--brand-primary-hover);
+  gap: 0.6rem;
+}
+
+@media (max-width: 600px) {
+  .trust-callout {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+}

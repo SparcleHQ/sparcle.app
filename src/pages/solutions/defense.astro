@@ -1,0 +1,137 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const frameworks = [
+  ["ITAR", "International Traffic in Arms Regulations — controlled technical data cannot leave the US persons boundary, full stop. Bolt's BYO-LLM mandate and on-prem inference mode keep the prompt inside that boundary regardless of which model is configured."],
+  ["CMMC L3 / L5", "Cybersecurity Maturity Model Certification — Sparcle's controls evidence map walks every CMMC practice to a concrete implementation. The cryptographic audit chain is the artifact the C3PAO reviews during assessment."],
+  ["IL4 / IL5", "DOD Impact Level requirements for controlled unclassified information and mission-critical workloads. Air-gap deployment is the default, not the upsell."],
+  ["NIST 800-171 / 800-172", "CUI and Enhanced-CUI control families. The Authority Policy SDK lets you encode classification-tier ranking floors that mechanically prevent over-cleared retrieval."],
+];
+
+const residency = [
+  ["Air-gap by default", "Bolt and Aeira ship with an air-gap-eligible Helm chart and a docker-compose path that requires zero outbound connectivity. The Aeira index is sharded and replicated entirely inside the customer enclave."],
+  ["No public LLM API in scope", "Mode A (on-prem inference via vLLM, TGI, llama.cpp, or NVIDIA NIM) is the supported posture. Mode C (public vendor API) is explicitly out of scope for ITAR and DOD IL4+ workloads."],
+  ["Customer KMS, customer keys", "Vault Transit, AWS KMS GovCloud, or PKCS#11 HSM. Sparcle does not hold tenant master keys. The crypto-shred construction means Sparcle cannot read data even with access to the ciphertext."],
+  ["Sovereign cloud + classified networks", "Helm chart deployable into AWS GovCloud, Azure Government, IL4/IL5 sovereign clouds, and classified networks reachable only from CAC-authenticated terminals."],
+];
+
+const workflows = [
+  ["SOC triage on a classified network", "An analyst at the launcher chips through CrowdStrike alerts, MISP indicators, classified threat intel. Every retrieval is ACL-bound to the analyst's clearance; every action is recorded in the audit chain."],
+  ["Contract and capability intelligence", "Cross-source synthesis across FAR / DFARS filings, contractor self-assessments, and internal capability briefings. Privilege walls keep classified annexes out of unclassified briefs."],
+  ["ITAR-bounded communications drafting", "Outbound communications to coalition partners pass the ITAR-control predicate before send. The audit chain records the predicate output, not just the message."],
+  ["Capability briefing assembly", "Pull authoritative source-of-record data into a structured brief; the Authority Policy ranks classified-source content above unclassified, and demotes deprecated or rescinded material below the cut."],
+];
+
+const trustDossier = [
+  ["/trust/where-the-model-runs", "Why Mode A (on-prem inference) is the default for defense; the PII-masking layer that protects every other mode."],
+  ["/trust/cryptographic-erasure", "Why Sparcle cannot read your data even with access to the ciphertext. The construction your auditor verifies."],
+  ["/trust/verify", "The standalone audit-chain verifier. Your auditor runs it offline; no network calls, no Sparcle dependencies."],
+  ["/trust/subprocessors", "Why customer data never reaches Sparcle infrastructure in the air-gap and Helm topologies."],
+];
+---
+<BaseLayout
+  title="Sparcle for Defense | ITAR · CMMC · IL4/IL5"
+  description="Sovereign AI for ITAR-bounded, CMMC-assessed, and DOD IL4/IL5 workloads. Air-gap by default, BYO LLM mandate, customer-held KMS. Trust artifacts, vertical workflows, and a 1-page printable brief."
+  canonical="https://sparcle.app/solutions/defense"
+>
+  <link slot="head" rel="stylesheet" href="/css/vertical-page.css" />
+  <main class="page-vertical">
+    <Hero
+      eyebrow="Sparcle for Defense"
+      title="ITAR-bounded. CMMC-ready. Air-gap by default."
+      lede="Defense and defense-industrial-base workloads have non-negotiable boundaries: ITAR-controlled technical data, CMMC-assessed cybersecurity practices, IL4/IL5 mission criticality. Bolt and Aeira ship for those boundaries — on-prem inference, customer-held keys, and an audit chain your sponsor's C3PAO can verify offline."
+    >
+      <a href="#" onclick="openContactModal('Defense Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule defense review</a>
+      <a href="/docs/pdfs/vertical-defense.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Compliance frameworks"
+      title="What Sparcle ships against."
+      lede="The defense compliance posture isn't a single framework; it's the intersection of ITAR, CMMC, NIST 800-171/172, and the DOD Impact-Level requirements that govern the network the binary runs on. Each frame below maps to a concrete implementation, not a marketing claim."
+      stripe="b"
+    >
+      <div class="vertical-list">
+        {frameworks.map((row) => (
+          <article class="vertical-list__item">
+            <h3 class="vertical-list__title">{row[0]}</h3>
+            <p class="vertical-list__body">{row[1]}</p>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Data residency posture"
+      title="Where the data lives. Where it doesn't go."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {residency.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="1-page brief"
+      title="Take this to your sponsor."
+      lede="The defense-vertical brief is a single printable page covering the compliance posture, the deployment topologies, and the trust artifacts. Designed to forward to your contracting officer or assessor without scheduling a call."
+      stripe="b"
+    >
+      <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand defense vertical brief">
+        <iframe
+          src="/docs/pdfs/vertical-defense.pdf#view=FitH"
+          title="Sparcle for Defense — 1-page brief"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p class="vertical-pdf-actions">
+        <a href="/docs/pdfs/vertical-defense.pdf" class="btn btn-secondary btn-lg" download>Download PDF</a>
+        <a href="/docs/pdfs/vertical-defense.pdf" target="_blank" rel="noopener" class="btn btn-tertiary btn-lg">Open in new tab &nearr;</a>
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Workflows the founding team has built for"
+      title="Four anchor use cases."
+      lede="These are the workflows the engineering team has implemented or scoped with defense design partners. The Authority Policy SDK and connector configuration are the per-customer tuning points; the runtime is the same Bolt and Aeira shipping to every other vertical."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {workflows.map((row) => (
+          <Card title={row[0]}>{row[1]}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Trust dossier for defense"
+      title="The four artifacts your CISO and assessor will ask for."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="vertical-dossier">
+        {trustDossier.map((row) => (
+          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+        ))}
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Want to walk this against your specific network and assessor?"
+      lede="A 30-minute defense architecture review covers your network classification, your KMS posture, your ITAR-control predicates, and the workflows your team needs. Founder-led; the engineering team is on the call."
+    >
+      <a href="#" onclick="openContactModal('Defense Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule defense review</a>
+      <a href="/solutions" class="btn btn-secondary btn-lg">All industries</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+

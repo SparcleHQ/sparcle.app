@@ -18,7 +18,7 @@ const tiers = [
   {
     badge: "Admin Apps",
     title: "Bring your stack",
-    intro: "Org admin enables centrally. The whole company gets the chip in one move. Routes through the customer's Bolt service against the systems the org has connected.",
+    intro: "Org admin enables centrally. Everyone in the company gets it in Bolt in one move. Routes through the customer's Bolt service against the systems the org has connected.",
     rows: [
       ["Who authors", "The customer's admin (or Sparcle, for bundled integrations)"],
       ["Who installs", "Org admin enables in Settings; per-user OAuth on first use"],
@@ -35,7 +35,7 @@ const tiers = [
   {
     badge: "User Apps",
     title: "Bring your shell. Bring your script. Bring your tools.",
-    intro: "An individual drops a .yaml in a local folder. The chip is just for them. Runs as their OS identity on their own machine. Sparcle servers are not in the request path. Admins can disable the entire tier on managed devices.",
+    intro: "An individual drops a .yaml in a local folder. Only they have it. Runs as their OS identity on their own machine. Sparcle servers are not in the request path. Admins can disable the entire tier on managed devices.",
     rows: [
       ["Who authors", "The individual user (or a teammate whose YAML they trust)"],
       ["Who installs", "User drops .yaml in a local folder, clicks Reload"],
@@ -84,7 +84,7 @@ const guarantees = [
 const cannots = [
   {
     title: "Bolt does not let an LLM invoke a User App",
-    body: "There is no agent-tool path to user_util_invoke. Architecturally, not as a flag a future release could flip. A model that wanted a User App to run would have to find a human to type the chip and press Enter.",
+    body: "There is no agent-tool path to user_util_invoke. Architecturally, not as a flag a future release could flip. A model that wanted a User App to run would have to find a human to open Bolt, type the App's keyboard shortcut, and press Enter.",
   },
   {
     title: "Bolt does not let a poisoned response chain a User App",
@@ -134,14 +134,14 @@ actions:
 ---
 <BaseLayout
   title="Bolt Apps: Admin and User tiers | Sparcle"
-  description="Bolt Apps are launcher chips you summon from any context on any OS. Two tiers, one trust contract: Admin Apps your org admin enables centrally, User Apps an individual drops in a local folder. Same YAML schema, different runtime, different boundary. Bring your daily workflows into Bolt without data crossing a boundary it should not."
+  description="Bolt Apps are keyboard shortcuts you summon from any context on any OS. Two tiers, one trust contract: Admin Apps your org admin enables centrally, User Apps an individual drops in a local folder. Same YAML schema, different runtime, different boundary. Bring your daily workflows into Bolt without data crossing a boundary it should not."
   canonical="https://sparcle.app/docs/utilities"
 >
   <main class="page-utilities">
     <Hero
       eyebrow="Bolt Apps"
       title="Bring your daily workflows into Bolt."
-      lede="Wherever you are, terminal or browser or a specific app, Bolt is one keystroke away. Apps are the chips that ride on that surface. Two tiers, one schema. Admin Apps connect the systems your org already runs. User Apps run on your own machine, under your own identity. Same trust contract for both, enforced at exec time."
+      lede="Wherever you are, terminal or browser or a specific app, Bolt is one keystroke away. Apps are how you summon a workflow without leaving where you are. Two tiers, one schema. Admin Apps connect the systems your org already runs. User Apps run on your own machine, under your own identity. Same trust contract for both, enforced at exec time."
     >
       <a href="#tiers" class="btn btn-primary btn-lg">Compare the two tiers</a>
       <a href="#trust" class="btn btn-secondary btn-lg">Read the trust contract</a>
@@ -151,7 +151,7 @@ actions:
       id="tiers"
       eyebrow="The two tiers"
       title="Same template. Different boundary."
-      lede="Both tiers are YAML manifests. Both render chips in the launcher. The runtime, the install path, and the trust posture differ. Read them side by side."
+      lede="Both tiers are YAML manifests. Both show up in Bolt as keyboard shortcuts users summon by typing. The runtime, the install path, and the trust posture differ. Read them side by side."
       stripe="b"
     >
       <div class="tiers-grid">
@@ -229,7 +229,7 @@ actions:
       id="admin-gate"
       eyebrow="Admin disable"
       title="On a managed device, admins can turn User Apps off."
-      lede="Settings, Utilities, User Apps. One toggle. When off, installed Apps stop loading, the launcher detector stops proposing user chips, and invocation refuses at the runtime boundary. Manifest files on disk are kept so re-enabling restores the user's setup identically."
+      lede="Settings, Utilities, User Apps. One toggle. When off, installed Apps stop loading, Bolt stops surfacing them as suggestions, and invocation refuses at the runtime boundary. Manifest files on disk are kept so re-enabling restores the user's setup identically."
       stripe="b"
     >
       <CardGrid cols={2}>
@@ -271,7 +271,7 @@ actions:
       id="byo-yaml"
       eyebrow="Author a User App in 25 lines"
       title="A few lines of YAML. No data crossing a boundary it should not."
-      lede="The example below installs a chip that runs git log in a local repo and shows the commit lines in Bolt. Drop it in your user-apps folder, click Reload, then type =git-log &lt;repo&gt; to try it. Same schema serves Admin Apps too, with a different runtime block."
+      lede="The example below installs an App that runs git log in a local repo and shows the commit lines in Bolt. Drop it in your user-apps folder, click Reload, then type =git-log &lt;repo&gt; to try it. Same schema serves Admin Apps too, with a different runtime block."
     >
       <div class="manifest-block">
         <Code code={sampleYaml} lang="yaml" theme="github-dark" />

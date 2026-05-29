@@ -4112,8 +4112,16 @@ a.pill:hover {
 .data-table--cols4 .data-table__row {
     grid-template-columns: 180px repeat(3, 1fr);
 }
+.data-table--cols3 .data-table__row {
+    grid-template-columns: 160px 1fr 240px;
+}
+.data-table--cols2 .data-table__row {
+    grid-template-columns: 240px 1fr;
+}
 @media (max-width: 720px) {
     .data-table__row,
+    .data-table--cols2 .data-table__row,
+    .data-table--cols3 .data-table__row,
     .data-table--cols4 .data-table__row {
         grid-template-columns: 1fr;
     }

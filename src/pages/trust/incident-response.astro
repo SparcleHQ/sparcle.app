@@ -1,0 +1,219 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const phases = [
+  ["1. Detect", "We discover an event via monitoring (Prometheus alerts on bolt-api and Aeira components), customer report, vendor advisory feed, or vulnerability disclosure."],
+  ["2. Triage", "The responding engineer classifies severity (SEV1 to SEV4), assigns an incident lead, and opens a private incident channel and incident ticket. Acknowledgement to the customer (or, for public-facing issues, the reporter) happens within the target acknowledgement window for that severity."],
+  ["3. Stabilize", "We contain the issue with the shortest path to reducing customer impact, even if that is a partial mitigation. Permanent fixes follow stabilization, not the other way around."],
+  ["4. Mitigate", "Engineering ships and verifies the fix in a controlled rollout, with customer-specific guidance where the fix requires a customer-side action (Helm chart upgrade, configuration change, key rotation)."],
+  ["5. Validate and communicate", "We confirm closure with telemetry and, for customer-impacting incidents, with the affected customer. Public post-incident review follows for any incident that required customer notification."],
+];
+
+const sevTable = [
+  ["SEV1", "Critical: actively exploited vulnerability in a current Bolt or Aeira release; compromise of the cosign signing key or build pipeline; sub-processor breach with customer-data implications.", "Acknowledgement within 1 business day. Patch shipped within the Critical SLA (7 days per the VDP)."],
+  ["SEV2", "High: confirmed exploitable vulnerability in a current release without active exploitation; high-severity CVE in a deployed dependency with no workaround.", "Acknowledgement within 1 business day. Patch shipped within the High SLA (30 days per the VDP)."],
+  ["SEV3", "Medium: vulnerability with an available workaround; sub-processor incident without customer-data impact; documentation security gap.", "Acknowledgement within 3 business days. Patch shipped within the Medium SLA (90 days)."],
+  ["SEV4", "Low: minor issue in a non-current release; cosmetic issues; advisory items without exploitability.", "Acknowledgement within the next quarterly release window."],
+];
+
+const notificationRows = [
+  ["Vendor-shipped CVE in a current Bolt or Aeira release", "Customer advisory plus patched release within the patch SLA (Critical 7 days, High 30 days, Medium 90 days, Low next quarterly release). CVE assigned where appropriate. Advisory mailing list receives notification out of band; coordinated disclosure timing follows the VDP."],
+  ["Cosign signing-key or build-pipeline compromise", "Public advisory and key revocation within 24 hours of confirmation. Customer-side rebuild and re-pull guidance ships with the advisory."],
+  ["Sub-processor breach affecting Sparcle's delivery chain (source-code host, signing transparency log, etc.)", "Notification to affected customers within 24 hours of confirmation. Sub-Processor Disclosure updated within 30 days per the standard change-notice timeline."],
+  ["Contractual notification to a specific customer", "Within the SLA defined in the executed MSA or order form. Default for vendor-side incidents affecting the customer's environment is 72 hours."],
+  ["HIPAA or GDPR breach-notification clauses in the executed BAA or DPA", "Where the executed contract binds Sparcle to HIPAA breach notification (60 days per 45 CFR 164.404) or GDPR breach notification (72 hours per Art. 33) for incidents Sparcle is the trigger for, those clauses govern. Customer-side incidents in the customer's own deployment fall under the customer's own BAAs and DPAs with their LLM, cloud, and IdP providers, not Sparcle's."],
+];
+
+const maturation = [
+  ["Design-partner stage (pre-pilot)", "Founder-led security response within 1 business day during business hours. Joint threat-model session and architecture review under mutual NDA. Sub-processor disclosure and DPA template shared for customer counsel review. Vulnerability reports go to founder-led triage. The customer's input directly informs the security roadmap; no formal SLA beyond the acknowledgement targets on this page."],
+  ["Pilot stage (executed pilot agreement)", "Acknowledgement and notification cadence tightens to match the executed pilot agreement. Named primary security contact at Sparcle (founder-level), available during pilot hours. Joint deployment runbook produced for the customer's environment. For AWS or Vault deployments, a Day-1 customer-side KMS conformance run is part of the pilot kickoff. Sub-processor change notifications begin at signature. Pilot post-mortem at conclusion includes any security-program gaps surfaced for closure before production."],
+  ["Post-deployment (production contract)", "Contractual MSA, BAA, or DPA cadence governs all notification timelines and overrides any general statement on this page. Dedicated security engineer hired at the engagement threshold defined in the executed contract. Paged on-call rotation added in proportion to production stakes; SEV1 acknowledgement window shortens to the contractual figure. Annual third-party penetration test. SOC 2 Type I (Q4 2026 target) followed by Type II (Q2 2027 target). Sub-processor onboarding gated by customer approval per the executed DPA."],
+];
+
+const honestFraming = [
+  ["Operating model today", "Sparcle's security program is run by the founding team. The acknowledgement and patch SLAs above are the binding commitments; an executed MSA, BAA, or DPA defines the cadence Sparcle runs for that customer and takes precedence over this page. Deeper coverage tiers (paged on-call, dedicated security engineer, 24/7 staffing) activate in lockstep with the customer contracts that require them, per the maturation path above."],
+  ["What ships in the box today", "A documented five-phase response plan; a written runbook the responding engineer follows; the Vulnerability Disclosure Policy's patch SLAs as binding commitments; audit-chain evidence on every admin action taken during a response; a sub-processor disclosure with a 30-day change-notice window for customers; and a tamper-evident Merkle-sealed audit chain that customers can independently verify."],
+  ["What activates with scale", "A 24/7 staffed security operations center, a formal CSIRT charter, a paged on-call rotation, and a third-party-attested incident-response certification activate at the customer-contract thresholds that warrant them. The SLAs on this page remain the binding floor at every stage; tighter contractual figures take precedence."],
+  ["Sparcle does not host your data", "In the production deployment topology, customer data lives in the customer's infrastructure. Most security incidents that affect customer-owned data are incidents the customer responds to, not Sparcle. Sparcle's role is software-vendor-side: ship advisories, ship patches, and support the customer's response."],
+];
+---
+<BaseLayout
+  title="Incident Response Framework | Sparcle"
+  description="Sparcle's five-phase software-vendor-side incident-response framework, severity classification, acknowledgement and patch SLAs, customer notification clauses (HIPAA 60-day, GDPR 72-hour, contractual via MSA / BAA). Honest framing about what is shipped vs. roadmap and about current company stage."
+  canonical="https://sparcle.app/trust/incident-response"
+>
+  <main class="page-ir">
+    <Hero
+      eyebrow="Incident Response"
+      title="How Sparcle responds to software-vendor-side incidents."
+      lede="Sparcle ships software that runs in customer infrastructure. Most security incidents that affect customer-owned data are customer-side, and the customer's incident response runs the response. This page describes <strong>software-vendor-side</strong> incident response: how Sparcle detects, triages, mitigates, and communicates incidents in the code, releases, and delivery infrastructure Sparcle itself controls (a CVE in a shipped Bolt or Aeira release, a cosign signing-key compromise, a sub-processor breach in our delivery chain). The customer notification SLAs that bind Sparcle contractually are codified in the executed MSA, BAA, or DPA."
+    >
+      <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Contact security</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="The framework"
+      title="Five phases."
+      lede="The same shape the major incident-response frameworks (NIST SP 800-61, ISO 27035, FIRST) prescribe, sized to a software vendor that ships into customer infrastructure rather than operating customer data plane."
+      stripe="b"
+    >
+      <ol class="phase-list">
+        {phases.map(([t, body]) => (
+          <li>
+            <h3 class="phase-list__title">{t}</h3>
+            <p class="phase-list__body">{body}</p>
+          </li>
+        ))}
+      </ol>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Severity classification"
+      title="Acknowledgement and patch targets."
+      lede="Severity is assigned by the responding engineer at triage and is the input to our notification cadence. Severity can be downgraded or upgraded as the incident evolves; every change is recorded in the audit chain. Patch SLAs match the Vulnerability Disclosure Policy."
+      stripe="a"
+    >
+      <div class="data-table data-table--cols3">
+        <div class="data-table__row data-table__row--head">
+          <div>Severity</div>
+          <div>Definition</div>
+          <div>Acknowledgement + patch target</div>
+        </div>
+        {sevTable.map((row) => (
+          <div class="data-table__row">
+            <div class="data-table__label">{row[0]}</div>
+            <div>{row[1]}</div>
+            <div>{row[2]}</div>
+          </div>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Customer notification"
+      title="When and how we notify."
+      lede="Notification timing is a function of the regulatory regime governing the data, the contract executed with the customer, and the operational reality of the incident. The table below summarizes the floor; specific MSA, BAA, or DPA terms may be tighter."
+      stripe="b"
+    >
+      <div class="data-table data-table--cols2">
+        <div class="data-table__row data-table__row--head">
+          <div>Scenario</div>
+          <div>Notification commitment</div>
+        </div>
+        {notificationRows.map(([t, body]) => (
+          <div class="data-table__row">
+            <div class="data-table__label">{t}</div>
+            <div>{body}</div>
+          </div>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Communication channels"
+      title="Where you hear from us during an incident."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        <Card title="Customer security contact on file">
+          The email address you provide on the executed MSA or DPA is the primary notification channel
+          during a customer-affecting incident. Keep it current. We recommend a shared inbox monitored by
+          your security team rather than an individual.
+        </Card>
+        <Card title="Public security advisories">
+          Software-defect advisories are published with the patched release, including CVE assignment
+          where appropriate, affected version range, severity, and mitigation guidance. Customers on
+          our advisory mailing list receive these out of band.
+        </Card>
+        <Card title="Post-incident review">
+          For any incident requiring customer notification, we publish a post-incident review covering
+          root cause, customer impact, what worked, what did not, and the changes we are making. PIRs
+          are shared with affected customers directly and, where appropriate, published publicly.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Honest framing"
+      title="What this framework is, and what it is not."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        {honestFraming.map(([t, body]) => (
+          <Card title={t}>{body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Maturation path"
+      title="How the security program grows with the customer relationship."
+      lede="Sparcle's security program is staged to match the customer relationship. The commitments below activate at each phase; subsequent phases add commitments without regressing prior ones. The acknowledgement and patch SLAs published on this page are the binding floor at every stage. The executed contract for that phase is what governs."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {maturation.map(([t, body]) => (
+          <Card title={t}>{body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Past incidents"
+      title="None to disclose."
+      lede="No production incidents involving customer data have occurred. Internal-only events (build-pipeline regressions, development-environment issues) are tracked separately and do not appear here. This section will be backfilled with summarized public post-incident reviews if a customer-impacting incident occurs in the future, and remains the place to look for that history."
+      stripe="b"
+      width="prose"
+    >
+      <span aria-hidden="true"></span>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Questions about how this would work with your environment?"
+      lede="Framework version 0.2. The deeper runbook is shared under NDA during pilot evaluation."
+    >
+      <a href="#" onclick="openContactModal('Incident Response Review'); return false;" class="btn btn-primary btn-lg">Schedule review</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">security@sparcle.app</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-ir .phase-list {
+    list-style: none;
+    counter-reset: phase;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.85rem;
+    max-width: 880px;
+    margin-inline: auto;
+  }
+  .page-ir .phase-list li {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+  }
+  .page-ir .phase-list__title {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .page-ir .phase-list__body {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+</style>

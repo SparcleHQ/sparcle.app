@@ -1,0 +1,336 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const sections = [
+  {
+    id: "certifications",
+    eyebrow: "1. Certifications and audits",
+    title: "Where we are with formal attestations.",
+    items: [
+      {
+        q: "Are you SOC 2 Type II compliant?",
+        a: "Not yet. SOC 2 Type I is targeted for issuance in Q4 2026; Type II report (with required observation period) targets Q2 2027. Audit firm and readiness-automation platform are being selected. We share the readiness roadmap document and reference the current auditor relationship under NDA.",
+      },
+      {
+        q: "ISO 27001?",
+        a: "Not pursued in Year 1. Will reassess when EU and APAC enterprise demand warrants. Most of our customers find SOC 2 Type II sufficient.",
+      },
+      {
+        q: "HIPAA compliance?",
+        a: "We are HIPAA-aware in the bolt-api architecture (PHI handling, audit logging, crypto-shred for right-to-erasure, transmission security via TLS, BAA-able sub-processors). A formal Business Associate Agreement is executable per customer. Anthropic BAA is in progress for customers using the Claude API path. HITRUST certification is on the long-term roadmap, not in flight.",
+      },
+      {
+        q: "FedRAMP, PCI-DSS, FISMA?",
+        a: "Not pursued in Year 1. Will reassess when federal, payment, or defense customer demand warrants.",
+      },
+      {
+        q: "When did you last conduct a third-party penetration test?",
+        a: "Pending. First annual third-party penetration test is targeted for Q4 2026. Internal hardening run completed mid-2026; remediation backlog is published internally and informs scope.",
+      },
+    ],
+  },
+  {
+    id: "encryption",
+    eyebrow: "2. Encryption",
+    title: "At rest, in transit, and the key-management surface.",
+    items: [
+      {
+        q: "How is data encrypted at rest?",
+        a: "Layered encryption. Application layer: AES-256-GCM envelope encryption with per-tenant Customer Master Keys (CMK). Master key sourced from a pluggable KMS backend behind the aeira-traits Kms trait. Local file-backed is production-tested today (pilots, dev, air-gap). AWS KMS and HashiCorp Vault Transit reference implementations live in the aeira-rs trait library; cloud-service integration testing is in flight. PKCS#11 HSM, Azure Key Vault, and GCP KMS reference implementations are on the roadmap; customers needing these should ask. Database layer: customer responsibility, typically managed Postgres (RDS, Cloud SQL, Aurora) with the provider's at-rest encryption enabled. Disk layer: customer responsibility, typically the cloud provider's volume encryption or LUKS.",
+      },
+      {
+        q: "How is data encrypted in transit?",
+        a: "TLS at ingress (cert-manager and Let's Encrypt or customer PKI; HSTS preload-list-eligible). TLS for Postgres connections (SSL_MODE=require recommended). TLS for Redis when supported by the managed provider. TLS for all LLM-provider API calls. mTLS optional on admin endpoints via ingress annotations.",
+      },
+      {
+        q: "What encryption algorithms are used?",
+        a: "AES-256-GCM (envelope encryption); Ed25519 (audit chain signing, manifest-bundle signing); HMAC-SHA256 (PII pseudonymization, webhook signatures); SHA-256 (content hashing). Algorithms are FIPS-eligible; FIPS 140-3 module validation is pending and on the roadmap.",
+      },
+      {
+        q: "How are encryption keys managed and rotated?",
+        a: "Per-tenant CMK rotation via an authenticated admin endpoint. Old DEKs continue to decrypt; new writes wrap under the new key id. Customer-driven cadence (recommend annual or on suspected key compromise). Cosign signing for releases uses keyless Fulcio short-lived certs, so there is no long-lived signing key to manage. Master keys for PII pseudonymization and token vault encryption are sourced from the customer's secret store (External Secrets Operator and AWS Secrets Manager, GCP Secret Manager, or Vault).",
+      },
+    ],
+  },
+  {
+    id: "access",
+    eyebrow: "3. Access control",
+    title: "Identity, authorization, and privileged access.",
+    items: [
+      {
+        q: "How do users authenticate?",
+        a: "OIDC or SAML 2.0 via the customer's IdP (Okta, Microsoft Entra ID, Google Workspace, Auth0, Keycloak, custom). SCIM 2.0 server at /scim/v2/* for IdP-driven user provisioning (the standard SCIM mount point your IdP will look for). Per-org SCIM bearer tokens issued via the admin API; rotation recommended every 90 days (SOC 2 CC6.1, ISO 27001 A.9.4).",
+      },
+      {
+        q: "Multi-factor authentication?",
+        a: "MFA is enforced at the customer's IdP. Bolt accepts whatever authentication assertion the IdP issues. The recommended IdP configuration requires MFA for all users with admin role.",
+      },
+      {
+        q: "Role-based access control?",
+        a: "Yes. RBAC enforced at multiple layers: session middleware, admin-only middleware, OAuth scope middleware, per-tenant ACL pre-filter in Aeira's search layer. Admin role is required for KMS rotation, audit seal, PII reveal, SCIM token management.",
+      },
+      {
+        q: "Privileged access management?",
+        a: "Admin endpoints can be additionally restricted at the ingress layer by source-IP allow-list or mTLS. PII reveal is admin-gated and emits a high-risk audit event on every call; the call is permanently sealed in the Merkle chain.",
+      },
+    ],
+  },
+  {
+    id: "audit",
+    eyebrow: "4. Audit logging",
+    title: "What we log, how it is sealed, and where it goes.",
+    items: [
+      {
+        q: "Do you log security events?",
+        a: "Yes. Structured JSON to stdout (set LOG_FORMAT=json; default in production overlay). Customer routes via Vector, Fluent Bit, OpenTelemetry Collector, or Datadog Agent to their SIEM. SIEM export guide is shared during pilot evaluation.",
+      },
+      {
+        q: "What events are logged?",
+        a: "Authentication events, authorization decisions, admin actions (KMS rotation, PII reveal, audit seal, SCIM token issuance and revoke), data access via Aeira search (ingest path; search-side audit emit is on the roadmap), tool executions, LLM calls, errors, state-machine transitions on agent runs. Audit lines tagged with event_type=security for SIEM-side index separation.",
+      },
+      {
+        q: "Is the audit log tamper-evident?",
+        a: "Yes. Bolt-api maintains a Merkle-sealed audit chain in Postgres. Operators (or scheduled jobs) can call an admin endpoint to roll a date range into a signed Merkle root, and verify integrity via a corresponding verify endpoint. Recommended pattern: nightly seal plus export root to write-once storage (S3 Object Lock, Azure Immutable Blob, GCS Bucket Lock).",
+      },
+      {
+        q: "How long are logs retained?",
+        a: "Customer-owned retention via their SIEM or log archive. Recommended minimums by framework: SOC 2 CC7 1 year, HIPAA 164.312(b) 6 years, GDPR Art. 30 at least 1 year, SEC 17a-4 6 years (WORM), PCI-DSS 10.7 1 year with 3 months online.",
+      },
+    ],
+  },
+  {
+    id: "ir",
+    eyebrow: "5. Incident response",
+    title: "Plan, classification, and notification SLAs.",
+    items: [
+      {
+        q: "Do you have a documented incident-response plan?",
+        a: "Yes. Sparcle runs a documented five-phase incident-response plan (detect, triage, stabilize, mitigate, validate-and-communicate) covering software-vendor-side incidents: a CVE in a shipped Bolt or Aeira release, a cosign signing-key or build-pipeline compromise, a sub-processor breach in our delivery chain. SEV1-4 classification with acknowledgement and patch SLAs published on /trust/incident-response and binding at every stage. A maturation path on the same page documents how coverage tiers activate with customer contracts. The deeper runbook is shared under NDA during pilot evaluation. Customer-instance incidents in the customer's own deployment are run by the customer's IR; Sparcle supports those with advisories, patches, and direct technical assistance.",
+      },
+      {
+        q: "What is your breach notification SLA?",
+        a: "Notification cadence is codified in the executed MSA, BAA, or DPA and takes precedence over the public defaults on /trust/incident-response. HIPAA breach notification (60 days per 45 CFR 164.404) and GDPR breach notification (72 hours per Art. 33) bind Sparcle for vendor-side scenarios (a CVE in our shipped software, a signing-key compromise, a sub-processor breach affecting our delivery chain). Customer-side incidents in the customer's own deployment fall under the customer's own BAAs and DPAs with their LLM, cloud, and IdP providers.",
+      },
+      {
+        q: "Have you experienced a security incident in the past 12 months?",
+        a: "No production incidents involving customer data have occurred. Internal-only incidents (build pipeline regressions, dev environment issues) are tracked separately and not customer-affecting.",
+      },
+    ],
+  },
+  {
+    id: "subprocessors",
+    eyebrow: "6. Sub-processors and data flow",
+    title: "Where customer data lives.",
+    items: [
+      {
+        q: "Who are your sub-processors?",
+        a: "See the Sub-Processor Disclosure on this Trust Center. Summary: in customer-hosted deployments (the only shipping topology), Sparcle is not a data processor. Customer data flows from customer-deployed bolt-api pods to customer-configured LLM providers, customer-managed databases, and customer-owned cloud infrastructure. Sparcle's own sub-processors handle Sparcle internal operations (source code on GitHub, etc.), not customer data.",
+      },
+      {
+        q: "Where is customer data stored?",
+        a: "In the customer's own infrastructure. Sparcle does not host or process customer data in any shipping topology. Verifiable by inspecting the deployed Helm chart's NetworkPolicy egress rules and by the absence of phone-home traffic.",
+      },
+      {
+        q: "Do you transfer data internationally?",
+        a: "Customer-determined. Bolt is deployed wherever the customer's Kubernetes cluster sits; LLM endpoints can be pinned to the customer's geography. Where the customer routes data to a US LLM provider from an EU jurisdiction, the customer's relationship with that LLM provider governs the Art. 44 and following transfer mechanisms (SCCs).",
+      },
+    ],
+  },
+  {
+    id: "vuln",
+    eyebrow: "7. Vulnerability management",
+    title: "Scanning, patching, and disclosure.",
+    items: [
+      {
+        q: "How do you handle vulnerabilities in dependencies?",
+        a: "CI scans on every push (cargo audit, cargo deny check). Image build pipeline gates on Trivy CRITICAL and HIGH findings with exit-code 1, failing scans block the image push. SBOM emitted per build (CycloneDX format). Customer can scan independently with their own tooling against the published SBOM.",
+      },
+      {
+        q: "Patch SLA?",
+        a: "CRITICAL: 7 days. HIGH: 30 days. MEDIUM: 90 days. LOW: next quarterly release. Patches ship as new container image tags signed with cosign.",
+      },
+      {
+        q: "Do you have a vulnerability disclosure policy?",
+        a: "Yes. See the Vulnerability Disclosure page on this Trust Center. One-business-day acknowledgement, 7-30-90 day patch SLA, 90-day coordinated disclosure, good-faith safe harbor.",
+      },
+    ],
+  },
+  {
+    id: "bcdr",
+    eyebrow: "8. Business continuity and disaster recovery",
+    title: "RTO, RPO, and failover.",
+    items: [
+      {
+        q: "RTO and RPO?",
+        a: "Customer-deployment-dependent (a single-replica customer has different recovery characteristics than a multi-region multi-replica customer). Bolt-api's backup CronJob default schedule is nightly; customers can tune. Named values for typical topologies are in the disaster-recovery documentation shared during pilot evaluation.",
+      },
+      {
+        q: "How often do you test backups?",
+        a: "Backup restore drills are part of the customer's DR procedure. The chart ships the CronJob; the restore drill is the customer's operational practice. Sparcle's CI environment runs a backup-restore test on every release.",
+      },
+      {
+        q: "Multi-region failover?",
+        a: "Customer-deployment-dependent. The chart supports multi-replica within a region via replicaCount, HPA, and pod anti-affinity; multi-region requires customer-side traffic-routing infrastructure.",
+      },
+    ],
+  },
+  {
+    id: "personnel",
+    eyebrow: "9. Personnel security",
+    title: "Background checks, training, and confidentiality.",
+    items: [
+      {
+        q: "Background checks on engineering staff?",
+        a: "Pending. Background check policy and vendor adoption are in the Q3 2026 timeline.",
+      },
+      {
+        q: "Security training?",
+        a: "Pending. Annual security awareness training is in the Q3 2026 timeline.",
+      },
+      {
+        q: "Confidentiality agreements?",
+        a: "All Sparcle personnel sign confidentiality and IP-assignment agreements as a condition of engagement. Sub-processors are bound by their own agreements and sub-processor commitments.",
+      },
+    ],
+  },
+  {
+    id: "supply",
+    eyebrow: "10. Software supply chain",
+    title: "Signing, SBOM, and SLSA.",
+    items: [
+      {
+        q: "Are images signed?",
+        a: "Yes. Every image is signed via cosign keyless (Fulcio and Rekor transparency log). Verification recipe and admission policy guidance (Sigstore Policy Controller, Kyverno) are in the deployment documentation shared during pilot evaluation.",
+      },
+      {
+        q: "Do you provide SBOMs?",
+        a: "Yes. CycloneDX JSON published per release and embedded as an attestation on every image (verifiable via cosign verify-attestation type spdx).",
+      },
+      {
+        q: "SLSA level?",
+        a: "SLSA v1.0 Build L2 today (signed provenance via GitHub-issued attestation, isolated builder via GitHub Actions hosted runner). Build L3 (hermetic builds, additional non-falsifiability) is on the roadmap once we move off shared GitHub-hosted runners.",
+      },
+    ],
+  },
+  {
+    id: "ai",
+    eyebrow: "11. AI and LLM-specific questions",
+    title: "How prompts and PII flow at the LLM boundary.",
+    items: [
+      {
+        q: "Do you send our data to OpenAI, Anthropic, or other LLM providers?",
+        a: "Only the data flowing through agents the customer configures, to the LLM provider the customer configures. Sparcle does not see this data. PII is pseudonymized at the LLM-call boundary by default (HMAC tokens replace detected PII before the prompt reaches the LLM provider; original values are restored in the response).",
+      },
+      {
+        q: "Can I use my own LLM?",
+        a: "Yes. Configure APP__LLM__BASE_URL, APP__LLM__API_KEY, and APP__LLM__MODEL to point at any OpenAI-compatible endpoint (self-hosted Ollama, vLLM, Azure OpenAI, customer's BYO LLM).",
+      },
+      {
+        q: "Is the PII detection comprehensive?",
+        a: "Regex-based detection covers 10+ PII types out of the box (email, phone, SSN, credit card, US passport, US driver license, and others). For free-text PHI (names without format anchors, clinical notes, non-US identifiers), regex coverage is incomplete; NER-based detection is on the roadmap. Customers can supply additional regex patterns per tier.",
+      },
+      {
+        q: "Is the LLM output filtered?",
+        a: "Yes. PII is pseudonymized before LLM call; on LLM response, tokens are restored to original values for display to the user (audit-logged on restoration). Output filtering against jailbreaks and prompt-injection responses runs in the security pipeline.",
+      },
+    ],
+  },
+];
+---
+<BaseLayout
+  title="Security Questionnaire: Pre-Filled Answers (CAIQ, SIG, HECVAT) | Sparcle"
+  description="Sparcle's pre-filled security questionnaire master. Encryption, access control, audit, sub-processors, incident response, vulnerability management, BCDR, personnel, supply chain, AI / LLM. Saves your procurement team a 20-hour vendor intake."
+  canonical="https://sparcle.app/trust/questionnaire"
+>
+  <main class="page-questionnaire">
+    <Hero
+      eyebrow="Security Questionnaire"
+      title="Pre-filled answers to the questions every procurement team asks."
+      lede="This page is our canonical answer source for CSA CAIQ, Shared Assessments SIG-Lite, HECVAT, and the custom RFP security sections we see most often. If a question you need is not here, email security@sparcle.app and we will answer it and add it for the next reviewer."
+    >
+      <a href="#certifications" class="btn btn-primary btn-lg">Start reading</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">Ask a new question</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="How to use this"
+      title="What you get, what you do not."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <p>
+        This document is the canonical answer source. The evidence behind each answer is cross-referenced
+        in our <a href="/trust/controls">controls evidence map</a>. Items called out as
+        <strong>Pending</strong> are tracked in our internal security roadmap and a customer-facing
+        12-month security plan; when asked about them in a prospect call we name the target close date
+        rather than claim them as in-place.
+      </p>
+      <p>
+        For a question this page does not cover, please email
+        <a href="mailto:security@sparcle.app">security@sparcle.app</a>. We answer once, publish here, and
+        the next reviewer benefits.
+      </p>
+    </PageSection>
+
+    {sections.map((s, idx) => (
+      <PageSection
+        eyebrow={s.eyebrow}
+        title={s.title}
+        stripe={idx % 2 === 0 ? "a" : "b"}
+        width="prose"
+        align="left"
+        id={s.id}
+      >
+        <div class="qa-list">
+          {s.items.map((item) => (
+            <article class="qa-item">
+              <h3 class="qa-item__q">{item.q}</h3>
+              <p class="qa-item__a">{item.a}</p>
+            </article>
+          ))}
+        </div>
+      </PageSection>
+    ))}
+
+    <CTAStrip
+      variant="band"
+      title="Question we did not answer here?"
+      lede="Version 0.2. Counsel review pending. We answer once, publish here, and the next reviewer benefits."
+    >
+      <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Email security@sparcle.app</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-questionnaire .qa-list {
+    display: grid;
+    gap: 1rem;
+  }
+  .page-questionnaire .qa-item {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.2rem;
+  }
+  .page-questionnaire .qa-item__q {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.4;
+    font-family: var(--font-display);
+  }
+  .page-questionnaire .qa-item__a {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+</style>

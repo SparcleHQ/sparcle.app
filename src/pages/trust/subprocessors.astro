@@ -1,0 +1,321 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const topologyRows = [
+  ["Trial (sidecar or desktop)", "All data stays on the end-user's machine. No network egress to Sparcle.", "Sparcle is not a data processor."],
+  ["Production (Helm in customer infra)", "All data stays inside the customer's Kubernetes cluster. The bolt-api binary runs on customer compute, reads from customer-provided Postgres and Redis, and calls customer-configured LLM endpoints.", "Sparcle is not a data processor for customer data. Sparcle is the software vendor."],
+  ["Hosted Bolt", "Not applicable. Sparcle does not offer hosted Bolt today.", "Not applicable."],
+];
+
+const customerSubprocessors = [
+  ["Large Language Model API", "Anthropic (Claude), OpenAI (GPT), Azure OpenAI, AWS Bedrock, Google Vertex, Ollama (self-hosted), vLLM (self-hosted), and others", "Generates LLM completions from masked prompts", "Customer signs DPA or BAA directly with chosen LLM provider. Anthropic, OpenAI, and the major cloud providers all offer BAAs for HIPAA."],
+  ["Identity Provider", "Google Workspace, Microsoft Entra ID, Okta, Auth0, Keycloak, AWS IAM Identity Center, custom OIDC or SAML", "Authenticates users; provides directory data via SCIM", "Customer-owned IdP relationship."],
+  ["Cloud Compute", "AWS, Azure, GCP, on-premises Kubernetes, private cloud", "Hosts the customer's bolt-api pods and managed Postgres and Redis", "Customer-owned cloud account."],
+  ["Managed Database", "RDS, Cloud SQL, Aurora, Azure Database, on-prem Postgres", "Stores audit logs, sessions, encrypted MCP tokens, encrypted PII vault", "Customer-owned, customer-encrypted at rest."],
+  ["Managed Cache", "ElastiCache, Memorystore, Azure Cache, on-prem Redis", "Session ephemera; PII tokenization map for in-flight requests", "Customer-owned."],
+  ["Object Storage (optional)", "S3, GCS, Azure Blob", "Backup target and audit-chain WORM archive", "Customer-owned, customer-encrypted."],
+  ["MCP Integrations", "Customer-chosen (Jira, Salesforce, Slack, GitHub, internal services)", "Tool execution endpoints the customer's agents call", "Customer-owned credentials; OAuth tokens stored encrypted in the customer's bolt-api Postgres."],
+  ["SIEM or Logging", "Splunk, Sentinel, Datadog, Elastic, customer-deployed forwarder", "Receives bolt-api stdout JSON for retention", "Customer-owned SIEM relationship."],
+  ["KMS", "Local file-backed (production-tested; pilots, dev, air-gap). AWS KMS and HashiCorp Vault Transit reference implementations in the aeira-rs trait library; cloud-service integration testing in flight. PKCS#11 HSM, Azure Key Vault, and GCP KMS reference implementations on the roadmap.", "Wraps per-tenant Customer Master Keys", "Customer-owned; Sparcle has no access."],
+];
+
+const sparcleSubprocessors = [
+  ["GitHub, Inc. (Microsoft)", "Source code hosting, container registry (GHCR), CI / CD", "Sparcle source code; published container images; build telemetry", "United States (with global edge)"],
+  ["Anthropic, PBC", "LLM API used internally by Sparcle engineers to author and review code (NOT in customer data path)", "Sparcle's own development queries; never customer data", "United States"],
+  ["Cloudflare, Inc.", "DNS, domain registration, marketing-site hosting (Cloudflare Pages), DDoS and bot protection, edge functions for the contact form", "DNS records, marketing-site requests, contact-form submissions", "United States (with global edge)"],
+  ["Google Workspace", "Sparcle internal email and document collaboration", "Sparcle internal correspondence; never customer data", "United States"],
+  ["Accounting, payroll, business operations", "To be disclosed on first contract requiring it. Anticipated providers include Mercury, Gusto, and Stripe.", "Sparcle's own financial and employment records", "United States"],
+];
+
+const transferMechanisms = [
+  ["EU and UK", "EU Standard Contractual Clauses (2021/914) plus UK IDTA addendum where applicable."],
+  ["Switzerland", "Swiss-FADP-equivalent SCCs."],
+  ["United States (HIPAA)", "BAA where applicable; SOC 2 Type II report (in progress; see Trust Center)."],
+  ["Canada", "PIPEDA-compliant data-handling commitments."],
+  ["Other jurisdictions", "Case-by-case. Contact legal@sparcle.app."],
+];
+
+const notDoes = [
+  "Operate a multi-tenant hosted version of Bolt for production customers.",
+  "Hold customer encryption keys, KMS material, or PII master values.",
+  "Process customer audit logs on Sparcle-controlled infrastructure.",
+  "Access customer Postgres, Redis, or LLM-provider API keys.",
+  "Receive telemetry, analytics, or usage data from production customer installations (no phone-home; verifiable via NetworkPolicy egress deny).",
+  "Sub-process any customer data via affiliates, contractors, or acquirers without prior notice and the customer's right-to-object.",
+];
+---
+<BaseLayout
+  title="Sub-Processor Disclosure | Sparcle"
+  description="GDPR Art. 28 / CCPA / PIPEDA aligned sub-processor disclosure for Bolt and Aeira. Distinguishes sub-processors of the customer (LLM provider, IdP, cloud) from sub-processors of Sparcle (GitHub, Cloudflare). 30-day change notification."
+  canonical="https://sparcle.app/trust/subprocessors"
+>
+  <main class="page-subprocessors">
+    <Hero
+      eyebrow="Sub-Processor Disclosure"
+      title="Customer data does not reach Sparcle infrastructure."
+      lede="This disclosure satisfies the sub-processor transparency requirements in GDPR Art. 28, CCPA / CPRA, Quebec Law 25, PIPEDA, Singapore PDPA, UAE Federal Decree-Law No. 45 of 2021, and equivalent regimes. The asymmetric structure below reflects the operative reality: in every shipping topology, customer data is processed in the customer's own infrastructure by services the customer has selected."
+    >
+      <a href="mailto:bolt@sparcle.app" class="btn btn-primary btn-lg">Sub-processor questions</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Scope"
+      title="Who this disclosure is for."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <p>
+        This disclosure covers data-processing roles in Sparcle's standard deployment topologies.
+        It is required reading for any customer subject to GDPR Art. 28, CCPA or CPRA, Quebec Law 25,
+        PIPEDA, Singapore PDPA, UAE Federal Decree-Law No. 45 of 2021, or equivalent personal-data
+        legislation.
+      </p>
+      <p>
+        If your contract requires Sparcle to use only sub-processors that you have approved in writing,
+        this list is the starting point for that approval process.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Deployment topology"
+      title="Topology determines who processes what."
+      lede="Sparcle's role under data-protection law depends on which deployment topology you operate. In every shipping topology, customer data does not reach Sparcle-controlled infrastructure."
+      stripe="a"
+    >
+      <div class="data-table data-table--cols3">
+        <div class="data-table__row data-table__row--head">
+          <div>Topology</div>
+          <div>Customer data path</div>
+          <div>Sparcle's role</div>
+        </div>
+        {topologyRows.map((row) => (
+          <div class="data-table__row">
+            <div class="data-table__label">{row[0]}</div>
+            <div>{row[1]}</div>
+            <div>{row[2]}</div>
+          </div>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Sub-processors of the customer"
+      title="Configured by you, inside your environment."
+      lede="These are services the customer configures inside their Bolt deployment. They process customer data only because the customer points Bolt at them. Sparcle does not select them, hold credentials for them, or have access to them."
+      stripe="b"
+    >
+      <div class="subprocessor-list">
+        {customerSubprocessors.map((row) => (
+          <article class="subprocessor-card">
+            <header class="subprocessor-card__header">
+              <h3 class="subprocessor-card__title">{row[0]}</h3>
+            </header>
+            <dl class="subprocessor-card__grid">
+              <div>
+                <dt>Typical providers</dt>
+                <dd>{row[1]}</dd>
+              </div>
+              <div>
+                <dt>Purpose</dt>
+                <dd>{row[2]}</dd>
+              </div>
+              <div>
+                <dt>Customer action</dt>
+                <dd>{row[3]}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Sub-processors of Sparcle"
+      title="For software delivery only."
+      lede="These are Sparcle's own sub-processors. They handle Sparcle's software-delivery operations, not customer data."
+      stripe="a"
+    >
+      <div class="subprocessor-list">
+        {sparcleSubprocessors.map((row) => (
+          <article class="subprocessor-card">
+            <header class="subprocessor-card__header">
+              <h3 class="subprocessor-card__title">{row[0]}</h3>
+              <span class="subprocessor-card__location">{row[3]}</span>
+            </header>
+            <dl class="subprocessor-card__grid">
+              <div>
+                <dt>Purpose</dt>
+                <dd>{row[1]}</dd>
+              </div>
+              <div>
+                <dt>Data processed</dt>
+                <dd>{row[2]}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="What Sparcle does not do"
+      title="The boundary, stated plainly."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="not-list">
+        {notDoes.map((line) => <li>{line}</li>)}
+      </ul>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Notice of changes"
+      title="30-day advance notice for sub-processor changes."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <p>
+        Sparcle will notify the customer (via the email on file with the account) at least 30 calendar
+        days before adding or replacing a sub-processor that handles customer data. The customer has
+        the right to object in writing within that window; if Sparcle cannot reasonably accommodate the
+        objection, the customer may terminate the affected service for cause.
+      </p>
+      <p>
+        For sub-processors that handle only Sparcle's own internal data (the Sub-processors of Sparcle
+        table above), no advance notice is required. That table is refreshed when changes are made.
+      </p>
+      <p>
+        Customers who want active notification can subscribe by emailing
+        <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a> with the subject line "subprocessor notifications".
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Cross-border transfers"
+      title="Mechanisms we rely on."
+      lede="When sub-processors operate outside the customer's data-residency jurisdiction, Sparcle relies on the following transfer mechanisms."
+      stripe="b"
+    >
+      <div class="data-table data-table--cols2">
+        <div class="data-table__row data-table__row--head">
+          <div>Jurisdiction</div>
+          <div>Mechanism</div>
+        </div>
+        {transferMechanisms.map((row) => (
+          <div class="data-table__row">
+            <div class="data-table__label">{row[0]}</div>
+            <div>{row[1]}</div>
+          </div>
+        ))}
+      </div>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Questions about a specific sub-processor or transfer mechanism?"
+      lede="Version 0.2. Counsel review pending; this page is updated on any material change."
+    >
+      <a href="mailto:bolt@sparcle.app" class="btn btn-primary btn-lg">bolt@sparcle.app</a>
+      <a href="mailto:legal@sparcle.app" class="btn btn-secondary btn-lg">legal@sparcle.app (contract)</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-subprocessors .subprocessor-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+  .page-subprocessors .subprocessor-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.25rem;
+  }
+  .page-subprocessors .subprocessor-card__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .page-subprocessors .subprocessor-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+  }
+  .page-subprocessors .subprocessor-card__location {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .page-subprocessors .subprocessor-card__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin: 0;
+  }
+  .page-subprocessors .subprocessor-card__grid > div {
+    min-width: 0;
+  }
+  .page-subprocessors .subprocessor-card__grid dt {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .page-subprocessors .subprocessor-card__grid dd {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+  @media (max-width: 760px) {
+    .page-subprocessors .subprocessor-card__grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+  }
+  .page-subprocessors .not-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .page-subprocessors .not-list li {
+    padding: 0.7rem 0.9rem 0.7rem 2.2rem;
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--text-body);
+    position: relative;
+  }
+  .page-subprocessors .not-list li::before {
+    content: "✕";
+    position: absolute;
+    left: 0.85rem;
+    top: 0.65rem;
+    color: var(--color-danger-strong, var(--brand-primary));
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+</style>

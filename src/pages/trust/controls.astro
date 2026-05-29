@@ -1,0 +1,329 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+import Pill from "../../components/ui/Pill.astro";
+
+type PillVariant = "success" | "warning" | "neutral" | "brand" | "danger";
+const statusPill = (s: string): { variant: PillVariant; label: string } => {
+  if (s === "Operating") return { variant: "success", label: "Operating" };
+  if (s === "Partial") return { variant: "warning", label: "Partial" };
+  return { variant: "neutral", label: "Pending" };
+};
+
+const soc2 = [
+  {
+    family: "CC1. Control environment",
+    rows: [
+      ["CC1.1 Demonstrates commitment to integrity and ethical values", "Sparcle Proprietary License; founder code-of-conduct (internal)", "Operating"],
+      ["CC1.2 Board oversight", "C-corp formation in progress", "Pending"],
+      ["CC1.3 Organizational structure", "Same as CC1.2", "Pending"],
+      ["CC1.4 Personnel competence", "Background-check policy on the internal security roadmap", "Pending"],
+      ["CC1.5 Accountability for internal controls", "Policy pack rollout on the internal security roadmap", "Pending"],
+    ],
+  },
+  {
+    family: "CC2. Communication and information",
+    rows: [
+      ["CC2.1 Quality information for internal control", "Operations runbook, PII architecture doc, disaster-recovery doc, SIEM export guide (shared under NDA)", "Operating"],
+      ["CC2.2 Internal communication of objectives and responsibilities", "Annual security awareness training on the internal security roadmap", "Pending"],
+      ["CC2.3 External communication", "This evidence map; Sub-Processor Disclosure; published compliance README", "Operating"],
+    ],
+  },
+  {
+    family: "CC3. Risk assessment",
+    rows: [
+      ["CC3.1 Specifies suitable objectives", "Internal production-readiness audit (available under NDA)", "Operating"],
+      ["CC3.2 Identifies and analyzes risk", "Internal risk register (available under NDA); 30+ classified S1-S4 risks", "Operating"],
+      ["CC3.3 Considers potential for fraud", "Policy pack on the internal security roadmap", "Pending"],
+      ["CC3.4 Identifies and assesses changes", "Change-management policy on the internal security roadmap", "Pending"],
+    ],
+  },
+  {
+    family: "CC4. Monitoring activities",
+    rows: [
+      ["CC4.1 Ongoing and separate evaluations", "Prometheus and curated alerts in the Helm chart; planned annual penetration test on the internal security roadmap", "Partial"],
+      ["CC4.2 Internal communication of deficiencies", "Incident-response policy on the internal security roadmap", "Pending"],
+    ],
+  },
+  {
+    family: "CC5. Control activities",
+    rows: [
+      ["CC5.1 Selects and develops control activities", "Helm chart with hardened defaults", "Operating"],
+      ["CC5.2 Selects and develops technology controls", "Operations runbook, Production Hardening Checklist (shared under NDA)", "Operating"],
+      ["CC5.3 Deploys through policies and procedures", "Policy pack rollout on the internal security roadmap", "Pending"],
+    ],
+  },
+  {
+    family: "CC6. Logical and physical access",
+    rows: [
+      ["CC6.1 Logical access security", "Admin-only middleware, OAuth bearer middleware, identity module, authorization module; ingress source-IP allow-list and mTLS", "Operating"],
+      ["CC6.2 Authorization and authentication of users", "Authorization enforcement module, CSRF middleware, SCIM 2.0 server at the standard /scim/v2/* mount point (Users + Groups CRUD)", "Operating"],
+      ["CC6.3 Modification or removal of access", "SCIM token issue / list / revoke via an authenticated admin endpoint", "Operating"],
+      ["CC6.4 Restricts physical access", "Not applicable. Sparcle does not operate physical infrastructure; customer-owned cloud.", "Operating"],
+      ["CC6.5 Discontinues access", "GDPR right-to-erasure module; per-org KMS crypto-shred via an authenticated admin endpoint", "Operating"],
+      ["CC6.6 Restricts external access", "Helm chart NetworkPolicy template; ingress source-IP allow-list; mTLS", "Operating"],
+      ["CC6.7 Transmission of data", "TLS at ingress (cert-manager); HSTS and security headers; session cookies Secure and SameSite", "Operating"],
+      ["CC6.8 Prevention and detection of unauthorized software", "Cosign keyless signing and admission policies (Sigstore Policy Controller, Kyverno examples)", "Operating"],
+    ],
+  },
+  {
+    family: "CC7. System operations",
+    rows: [
+      ["CC7.1 Detection of vulnerabilities", "Trivy gate in deploy pipeline; SBOM emitted per build (CycloneDX)", "Operating"],
+      ["CC7.2 Monitoring of system performance", "Prometheus metrics; 8 alert groups plus audit hardening alerts in the chart", "Operating"],
+      ["CC7.3 Evaluation of security events", "Merkle-sealed audit chain; SIEM forwarder samples shipped with the chart", "Operating"],
+      ["CC7.4 Incident response", "Operations runbook, Incident Workflow (shared under NDA; summarized publicly on /trust/incident-response)", "Operating"],
+      ["CC7.5 Recovery from incidents", "Disaster-recovery documentation (shared under NDA)", "Operating"],
+    ],
+  },
+  {
+    family: "CC8. Change management",
+    rows: [
+      ["CC8.1 Authorizes, designs, develops, configures changes", "CI workflow (push and PR triggers); deploy workflow with Trivy gate", "Operating"],
+    ],
+  },
+  {
+    family: "CC9. Risk mitigation",
+    rows: [
+      ["CC9.1 Identifies, selects, develops risk mitigation", "Backup CronJob in chart with fail-closed S3 destination guard", "Operating"],
+      ["CC9.2 Assesses and manages risks of business partners", "Sub-Processor Disclosure", "Operating"],
+    ],
+  },
+];
+
+const hipaa = [
+  ["164.308(a)(1)(i) Security Management Process", "Required risk analysis", "Internal risk register", "Operating"],
+  ["164.308(a)(3) Workforce Security", "Authorization / supervision / termination", "Pending on the internal security roadmap", "Pending"],
+  ["164.308(a)(5) Security Awareness and Training", "Required", "Pending on the internal security roadmap", "Pending"],
+  ["164.308(a)(6) Security Incident Procedures", "Required response", "Operations runbook, Incident Workflow", "Operating"],
+  ["164.308(a)(7) Contingency Plan", "Required backup and DR", "Disaster-recovery documentation; backup CronJob", "Operating"],
+  ["164.312(a)(1) Access Control", "Unique user id, automatic logoff, encryption", "Session middleware; CMK envelope encryption", "Operating"],
+  ["164.312(b) Audit Controls", "Required", "Merkle-sealed audit chain", "Operating"],
+  ["164.312(c) Integrity", "Required", "Audit-chain Merkle root and Ed25519 signing", "Operating"],
+  ["164.312(d) Person or Entity Authentication", "Required", "OIDC, SAML, SCIM via identity module", "Operating"],
+  ["164.312(e) Transmission Security", "Required encryption", "TLS ingress and DB TLS (SSL_MODE=require)", "Operating"],
+  ["164.314(a) Business Associate Contracts", "Required", "Customer BAA template; Anthropic BAA in progress", "Pending"],
+];
+
+const gdpr = [
+  ["Art. 5(1)(f) Integrity and confidentiality", "Appropriate security", "Aggregate of CC6 and CC7 above", "Operating"],
+  ["Art. 17 Right to erasure", "Erasure on request", "Per-org crypto-shred via an authenticated admin endpoint; tenant-scoped KMS shred at the trait layer (LocalKms production-tested; AwsKms, VaultKms reference impls in integration testing)", "Operating"],
+  ["Art. 25 Data protection by design", "Pseudonymization and encryption by default", "PII pseudonymization at LLM boundary and at tool-result to history boundary; CMK envelope encryption", "Operating"],
+  ["Art. 28 Processor obligations", "Sub-processor disclosure and DPA", "Sub-Processor Disclosure", "Operating"],
+  ["Art. 30 Records of processing activities", "Required logging", "Audit chain and customer-side SIEM forwarder", "Operating"],
+  ["Art. 32 Security of processing", "Pseudonymization, encryption, resilience, testing", "Aggregate of above", "Operating"],
+  ["Art. 33 Notification of personal-data breach", "72-hour notification", "Incident-response policy pending on the internal security roadmap; contractual notification in executed DPA", "Pending"],
+  ["Art. 35 DPIA", "Required for high-risk processing", "Customer-driven (Sparcle is the processor; controller does the DPIA)", "Pending"],
+];
+
+const iso = [
+  ["A.5 Information security policies", "Policies in place", "Pending on the internal security roadmap", "Pending"],
+  ["A.8 Asset management", "Asset register", "Internal asset register", "Pending"],
+  ["A.9 Access control", "Authorisation, removal", "Same as CC6", "Operating"],
+  ["A.10 Cryptography", "Key management", "Pluggable KMS via aeira-traits Kms trait (Local production-tested; AWS, Vault reference impls in integration testing); cosign signing for releases", "Operating"],
+  ["A.12 Operations security", "Logging, monitoring, vulnerability management", "Same as CC7", "Operating"],
+  ["A.13 Communications security", "Network security", "Helm NetworkPolicy; TLS", "Operating"],
+  ["A.14 System acquisition, development, maintenance", "Secure development", "Secure SDLC policy pending on the internal security roadmap", "Pending"],
+  ["A.16 Information security incident management", "Incident response", "Operations runbook, Incident Workflow", "Operating"],
+  ["A.17 Business continuity", "Plan and tests", "Disaster-recovery documentation", "Operating"],
+  ["A.18 Compliance", "Regulatory compliance", "This map", "Operating"],
+];
+---
+<BaseLayout
+  title="Controls Evidence Map: SOC 2, HIPAA, GDPR, ISO 27001 | Sparcle"
+  description="How Sparcle's controls map to SOC 2 Trust Services Criteria, HIPAA Security Rule, GDPR articles, and ISO 27001 Annex A. Status per control: Operating, Partial, or Pending."
+  canonical="https://sparcle.app/trust/controls"
+>
+  <main class="page-controls">
+    <Hero
+      eyebrow="Controls Evidence Map"
+      title="How our controls map to the frameworks your auditor uses."
+      lede="A SOC 2 auditor or internal compliance reviewer starts here. Each row names a control, what evidence backs it, and its current status: Operating, Partial, or Pending. Items marked Operating have evidence in our codebase, runbook, or shipped artifacts; items marked Pending are tracked on our internal security roadmap with target close dates shared under NDA."
+    >
+      <a href="#soc2" class="btn btn-primary btn-lg">Start reading</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="How this map is maintained"
+      title="Discipline behind the table."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <ul class="map-list">
+        <li>Evidence pointers are file paths (commit-pinned) or runbook section references, both versionable.</li>
+        <li>When an evidence-bearing file changes, this map is refreshed in the same commit (CI check enforces this on the file paths listed below).</li>
+        <li>Cross-reference depth: this map points to the artifact; the artifact points to the test, metric, or runbook that proves it.</li>
+        <li>Status moves from Pending to Operating when the corresponding work on the internal security roadmap closes.</li>
+        <li>For an external auditor walk, every Operating row should map to a test that exercises the control plus a runbook entry that describes how to handle failures.</li>
+      </ul>
+    </PageSection>
+
+    <PageSection
+      eyebrow="SOC 2 Trust Services Criteria"
+      title="Current control posture against SOC 2."
+      lede="SOC 2 Type I is targeted for issuance in Q4 2026; Type II report (with required observation period) targets Q2 2027. The rows below are our current self-assessment, not the auditor's attestation."
+      stripe="a"
+      id="soc2"
+    >
+      {soc2.map((g) => (
+        <div class="control-family">
+          <h3 class="control-family__title">{g.family}</h3>
+          <div class="data-table data-table--cols3">
+            <div class="data-table__row data-table__row--head">
+              <div>Control</div>
+              <div>Evidence</div>
+              <div>Status</div>
+            </div>
+            {g.rows.map((r) => {
+              const p = statusPill(r[2]);
+              return (
+                <div class="data-table__row">
+                  <div class="data-table__label">{r[0]}</div>
+                  <div>{r[1]}</div>
+                  <div><Pill variant={p.variant} size="sm">{p.label}</Pill></div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </PageSection>
+
+    <PageSection
+      eyebrow="HIPAA Security Rule"
+      title="Per-standard implementation map."
+      lede="Sparcle ships HIPAA-deployable software that customers run in their own infrastructure. The rows below map Sparcle's software-vendor-side controls and BAA-able support to the HIPAA Security Rule; a Business Associate Agreement is executable per customer. Customer-side controls (PHI handling in the customer's environment, breach reporting under their BAAs with their LLM and cloud providers) remain with the customer per the deployment topology."
+      stripe="b"
+      id="hipaa"
+    >
+      <div class="data-table data-table--cols4">
+        <div class="data-table__row data-table__row--head">
+          <div>Standard</div>
+          <div>Implementation specification</div>
+          <div>Evidence</div>
+          <div>Status</div>
+        </div>
+        {hipaa.map((r) => {
+          const p = statusPill(r[3]);
+          return (
+            <div class="data-table__row">
+              <div class="data-table__label">{r[0]}</div>
+              <div>{r[1]}</div>
+              <div>{r[2]}</div>
+              <div><Pill variant={p.variant} size="sm">{p.label}</Pill></div>
+            </div>
+          );
+        })}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="GDPR"
+      title="Article-by-article map."
+      stripe="a"
+      id="gdpr"
+    >
+      <div class="data-table data-table--cols4">
+        <div class="data-table__row data-table__row--head">
+          <div>Article</div>
+          <div>Requirement</div>
+          <div>Evidence</div>
+          <div>Status</div>
+        </div>
+        {gdpr.map((r) => {
+          const p = statusPill(r[3]);
+          return (
+            <div class="data-table__row">
+              <div class="data-table__label">{r[0]}</div>
+              <div>{r[1]}</div>
+              <div>{r[2]}</div>
+              <div><Pill variant={p.variant} size="sm">{p.label}</Pill></div>
+            </div>
+          );
+        })}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="ISO 27001"
+      title="Selected Annex A controls."
+      lede="ISO 27001 is not in flight for Year 1. The rows below are alignment evidence; formal certification is a separate engagement."
+      stripe="b"
+      id="iso"
+    >
+      <div class="data-table data-table--cols4">
+        <div class="data-table__row data-table__row--head">
+          <div>Annex A</div>
+          <div>Control</div>
+          <div>Evidence</div>
+          <div>Status</div>
+        </div>
+        {iso.map((r) => {
+          const p = statusPill(r[3]);
+          return (
+            <div class="data-table__row">
+              <div class="data-table__label">{r[0]}</div>
+              <div>{r[1]}</div>
+              <div>{r[2]}</div>
+              <div><Pill variant={p.variant} size="sm">{p.label}</Pill></div>
+            </div>
+          );
+        })}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Status key"
+      title="What the labels mean."
+      stripe="a"
+      width="prose"
+      align="left"
+    >
+      <ul class="map-list">
+        <li><strong>Operating</strong>. Control is implemented and evidence exists in the codebase, runbook, or shipped artifacts.</li>
+        <li><strong>Partial</strong>. Control is partially implemented; the gap is named in the Evidence column.</li>
+        <li><strong>Pending</strong>. Control is not yet implemented; closure is tracked on the internal security roadmap.</li>
+      </ul>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Need to map a control we have not listed?"
+      lede="Version 0.2. Counsel and SOC 2 auditor review pending."
+    >
+      <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Email security@sparcle.app</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-controls .control-family {
+    margin-bottom: 2rem;
+  }
+  .page-controls .control-family:last-child {
+    margin-bottom: 0;
+  }
+  .page-controls .control-family__title {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+    text-align: left;
+  }
+  .page-controls .map-list {
+    list-style: disc;
+    padding-left: 1.4rem;
+    margin: 0;
+  }
+  .page-controls .map-list li {
+    margin: 0.4rem 0;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+</style>

@@ -1,0 +1,160 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+const publicArtifacts = [
+  {
+    title: "Security and compliance posture",
+    body: "What is architecturally deployable today (HIPAA, SOX, ITAR, GDPR, FCA, DORA) and what is on the roadmap (SOC 2 Type II, FedRAMP Moderate, ISO 27001). Honest framing throughout.",
+    href: "/security",
+  },
+  {
+    title: "Architecture",
+    body: "How Bolt's agent runtime and Aeira's data plane fit together. Identity-bound retrieval, multi-layer security pipeline, customer-extensible Authority Policy SDK.",
+    href: "/architecture",
+  },
+  {
+    title: "Security questionnaire (CAIQ, SIG, HECVAT)",
+    body: "Pre-filled answers to the security questions every procurement team asks. Encryption, access control, audit, sub-processors, incident response, supply chain. Saves your team a 20-hour vendor intake.",
+    href: "/trust/questionnaire",
+  },
+  {
+    title: "Sub-processor disclosure",
+    body: "GDPR Art. 28, CCPA, PIPEDA aligned. Distinguishes sub-processors of the customer (LLM provider, IdP, cloud) from sub-processors of Sparcle (GitHub, Cloudflare). 30-day change notification.",
+    href: "/trust/subprocessors",
+  },
+  {
+    title: "Controls evidence map",
+    body: "Maps SOC 2 Trust Services Criteria, HIPAA Security Rule, GDPR articles, and ISO 27001 Annex A controls to concrete evidence in our codebase and runbook.",
+    href: "/trust/controls",
+  },
+  {
+    title: "Vulnerability disclosure",
+    body: "How to report a security issue, our 1-business-day acknowledgement target, 90-day coordinated disclosure window, and good-faith safe harbor.",
+    href: "/trust/vulnerability-disclosure",
+  },
+  {
+    title: "Incident response",
+    body: "Our five-phase response framework, severity classification, customer notification SLAs (HIPAA 60-day, GDPR 72-hour), and contractual escalation paths.",
+    href: "/trust/incident-response",
+  },
+];
+
+const ndaArtifacts = [
+  ["Architecture brief", "component diagrams, runtime topology, pipeline layer detail"],
+  ["Threat model", "STRIDE-by-component, mitigations mapped to controls"],
+  ["Penetration test summary", "latest external assessment findings and remediation status"],
+  ["DPA, MSA, BAA, SLA templates", "customer-counsel-ready starting points, v0.2 pending counsel review"],
+  ["SOC 2 readiness package", "current control posture and gap analysis ahead of formal audit"],
+  ["Patent claim summaries", "what the USPTO filings cover and how they map to the runtime"],
+  ["Reference customer conversations", "design partners willing to take a call"],
+];
+
+const why = [
+  ["Procurement-ready by default", "Your security, legal, and TPRM teams should find the answers they need before scheduling a call. Most of what we publish here used to require an NDA loop and a 5-day reply window."],
+  ["Honest about shipped vs. roadmap", "We use precise language. \"Architecturally deployable\" is not \"certified.\" Roadmap items name target close dates, not aspirations. SOC 2 Type II is in flight, not implied."],
+  ["Sparcle does not host your data", "Bolt and Aeira run inside your perimeter. In every shipping topology, customer data does not reach Sparcle infrastructure. The sub-processor list reflects that distinction."],
+];
+
+const contracts = [
+  ["DPA", "Data Processing Addendum. GDPR Art. 28 aligned. SCCs and UK IDTA addendum included."],
+  ["MSA", "Master Services Agreement. Software license, support, IP, warranty, liability, term."],
+  ["BAA", "Business Associate Agreement. HIPAA-aligned for customers handling PHI."],
+  ["SLA and Support", "Uptime and response targets that match the deployment topology you operate."],
+];
+---
+<BaseLayout
+  title="Trust Center: Procurement, Security, and Compliance Artifacts | Sparcle"
+  description="Sparcle's trust center: pre-filled security questionnaire, sub-processor disclosure, controls evidence map, vulnerability disclosure, incident response, DPA / BAA / MSA / SLA templates. Built so your CISO, legal, and procurement teams find the answers before they have to ask."
+  canonical="https://sparcle.app/trust"
+>
+  <main class="page-trust">
+    <Hero
+      eyebrow="Trust Center"
+      title="Everything procurement asks for, before they have to ask."
+      lede="Most enterprise software vendors make their buyers do the work: wait for a security questionnaire, a sub-processor request, a contract template ask, and a CISO architecture review, and reply slowly to each. We publish the answers up front. Your security, legal, and TPRM teams can read what they need today, on their schedule, without an NDA loop."
+    >
+      <a href="#artifacts" class="btn btn-primary btn-lg">Browse artifacts</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">Contact security</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="Why this exists"
+      title="Buyers should not have to wait on us."
+      stripe="b"
+    >
+      <CardGrid cols={3}>
+        {why.map(([t, body]) => (
+          <Card title={t}>{body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Public artifacts"
+      title="What you can read today."
+      lede="No NDA, no form, no waiting."
+      stripe="a"
+      id="artifacts"
+    >
+      <CardGrid cols={2}>
+        {publicArtifacts.map((a) => (
+          <Card title={a.title} href={a.href}>{a.body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Available under NDA"
+      title="Where the deeper material lives."
+      lede="A short list of artifacts we share during pilot evaluation under a mutual NDA. The public artifacts above are designed to answer almost every procurement question without these; the NDA materials are for the security and legal teams that want to go a layer deeper."
+      stripe="b"
+      width="prose"
+    >
+      <ul class="nda-list">
+        {ndaArtifacts.map(([t, body]) => (
+          <li><strong>{t}</strong>. {body}</li>
+        ))}
+      </ul>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Contracts"
+      title="Customer counsel can read our templates before we talk."
+      lede="DPA, MSA, BAA, and SLA templates are available under NDA during pilot evaluation, and will be moved to this page after counsel review. They are starting points designed to be negotiated, not take-it-or-leave-it riders."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        {contracts.map(([t, body]) => (
+          <Card title={t}>
+            <p>{body}</p>
+            <p class="contract-status">Under NDA today. Public v0.2 pending counsel review.</p>
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Talk to us."
+      lede="If your team has read what's here and wants to go further, schedule a security or architecture review. Most pilots start with a 30-minute call and a mutual NDA."
+    >
+      <a href="#" onclick="openContactModal('Security Review Request'); return false;" class="btn btn-primary btn-lg">Schedule security review</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">security@sparcle.app</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-trust .contract-status {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+</style>

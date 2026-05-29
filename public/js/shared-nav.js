@@ -41,6 +41,7 @@
         if (page === 'crisis' && path.indexOf('/crisis') !== -1) return ' nav-active';
         if (page === 'solution' && path.indexOf('/solution') !== -1) return ' nav-active';
         if (page === 'why-sparcle' && path.indexOf('/why-sparcle') !== -1) return ' nav-active';
+        if (page === 'trust' && path.indexOf('/trust') !== -1) return ' nav-active';
         // Bolt: /products.html or any /products subpath WITHOUT /aeira (so the
         // dual-product page lights up the Bolt tab unless the URL is the
         // Aeira variant).
@@ -70,6 +71,7 @@
         '    <li><a href="/products.html" class="nav-link' + activeClass('bolt') + '">Bolt</a></li>',
         '    <li><a href="/products/aeira.html" class="nav-link' + activeClass('aeira') + '">Aeira</a></li>',
         '    <li><a href="/solution" class="nav-link' + activeClass('solution') + '">Solutions</a></li>',
+        '    <li><a href="/trust" class="nav-link' + activeClass('trust') + '">Trust</a></li>',
         '    <li><a href="/pricing#bolt" class="nav-link' + activeClass('pricing') + '">Pricing</a></li>',
         '    <li class="nav-item-has-submenu">',
         '      <button type="button" class="nav-link submenu-toggle-btn' + activeClass('resources') + '" aria-expanded="false" aria-haspopup="true">',
@@ -163,6 +165,7 @@
         '          <li><a href="/docs/integrate">Bring your stack</a></li>',
         '          <li><a href="/architecture">Architecture</a></li>',
         '          <li><a href="/security">Security &amp; Compliance</a></li>',
+        '          <li><a href="/trust">Trust Center</a></li>',
         '          <li><a href="/integrations">Integrations</a></li>',
         '          <li><a href="/research.html">Research &amp; Whitepaper</a></li>',
         '          <li><a href="/media/Bolt_Strategic_Vision.pdf" target="_blank">Strategic Vision</a></li>',

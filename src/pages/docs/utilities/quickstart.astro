@@ -1,4 +1,5 @@
 ---
+import { Code } from "astro:components";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 
 // Utility manifest quickstart — hand-authored walkthrough.
@@ -7,6 +8,35 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 //
 // Voice: short, plain punctuation, no em-dashes, no section symbol.
 // Examples use generic placeholder names (Acme) so this is safe to publish.
+
+const worldClockYaml = `schema_version: 1
+id: worldclock
+chip: =worldclock
+title: World Clock
+description: Current time for a given timezone.
+emits: Event
+
+scopes:
+  - id: lookup
+    match: "{zone:string}"
+    flow:
+      - call:
+          id: fetch_time
+          kind: http
+          public: true
+          method: GET
+          url: "https://worldtimeapi.org/api/timezone/\${zone}"
+      - emit:
+          from: fetch_time
+          fields:
+            title: "Current time in \${zone}"
+            subtitle: "\${.datetime}"
+            timezone: "\${.timezone}"
+            utc_offset: "\${.utc_offset}"
+
+presentation:
+  empty_state: "Try =worldclock America/New_York"
+`;
 ---
 <BaseLayout
   title="Quickstart: write your first Bolt App | Sparcle"
@@ -61,34 +91,9 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
           directory (or paste it into the YAML side panel in the admin UI). The
           full reference for every field is in the <a href="/docs/utilities/spec">manifest spec</a>.
         </p>
-        <pre class="qs-block"><code>{`schema_version: 1
-id: worldclock
-chip: =worldclock
-title: World Clock
-description: Current time for a given timezone.
-emits: Event
-
-scopes:
-  - id: lookup
-    match: "{zone:string}"
-    flow:
-      - call:
-          id: fetch_time
-          kind: http
-          public: true
-          method: GET
-          url: "https://worldtimeapi.org/api/timezone/\${zone}"
-      - emit:
-          from: fetch_time
-          fields:
-            title: "Current time in \${zone}"
-            subtitle: "\${.datetime}"
-            timezone: "\${.timezone}"
-            utc_offset: "\${.utc_offset}"
-
-presentation:
-  empty_state: "Try =worldclock America/New_York"
-`}</code></pre>
+        <div class="qs-block">
+          <Code code={worldClockYaml} lang="yaml" theme="github-dark" />
+        </div>
       </div>
     </section>
 

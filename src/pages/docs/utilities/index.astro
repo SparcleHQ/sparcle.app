@@ -1,107 +1,315 @@
 ---
+import { Code } from "astro:components";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import Hero from "../../../components/ui/Hero.astro";
 import PageSection from "../../../components/ui/PageSection.astro";
 import CardGrid from "../../../components/ui/CardGrid.astro";
 import Card from "../../../components/ui/Card.astro";
-import Pill from "../../../components/ui/Pill.astro";
+import CTAStrip from "../../../components/ui/CTAStrip.astro";
 import samples from "../../../data/utility-samples.json";
 
-// Utilities docs landing — a router page.
-// Two tracks: no-code (Use a sample) vs engineer (Author your own).
-// Keep it terse. Real content lives one click away.
-
 const sampleCount = samples.length;
+
+// Symmetric template for the two tiers. Same dimensions, different
+// values. Renders side by side so a reader can compare without
+// flipping tabs. The dimensions ARE the trust contract; every cell
+// maps to runtime behavior the platform enforces.
+const tiers = [
+  {
+    badge: "Admin Apps",
+    title: "Bring your stack",
+    intro: "Org admin enables centrally. The whole company gets the chip in one move. Routes through the customer's Bolt service against the systems the org has connected.",
+    rows: [
+      ["Who authors", "The customer's admin (or Sparcle, for bundled integrations)"],
+      ["Who installs", "Org admin enables in Settings; per-user OAuth on first use"],
+      ["Where it runs", "Inside the customer perimeter, via the customer's Bolt service"],
+      ["What hits the network", "Org-connected systems (Jira, Stripe, Confluence, internal APIs, ...)"],
+      ["Whose identity it runs as", "Per-user OAuth, scoped to the calling user"],
+      ["What Sparcle servers see", "Nothing about the request body. Audit-chain hashes only."],
+      ["Audit", "Full call, emit, action chain. Same chain as the rest of Bolt and Aeira."],
+      ["Removable", "Admin disables in Settings; per-org policy"],
+    ],
+    primaryCta: { href: "/docs/utilities/gallery", label: "Browse bundled integrations" },
+    secondaryCta: { href: "/docs/utilities/spec", label: "Author a custom Admin App" },
+  },
+  {
+    badge: "User Apps",
+    title: "Bring your shell. Bring your script. Bring your tools.",
+    intro: "An individual drops a .yaml in a local folder. The chip is just for them. Runs as their OS identity on their own machine. Sparcle servers are not in the request path. Admins can disable the entire tier on managed devices.",
+    rows: [
+      ["Who authors", "The individual user (or a teammate whose YAML they trust)"],
+      ["Who installs", "User drops .yaml in a local folder, clicks Reload"],
+      ["Where it runs", "On the user's own machine, end-to-end local"],
+      ["What hits the network", "Whatever the user's script asks for. With the user's auth, from the user's machine."],
+      ["Whose identity it runs as", "The user's OS identity. Same as their terminal."],
+      ["What Sparcle servers see", "Nothing. Optional audit ping is metadata only: App id, timestamp, ok flag, duration ms. No query. No arguments. No output."],
+      ["Audit", "Optional metadata ping per call. No body, ever."],
+      ["Removable", "User deletes the file; admin can disable the whole tier on a managed device"],
+    ],
+    primaryCta: { href: "/docs/utilities/quickstart#user-app", label: "Drop a YAML, click Reload" },
+    secondaryCta: { href: "/docs/utilities/spec#19-bridge-runtime-user-apps", label: "Read the bridge runtime spec" },
+  },
+];
+
+// Five runtime-enforced properties. These are checks in the loader
+// and executor, not items on a policy checklist. Apply to BOTH tiers
+// where relevant. The "argv-only" and "forced fields" ones are
+// User-App-specific by construction; the others span both.
+const guarantees = [
+  {
+    title: "Confirm before run",
+    body: "Bolt renders a 'Press Enter to run' row instead of firing on every keystroke. Authors can customize the prompt copy but cannot turn confirm off. Applies to admin and user tiers alike, with an auto_when escape valve for unambiguous queries (e.g. exact Jira issue keys).",
+  },
+  {
+    title: "Never an LLM tool",
+    body: "Apps are not registered as agent tools and never appear in the LLM's tool-use surface. The agent loop does not know they exist. A poisoned document cannot tell the model to run an App because the model cannot run anything.",
+  },
+  {
+    title: "Never staged into chat context",
+    body: "App output never auto-attaches to a chat message. The chat composer's attachment surface accepts entity and plugin context, not App rows. Output stays in the dropdown and the right-side preview pane. The LLM only sees it if the user copies and pastes it.",
+  },
+  {
+    title: "argv-only execution (User Apps)",
+    body: "Templated commands are tokenized into argv via POSIX shell rules and spawned directly. There is no /bin/sh -c. Multi-statement shell, pipes, command substitution, and backticks are rejected at validate time, before the manifest ever loads.",
+  },
+  {
+    title: "Forced safety fields",
+    body: "Every row a User App emits gets canEscalateAi=false, source=user_bridge, and pii_boundary=enforce stamped on it regardless of what the YAML asks for. Forbidden right-pane kinds (entity-graph bindings on a User App) are rejected at load time so a manifest cannot graft itself onto Bolt's entity router.",
+  },
+];
+
+// What Bolt does NOT do that a remote model or a hostile app on the
+// same machine might want it to. This is the testable version of the
+// "Bolt does not multiply the user's authority" claim.
+const cannots = [
+  {
+    title: "Bolt does not let an LLM invoke a User App",
+    body: "There is no agent-tool path to user_util_invoke. Architecturally, not as a flag a future release could flip. A model that wanted a User App to run would have to find a human to type the chip and press Enter.",
+  },
+  {
+    title: "Bolt does not let a poisoned response chain a User App",
+    body: "The action buttons rendered for an App row come from the manifest, not from the model. The model cannot inject a new action, a new url, or a new shell command into a row it sees.",
+  },
+  {
+    title: "Bolt does not store User App output it does not own",
+    body: "The optional audit ping is metadata. The query, the arguments, the stdout, the stderr: none of it leaves the user's machine via Sparcle. If the script writes to a file, that is the user's file. If it hits an external API, that is the user's request from the user's IP.",
+  },
+  {
+    title: "Bolt does not run User Apps as root",
+    body: "The Bolt App Runtime runs as the user. User App commands inherit that identity. There is no privilege escalation path; the runtime does not have privilege to escalate to.",
+  },
+];
+
+// What this page does NOT claim. Pretending the surface is risk-free
+// is what gets a CISO to stop reading.
+const honest = [
+  {
+    title: "Bolt does not review what a user writes",
+    body: "Bolt is not an app store. There is no submission queue, no Sparcle approval, no automated scan of YAML for intent. The user authors the script and the user owns the consequences. The runtime enforces structural safety; it cannot enforce that the user's intent is benign.",
+  },
+  {
+    title: "User Apps live outside the admin PII masking boundary",
+    body: "A User App that hits an external API with the user's auth can send data outside the masking layer admin policies enforce on the rest of Bolt. This is intentional. The user controls what their script does. It is also why admins on managed devices may want to disable the tier entirely.",
+  },
+  {
+    title: "Sharing patterns are file-based, not marketplace",
+    body: "If you want to share a User App, you share the YAML file. Gist, repo, internal pack. The recipient reads it, drops it in their folder, clicks Reload. There is no central registry, no signed-manifest verification yet, and no submission queue.",
+  },
+];
+
+// The compact User App manifest example, for the "few lines of YAML"
+// pitch at the bottom. Same example as on the spec page; intentional
+// repetition so the reader does not have to leave to see the shape.
+const sampleYaml = `schema_version: 1
+runtime: bridge
+id: git-log
+chip: git-log
+title: Recent commits
+icon: git-branch
+description: Show recent commits in a local git repo under ~/dev
+placeholder_examples: ["my-app", "infra 30"]
+emits: Generic
+
+bridge:
+  command:
+    macos:   "git -C ~/dev/{{repo}} log --oneline -{{limit | default: 20}}"
+    linux:   "git -C ~/dev/{{repo}} log --oneline -{{limit | default: 20}}"
+    windows: 'git -C C:\\dev\\{{repo}} log --oneline -{{limit | default: 20}}'
+  parse: lines
+  timeout_seconds: 5
+
+args:
+  - { name: repo,  from: "query.word(0)" }
+  - { name: limit, from: "query.word(1)", default: 20 }
+
+presentation:
+  widget: list
+  title_field: line
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy SHA, insert: "{{line}}" }`;
 ---
 <BaseLayout
-  title="Apps: Bundled Integrations and Custom Manifests | Sparcle"
-  description="Bolt Apps are launcher chips backed by declarative YAML manifests (codename: utilities). Use a bundled integration from the gallery, or author a custom App against your own MCP servers and HTTP endpoints. No LLM in the loop, no tokens per query."
+  title="Bolt Apps: Admin and User tiers | Sparcle"
+  description="Bolt Apps are launcher chips you summon from any context on any OS. Two tiers, one trust contract: Admin Apps your org admin enables centrally, User Apps an individual drops in a local folder. Same YAML schema, different runtime, different boundary. Bring your daily workflows into Bolt without data crossing a boundary it should not."
   canonical="https://sparcle.app/docs/utilities"
 >
   <main class="page-utilities">
     <Hero
-      eyebrow="Documentation · Mode 1 · Available now"
-      title="Apps."
-      lede="The declarative integration surface. Launcher chips backed by YAML manifests (codename: utilities, used throughout the runtime, the gallery, and the in-app admin). Each App runs MCP tool calls or HTTP fetches, emits typed rows (Person, Issue, Document, ...), and renders them in the launcher and the right rail. No LLM in the loop, no tokens per query."
+      eyebrow="Bolt Apps"
+      title="Bring your daily workflows into Bolt."
+      lede="Wherever you are, terminal or browser or a specific app, Bolt is one keystroke away. Apps are the chips that ride on that surface. Two tiers, one schema. Admin Apps connect the systems your org already runs. User Apps run on your own machine, under your own identity. Same trust contract for both, enforced at exec time."
     >
-      <Pill href="/docs/utilities/gallery" variant="brand" size="lg">Browse sample integrations &rarr;</Pill>
-      <Pill href="/docs/utilities/quickstart" variant="neutral" size="lg">Write your first custom App &rarr;</Pill>
-      <Pill href="/docs/utilities/spec" variant="neutral" size="lg">Full spec &rarr;</Pill>
+      <a href="#tiers" class="btn btn-primary btn-lg">Compare the two tiers</a>
+      <a href="#trust" class="btn btn-secondary btn-lg">Read the trust contract</a>
     </Hero>
 
-    <PageSection stripe="b">
+    <PageSection
+      id="tiers"
+      eyebrow="The two tiers"
+      title="Same template. Different boundary."
+      lede="Both tiers are YAML manifests. Both render chips in the launcher. The runtime, the install path, and the trust posture differ. Read them side by side."
+      stripe="b"
+    >
+      <div class="tiers-grid">
+        {tiers.map((tier) => (
+          <article class="tier-card">
+            <header>
+              <p class="tier-card__badge">{tier.badge}</p>
+              <h3 class="tier-card__title">{tier.title}</h3>
+              <p class="tier-card__intro">{tier.intro}</p>
+            </header>
+            <dl class="tier-card__dl">
+              {tier.rows.map(([label, value]) => (
+                <div class="tier-card__row">
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+            <footer class="tier-card__footer">
+              <a href={tier.primaryCta.href} class="btn btn-primary">{tier.primaryCta.label}</a>
+              <a href={tier.secondaryCta.href} class="btn btn-secondary">{tier.secondaryCta.label}</a>
+            </footer>
+          </article>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      id="disclosure"
+      eyebrow="The User App disclosure"
+      title="What a User App is, in four sentences."
+      lede="This is the wording Bolt's Settings page shows the user when User Apps are enabled. It is also the wording we hold ourselves to on every other surface that describes the tier."
+    >
+      <div class="disclosure-card">
+        <p>
+          User Apps run, evaluate and process data that user authors on
+          user's machine, under user's identity. No AI in the path. No
+          Sparcle in the path. Read declarative YAML before you enable.
+        </p>
+      </div>
+    </PageSection>
+
+    <PageSection
+      id="trust"
+      eyebrow="The trust contract"
+      title="Five properties the runtime enforces."
+      lede="None of these are author-configurable. A manifest that tries to opt out of any of them is rejected at load time. A manifest that tries to smuggle past them at runtime never gets the chance: the executor and the row builder both stamp these on every output regardless of what the YAML asks for."
+      stripe="b"
+    >
+      <CardGrid>
+        {guarantees.map((g) => (
+          <Card title={g.title} accent="success">
+            <p>{g.body}</p>
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      id="cannots"
+      eyebrow="The testable claim"
+      title="Bolt does not multiply the user's authority."
+      lede="A User App runs commands the user could already have run from their terminal. That is the strong version. The four cards below are the specific things a user's terminal does NOT let happen that Bolt also does not let happen."
+    >
+      <CardGrid>
+        {cannots.map((c) => (
+          <Card title={c.title}>
+            <p>{c.body}</p>
+          </Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      id="admin-gate"
+      eyebrow="Admin disable"
+      title="On a managed device, admins can turn User Apps off."
+      lede="Settings, Utilities, User Apps. One toggle. When off, installed Apps stop loading, the launcher detector stops proposing user chips, and invocation refuses at the runtime boundary. Manifest files on disk are kept so re-enabling restores the user's setup identically."
+      stripe="b"
+    >
       <CardGrid cols={2}>
-        <Card title="Use a sample">
+        <Card eyebrow="Shipped today" title="Device-level toggle">
           <p>
-            No code required. Pick from {sampleCount} bundled manifests covering common
-            sources like Jira, Salesforce, Slack, Notion, Linear, GitHub, and more.
-            Enable one in the Gallery, sign in to the source over OAuth, and the chip
-            shows up in your launcher.
+            The Allow User Apps toggle is per-device. An admin who manages
+            the OS image (MDM, JAMF, Intune) can pre-write the policy
+            file to disabled before the user ever opens Bolt.
           </p>
           <p>
-            Best when an existing source matches your need and you want the
-            shortest path to value.
-          </p>
-          <p>
-            <a href="/docs/utilities/gallery"><strong>Browse the gallery &rarr;</strong></a>
+            Path: <code>&lt;app_data&gt;/user-apps-policy.json</code>
+            with <code>{"{ \"enabled\": false }"}</code>.
           </p>
         </Card>
-        <Card title="Author your own">
+        <Card eyebrow="Coming" title="Org-pushed policy">
           <p>
-            Write a YAML manifest that calls your own MCP servers or public HTTP
-            endpoints, then bind the response to a typed row shape. The wizard
-            introspects MCP tools and helps you bind fields by point-and-click;
-            the YAML side panel is there when you want full control.
+            The same toggle, propagated from the admin tenant down to
+            every device on first connect. Removes the need to write the
+            policy file via MDM and gives the admin a single dashboard
+            view of which devices honor the gate.
           </p>
           <p>
-            Best when you have an internal API, a custom MCP server, or a source
-            we don't bundle.
-          </p>
-          <p>
-            <a href="/docs/utilities/quickstart"><strong>Quickstart walkthrough &rarr;</strong></a>
-            &nbsp;·&nbsp;
-            <a href="/docs/utilities/spec"><strong>Full manifest spec (v1) &rarr;</strong></a>
+            Until that ships, admins who need org-wide enforcement use
+            the MDM path above.
           </p>
         </Card>
       </CardGrid>
     </PageSection>
 
     <PageSection
-      title="What's in the box"
-      lede="Every App, bundled or custom, shares the same primitives. Once you know one manifest you know them all."
-      stripe="a"
+      id="byo-yaml"
+      eyebrow="Author a User App in 25 lines"
+      title="A few lines of YAML. No data crossing a boundary it should not."
+      lede="The example below installs a chip that runs git log in a local repo and shows the commit lines in Bolt. Drop it in your user-apps folder, click Reload, then type =git-log &lt;repo&gt; to try it. Same schema serves Admin Apps too, with a different runtime block."
     >
-      <CardGrid cols={3}>
-        <Card title="Scopes">
-          Sub-commands a user can pick after typing the chip. <code>=jira my</code>,
-          <code>=jira sprint</code>, <code>=jira PROJ-123</code> are three scopes
-          under one chip.
-        </Card>
-        <Card title="Flow DAG">
-          Declarative steps: <code>call</code>, <code>parallel</code>, <code>merge</code>,
-          <code>transform</code>, <code>emit</code>. No code, no callbacks. The runtime
-          handles concurrency, retries, and timeouts.
-        </Card>
-        <Card title="Typed emits">
-          Rows come out as a canonical type (<code>Person</code>, <code>Issue</code>,
-          <code>Document</code>, <code>File</code>, <code>Event</code>, ...). The
-          launcher and right rail know how to render every type.
-        </Card>
-        <Card title="Per-user OAuth">
-          Auth is per-user OAuth. No service accounts, ever. Every action an App
-          takes is attributable to the human who ran it.
-        </Card>
-        <Card title="Actions on rows">
-          Typed actions (<code>url</code>, <code>tool</code>, <code>utility</code>,
-          <code>composer</code>) let users open, edit, or pipe rows into the next
-          step without leaving the launcher.
-        </Card>
-        <Card title="Audit by default">
-          Every call, every emit, every action lands in the same audit chain as
-          the rest of Bolt + Aeira. Nothing in an App manifest bypasses it.
-        </Card>
+      <div class="manifest-block">
+        <Code code={sampleYaml} lang="yaml" theme="github-dark" />
+      </div>
+    </PageSection>
+
+    <PageSection
+      id="honest"
+      eyebrow="What this page does not claim"
+      title="The honest map."
+      lede="A trust page that does not say what it cannot promise is marketing, not a contract. These are the things the runtime cannot enforce and we will not pretend it does."
+      stripe="b"
+    >
+      <CardGrid>
+        {honest.map((h) => (
+          <Card title={h.title}>
+            <p>{h.body}</p>
+          </Card>
+        ))}
       </CardGrid>
     </PageSection>
+
+    <CTAStrip>
+      <Fragment slot="title">Pick the tier that matches the surface.</Fragment>
+      <Fragment slot="lede">If you are connecting org systems, start with the bundled gallery ({sampleCount} integrations) or author a custom Admin App. If you are bringing a personal workflow, drop a YAML in your user-apps folder and click Reload.</Fragment>
+      <a href="/docs/utilities/gallery" class="btn btn-primary btn-lg">Admin App gallery</a>
+      <a href="/docs/utilities/quickstart" class="btn btn-secondary btn-lg">Quickstart</a>
+      <a href="/docs/utilities/spec" class="btn btn-secondary btn-lg">Full manifest spec</a>
+    </CTAStrip>
   </main>
 </BaseLayout>
 
@@ -119,5 +327,116 @@ const sampleCount = samples.length;
   }
   .page-utilities .card__body p:last-child {
     margin-bottom: 0;
+  }
+
+  /* Side-by-side tier cards. Symmetric template; the two tiers
+     occupy equal columns on wide screens and stack on narrow. */
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+  .tier-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-left: 4px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .tier-card__badge {
+    margin: 0 0 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--brand-primary);
+  }
+  .tier-card__title {
+    margin: 0 0 0.75rem;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    color: var(--text-heading);
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .tier-card__intro {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.6;
+  }
+  .tier-card__dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    flex: 1 0 auto;
+  }
+  .tier-card__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .tier-card__row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .tier-card__row dt {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tier-card__row dd {
+    margin: 0;
+    color: var(--text-body);
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+  .tier-card__footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .tier-card__footer .btn {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .disclosure-card {
+    border: 1px solid var(--brand-primary-light);
+    border-left: 4px solid var(--brand-primary);
+    background: var(--bg-surface-solid);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .disclosure-card p {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-heading);
+  }
+
+  .manifest-block {
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .manifest-block :global(pre) {
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.55;
   }
 </style>

@@ -24,7 +24,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 // public/js/shared-nav.js — Cloudflare's edge cache otherwise serves the
 // stale file for up to 24h (cache-control: max-age=86400). The dashboard
 // cache-purge works too, but bumping this is the zero-click path.
-const sharedNavVersion = "20260528a";
+const sharedNavVersion = "20260529a";
 ---
 
 <!doctype html>
@@ -232,6 +232,201 @@ const sharedNavVersion = "20260528a";
     <main id="main-content">
       <slot />
     </main>
+
+    <!--
+      Click-to-expand diagram modal — wraps any element with [data-expandable]
+      and clones its inner SVG into a full-viewport overlay. ESC, click-outside,
+      or the explicit close button dismisses. One modal serves every page; the
+      trigger script is delegated so any number of containers can opt in by
+      adding the attribute.
+    -->
+    <div id="diagram-modal" class="diagram-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Expanded diagram view">
+      <button type="button" class="diagram-modal__close" aria-label="Close (ESC)">&times;</button>
+      <div class="diagram-modal__viewport">
+        <div class="diagram-modal__content" id="diagram-modal-content"></div>
+      </div>
+    </div>
+
+    <style is:global>
+      [data-expandable] {
+        cursor: zoom-in;
+        position: relative;
+      }
+      [data-expandable]::after {
+        content: "Click to expand \2922";
+        position: absolute;
+        top: 0.6rem;
+        right: 0.75rem;
+        background: var(--brand-primary);
+        color: var(--text-on-primary);
+        padding: 0.35rem 0.7rem;
+        border-radius: var(--radius-full);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 180ms ease, transform 180ms ease;
+        z-index: 2;
+        box-shadow: var(--shadow-sm);
+      }
+      [data-expandable]:hover::after,
+      [data-expandable]:focus-within::after {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .diagram-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 12, 24, 0.82);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1rem, 3vw, 3rem);
+      }
+      .diagram-modal.is-open {
+        display: flex;
+      }
+      .diagram-modal__viewport {
+        background: var(--bg-surface-solid);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem 1.75rem;
+        width: min(96vw, 1400px);
+        max-height: 92vh;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: var(--shadow-xl);
+      }
+      .diagram-modal__content {
+        display: block;
+        width: 100%;
+        min-height: 0;
+      }
+      .diagram-modal__content svg,
+      .diagram-modal__content img,
+      .diagram-modal__content iframe {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: none;
+        min-width: 0;
+      }
+      .diagram-modal__content iframe {
+        border: 0;
+        background: var(--bg-surface-solid);
+      }
+      .diagram-modal__close {
+        position: fixed;
+        top: 1.25rem;
+        right: 1.25rem;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-full);
+        background: var(--bg-surface-solid);
+        border: 1px solid var(--border-strong);
+        color: var(--text-heading);
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-md);
+        transition: background var(--transition-fast), border-color var(--transition-fast);
+      }
+      .diagram-modal__close:hover {
+        background: var(--brand-primary);
+        color: var(--text-on-primary);
+        border-color: var(--brand-primary);
+      }
+      body.diagram-modal-open {
+        overflow: hidden;
+      }
+    </style>
+
+    <script is:inline>
+      (function () {
+        var modal = document.getElementById('diagram-modal');
+        var content = document.getElementById('diagram-modal-content');
+        var closeBtn = modal ? modal.querySelector('.diagram-modal__close') : null;
+        if (!modal || !content || !closeBtn) return;
+
+        function openModal(trigger) {
+          // Pick the first svg, img, or iframe inside the trigger. SVG is
+          // typical; img covers raster diagrams and screenshots; iframe is
+          // used for embedded PDFs (cloned as-is so the same URL renders
+          // in the modal viewport).
+          var media = trigger.querySelector('svg, img, iframe');
+          if (!media) return;
+          var clone = media.cloneNode(true);
+          // Force the clone to scale to the modal viewport regardless of any
+          // min-width / max-width applied to the source on the page.
+          clone.removeAttribute('width');
+          clone.removeAttribute('height');
+          clone.style.width = '100%';
+          clone.style.height = 'auto';
+          clone.style.maxWidth = 'none';
+          clone.style.minWidth = '0';
+          // Iframes need an explicit pixel height — auto collapses them.
+          if (clone.tagName === 'IFRAME') {
+            clone.style.height = '85vh';
+          }
+          content.innerHTML = '';
+          content.appendChild(clone);
+          modal.classList.add('is-open');
+          modal.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('diagram-modal-open');
+          closeBtn.focus();
+        }
+
+        function closeModal() {
+          modal.classList.remove('is-open');
+          modal.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('diagram-modal-open');
+          content.innerHTML = '';
+        }
+
+        document.addEventListener('click', function (e) {
+          var trigger = e.target.closest('[data-expandable]');
+          if (trigger && trigger !== modal && !modal.contains(trigger)) {
+            e.preventDefault();
+            openModal(trigger);
+          }
+        });
+
+        // Allow keyboard activation: Enter or Space on a focused trigger.
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+            e.preventDefault();
+            closeModal();
+            return;
+          }
+          if ((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.matches('[data-expandable]')) {
+            e.preventDefault();
+            openModal(document.activeElement);
+          }
+        });
+
+        closeBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          closeModal();
+        });
+
+        modal.addEventListener('click', function (e) {
+          // Click on the backdrop (not the viewport card) closes.
+          if (e.target === modal) closeModal();
+        });
+      })();
+    </script>
+
     <script is:inline src={`/js/shared-nav.js?v=${sharedNavVersion}`}></script>
   </body>
 </html>

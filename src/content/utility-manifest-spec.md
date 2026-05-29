@@ -843,3 +843,144 @@ Documented here so that no one re-asks:
 - All bundled manifests have fixtures, goldens, and pass CI.
 - Per-utility metrics visible in admin observability dashboard.
 - The pre-existing `service_user`, `bearer_token` (shared), `basic`, `mtls`, `signed_jwt_assertion`, `oauth2_client_credentials`, `oauth2_on_behalf_of`, `session_passthrough` auth profile types are removed from `auth-profiles.yaml` and rejected by the loader.
+
+---
+
+## 19. Bridge runtime (User Apps)
+
+The same manifest schema supports a second runtime for User Apps. An author opts in by setting `runtime: bridge` at the top level. The runtime is the strict subset of the admin shape that can run safely on an end user's machine under their own OS identity: no admin-controlled fields, no flow DAG, no MCP wiring, no auth profile. Just a templated shell command, an output parser, a presentation block, and a small set of declared actions.
+
+Customer-facing name: **User App**. Codename in code and YAML: `utility` / `runtime: bridge`.
+
+### 19.1 Discriminator
+
+```yaml
+runtime: bridge
+```
+
+Required and the only allowed value when the bridge runtime is active. Reserved so future runtimes (`wasm`, `subprocess`, etc.) can be added without breaking parsers.
+
+### 19.2 Forbidden fields
+
+The bridge runtime rejects every admin-only field at load time. Presence is the rejection; the loader does not silently ignore. A manifest that sets any of the following fails to load and the user sees a per-file error in Settings:
+
+- `auth_profile_ref`
+- `requires`
+- `scopes` (use a `match:` branch in the future if needed; v1 has a single implicit scope)
+- `filters`
+- `cache_ttl_seconds`
+- `provisioning_mode`, `departments`, `roles`, `groups`
+- `actions[].kind` other than `url`, `composer`, or `utility`
+- `actions[].flow`, `actions[].confirm` (these are admin tool-action fields)
+- `bridge.command.<os>` containing unquoted `;`, `&&`, `||`, `|`, backtick, or `$(...)`. Multi-statement shell is rejected at validate time, before the manifest ever loads.
+- `bridge.env.<KEY>` with an inline literal. Values must match exactly `^\$\{env:[A-Z_][A-Z0-9_]*\}$`; secrets come from the real process env or a future secrets broker.
+
+Forbidden field errors include the offending field name so authors can fix without grepping the spec.
+
+### 19.3 Forced fields
+
+The loader / parser stamps these on every emitted row regardless of what the YAML asks for:
+
+- `canEscalateAi: false`
+- `aiSuggestedQuery: null`
+- `quickQaActionQuery: null`
+- `escalationPrompt: null`
+- `source: "user_bridge"`
+- `pii_boundary: "enforce"`
+
+Bridge utilities are also forced to `dispatch.mode: confirm`. Authors can customize `dispatch.confirm_label` and `confirm_hint` text but cannot turn confirm off. Shell exec on incremental input is not a thing the runtime ships.
+
+### 19.4 The `bridge:` block
+
+The new top-level field that admin manifests do not carry:
+
+```yaml
+bridge:
+  command:
+    macos:   "git -C ~/dev/{{repo}} log --oneline -{{limit | default: 20}}"
+    linux:   "git -C ~/dev/{{repo}} log --oneline -{{limit | default: 20}}"
+    windows: 'git -C C:\\dev\\{{repo}} log --oneline -{{limit | default: 20}}'
+  parse: lines
+  timeout_seconds: 5
+  env:
+    GH_TOKEN: "${env:GH_TOKEN}"
+```
+
+Fields:
+- `command.<os>`: templated command for that OS. At least one of `macos`, `linux`, `windows` required. Templating supports `{{var}}` and `{{var | default: X}}`.
+- `parse`: `lines` (one row per non-empty stdout line, fields `{line, idx}`), `json` (expects array or `{rows: [...]}`), or `raw` (one row total, field `{raw}`).
+- `timeout_seconds`: clamped to `1..=60`, default `10`. On timeout the child is killed and reaped.
+- `env`: optional env-var refs that must already be set in the user's process. `${env:VARNAME}` form only; the loader rejects inline literals.
+
+### 19.5 argv-only execution
+
+The command template is expanded with the args block, then tokenized into argv via POSIX shell-words and spawned directly. There is no `/bin/sh -c`. The shell-metacharacter rejection at validate time means an argv-split is always unambiguous; ambiguity is a reject.
+
+This is the runtime mechanism behind the "Bolt does not multiply the user's authority" claim. The command can only do what a single binary invocation could do. The user's terminal has the same constraint when the user types the command directly.
+
+### 19.6 Presentation: right_widget kinds
+
+The bridge runtime allows the same widgets as the admin runtime with one exclusion: `kind: entity` is rejected. The validator names the rejection so authors do not assume a typo:
+
+> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date] (entity kind is not allowed for user utilities)`
+
+Letting a User App emit entity-bound right widgets would graft it onto the launcher's entity router and break the "User Apps stay out of the entity surface" invariant. Authors who want richer entity views go through an admin utility instead.
+
+### 19.7 Install model
+
+Drop a `.yaml` into the user-apps folder and click Reload in Settings. There is no file picker, no consent modal, no two-step handshake. The act of copying the file into the folder IS the consent. Removing the App via Settings deletes the file from disk.
+
+Per-OS folder paths (resolved via Tauri's app-data dir):
+- macOS: `~/Library/Application Support/<bundle>/user-utils/`
+- Linux: `~/.local/share/<bundle>/user-utils/`
+- Windows: `%APPDATA%/<bundle>/user-utils/`
+
+### 19.8 Org / device policy
+
+Admins on managed devices can disable the entire User App tier with a single toggle. When off:
+- The chip list returned to the launcher is empty.
+- The launcher detector stops proposing user keys, and chip-pill conversion no longer fires for them.
+- Invocation refuses at the runtime boundary with a clear error.
+- Manifest files on disk are not touched. Re-enabling restores the user's setup identically.
+
+Storage: `<app_data>/user-apps-policy.json` with `{ "enabled": bool }`. Admins managing an OS image (MDM, JAMF, Intune) can pre-write the file to `{ "enabled": false }` before the user ever opens Bolt. An org-pushed policy that propagates the gate from the admin tenant down to managed devices is a follow-up.
+
+### 19.9 Audit shape
+
+User App invocations produce an optional audit ping when the device is configured to send one. The payload is metadata only: `{utility_id, ts, ok, duration_ms}`. No query, no arguments, no output, no stdout, no stderr. The Bolt service is not in the request path, and Sparcle servers are not in the data path.
+
+### 19.10 Example: a complete User App
+
+```yaml
+schema_version: 1
+runtime: bridge
+id: git-log
+chip: git-log
+title: Recent commits
+icon: git-branch
+description: Show recent commits in a local git repo under ~/dev
+placeholder_examples: ["my-app", "infra 30"]
+emits: Generic
+
+bridge:
+  command:
+    macos:   "git -C ~/dev/{{repo}} log --oneline -{{limit | default: 20}}"
+    linux:   "git -C ~/dev/{{repo}} log --oneline -{{limit | default: 20}}"
+    windows: 'git -C C:\\dev\\{{repo}} log --oneline -{{limit | default: 20}}'
+  parse: lines
+  timeout_seconds: 5
+
+args:
+  - { name: repo,  from: "query.word(0)" }
+  - { name: limit, from: "query.word(1)", default: 20 }
+
+presentation:
+  widget: list
+  title_field: line
+  subtitle_field: idx
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy SHA, insert: "{{line}}" }
+```
+
+That is the entire manifest. The runtime takes care of confirm-row dispatch, argv-only spawn, output parsing, row construction, forced-field stamping, and rendering. The author writes 25 lines of YAML.

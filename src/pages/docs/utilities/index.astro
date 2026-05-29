@@ -100,23 +100,6 @@ const cannots = [
   },
 ];
 
-// What this page does NOT claim. Pretending the surface is risk-free
-// is what gets a CISO to stop reading.
-const honest = [
-  {
-    title: "Bolt does not review what a user writes",
-    body: "Bolt is not an app store. There is no submission queue, no Sparcle approval, no automated scan of YAML for intent. The user authors the script and the user owns the consequences. The runtime enforces structural safety; it cannot enforce that the user's intent is benign.",
-  },
-  {
-    title: "User Apps live outside the admin PII masking boundary",
-    body: "A User App that hits an external API with the user's auth can send data outside the masking layer admin policies enforce on the rest of Bolt. This is intentional. The user controls what their script does. It is also why admins on managed devices may want to disable the tier entirely.",
-  },
-  {
-    title: "Sharing patterns are file-based, not marketplace",
-    body: "If you want to share a User App, you share the YAML file. Gist, repo, internal pack. The recipient reads it, drops it in their folder, clicks Reload. There is no central registry, no signed-manifest verification yet, and no submission queue.",
-  },
-];
-
 // The compact User App manifest example, for the "few lines of YAML"
 // pitch at the bottom. Same example as on the spec page; intentional
 // repetition so the reader does not have to leave to see the shape.
@@ -274,6 +257,14 @@ actions:
           </p>
         </Card>
       </CardGrid>
+      <p class="admin-gate-note">
+        Why the gate matters: a User App runs as the user, with the user's
+        auth. Its outbound traffic does not go through the admin-tier PII
+        masking layer that the rest of Bolt enforces. On a managed device
+        carrying regulated data, an admin may want the tier off. This is
+        not a runtime hole — it is the same authority the user already
+        has from their terminal. The gate exists so admins can decide.
+      </p>
     </PageSection>
 
     <PageSection
@@ -285,22 +276,6 @@ actions:
       <div class="manifest-block">
         <Code code={sampleYaml} lang="yaml" theme="github-dark" />
       </div>
-    </PageSection>
-
-    <PageSection
-      id="honest"
-      eyebrow="What this page does not claim"
-      title="The honest map."
-      lede="A trust page that does not say what it cannot promise is marketing, not a contract. These are the things the runtime cannot enforce and we will not pretend it does."
-      stripe="b"
-    >
-      <CardGrid>
-        {honest.map((h) => (
-          <Card title={h.title}>
-            <p>{h.body}</p>
-          </Card>
-        ))}
-      </CardGrid>
     </PageSection>
 
     <CTAStrip>
@@ -439,6 +414,18 @@ actions:
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--text-heading);
+  }
+
+  .admin-gate-note {
+    margin: 1.75rem auto 0;
+    max-width: 760px;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--text-muted);
+    background: var(--bg-muted);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-body);
   }
 
   .manifest-block {

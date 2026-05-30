@@ -2,18 +2,18 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import InstallTabs from "../../components/InstallTabs.astro";
 
-// Trial sidecar quickstart. Public, indexable, kept tight.
+// Bolt quickstart. Public, indexable, kept tight.
 //
 // PDF: this page is its own source-of-truth. Regenerate the companion PDF
 // after edits with:
-//   npm run pdf:trial-quickstart
-// (See scripts/render-pdf.mjs. The print stylesheet at the bottom of this
-// file controls the PDF rendering.)
+//   npm run pdf:trial-quickstart      (script name unchanged for now)
 //
 // Conventions:
 // - No personal/internal paths, customer names, or NDA references.
-// - Trial = real aeira-rs crates + a 2,573-row synthetic corpus.
-// - Never claim features that are not actually shipping in the trial UX.
+// - Bolt is free for individuals; the same Aeira Rust crates and audit chain
+//   ship in both the free desktop install and the paid org tiers.
+// - Demo mode loads a 2,573-row synthetic corpus so users can see retrieval,
+//   masking, and audit-chain behavior without configuring an IdP or LLM key.
 
 interface Step {
   title: string;
@@ -30,34 +30,34 @@ const fiveThings: Step[] = [
     body: "Open the LLM payload view on any result. Sensitive fields appear masked at the LLM boundary while internal tools continue to operate on the unmasked values. This is the BYO-LLM + PII-protected contract in one screen.",
   },
   {
-    title: "3. /discover — the trial Aeira catalog",
-    body: "Type /discover to open the trial Aeira catalog. It lists every entity, relationship, and field the synthetic corpus exposes, so you can see the shape of the data without writing a query. (For local-disk navigation, /browse is the file browser.)",
+    title: "3. /discover - the Aeira catalog",
+    body: "Type /discover to open the Aeira catalog. It lists every entity, relationship, and field the synthetic corpus exposes, so you can see the shape of the data without writing a query. (For local-disk navigation, /browse is the file browser.)",
   },
   {
     title: "4. Audit chain",
-    body: "Open the audit verifier on any prior query. Every step (retrieval, masking decision, tool call, LLM call) is cryptographically chained. The chain encoding is byte-compatible with the production Aeira audit chain.",
+    body: "Open the audit verifier on any prior query. Every step (retrieval, masking decision, tool call, LLM call) is cryptographically chained. The chain encoding is byte-compatible with the production Aeira audit chain used by paid org deployments.",
   },
   {
     title: "5. Bring your own LLM",
-    body: "Settings → AI Configuration: drop in an Anthropic, OpenAI, Google, Mistral, or OpenAI-compatible local key. Re-run any prior query against your provider with the same masking contract.",
+    body: "Settings - AI Configuration: drop in an Anthropic, OpenAI, Google, Mistral, or OpenAI-compatible local key. Re-run any prior query against your provider with the same masking contract.",
   },
 ];
 ---
 
 <BaseLayout
-  title="Trial sidecar quickstart | Sparcle"
-  description="Get the Bolt Enterprise Trial running in under a minute. One install command, instant demo mode, real Aeira retrieval and ACL crates against a synthetic 2,573-row corpus. 7 days, all features unlocked."
-  canonical="https://sparcle.app/docs/trial-quickstart"
+  title="Bolt quickstart | Sparcle"
+  description="Get Bolt running locally in under a minute. One install command, instant demo mode, real Aeira retrieval and ACL crates against a synthetic 2,573-row corpus. Free for individuals."
+  canonical="https://sparcle.app/docs/quickstart"
 >
   <main class="qs-page">
     <section class="qs-hero">
       <div class="container">
         <p class="qs-eyebrow"><a href="/docs">&larr; Docs</a></p>
-        <h1>Trial quickstart.</h1>
+        <h1>Bolt quickstart.</h1>
         <p class="qs-lede">
-          Bolt Enterprise Trial running locally in under a minute. One install command,
-          instant demo mode, real Aeira retrieval and ACL crates against a 2,573-row
-          synthetic corpus. 7 days, all features unlocked.
+          Bolt running locally in under a minute. One install command,
+          instant demo mode, real Aeira retrieval and ACL crates against a
+          2,573-row synthetic corpus. Free for individuals.
         </p>
         <ul class="qs-pills">
           <li><a href="/docs/pdfs/trial-quickstart.pdf" target="_blank" rel="noopener">Download as PDF &rarr;</a></li>
@@ -71,12 +71,12 @@ const fiveThings: Step[] = [
       <div class="container">
         <h2>What you'll have running in 60 seconds</h2>
         <ul class="qs-bullets">
-          <li>Bolt Enterprise Trial desktop app (macOS, Linux, Windows).</li>
+          <li>Bolt desktop app (macOS, Linux, Windows).</li>
           <li>Embedded PostgreSQL (one-time prewarm during install).</li>
-          <li>The same Aeira Rust crates that ship in production: ACL evaluator, retrieval, audit chain.</li>
+          <li>The same Aeira Rust crates that ship in production org deployments: ACL evaluator, retrieval, audit chain.</li>
           <li>A preloaded 2,573-row synthetic corpus (mixed ERP, mail, channel, and document records).</li>
           <li>Instant demo mode by default. No identity provider, no LLM key required to start.</li>
-          <li>7 days, all features unlocked.</li>
+          <li>Free for individuals - no time limit, no login required to get going.</li>
         </ul>
       </div>
     </section>
@@ -93,18 +93,18 @@ const fiveThings: Step[] = [
         <InstallTabs
           macos={{
             hint: "Run in Terminal · Apple Silicon & Intel",
-            command: "curl -fsSL https://sparcle.app/trial.sh | sh",
-            note: "Downloads, installs to /Applications, and launches Bolt Enterprise.",
+            command: "curl -fsSL https://sparcle.app/install.sh | sh",
+            note: "Downloads, installs to /Applications, and launches Bolt.",
           }}
           linux={{
             hint: "Run in Terminal · x86_64 & ARM64",
-            command: "curl -fsSL https://sparcle.app/trial.sh | sh",
+            command: "curl -fsSL https://sparcle.app/install.sh | sh",
             note: "Auto-detects Linux · installs AppImage to ~/.local/bin.",
           }}
           windows={{
             hint: "Run in PowerShell · x86_64",
-            command: "irm https://sparcle.app/trial.ps1 | iex",
-            note: "Marks app as trusted · downloads, installs, and launches Bolt Enterprise.",
+            command: "irm https://sparcle.app/install.ps1 | iex",
+            note: "Marks app as trusted · downloads, installs, and launches Bolt.",
           }}
         />
 
@@ -112,9 +112,9 @@ const fiveThings: Step[] = [
           <strong>Pin a specific version</strong> with <code>BOLT_VERSION</code>. Useful when
           you want to reproduce a behavior against an older release.
         </p>
-        <pre class="qs-block"><code>BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/trial.sh | sh</code></pre>
+        <pre class="qs-block"><code>BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/install.sh | sh</code></pre>
         <p class="qs-section-blurb">
-          On PowerShell: <code>$env:BOLT_VERSION='0.1.18'; irm https://sparcle.app/trial.ps1 | iex</code>.
+          On PowerShell: <code>$env:BOLT_VERSION='0.1.18'; irm https://sparcle.app/install.ps1 | iex</code>.
         </p>
       </div>
     </section>
@@ -149,7 +149,7 @@ const fiveThings: Step[] = [
       <div class="container">
         <h2>Bring your own IdP and data (optional)</h2>
         <p class="qs-section-blurb">
-          The trial works end-to-end on the preloaded corpus. When you're ready to
+          The free install works end-to-end on the preloaded corpus. When you're ready to
           point it at your environment:
         </p>
         <ul class="qs-bullets">
@@ -167,9 +167,9 @@ const fiveThings: Step[] = [
       <div class="container">
         <h2>Data locality</h2>
         <ul class="qs-bullets">
-          <li>The trial runs entirely on your machine. Bolt, the local API sidecar, and embedded PostgreSQL are all local processes.</li>
+          <li>Bolt runs entirely on your machine. The desktop app, the local API sidecar, and embedded PostgreSQL are all local processes.</li>
           <li>LLM calls are the only outbound traffic, and only when you point Bolt at a hosted provider. PII masking redacts sensitive fields at the boundary before the call.</li>
-          <li>No trial data is sent to Sparcle servers in any shipping mode. There is no telemetry path that uploads your corpus, queries, or results.</li>
+          <li>No data is sent to Sparcle servers in any shipping mode. There is no telemetry path that uploads your corpus, queries, or results.</li>
         </ul>
       </div>
     </section>
@@ -178,13 +178,13 @@ const fiveThings: Step[] = [
       <div class="container">
         <h2>What's next</h2>
         <ul class="qs-bullets">
-          <li><a href="/docs/pdfs/pilot-preflight-checklist.pdf" target="_blank" rel="noopener">90-day pilot pre-flight checklist (PDF)</a> for moving from trial to a real environment.</li>
+          <li><a href="/docs/pdfs/pilot-preflight-checklist.pdf" target="_blank" rel="noopener">90-day pilot pre-flight checklist (PDF)</a> for moving from a single-user install to a real org deployment.</li>
           <li><a href="/architecture">System overview</a> if you want the full picture before a pilot.</li>
           <li><a href="/security">Security and compliance</a> for the threat-model and audit-chain story.</li>
-          <li><a href="/pricing">Pricing</a> when you're ready to size a deployment.</li>
+          <li><a href="/pricing">Pricing</a> when you're ready to size an org deployment.</li>
         </ul>
         <p class="qs-section-blurb qs-footnote">
-          Trial issues: re-run the install command (it's idempotent). Anything stuck after that,
+          Install issues: re-run the install command (it's idempotent). Anything stuck after that,
           reach the team via the contact link in the footer.
         </p>
       </div>

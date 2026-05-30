@@ -16,8 +16,8 @@ const inclusions = [
   },
   {
     metric: "30 days",
-    label: "Trial-license window",
-    body: "Long enough for daily usage to show up, short enough that no one drifts. License is time-bombed; renew, upgrade, or walk.",
+    label: "Engagement window",
+    body: "Long enough for daily usage to show up, short enough that no one drifts. Engagement is fixed at 30 days; renew, upgrade, or walk.",
   },
   {
     metric: "$5,000",
@@ -27,18 +27,18 @@ const inclusions = [
 ];
 
 const youGet = [
-  "Bolt <strong>trial sidecar</strong> binary on up to 10 user laptops (macOS, Linux, Windows). Single process, embedded Postgres, trial license, no server install required.",
+  "Bolt <strong>sidecar</strong> deployment on up to 10 user laptops (macOS, Linux, Windows). Single process, embedded Postgres, no server install required.",
   "Aeira Catalog tier baked into the sidecar &mdash; identity-bound search across whatever corpus the user chooses to ingest locally (DMS folder, mailbox, Drive sync, code repo).",
   "MCP connectors pre-configured for the tools your users already use: Microsoft 365, Google Workspace, Slack, GitHub, Jira, Salesforce, and more on request.",
   "BYO LLM or use a Sparcle-provided test key for the 30-day window.",
-  "Sealed Merkle audit chain and crypto-shred enabled by default. Even at trial scale, every query carries auditor-grade evidence.",
+  "Sealed Merkle audit chain and crypto-shred enabled by default. Even at small scale, every query carries auditor-grade evidence.",
   "One 60-minute founder-led onboarding call + a single 30-minute check-in mid-window.",
   "Optional reference rights at day 30. Declining does not affect the engagement.",
 ];
 
 const notFor = [
   "Production rollouts. If you need server-side install in your VPC or on-prem, start at the <a href=\"/pilot\">Pilot tier</a> ($15K, 30 seats, Docker/Helm).",
-  "Air-gapped or classified networks. Trial sidecar requires outbound to your chosen LLM; air-gap is the Federated Aeira tier.",
+  "Air-gapped or classified networks. Sidecar deployment requires outbound to your chosen LLM; air-gap is the Federated Aeira tier.",
   "Pure curiosity with no internal champion. Discovery works when one named person on your side owns the outcome.",
   "Free pilots. We do not run them; paid pilots produce decisions, free pilots produce stalls.",
 ];
@@ -47,7 +47,7 @@ const faqs = [
   {
     question: "How is Discovery different from the Pilot tier?",
     answer:
-      "<p>Different deployment shape, different validation question. <strong>Discovery</strong> ships the Bolt <em>trial sidecar</em> binary &mdash; each user runs it locally on their laptop. There is no install in your data center. Best for &ldquo;does this work for my team?&rdquo; <strong>Pilot</strong> ships the production server build via Docker compose (single-host) or Helm (multi-node) inside your VPC, on-prem, or cloud account. Best for &ldquo;can we run this at department scale safely?&rdquo; <a href=\"/pilot\">See the Pilot tier &rarr;</a></p>",
+      "<p>Different deployment shape, different validation question. <strong>Discovery</strong> deploys Bolt as a <em>sidecar</em> &mdash; each user runs it locally on their laptop. There is no install in your data center. Best for &ldquo;does this work for my team?&rdquo; <strong>Pilot</strong> ships the production server build via Docker compose (single-host) or Helm (multi-node) inside your VPC, on-prem, or cloud account. Best for &ldquo;can we run this at department scale safely?&rdquo; <a href=\"/pilot\">See the Pilot tier &rarr;</a></p>",
   },
   {
     question: "Can Discovery convert into a Pilot or Founding Customer engagement?",
@@ -55,9 +55,9 @@ const faqs = [
       "<p>Yes. If you decide to expand at day 30, the $5K applies as a credit against the Pilot tier or against year one of any Bolt or Aeira annual.</p>",
   },
   {
-    question: "Why a trial sidecar and not a real install?",
+    question: "Why a sidecar deployment and not a real install?",
     answer:
-      "<p>At 10 seats and 30 days the install-and-tear-down cost of a production deployment outweighs the validation signal. The trial sidecar is the same product code as production &mdash; just packaged for laptop-local execution. You learn whether the workflow works; later you graduate to production for the scale and uptime guarantees.</p>",
+      "<p>At 10 seats and 30 days the install-and-tear-down cost of a production deployment outweighs the validation signal. The sidecar is the same product code as production &mdash; just packaged for laptop-local execution. You learn whether the workflow works; later you graduate to production for the scale and uptime guarantees.</p>",
   },
   {
     question: "Is the price negotiable?",
@@ -79,14 +79,14 @@ const faqs = [
 
 <BaseLayout
   title="Discovery — $5K, up to 10 seats, 30 days | Sparcle"
-  description="The entry rung for Bolt + Aeira. Bolt trial sidecar on up to 10 user laptops for 30 days. Flat $5K. Founder-led. For partners and dept heads ready to put AI on confidential work."
+  description="The entry rung for Bolt + Aeira. Bolt sidecar on up to 10 user laptops for 30 days. Flat $5K. Founder-led. For partners and dept heads ready to put AI on confidential work."
   canonical="https://sparcle.app/discovery-pilot"
 >
   <link slot="head" rel="stylesheet" href="/css/pilot-stages.css" />
   <main class="page-discovery-pilot">
     <Hero
       eyebrow="Discovery"
-      title="<strong>$5,000.</strong> Up to 10 seats. <br>30 days. Trial sidecar."
+      title="<strong>$5,000.</strong> Up to 10 seats. <br>30 days. Sidecar."
       lede="The lowest-friction way to put Bolt on real work, with real users, on your team's own laptops &mdash; before any production rollout."
     >
       <a href="#apply" class="btn btn-primary btn-lg">Apply for Discovery</a>
@@ -131,8 +131,8 @@ const faqs = [
 
     <PageSection
       eyebrow="What is included"
-      title="Trial sidecar, real product"
-      lede="The Discovery sidecar is the same Rust code as production Bolt. Only the packaging differs &mdash; single binary, embedded Postgres, trial-licensed for 30 days."
+      title="Sidecar deployment, real product"
+      lede="The Discovery sidecar is the same Rust code as production Bolt. Only the packaging differs &mdash; single binary, embedded Postgres, founder-led for 30 days."
       stripe="a"
       width="prose"
       align="left"
@@ -174,7 +174,7 @@ const faqs = [
             </tr>
             <tr>
               <th scope="row">Deployment</th>
-              <td><strong>Trial sidecar</strong> on user laptops</td>
+              <td><strong>Sidecar</strong> on user laptops</td>
               <td><strong>Docker</strong> single-host or <strong>Helm</strong> multi-node in your VPC / on-prem / cloud</td>
               <td>Same as Pilot + roadmap influence</td>
             </tr>
@@ -255,7 +255,7 @@ const faqs = [
     <CTAStrip
       variant="band"
       title="Two emails. One call. Sidecar in motion."
-      lede="Tell us the work, the team, and a date. We confirm fit, send a 2-page agreement, and ship the trial binary within the week."
+      lede="Tell us the work, the team, and a date. We confirm fit, send a 2-page agreement, and ship the binary within the week."
     >
       <a href="#" onclick="openContactModal('Discovery Application'); return false;" class="btn btn-primary btn-xl">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

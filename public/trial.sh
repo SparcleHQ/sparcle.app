@@ -1,9 +1,12 @@
 #!/bin/sh
-# Bolt Enterprise Trial Installer — delegates to install.sh with trial edition.
+# DEPRECATED — Bolt is now free for individuals; the separate trial flow has
+# been retired. This shim delegates to install.sh so any old links keep working.
 #
-# Usage:
-#   curl -fsSL https://sparcle.app/trial.sh | sh                       # latest
-#   curl -fsSL https://sparcle.app/trial.sh | sh -s -- 0.1.18          # pin a version
-#   BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/trial.sh | sh   # pin via env
+# Use:
+#   curl -fsSL https://sparcle.app/install.sh | sh
+#
+# This file may be removed in a future release.
 set -e
-curl -fsSL https://sparcle.app/install.sh | sh -s -- trial "$@"
+echo "[bolt] note: /trial.sh is deprecated. Bolt is free for individuals." >&2
+echo "[bolt]       Switching to https://sparcle.app/install.sh ..." >&2
+exec curl -fsSL https://sparcle.app/install.sh | sh -s -- "$@"

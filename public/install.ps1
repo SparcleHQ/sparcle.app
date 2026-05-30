@@ -1,9 +1,10 @@
 # Bolt Installer for Windows — https://sparcle.app/install.ps1
 # Usage (run in PowerShell):
-#   irm https://sparcle.app/install.ps1 | iex                                            # Personal edition (default), latest
-#   $env:EDITION='trial'; irm https://sparcle.app/install.ps1 | iex                      # Enterprise Trial, latest
+#   irm https://sparcle.app/install.ps1 | iex                                            # Bolt (free), latest
 #   $env:BOLT_VERSION='0.1.18'; irm https://sparcle.app/install.ps1 | iex                # Pin a specific version
-#   $env:EDITION='trial'; $env:BOLT_VERSION='0.1.18'; irm .../install.ps1 | iex          # Both
+#
+# Backwards-compat: $env:EDITION='personal', 'free', 'trial', or 'enterprise'
+# all accept and resolve to the same free Bolt build.
 #
 # What this does:
 #   1. Resolves the target version ($env:BOLT_VERSION > /releases/latest)
@@ -407,20 +408,26 @@ function Invoke-PostgresPrewarm {
 }
 
 # ── Parse edition ───────────────────────────────────────────────────────────
+# Bolt is now free for individuals. `trial` and `enterprise` are kept as
+# aliases for backwards compatibility and resolve to the same Free build.
+# The bundle id and installed-app folder stay app.sparcle.bolt.personal so
+# upgrades from older "Bolt Personal" installs land in place.
 switch ($Edition.ToLower()) {
-  "personal" {
-    $AppName    = "Bolt Personal"
-    $FilePrefix = "Bolt-Personal"
+  { $_ -in "personal", "free" } {
+    $Edition       = "personal"
+    $AppName       = "Bolt"
+    $FilePrefix    = "Bolt-Personal"
     $AppIdentifier = "app.sparcle.bolt.personal"
   }
   { $_ -in "trial", "enterprise" } {
-    $Edition    = "trial"
-    $AppName    = "Bolt Enterprise"
-    $FilePrefix = "Bolt-Enterprise-Trial"
-    $AppIdentifier = "app.sparcle.bolt.enterprise"
+    Write-Host "  Note: '$Edition' is now an alias for the free Bolt build."
+    $Edition       = "personal"
+    $AppName       = "Bolt"
+    $FilePrefix    = "Bolt-Personal"
+    $AppIdentifier = "app.sparcle.bolt.personal"
   }
   default {
-    Fail "Unknown edition: $Edition. Use 'personal' or 'trial'."
+    Fail "Unknown edition: $Edition. Bolt is free for individuals; just run without arguments."
   }
 }
 
@@ -630,7 +637,7 @@ switch ($Edition) {
   }
   "trial" {
     Write-Host "  Next: Try instant demo mode, or configure your own IDP + LLM"
-    Write-Host "  Trial: 7 days, all features unlocked"
+    Write-Host "  All features unlocked - free for individuals"
   }
 }
 Write-Host ""

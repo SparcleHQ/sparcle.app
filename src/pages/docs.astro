@@ -23,11 +23,11 @@ interface DocCategory {
 const categories: DocCategory[] = [
   {
     title: "Getting started",
-    blurb: "Install Bolt, try the trial sidecar, run your first cross-source query.",
+    blurb: "Install Bolt, run your first cross-source query.",
     items: [
       { title: "Install Bolt desktop (macOS · Linux · Windows)", href: "/download" },
-      { title: "Trial sidecar quickstart", href: "/docs/trial-quickstart" },
-      { title: "Trial sidecar quickstart (PDF)", href: "/docs/pdfs/trial-quickstart.pdf", external: true },
+      { title: "Bolt quickstart", href: "/docs/quickstart" },
+      { title: "Bolt quickstart (PDF)", href: "/docs/pdfs/trial-quickstart.pdf", external: true },
       { title: "Pricing + tiers", href: "/pricing" },
       { title: "Connecting your IdP (Okta · Entra · OneLogin · Auth0 · Google · Zoho)", href: "/security" },
     ],
@@ -82,9 +82,9 @@ const categories: DocCategory[] = [
   },
   {
     title: "Pilots + economics",
-    blurb: "Three on-ramps: 30-day Discovery ($5K, trial sidecar), 90-day Pilot ($15K, production deployment), or Founding Customer (24-month commit).",
+    blurb: "Three on-ramps: 30-day Discovery ($5K, sidecar deployment), 90-day Pilot ($15K, production deployment), or Founding Customer (24-month commit).",
     items: [
-      { title: "Discovery — $5K, 30 days, up to 10 seats, trial sidecar", href: "/discovery-pilot" },
+      { title: "Discovery — $5K, 30 days, up to 10 seats, sidecar deployment", href: "/discovery-pilot" },
       { title: "Pilot — $15K, 90 days, up to 30 seats, production Docker or Helm", href: "/pilot" },
       { title: "Pilot pre-flight checklist", href: "/pilot-preflight" },
       { title: "Founding Customer program (40% off list, 24-month lock)", href: "/pricing#founding" },
@@ -117,7 +117,7 @@ const categories: DocCategory[] = [
       title="Docs."
       lede="Bolt + Aeira documentation. Architecture, security, compliance, connectors, API reference, pilots. Some artifacts (threat models, pen-test reports) are shared under NDA. Request via the security page."
     >
-      <Pill href="/download" variant="brand" size="lg">Try the trial sidecar &rarr;</Pill>
+      <Pill href="/download" variant="brand" size="lg">Get Bolt &rarr;</Pill>
       <Pill href="#" variant="neutral" size="lg" class="js-pill-nda">Request a security brief (NDA) &rarr;</Pill>
       <Pill href="/pricing" variant="neutral" size="lg">Pricing &rarr;</Pill>
       <Pill href="#" variant="neutral" size="lg" class="js-pill-contact">Contact &rarr;</Pill>

@@ -5,25 +5,25 @@ import PageSection from "../components/ui/PageSection.astro";
 import FAQ from "../components/ui/FAQ.astro";
 
 const faqs = [
-  { question: "Do I need an account to use Bolt Personal?",
-    answer: "<p>No. Bolt Personal runs entirely on your machine with no login. Just download, add an AI API key, and start using.</p>" },
-  { question: "What happens after the 7-day Enterprise trial?",
-    answer: "<p>The app stops connecting to enterprise features (email, calendar, agentic actions). Your local data remains. Contact us to purchase a license or switch to Personal edition.</p>" },
+  { question: "Do I need an account to use Bolt?",
+    answer: "<p>No. Bolt runs entirely on your machine with no login required to get started. Add an AI API key (or connect Google / Microsoft for full productivity), and start using it.</p>" },
+  { question: "Is Bolt really free?",
+    answer: "<p>Yes, for individuals. Download, install, and use Bolt on your own device with no time limit. The paid tiers on the pricing page are for organizations that need central deployment, governance, audit, SCIM, and IT-managed installs.</p>" },
   { question: "What AI keys work?",
     answer: "<p>Any OpenAI-compatible API — OpenAI, Anthropic, Google Gemini (has a free tier), Ollama (local), Groq, Together, or your own endpoint.</p>" },
   { question: "Does Bolt send my data anywhere?",
-    answer: "<p>No. Both editions run fully on your device. AI requests go directly from your machine to your chosen provider — nothing routes through Sparcle.</p>" },
+    answer: "<p>No. Bolt runs fully on your device. AI requests go directly from your machine to your chosen provider — nothing routes through Sparcle.</p>" },
   { question: "How do I launch Bolt?",
     answer: "<p>Press <kbd>Cmd+Shift+K</kbd> on macOS or <kbd>Ctrl+Shift+K</kbd> on Windows/Linux. Or configure your own shortcut. Bolt appears as a non-disruptive overlay on top of your focused app.</p>" },
-  { question: "What IDP credentials do I need for Enterprise Trial?",
-    answer: "<p>Your organization's OAuth Client ID and Secret for Google Workspace, Microsoft Entra ID, Okta, or any OIDC provider. The setup wizard walks you through it step by step.</p>" },
+  { question: "Can I connect Gmail, Calendar, Drive, Tasks, and Contacts?",
+    answer: "<p>Yes. Sign in with Google or Microsoft from the settings, and per-feature connect cards walk you through each scope on demand. Your data stays on this device; sensitive values are masked before any LLM call.</p>" },
   { question: "What is demo mode?",
-    answer: "<p>Enterprise Trial includes a one-click demo that loads sample data (emails, meetings, tasks) so you can explore the full platform instantly — no credentials needed. It resets when you quit the app.</p>" },
+    answer: "<p>Bolt includes a one-click demo that loads sample data (emails, meetings, tasks) so you can explore everything instantly — no credentials needed. It resets when you quit the app.</p>" },
 ];
 ---
 <BaseLayout
-  title="Download Bolt — 7-Day Enterprise Trial + Free Personal | Sparcle"
-  description="Get Bolt Personal (free, BYO API key, no login) or Bolt Enterprise Trial (7 days, full platform, your org credentials). macOS, Linux, Windows. Includes instant demo mode with sample data."
+  title="Download Bolt — Free for individuals | Sparcle"
+  description="Get Bolt on macOS, Linux, or Windows. Free for individuals — no login required, BYO AI key, includes instant demo mode with sample data. Same desktop client as the paid org tiers."
   canonical="https://sparcle.app/download"
 >
   <Fragment slot="head">
@@ -33,13 +33,11 @@ const faqs = [
       name: "Bolt",
       applicationCategory: "BusinessApplication",
       operatingSystem: "macOS, Linux, Windows",
-      description: "Sovereign AI agent for enterprise productivity. Available in Personal (free) and Enterprise Trial editions.",
+      description: "Sovereign AI agent for productivity. Free for individuals — runs entirely on your device.",
       url: "https://sparcle.app/download",
       offers: [
-        { "@type": "Offer", name: "Bolt Personal", price: "0", priceCurrency: "USD",
-          description: "Free forever — private AI chat with your own API key, no login required." },
-        { "@type": "Offer", name: "Bolt Enterprise Trial", price: "0", priceCurrency: "USD",
-          description: "7-day free trial of the full enterprise platform. Bring your own IDP, email, and LLM." },
+        { "@type": "Offer", name: "Bolt", price: "0", priceCurrency: "USD",
+          description: "Free for individuals. BYO AI key, no login required, full desktop suite. Org / multi-user deployments are paid (see pricing)." },
       ],
       provider: { "@type": "Organization", name: "Sparcle, LLC", url: "https://sparcle.app" },
     })} />
@@ -49,32 +47,30 @@ const faqs = [
     <Hero
       eyebrow="Download"
       title="Get Bolt."
-      lede="Start with the 7-day Enterprise Trial to evaluate the full platform with your own org credentials. Bolt Personal is the free local version — same desktop suite, no enterprise integrations."
+      lede="Free for individuals. Same desktop client as the paid org tiers — runs entirely on your machine, no login required to get started. macOS, Linux, Windows."
     />
 
     <PageSection stripe="b">
       <div class="download-editions">
 
-        <!-- Bolt Enterprise Trial (PRIMARY) -->
+        <!-- Bolt (Free for individuals) -->
         <div class="product-main download-edition--primary">
           <div class="product-header">
-            <img src="/images/bolt-logo.svg" alt="Bolt Enterprise" class="product-logo-img" width="56" height="56">
+            <img src="/images/bolt-logo.svg" alt="Bolt" class="product-logo-img" width="56" height="56">
             <div>
-              <h3>Bolt Enterprise</h3>
-              <p class="product-subtitle">Full Platform — BYO Everything</p>
+              <h3>Bolt</h3>
+              <p class="product-subtitle">Free for individuals &middot; BYO Everything</p>
             </div>
-            <span class="product-badge product-badge--accent">7-Day Trial<span class="product-badge-suffix"> &middot; Recommended</span></span>
           </div>
           <p class="product-intro">
-            The full enterprise platform. Bring your own identity provider, email, calendar,
-            and AI backend. Built for IT admins, CIOs, and CEOs to evaluate with real
-            org credentials. All features unlocked for 7&nbsp;days.
+            The full desktop suite. Bring your own identity provider, email, calendar,
+            and AI backend. Runs entirely on your machine, no data ever reaches Sparcle.
             <strong>Includes instant demo mode</strong> — preview the full platform with sample data before configuring anything.
           </p>
           <ul class="product-features-compact">
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              Bring your own Google, Microsoft, Okta, or any OIDC
+              Optional sign-in with Google, Microsoft, Okta, or any OIDC
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -90,96 +86,21 @@ const faqs = [
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              Multi-layer security pipeline
+              Multi-layer security pipeline (PII masking at LLM boundary)
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
               Open MCP integrations
             </li>
             <li class="compact-feature">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              All enterprise features unlocked during trial
-            </li>
-            <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               Instant demo mode — preview with sample data
             </li>
           </ul>
-
-          <div class="download-section">
-            <div class="dl-tabs">
-              <button class="dl-tab dl-tab--active" data-platform="macos">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                macOS
-              </button>
-              <button class="dl-tab" data-platform="linux">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a2.1 2.1 0 0 0-.084-.006c-.393 0-.777.158-1.048.473-.611.71-.354 1.884.482 2.497-.184.373-.27.77-.27 1.163 0 .63.259 1.248.867 1.687-.186.37-.275.758-.275 1.142 0 .838.537 1.591 1.541 1.846.305 1.166 1.451 2.344 2.527 2.344.348 0 .685-.113.978-.349.328.24.729.349 1.137.349.844 0 1.535-.479 1.879-1.219.417.102.862.155 1.316.155.455 0 .9-.054 1.316-.155.344.74 1.035 1.219 1.879 1.219.408 0 .809-.109 1.137-.349.293.236.63.349.978.349 1.076 0 2.222-1.178 2.527-2.344 1.004-.255 1.541-1.008 1.541-1.846 0-.384-.089-.771-.275-1.142.608-.439.867-1.057.867-1.687 0-.393-.086-.79-.27-1.163.836-.613 1.093-1.787.482-2.497-.271-.315-.655-.473-1.048-.473-.029 0-.057.003-.084.006.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298A5.1 5.1 0 0 0 12.504 0z"/></svg>
-                Linux
-              </button>
-              <button class="dl-tab" data-platform="windows">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
-                Windows
-              </button>
-            </div>
-            <div class="dl-panel" data-platform="macos">
-              <p class="dl-cmd-hint">Run in Terminal &middot; Apple Silicon &amp; Intel</p>
-              <div class="dl-code-block">
-                <code>curl -fsSL https://sparcle.app/trial.sh | sh</code>
-                <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/trial.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt Enterprise</p>
-            </div>
-            <div class="dl-panel" data-platform="linux" hidden>
-              <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
-              <div class="dl-code-block">
-                <code>curl -fsSL https://sparcle.app/trial.sh | sh</code>
-                <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://sparcle.app/trial.sh | sh');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <p class="dl-cmd-note">Auto-detects Linux &middot; installs AppImage to ~/.local/bin</p>
-            </div>
-            <div class="dl-panel" data-platform="windows" hidden>
-              <p class="dl-cmd-hint">Run in PowerShell &middot; x86_64</p>
-              <div class="dl-code-block">
-                <code>irm https://sparcle.app/trial.ps1 | iex</code>
-                <button class="dl-copy-btn" onclick="navigator.clipboard.writeText('irm https://sparcle.app/trial.ps1 | iex');this.querySelector('span').textContent='Copied!';setTimeout(()=>this.querySelector('span').textContent='Copy',1500)" title="Copy to clipboard">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                  <span>Copy</span>
-                </button>
-              </div>
-              <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt Enterprise</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bolt Personal (SECONDARY) -->
-        <div class="product-secondary download-edition--secondary">
-          <div class="product-header">
-            <img src="/images/bolt-logo.svg" alt="Bolt Personal" class="product-logo-img" width="44" height="44">
-            <div>
-              <h3>Bolt Personal</h3>
-              <p class="product-subtitle">Local AI desktop suite — no login, no cloud, BYO API key</p>
-            </div>
-            <span class="product-badge product-badge--free">FREE FOREVER</span>
-          </div>
-          <p class="product-intro">
-            App launcher, clipboard history, file browser, terminal, and an AI agent that
-            works with your files. Same desktop suite as Enterprise, minus the org-wide
-            integrations. Free forever.
+          <p class="product-features-note">
+            All of the above are also in the paid org tier &mdash; centrally deployed, governed, and audited.
+            <a href="#for-your-org">See what your org gets &darr;</a>
           </p>
-          <ul class="download-edition-inline-features">
-            <li>App launcher</li>
-            <li>Clipboard history</li>
-            <li>File browser + terminal</li>
-            <li>AI chat &amp; web lookup</li>
-            <li>BYO API key (Gemini free tier works)</li>
-            <li>macOS &middot; Linux &middot; Windows</li>
-          </ul>
 
           <div class="download-section">
             <div class="dl-tabs">
@@ -205,7 +126,7 @@ const faqs = [
                   <span>Copy</span>
                 </button>
               </div>
-              <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt Personal</p>
+              <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt</p>
             </div>
             <div class="dl-panel" data-platform="linux" hidden>
               <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
@@ -231,6 +152,93 @@ const faqs = [
             </div>
           </div>
         </div>
+
+      </div>
+    </PageSection>
+
+    <!-- For your organization — the buyer-facing value prop. CISOs, IT, and
+         security/compliance leads land on /download to evaluate before they
+         have a sales conversation; this section answers "exactly why should
+         my org pay for this?" with named controls, named primitives, and
+         deployment topology. Kept below the free download so the individual
+         user gets a clean download CTA at the top, decision-makers scroll
+         once to find the org story. -->
+    <a id="for-your-org" class="anchor" aria-hidden="true"></a>
+    <PageSection stripe="a">
+      <header class="org-section__head">
+        <p class="org-section__eyebrow">For your organization</p>
+        <h2 class="org-section__title">Deploy centrally for governance.</h2>
+        <p class="org-section__lede">
+          The paid org tiers are the same product, run inside your VPC or on-prem,
+          with the controls IT and security need to make AI safe at scale.
+        </p>
+      </header>
+
+      <div class="org-benefits">
+        <article class="org-benefit">
+          <h3 class="org-benefit__title">Central governance + audit</h3>
+          <p class="org-benefit__body">
+            Sealed Merkle audit chain on every retrieval, masking decision, tool call, and LLM call. Per-tenant
+            CMK envelopes. Crypto-shred for right-to-erasure. Standalone verifier binary your CISO can run
+            offline. SIG Lite, threat model, DPA, and MSA drafts ready for security review.
+          </p>
+        </article>
+
+        <article class="org-benefit">
+          <h3 class="org-benefit__title">Identity at the edge</h3>
+          <p class="org-benefit__body">
+            SSO via Microsoft Entra, Okta, Google Workspace, OneLogin, Auth0, or any OIDC provider. SCIM 2.0
+            provisioning for joiner / mover / leaver. IDP-bound ACLs propagated to every query and every
+            downstream tool call. No service-account fan-out; the user's identity is the authorization
+            primitive end-to-end.
+          </p>
+        </article>
+
+        <article class="org-benefit">
+          <h3 class="org-benefit__title">Central MCP + agent hub</h3>
+          <p class="org-benefit__body">
+            Admin-curated MCP connector catalog. Per-tenant token vault with envelope encryption. Agent
+            allowlist with capability scoping. Identity-bound MCP calls audited end-to-end. Users get the
+            integrations IT has approved; nothing else. Workforce-grade onboarding to new connectors
+            without re-architecting.
+          </p>
+        </article>
+
+        <article class="org-benefit">
+          <h3 class="org-benefit__title">LLM control + cost visibility</h3>
+          <p class="org-benefit__body">
+            BYO LLM &mdash; Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic, OpenAI, on-prem Llama, anything
+            OpenAI-compatible. Zero token markup. Per-org, per-team, per-user token telemetry with
+            dashboards. Model routing by sensitivity tier. Privacy-tier gating (no-train providers,
+            on-prem-only models for regulated workloads).
+          </p>
+        </article>
+
+        <article class="org-benefit">
+          <h3 class="org-benefit__title">PII + DLP at the LLM boundary</h3>
+          <p class="org-benefit__body">
+            Sensitive values are masked before any LLM call. Internal tools still operate on unmasked
+            values so productivity does not regress. DLP policy is enforced at the agent boundary, not
+            after the fact. The masking contract is provable in the audit chain &mdash; show the auditor
+            exactly which fields the model saw.
+          </p>
+        </article>
+
+        <article class="org-benefit">
+          <h3 class="org-benefit__title">Self-hosted deployment</h3>
+          <p class="org-benefit__body">
+            Docker compose (single-host, <code>docker-compose.ha.yml</code>) for small deployments. Helm
+            chart (multi-node, HA, multi-cluster) for production scale. Runs inside your VPC, on-prem
+            datacenter, or cloud account. Air-gapped at the Federated Aeira tier. Sparcle has no inbound
+            or outbound access to your deployment.
+          </p>
+        </article>
+      </div>
+
+      <div class="org-section__ctas">
+        <a href="/pricing" class="btn btn-primary btn-lg">See pricing &rarr;</a>
+        <a href="/discovery-pilot" class="btn btn-secondary btn-lg">Start with $5K Discovery &rarr;</a>
+        <a href="/architecture" class="btn btn-secondary btn-lg">Architecture &rarr;</a>
       </div>
     </PageSection>
 
@@ -269,14 +277,14 @@ const faqs = [
 </BaseLayout>
 
 <style is:global>
-  /* Stacked editions — Enterprise primary on top, Personal secondary below */
+  /* Single Bolt card — Free for individuals. */
   .download-editions {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
 
-  /* Primary card: Enterprise. Brand-blue accent, raised feel, full prominence. */
+  /* Primary card: full prominence. */
   .download-edition--primary {
     border-color: var(--brand-primary-light);
     box-shadow: 0 12px 40px rgba(37, 99, 235, 0.10);
@@ -293,82 +301,133 @@ const faqs = [
   .download-edition--primary > * {
     position: relative;
   }
-  .product-badge--accent {
-    background: var(--brand-primary) !important;
-    color: #fff !important;
-    border-color: var(--brand-primary) !important;
-  }
-  .product-badge--free {
-    background: var(--color-success-strong) !important;
-    color: #fff !important;
-    border-color: var(--color-success-strong) !important;
-  }
 
-  /* Badge stays inline with logo + title within the product-header. */
-  .download-edition--primary .product-header,
-  .download-edition--secondary .product-header {
-    flex-wrap: wrap;
-  }
-  .download-edition--primary .product-header > div:not(.product-badge):not(.product-logo-img),
-  .download-edition--secondary .product-header > div:not(.product-badge):not(.product-logo-img) {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .download-edition--primary .product-header .product-badge,
-  .download-edition--secondary .product-header .product-badge {
-    position: static;
-    top: auto;
-    right: auto;
-    margin-left: auto;
-    white-space: nowrap;
-    max-width: 100%;
-  }
-  @media (max-width: 640px) {
-    .download-edition--primary .product-header .product-badge,
-    .download-edition--secondary .product-header .product-badge {
-      font-size: 0.65rem;
-      padding: 0.35rem 0.7rem;
-      letter-spacing: 0.08em;
-    }
-  }
-  @media (max-width: 600px) {
-    .download-edition--primary .product-header .product-badge,
-    .download-edition--secondary .product-header .product-badge {
-      font-size: 0.6rem;
-      padding: 0.3rem 0.6rem;
-      letter-spacing: 0.06em;
-    }
-    .product-badge-suffix { display: none; }
-  }
-
-  /* Secondary card: Personal. */
-  .download-edition--secondary {
-    padding: 1.75rem 2rem;
-    background: var(--bg-surface);
-    border-color: var(--border-subtle);
-  }
-  .download-edition--secondary h3 { font-size: 1.25rem; }
-  .download-edition--secondary .product-subtitle { font-size: 0.85rem; }
-  .download-edition--secondary .product-intro { font-size: 0.9rem; line-height: 1.6; }
-  .download-edition-inline-features {
+  /* Feature grid: simple 2-col row flow. HTML order = visual order
+     (left-to-right, top-to-bottom). 7 items wrap as 4 rows: row 4 has a
+     single item in col 1. Collapses to single column under 720px. */
+  .product-features-compact {
     list-style: none;
     padding: 0;
-    margin: 0 0 2rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 0.6rem;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-  }
-  .download-edition-inline-features li {
-    padding: 0.25rem 0.6rem;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-full);
-    line-height: 1.3;
+    margin: 1.5rem 0 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 1.75rem;
+    row-gap: 0.65rem;
   }
   @media (max-width: 720px) {
-    .download-edition--secondary { padding: 1.5rem 1.25rem; }
+    .product-features-compact {
+      grid-template-columns: 1fr;
+    }
+  }
+  .compact-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-body);
+    line-height: 1.45;
+  }
+  .compact-feature svg {
+    flex-shrink: 0;
+    color: var(--brand-primary);
+    margin-top: 0.15rem;
+  }
+
+  /* Anchor jump-link from the in-card note to the For-Your-Org section. */
+  .product-features-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .product-features-note a {
+    color: var(--brand-primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.25rem;
+  }
+  .product-features-note a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── For Your Organization ─────────────────────────────────────────────
+     Buyer-facing section under the free download card. Six benefit tiles
+     in a 2- or 3-col grid (responsive), with the named controls a CISO /
+     IT lead expects to see. Three CTAs at the bottom: pricing, the $5K
+     Discovery rung, and the architecture deep-dive. */
+  .org-section__head {
+    max-width: 720px;
+    margin: 0 auto 2rem;
+    text-align: center;
+  }
+  .org-section__eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--brand-primary);
+  }
+  .org-section__title {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--text-heading);
+  }
+  .org-section__lede {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .org-benefits {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem 1.25rem;
+    margin: 0 auto;
+    max-width: 1100px;
+  }
+  @media (min-width: 980px) {
+    .org-benefits {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .org-benefit {
+    padding: 1.25rem 1.35rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+  }
+  .org-benefit__title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.3;
+  }
+  .org-benefit__body {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+  .org-benefit__body code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    background: var(--bg-elevated);
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.25rem;
+    color: var(--text-body);
+  }
+
+  .org-section__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 2.25rem;
   }
 
   /* Download CTA section inside product cards */

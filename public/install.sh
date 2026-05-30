@@ -3,11 +3,12 @@
 # Works on macOS and Linux.
 #
 # Usage:
-#   curl -fsSL https://sparcle.app/install.sh | sh                          # Personal edition (default), latest
-#   curl -fsSL https://sparcle.app/install.sh | sh -s -- trial              # Enterprise Trial, latest
-#   curl -fsSL https://sparcle.app/install.sh | sh -s -- personal           # Personal (explicit), latest
-#   curl -fsSL https://sparcle.app/install.sh | sh -s -- trial 0.1.18       # Specific version (positional)
+#   curl -fsSL https://sparcle.app/install.sh | sh                          # Bolt (free), latest
+#   curl -fsSL https://sparcle.app/install.sh | sh -s -- personal 0.1.18    # Specific version (positional)
 #   BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/install.sh | sh      # Specific version (env)
+#
+# Backwards-compat: `personal`, `free`, `trial`, and `enterprise` are all
+# accepted as the edition argument and resolve to the same free Bolt build.
 #
 # What this does:
 #   1. Detects your OS and architecture
@@ -595,19 +596,27 @@ cleanup() {
 trap cleanup EXIT
 
 # ── Parse edition argument ───────────────────────────────────────────────────
+# Bolt is now free for individuals. `trial` and `enterprise` are kept as
+# aliases for backwards compatibility (any existing curl one-liner or
+# bookmarked link still works) and resolve to the same Free build. The
+# bundle id and installed-app folder stay `app.sparcle.bolt.personal` so
+# upgrades from older "Bolt Personal" installs land in place without
+# stranding Application Support data.
 EDITION="${1:-personal}"
 case "$EDITION" in
-  personal)
-    APP_NAME="Bolt Personal"
+  personal|free)
+    EDITION="personal"
+    APP_NAME="Bolt"
     FILE_PREFIX="Bolt-Personal"
     ;;
   trial|enterprise)
-    EDITION="trial"
-    APP_NAME="Bolt Enterprise"
-    FILE_PREFIX="Bolt-Enterprise-Trial"
+    echo "  Note: '$EDITION' is now an alias for the free Bolt build."
+    EDITION="personal"
+    APP_NAME="Bolt"
+    FILE_PREFIX="Bolt-Personal"
     ;;
   *)
-    fail "Unknown edition: $EDITION. Use 'personal' or 'trial'."
+    fail "Unknown edition: $EDITION. Bolt is free for individuals; just run without arguments."
     ;;
 esac
 
@@ -834,6 +843,22 @@ install_macos() {
   [ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }
 
   pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
+  # Legacy cleanup: older personal builds installed as "Bolt Personal.app"
+  # (productName was renamed to "Bolt" on 2026-05-30 when Personal/Trial
+  # collapsed into Free). Without this kill+rm, an upgrade leaves the old
+  # /Applications/Bolt Personal.app behind, holding stale Dock pins +
+  # Spotlight entries that point at the obsolete bundle.
+  if [ "${APP_NAME}" = "Bolt" ]; then
+    pkill -f "Bolt Personal.app/Contents/MacOS" 2>/dev/null || true
+    if [ -d "/Applications/Bolt Personal.app" ]; then
+      info "Removing legacy /Applications/Bolt Personal.app (renamed to Bolt.app)..."
+      rm -rf "/Applications/Bolt Personal.app" 2>/dev/null || \
+        (sudo rm -rf "/Applications/Bolt Personal.app" 2>/dev/null < /dev/tty || true)
+    fi
+    if [ -d "${HOME}/Applications/Bolt Personal.app" ]; then
+      rm -rf "${HOME}/Applications/Bolt Personal.app" 2>/dev/null || true
+    fi
+  fi
   sleep 1
 
   INSTALL_BASE="/Applications"
@@ -1093,7 +1118,7 @@ if [ "$EDITION" = "personal" ]; then
   echo "  Tip:  Google Gemini has a free tier — works great with Bolt"
 else
   echo "  Next: Try instant demo mode, or configure your own IDP + LLM"
-  echo "  Trial: 7 days, all features unlocked"
+  echo "  All features unlocked — free for individuals"
 fi
 echo ""
 echo ""

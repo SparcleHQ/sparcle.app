@@ -11,5 +11,9 @@ export default defineConfig({
     // the brief publish of those pages still resolve.
     '/apps': '/docs/utilities',
     '/apps/trust': '/docs/utilities#trust',
+    // Trial flow was retired when Bolt became free for individuals.
+    // Old links to the trial-quickstart doc redirect to the renamed
+    // /docs/quickstart so any indexed pages keep working.
+    '/docs/trial-quickstart': '/docs/quickstart',
   },
 });

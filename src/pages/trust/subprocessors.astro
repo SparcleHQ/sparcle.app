@@ -5,7 +5,7 @@ import PageSection from "../../components/ui/PageSection.astro";
 import CTAStrip from "../../components/ui/CTAStrip.astro";
 
 const topologyRows = [
-  ["Trial (sidecar or desktop)", "All data stays on the end-user's machine. No network egress to Sparcle.", "Sparcle is not a data processor."],
+  ["Single-user (sidecar or desktop)", "All data stays on the end-user's machine. No network egress to Sparcle.", "Sparcle is not a data processor."],
   ["Production (Helm in customer infra)", "All data stays inside the customer's Kubernetes cluster. The bolt-api binary runs on customer compute, reads from customer-provided Postgres and Redis, and calls customer-configured LLM endpoints.", "Sparcle is not a data processor for customer data. Sparcle is the software vendor."],
   ["Hosted Bolt", "Not applicable. Sparcle does not offer hosted Bolt today.", "Not applicable."],
 ];

@@ -9,8 +9,8 @@ import CTAStrip from "../../components/ui/CTAStrip.astro";
 // Platform-story landing. Three integration surfaces, three cost/latency
 // profiles. Pick the surface per use case; security is constant.
 //
-// Mode 1 is shipped (Apps = /docs/utilities). Mode 2 (Agents) and Mode 3
-// (Retrieval) are stub pages today; they'll grow as content lands.
+// Mode 1 (Apps = /docs/utilities) and Mode 3 (Retrieval) ship today. Mode 2
+// (Agents) is rolling out; its docs page grows as content lands.
 
 // Scenario buckets per mode. Reframed from "given X, use Z" (table) to
 // "reach for Z when X" (cards) — easier to scan, no fragile table CSS.
@@ -90,7 +90,7 @@ const fitByMode = [
           </p>
         </Card>
 
-        <Card eyebrow="Mode 2 &middot; Available now" title="Agents" accent="success">
+        <Card eyebrow="Mode 2 &middot; Rolling out" title="Agents" accent="success">
           <p class="mode-tagline">
             The agent platform for your org. Define agents in Bolt, sync from
             your team's repo, or wrap services you already run. Bolt routes,
@@ -165,17 +165,16 @@ const fitByMode = [
       stripe="b"
     >
       <CardGrid cols={2}>
-        <Card title="Per-user OAuth only. No service accounts. Ever.">
+        <Card title="Per-user OAuth only. No service accounts.">
           Every call carries the requesting human's identity through the full
           chain, including subagent delegation. An integration cannot escalate
           beyond what the human running it can do. There is no service-account
-          mode, and there will not be one.
+          mode.
         </Card>
         <Card title="Authorization runs before the LLM, not after.">
           ACLs gate retrieval at the index. Tool calls run with the user's
           permissions. Documents the user cannot read never enter the candidate
-          set in the first place. Postprocess filtering is a leak surface; this
-          architecture does not have one.
+          set in the first place, so there is no postprocess-filter leak surface.
         </Card>
         <Card title="The audit chain holds across composition.">
           Every routing decision, every reasoning turn, every tool call, every
@@ -195,8 +194,8 @@ const fitByMode = [
     <CTAStrip
       variant="band"
       eyebrow="Start with what's live today"
-      title="Apps ships. Agents and Retrieval are next."
-      lede="Five minutes from gallery to chip-in-launcher for a bundled App. Fifteen minutes for your first custom manifest. Agents and Retrieval grow into the same surface as they land."
+      title="Apps and Retrieval ship. Agents are rolling out."
+      lede="Five minutes from gallery to chip-in-launcher for a bundled App. Fifteen minutes for your first custom manifest. Agents grow into the same surface as they land."
     >
       <a href="/docs/utilities/quickstart" class="btn btn-primary btn-xl">
         Write your first App

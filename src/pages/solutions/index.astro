@@ -33,7 +33,7 @@ const verticals = [
     slug: "healthcare",
     title: "Healthcare",
     compliance: "HIPAA · 21 CFR Part 11 · HITECH",
-    pitch: "PHI never leaves your perimeter. BAA-ready architecture, provable cryptographic erasure for Right-to-be-Forgotten, audit-trail responses your compliance team can sign off on.",
+    pitch: "PHI is masked before any LLM call and does not transit Sparcle infrastructure. BAA-ready architecture, provable cryptographic erasure for Right-to-be-Forgotten, audit-trail responses your compliance team can sign off on.",
     href: "/solutions/healthcare",
     briefPath: "/docs/pdfs/vertical-healthcare.pdf",
   },
@@ -41,7 +41,7 @@ const verticals = [
     slug: "finance",
     title: "Financial services",
     compliance: "SOX · FINRA 4511 · SEC 17a-4 · GLBA",
-    pitch: "Erasure-with-retention via cryptographic disposal — satisfies SOX/SEC record-keeping and GDPR Art. 17 with the same primitive. WORM-eligible audit chain, customer-held keys, sovereign deployment.",
+    pitch: "Erasure-with-retention via cryptographic disposal — designed to satisfy SOX/SEC record-keeping and GDPR Art. 17 obligations with the same primitive. WORM-eligible audit chain, customer-held keys, sovereign deployment.",
     href: "/solutions/finance",
     briefPath: "/docs/pdfs/vertical-finance.pdf",
   },
@@ -97,7 +97,7 @@ const consistent = [
 
     <PageSection
       eyebrow="Pick your industry"
-      title="Six verticals, one platform."
+      title="Seven verticals, one platform."
       lede="Each page below contains a 1-page printable brief, the compliance frameworks Sparcle ships against in that vertical, the workflows the founding team has built for, and the trust-center artifacts most relevant to that vertical's CISO."
       stripe="b"
     >
@@ -132,13 +132,13 @@ const consistent = [
 
     <PageSection
       eyebrow="Two products"
-      title="Bolt for the agent loop. Aeira for the substrate."
+      title="Bolt for the governed agentic platform. Aeira for the substrate."
       lede="Most prospects evaluate Bolt and Aeira together; some buy one or the other. Both products work across every vertical above."
       stripe="b"
     >
       <CardGrid cols={2}>
-        <Card title="Bolt — Sovereign AI agent" href="/products.html">
-          The launcher, the agent loop, the prompt assembly, the PII masking layer, the multi-layer security pipeline. Bolt is the runtime your users interact with; runs inside your perimeter with your LLM.
+        <Card title="Bolt — Extensible & Governed Agentic Platform" href="/products.html">
+          The launcher, the agent loop, the prompt assembly, the PII masking layer, the multi-layer security pipeline. Bolt is the runtime your users interact with; runs inside your perimeter with your LLM. Most queries are handled by deterministic, on-device recognition and never touch a model — the agentic path is one mode, not the only mode.
         </Card>
         <Card title="Aeira — ACL-aware substrate" href="/products/aeira.html">
           The 4-axis ACL pre-filter at index time, the keyword + vector + graph retrieval, the Authority Policy SDK, the cryptographically-verifiable audit chain. Aeira is the data plane Bolt rides on, or any MCP-compatible client can ride on.

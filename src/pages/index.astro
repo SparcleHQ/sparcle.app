@@ -7,14 +7,14 @@ import CTAStrip from "../components/ui/CTAStrip.astro";
 import Pill from "../components/ui/Pill.astro";
 
 const proofs = [
-  { metric: "30+",      label: "Systems Connected", body: "Via open MCP, not proprietary APIs." },
+  { metric: "100+",     label: "Enterprise Systems", body: "Via open MCP, not proprietary APIs." },
   { metric: "Your IP.", label: "Always Protected",  body: "Regardless of which AI model you use or where it runs." },
   { metric: "<1hr",     label: "To Deploy",         body: "Cloud, VPC, or air-gapped." },
 ];
 ---
 <BaseLayout
-  title="Sparcle — Sovereign Enterprise AI with Governance Built In (BYO LLM)"
-  description="Bolt + Aeira: enterprise AI agent + ACL-aware data plane that runs inside your perimeter. BYO LLM, on-prem or VPC. Built for legal, healthcare, defense, financial services, and federal teams that cannot route confidential matter through a vendor cloud."
+  title="Private, Self-Hosted Enterprise AI — Runs In Your Perimeter (BYO LLM) | Sparcle"
+  description="Sparcle (Bolt + Aeira): private, self-hosted enterprise AI agent + governed data plane. BYO LLM, on-prem / VPC / air-gapped. A ChatGPT/Copilot alternative for HIPAA, GDPR, and regulated teams whose data cannot leave their network."
   canonical="https://sparcle.app/"
 >
   <main class="page-home">
@@ -36,14 +36,15 @@ const proofs = [
             </h1>
 
             <p class="hero-description">
-              The enterprise AI agent that runs inside your own perimeter, with your own LLM,
-              under your own governance framework. Unlike Copilot 365 or Gemini, Bolt deploys on
-              infrastructure you control — so client matter, deal flow, source code, and patient
-              data stay on your network, never theirs. Built to the bar regulated industries
-              demand; equally a fit for <strong>law firms, M&amp;A advisors, IP boutiques,
-              family offices, research and consulting teams</strong> whose work is contractually
-              confidential. Works with your existing identity stack: Microsoft 365, Google
-              Workspace, Zoho, or any OIDC provider.
+              Your people are already using AI on their most sensitive work — and the alternative
+              to a governed surface is confidential data, source code, and customer records pasted
+              into whatever cloud AI is closest. Bolt gives your whole workforce a responsible
+              alternative: <strong>token-optimized, privacy-first, governed, and identity-aware</strong>,
+              running inside your own perimeter with your own LLM. Cut breach risk, stay compliant,
+              and keep everyone productive — in the most regulated industries.
+            </p>
+            <p class="hero-meta" style="font-size:0.92rem;opacity:0.72;margin-top:0.85rem;">
+              Works with your identity stack — Microsoft 365, Google Workspace, Zoho, or any OIDC provider.
             </p>
 
             <div class="hero-metrics">
@@ -202,7 +203,7 @@ const proofs = [
       <p class="design-partners-note">
         Sparcle deploys into environments where vendor reference is contractually forbidden.
         We are not collecting logos &mdash; we are choosing partners. The first 50 founding
-        customers get founder-led integration, 40% off list locked for 24 months, direct
+        customers get founder-led integration, 25% off list locked for 24 months, direct
         roadmap influence, and a contract structured for your security posture, not ours.
         <br>
         <a href="#" onclick="openContactModal('Founding Customer Application'); return false;">Apply for Founding Customer status &rarr;</a>
@@ -216,11 +217,11 @@ const proofs = [
       <div class="founding-banner">
         <div class="founding-banner__lhs">
           <div class="founding-banner__badge">Founding Customers Program</div>
-          <h3 class="founding-banner__title">First 50 customers — 40% off, locked for 24 months</h3>
+          <h3 class="founding-banner__title">First 50 customers — 25% off, locked for 24 months</h3>
           <p class="founding-banner__desc">
             We're building Bolt and Aeira with a small group of founding customers who get
             direct access to the founding team, influence on the roadmap, and pricing locked
-            at 40% below published rates for 24 months. Open through end of 2026 or until
+            at 25% below published rates for 24 months. Open through end of 2026 or until
             50 customers are signed — whichever comes first.
           </p>
           <a href="#" onclick="openContactModal('Founding Customer Application'); return false;" class="btn btn-primary btn-lg">
@@ -229,7 +230,7 @@ const proofs = [
         </div>
         <div class="founding-banner__rhs">
           <ul class="founding-banner__perks">
-            <li>40% off any Bolt or Aeira tier (24-month price lock)</li>
+            <li>25% off any Bolt or Aeira tier (24-month price lock)</li>
             <li>Direct founder access &middot; weekly office hours</li>
             <li>Roadmap influence &middot; priority on feature requests</li>
             <li>Optional co-marketing (case study, joint announcement)</li>
@@ -254,7 +255,7 @@ const proofs = [
               <h3>Bolt</h3>
               <p class="platform-card__subtitle">Sovereign AI Operating System</p>
             </div>
-            <Pill variant="brand" size="sm" class="platform-card__badge">Enterprise AI Agent</Pill>
+            <Pill variant="brand" size="sm" class="platform-card__badge">Governed Agentic Platform</Pill>
           </div>
           <p class="platform-card__intro">
             Deploys inside your firewall — governed, auditable, and compliant from day&nbsp;one.
@@ -272,7 +273,7 @@ const proofs = [
             </li>
             <li>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              <span><strong>The One Thing&#x2122;</strong> — patent-pending priority engine surfaces your most urgent task across systems</span>
+              <span><strong>The One Thing&#x2122;</strong> — patent-pending priority engine surfaces actionable signal from noise across systems</span>
             </li>
             <li>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -292,7 +293,7 @@ const proofs = [
             <Pill variant="brand" size="sm" class="platform-card__badge">Enterprise Search</Pill>
           </div>
           <p class="platform-card__intro">
-            The 100% self-hosted data plane for enterprises whose ACL, data-residency,
+            The fully self-hosted data plane for enterprises whose ACL, data-residency,
             and audit-trail bar is non-negotiable. Identity-bound search, provable erasure,
             audit-trail responses your compliance team can sign off on. Built to the bar
             legal, healthcare, financial services, and defense buyers demand. Start with
@@ -425,7 +426,7 @@ const proofs = [
     <a id="contact" class="anchor" aria-hidden="true"></a>
     <CTAStrip
       variant="band"
-      title="See what unified intelligence looks like."
+      title="See Bolt run inside your perimeter on your data."
       lede="Schedule a 30-minute technical walkthrough with our team. We'll show you how Bolt and Aeira work with your existing systems — no slides, just a live demo."
     >
       <a href="#" onclick="openContactModal('Enterprise Pilot Inquiry'); return false;" class="btn btn-primary btn-xl">

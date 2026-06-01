@@ -40,6 +40,29 @@ function renderIcon(iconId: string | undefined): string {
   if (!iconId || !iconPaths[iconId]) return '';
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPaths[iconId]}</svg>`;
 }
+
+/* FAQPage structured data — Google FAQ rich snippets.
+ * The schema Q&A text MUST match the visible FAQ accordion on the page.
+ * Offerings-driven faqs use title=question, detail=answer (plain text),
+ * so they map straight through with no HTML stripping needed. We merge
+ * both products' faqs when the dual-content path is used; in practice
+ * the public site renders one product per page. */
+const allFaqs = [
+  ...content.faqs,
+  ...(secondContent ? secondContent.faqs : []),
+];
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: allFaqs.map((item) => ({
+    "@type": "Question",
+    name: item.title,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.detail,
+    },
+  })),
+};
 ---
 
 <BaseLayout
@@ -47,7 +70,12 @@ function renderIcon(iconId: string | undefined): string {
   description={hasDual ? "Bolt and Aeira — two products, one vision for enterprise AI." : content.description}
   canonical={content.canonical}
 >
-  <slot name="head" slot="head" />
+  <Fragment slot="head">
+    <slot name="head" />
+    {allFaqs.length > 0 && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+    )}
+  </Fragment>
   <main class="offering-page" aria-labelledby="offering-title">
 
     {hasDual && (

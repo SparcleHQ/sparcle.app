@@ -89,8 +89,8 @@ const faqItems = [
       <Card icon={iconNetwork} title="Self-Hosted">
         You run the data plane and the AI inference. Sparcle ships software, updates, and support. Air-gap option available. Most regulated buyers start here.
       </Card>
-      <Card icon={iconNetwork} title="Hybrid (Bundled)">
-        You run the data plane in your perimeter. Sparcle runs the AI inference gateway under an MSA plus DPA with zero-retention guarantees from upstream providers.
+      <Card icon={iconNetwork} title="Managed AI option">
+        You keep the data plane in your perimeter. Sparcle routes only LLM calls through a managed gateway under an MSA plus DPA with zero-retention guarantees from upstream providers.
       </Card>
     </CardGrid>
   </PageSection>
@@ -223,7 +223,7 @@ const faqItems = [
     <a href="#" class="btn btn-primary btn-lg">Schedule Architecture Review</a>
     <a href="#" class="btn btn-secondary btn-lg">Security posture &rarr;</a>
     <Fragment slot="note">
-      Or download <a href="/download">Bolt Personal — free forever, bring your own API key</a>
+      Or download <a href="/download">Bolt Enterprise — free, bring your own API key</a>
     </Fragment>
   </CTAStrip>
 </BaseLayout>

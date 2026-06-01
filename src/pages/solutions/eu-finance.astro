@@ -7,14 +7,14 @@ import Card from "../../components/ui/Card.astro";
 import CTAStrip from "../../components/ui/CTAStrip.astro";
 
 const frameworks = [
-  ["DORA (Digital Operational Resilience Act)", "EU regulation applying to financial entities and their ICT third-party providers, effective January 2025. Bolt and Aeira ship as customer-deployed software inside the financial entity's perimeter — the lighter-touch posture under DORA's ICT-third-party register."],
+  ["DORA (Digital Operational Resilience Act)", "EU regulation applying to financial entities and their ICT third-party providers, effective January 2025. Bolt and Aeira ship as customer-deployed software inside the financial entity's perimeter — positioned as customer-deployed software in the DORA ICT-third-party register."],
   ["GDPR Art. 17 / 28 / 35", "Right to be Forgotten via cryptographic erasure; Art. 28 data-processor responsibilities; Art. 35 DPIA for high-risk processing. Sparcle's sub-processor disclosure is asymmetric &mdash; customer data does not reach Sparcle infrastructure in the shipping topologies."],
   ["NIS2 (Network and Information Security Directive 2)", "Stricter cybersecurity baseline across EU essential and important entities. The five-phase incident-response framework, the audit chain integrity primitive, and the customer-held KMS posture map to NIS2 risk-management requirements."],
   ["EU AI Act (high-risk AI in finance)", "Sparcle is the runtime, not the model. The Authority Policy SDK lets the financial entity encode the EU AI Act risk-management and human-oversight provisions; the audit-trail responses are the artifact the supervisor reviews."],
 ];
 
 const residency = [
-  ["EU-region key residency", "Customer-held KMS in an EU region (Vault Transit, AWS KMS Frankfurt/Ireland, Azure Key Vault EU). The crypto-shred construction means Sparcle cannot read tenant data even with access to the ciphertext."],
+  ["EU-region key residency", "Customer-held KMS in an EU region (Vault Transit, AWS KMS Frankfurt/Ireland, Azure Key Vault EU). The crypto-shred construction means Sparcle cannot read tenant data without the customer-held CMK."],
   ["No transfer outside the EEA", "Bolt and Aeira run inside the customer's EU perimeter. Customer data does not transit Sparcle infrastructure; sub-processor disclosure makes the transfer mechanism (or lack thereof) explicit."],
   ["DORA-aligned ICT third-party register", "Sparcle is the customer-deployed software vendor under DORA; the customer's ICT-third-party register reflects that role. Sub-processor disclosure, MSA, and DPA template support the customer's register update."],
   ["DPO-verifiable artifacts inside the bloc", "The standalone audit-chain verifier runs offline inside the EU perimeter. Your DPO does not need to transfer audit material outside the bloc to verify integrity."],
@@ -28,7 +28,7 @@ const workflows = [
 ];
 
 const trustDossier = [
-  ["/trust/cryptographic-erasure", "The construction satisfying GDPR Art. 17 while preserving regulatory retention duties. The packet your DPO and supervisory authority receive."],
+  ["/trust/cryptographic-erasure", "The construction designed to satisfy GDPR Art. 17 obligations while preserving regulatory retention duties. The packet your DPO and supervisory authority receive."],
   ["/trust/subprocessors", "Asymmetric topology + cross-border transfer mechanisms (SCCs, UK IDTA addendum). Why customer data does not reach Sparcle infrastructure in EU deployments."],
   ["/trust/verify", "The standalone audit-chain verifier. Your DPO runs it offline inside the EU perimeter; the artifact a supervisory-authority audit relies on."],
   ["/trust/incident-response", "Five-phase response framework aligned with the NIS2 notification timeline. The runbook a CISO at an EU financial institution expects."],

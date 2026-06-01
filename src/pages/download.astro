@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/ui/Hero.astro";
 import PageSection from "../components/ui/PageSection.astro";
 import FAQ from "../components/ui/FAQ.astro";
+import { buildFaqSchema } from "../lib/faqSchema";
 
 const faqs = [
   { question: "Do I need an account to use Bolt?",
@@ -22,32 +23,33 @@ const faqs = [
 ];
 ---
 <BaseLayout
-  title="Download Bolt — Free for individuals | Sparcle"
-  description="Get Bolt on macOS, Linux, or Windows. Free for individuals — no login required, BYO AI key, includes instant demo mode with sample data. Same desktop client as the paid org tiers."
+  title="Download Bolt Enterprise — Free for individuals | Sparcle"
+  description="Get Bolt Enterprise on macOS, Linux, or Windows. Free download for everyone. Single binary; bundled sidecar runs on this device by default, or point at your org's central Bolt server."
   canonical="https://sparcle.app/download"
 >
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      name: "Bolt",
+      name: "Bolt Enterprise",
       applicationCategory: "BusinessApplication",
       operatingSystem: "macOS, Linux, Windows",
-      description: "Sovereign AI agent for productivity. Free for individuals — runs entirely on your device.",
+      description: "Sovereign AI agent for productivity. Free download. Single binary; bundled sidecar runs on this device or points at your org's central Bolt server.",
       url: "https://sparcle.app/download",
       offers: [
-        { "@type": "Offer", name: "Bolt", price: "0", priceCurrency: "USD",
-          description: "Free for individuals. BYO AI key, no login required, full desktop suite. Org / multi-user deployments are paid (see pricing)." },
+        { "@type": "Offer", name: "Bolt Enterprise", price: "0", priceCurrency: "USD",
+          description: "Free download. BYO AI key, no login required for local use, full desktop suite. Paid org tiers add central deployment (Helm/Docker), SCIM, governance, audit, MCP hub (see pricing)." },
       ],
-      provider: { "@type": "Organization", name: "Sparcle, LLC", url: "https://sparcle.app" },
+      provider: { "@type": "Organization", name: "Sparcle", url: "https://sparcle.app" },
     })} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(buildFaqSchema(faqs))} />
   </Fragment>
 
   <main class="page-download">
     <Hero
       eyebrow="Download"
-      title="Get Bolt."
-      lede="Free for individuals. Same desktop client as the paid org tiers — runs entirely on your machine, no login required to get started. macOS, Linux, Windows."
+      title="Get Bolt Enterprise."
+      lede="Free download. Same desktop client whether you run the bundled sidecar on your own machine or connect to your org's central Bolt server. macOS, Linux, Windows."
     />
 
     <PageSection stripe="b">
@@ -56,15 +58,17 @@ const faqs = [
         <!-- Bolt (Free for individuals) -->
         <div class="product-main download-edition--primary">
           <div class="product-header">
-            <img src="/images/bolt-logo.svg" alt="Bolt" class="product-logo-img" width="56" height="56">
+            <img src="/images/bolt-logo.svg" alt="Bolt Enterprise" class="product-logo-img" width="56" height="56">
             <div>
-              <h3>Bolt</h3>
-              <p class="product-subtitle">Free for individuals &middot; BYO Everything</p>
+              <h3>Bolt Enterprise</h3>
+              <p class="product-subtitle">Free download &middot; BYO Everything</p>
             </div>
           </div>
           <p class="product-intro">
             The full desktop suite. Bring your own identity provider, email, calendar,
-            and AI backend. Runs entirely on your machine, no data ever reaches Sparcle.
+            and AI backend. By default, it runs on your machine and no
+            data reaches Sparcle. Your IT can later point Bolt at their central server
+            (see below) without re-installing.
             <strong>Includes instant demo mode</strong> — preview the full platform with sample data before configuring anything.
           </p>
           <ul class="product-features-compact">
@@ -78,7 +82,7 @@ const faqs = [
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              Agentic actions — send emails, schedule meetings
+              Agentic actions — on-device or via MCP tools, with human-in-the-loop approval.
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -90,11 +94,15 @@ const faqs = [
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-9-9h6m6 0h6"/></svg>
-              Open MCP integrations
+              Open MCP integrations and agent-to-agent delegation
             </li>
             <li class="compact-feature">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               Instant demo mode — preview with sample data
+            </li>
+             <li class="compact-feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Local-first, identity-aware, token optimized
             </li>
           </ul>
           <p class="product-features-note">
@@ -126,7 +134,7 @@ const faqs = [
                   <span>Copy</span>
                 </button>
               </div>
-              <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt</p>
+              <p class="dl-cmd-note">Downloads, installs to /Applications, and launches Bolt Enterprise</p>
             </div>
             <div class="dl-panel" data-platform="linux" hidden>
               <p class="dl-cmd-hint">Run in Terminal &middot; x86_64 &amp; ARM64</p>
@@ -148,7 +156,7 @@ const faqs = [
                   <span>Copy</span>
                 </button>
               </div>
-              <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt</p>
+              <p class="dl-cmd-note">Marks app as trusted &middot; downloads, installs, and launches Bolt Enterprise</p>
             </div>
           </div>
         </div>

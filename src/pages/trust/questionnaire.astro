@@ -76,6 +76,10 @@ const sections = [
         q: "Privileged access management?",
         a: "Admin endpoints can be additionally restricted at the ingress layer by source-IP allow-list or mTLS. PII reveal is admin-gated and emits a high-risk audit event on every call; the call is permanently sealed in the Merkle chain.",
       },
+      {
+        q: "How are agent and tool capabilities provisioned and restricted?",
+        a: "Capabilities are declared in a single MCP-native YAML manifest and enforced server-side. Admins provision org-wide Apps centrally; users can build their own desktop Apps; where the two overlap, admin-provisioned Apps take precedence. Entitlements (which tools and connectors a given identity can invoke) are checked on the server, not the client, so a user cannot widen their own surface. Most launcher actions are deterministic and never invoke an agent or a model at all.",
+      },
     ],
   },
   {

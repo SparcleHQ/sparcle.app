@@ -7,6 +7,7 @@ import Card from "../components/ui/Card.astro";
 import CTAStrip from "../components/ui/CTAStrip.astro";
 import Pill from "../components/ui/Pill.astro";
 import FAQ from "../components/ui/FAQ.astro";
+import { buildFaqSchema } from "../lib/faqSchema";
 
 const inclusions = [
   {
@@ -37,7 +38,7 @@ const youGet = [
 ];
 
 const notFor = [
-  "Production rollouts. If you need server-side install in your VPC or on-prem, start at the <a href=\"/pilot\">Pilot tier</a> ($15K, 30 seats, Docker/Helm).",
+  "Production rollouts. If you need server-side install in your VPC or on-prem, start at the <a href=\"/pilot\">Pilot tier</a> ($15K, 90 days, up to 30 seats, Docker/Helm).",
   "Air-gapped or classified networks. Sidecar deployment requires outbound to your chosen LLM; air-gap is the Federated Aeira tier.",
   "Pure curiosity with no internal champion. Discovery works when one named person on your side owns the outcome.",
   "Free pilots. We do not run them; paid pilots produce decisions, free pilots produce stalls.",
@@ -83,6 +84,7 @@ const faqs = [
   canonical="https://sparcle.app/discovery-pilot"
 >
   <link slot="head" rel="stylesheet" href="/css/pilot-stages.css" />
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(buildFaqSchema(faqs))} />
   <main class="page-discovery-pilot">
     <Hero
       eyebrow="Discovery"
@@ -194,7 +196,7 @@ const faqs = [
               <th scope="row">Price</th>
               <td><strong>$5,000 flat</strong></td>
               <td><strong>$15,000 flat</strong></td>
-              <td>40% off list, 24-mo</td>
+              <td>25% off list, 24-mo</td>
             </tr>
             <tr>
               <th scope="row">Onboarding</th>

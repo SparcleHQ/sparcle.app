@@ -10,7 +10,7 @@
       "name": "What do BYOK and BYO LLM mean?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "BYOK (Bring Your Own Key) lets you plug in API keys from providers like OpenAI, Anthropic, or Google. BYO LLM (Bring Your Own LLM) goes further — run self-hosted or private models in your own environment. Bolt supports both. You control the model, the cost, and the data flow. Available on all plans. Bundled and Complete also include managed AI if you prefer zero setup."
+        "text": "BYOK (Bring Your Own Key) lets you plug in API keys from providers like OpenAI, Anthropic, or Google. BYO LLM (Bring Your Own LLM) goes further — run self-hosted or private models in your own environment. BYO-LLM is the default and recommendation in every tier: your keys, your cost, your ceiling, and we never mark up tokens. If you prefer zero setup, optional Managed AI is available on any tier, billed prepaid at provider cost with no markup."
       }
     },
     {
@@ -23,10 +23,10 @@
     },
     {
       "@type": "Question",
-      "name": "What happens if we exceed the AI query limit?",
+      "name": "Do you mark up AI tokens?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You'll never be cut off. Overages are billed at a transparent per-query rate. We'll alert you before you approach limits. Contact us for details on fair-use thresholds and custom allowances."
+        "text": "No. BYO-LLM is the default in every tier — you connect your own provider (OpenAI, Anthropic, Bedrock, Azure, or a local model) and pay your provider directly at your own rate. We never mark up tokens. Optional Managed AI is available on any tier, billed prepaid at provider cost with no markup. No surprise bills."
       }
     },
     {
@@ -34,7 +34,7 @@
       "name": "Is Bolt free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes — Bolt is free for individuals. Download the desktop app and get the full suite with no time limit, no credit card, no data leaving your machine. For organizations, the paid tiers add central deployment, governance, audit, SCIM, and the MCP hub; Discovery ($5K, 30 days, founder-led) is the lowest-friction starting point."
+        "text": "Yes — Bolt is free for individuals. Download the desktop app and get the full suite with no time limit, no credit card, no data leaving your machine. For organizations, the paid tiers add SSO, central admin, policy, and audit, all self-hosted in your own infrastructure. Teams with IT/SRE can self-deploy free with our Helm charts and guides; optional one-time deployment services (Guided Setup at $5K or Production Deployment at $15K) are available if you want us to deploy and integrate with you."
       }
     },
     {
@@ -42,7 +42,7 @@
       "name": "Where does our data live?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "With Absolute — entirely in your environment. With Bundled — your infra + Bolt's AI gateway (covered by DPA, zero-retention). With Complete — Bolt-managed infrastructure with your choice of region (US, EU, APAC)."
+        "text": "Entirely in your own infrastructure, in every tier — Authorize, Backbone, and Certify all self-host inside your perimeter. Sparcle never hosts your data. If you opt into Managed AI, prompts route through a zero-retention gateway covered by a DPA; nothing is stored by the LLM provider."
       }
     },
     {
@@ -50,7 +50,7 @@
       "name": "Can we switch plans later?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Start with Absolute (BYOK / BYO LLM) and upgrade to Bundled or Complete anytime. Your data, integrations, and configuration carry over seamlessly."
+        "text": "Yes. Start with Authorize (BYO-LLM) and upgrade to Backbone or Certify anytime. Your data, integrations, and configuration carry over seamlessly, and you stay self-hosted throughout."
       }
     },
     {
@@ -196,6 +196,12 @@
         padding: 3px 10px;
         border-radius: 12px;
     }
+
+    /* ─── FREE STRIP ───────────── */
+    .free-strip { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; max-width:1200px; margin:0 auto 1.5rem; padding:1rem 1.5rem; border:1px solid var(--line,#e2e8f0); border-radius:14px; background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.06)); }
+    .free-strip__main strong { font-size:1.05rem; }
+    .free-strip__main span { color:var(--ink-soft,#475569); }
+    .free-strip__cta { color:var(--ink-soft,#475569); font-size:0.95rem; }
 
     /* ─── PRICING CARDS ─────────── */
     .pricing-grid {

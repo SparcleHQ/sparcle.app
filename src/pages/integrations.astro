@@ -115,8 +115,6 @@ const categories = [
   },
 ];
 
-const totalCount = categories.reduce((sum, cat) => sum + cat.items.length, 0);
-
 const iconPaths: Record<string, string> = {
   "layers": '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
   "shield": '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
@@ -130,7 +128,7 @@ const iconPaths: Record<string, string> = {
 };
 ---
 <BaseLayout
-  title="Integrations — 60+ Enterprise Systems via Open MCP Protocol | Sparcle"
+  title="Integrations — 100+ Enterprise Systems via Open MCP Protocol | Sparcle"
   description="Bolt connects to identity (Okta, Entra, Workspace, Zoho), productivity, engineering, sales, ITSM, knowledge, data warehouse, and LLM providers via the Model Context Protocol. BYO MCP servers welcome."
   canonical="https://sparcle.app/integrations"
 >
@@ -138,7 +136,7 @@ const iconPaths: Record<string, string> = {
     <Hero
       eyebrow="Integrations"
       title="Connected to the work your team already does."
-      lede={`Bolt connects to <strong>${totalCount}+</strong> enterprise systems via the open <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol</a>. No proprietary APIs, no vendor lock-in. Bring your own MCP servers and they slot in alongside ours.`}
+      lede={`Bolt connects to <strong>100+</strong> enterprise systems via the open <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol</a>. 103 in-house connectors, ~350 more via Airbyte, and any MCP-compliant server. No proprietary APIs, no vendor lock-in. Bring your own MCP servers and they slot in alongside ours.`}
     >
       <a href="#" onclick="openContactModal('Custom Integration Request'); return false;" class="btn btn-primary btn-lg">
         Request Custom Integration

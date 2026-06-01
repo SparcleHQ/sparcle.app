@@ -596,27 +596,21 @@ cleanup() {
 trap cleanup EXIT
 
 # ── Parse edition argument ───────────────────────────────────────────────────
-# Bolt is now free for individuals. `trial` and `enterprise` are kept as
-# aliases for backwards compatibility (any existing curl one-liner or
-# bookmarked link still works) and resolve to the same Free build. The
-# bundle id and installed-app folder stay `app.sparcle.bolt.personal` so
-# upgrades from older "Bolt Personal" installs land in place without
-# stranding Application Support data.
-EDITION="${1:-personal}"
+# Bolt is one product (Bolt Enterprise) shipped as one binary per platform,
+# free to download for everyone. The legacy `personal`, `free`, and `trial`
+# argument values are still accepted as no-op aliases so any bookmarked curl
+# one-liner keeps working. Bundle id and installed-app folder are
+# `app.sparcle.bolt.enterprise` — existing "Bolt Enterprise" installs (incl.
+# the old "trial" build) upgrade in place; older "Bolt Personal" installs
+# are not migrated (those users re-curl-install if they care).
+EDITION="${1:-enterprise}"
 case "$EDITION" in
-  personal|free)
-    EDITION="personal"
-    APP_NAME="Bolt"
-    FILE_PREFIX="Bolt-Personal"
-    ;;
-  trial|enterprise)
-    echo "  Note: '$EDITION' is now an alias for the free Bolt build."
-    EDITION="personal"
-    APP_NAME="Bolt"
-    FILE_PREFIX="Bolt-Personal"
+  enterprise|personal|free|trial)
+    APP_NAME="Bolt Enterprise"
+    FILE_PREFIX="Bolt-Enterprise"
     ;;
   *)
-    fail "Unknown edition: $EDITION. Bolt is free for individuals; just run without arguments."
+    fail "Unknown edition: $EDITION. Bolt is free; just run without arguments."
     ;;
 esac
 
@@ -843,22 +837,6 @@ install_macos() {
   [ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }
 
   pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
-  # Legacy cleanup: older personal builds installed as "Bolt Personal.app"
-  # (productName was renamed to "Bolt" on 2026-05-30 when Personal/Trial
-  # collapsed into Free). Without this kill+rm, an upgrade leaves the old
-  # /Applications/Bolt Personal.app behind, holding stale Dock pins +
-  # Spotlight entries that point at the obsolete bundle.
-  if [ "${APP_NAME}" = "Bolt" ]; then
-    pkill -f "Bolt Personal.app/Contents/MacOS" 2>/dev/null || true
-    if [ -d "/Applications/Bolt Personal.app" ]; then
-      info "Removing legacy /Applications/Bolt Personal.app (renamed to Bolt.app)..."
-      rm -rf "/Applications/Bolt Personal.app" 2>/dev/null || \
-        (sudo rm -rf "/Applications/Bolt Personal.app" 2>/dev/null < /dev/tty || true)
-    fi
-    if [ -d "${HOME}/Applications/Bolt Personal.app" ]; then
-      rm -rf "${HOME}/Applications/Bolt Personal.app" 2>/dev/null || true
-    fi
-  fi
   sleep 1
 
   INSTALL_BASE="/Applications"
@@ -903,10 +881,7 @@ install_macos() {
   fi
   ok "App trusted — ready to launch"
 
-  APP_IDENTIFIER="app.sparcle.bolt.personal"
-  if [ "$EDITION" = "trial" ]; then
-    APP_IDENTIFIER="app.sparcle.bolt.enterprise"
-  fi
+  APP_IDENTIFIER="app.sparcle.bolt.enterprise"
   persist_pg_runtime_sources "$APP_IDENTIFIER"
   seed_embedded_postgres_runtime "$APP_IDENTIFIER"
   persist_database_runtime_config "$APP_IDENTIFIER"
@@ -955,10 +930,7 @@ install_linux_deb() {
   # error fires on every launch (see bolt-pwa build-id-watcher.ts).
   # Fresh installs no-op (dirs don't exist yet). Run as the invoking user
   # (NOT under sudo) because the dirs are user-owned in $HOME.
-  CACHE_IDENTIFIER="app.sparcle.bolt.personal"
-  if [ "$EDITION" = "trial" ]; then
-    CACHE_IDENTIFIER="app.sparcle.bolt.enterprise"
-  fi
+  CACHE_IDENTIFIER="app.sparcle.bolt.enterprise"
   CACHE_BASE="${HOME}/.local/share/${CACHE_IDENTIFIER}"
   for cache_dir in CacheStorage WebKitCache databases localstorage mediakeys storage; do
     rm -rf "${CACHE_BASE}/${cache_dir}" 2>/dev/null || true
@@ -981,10 +953,7 @@ install_linux_deb() {
   fi
 
   if [ -n "$LAUNCH_BIN" ] && [ -x "$LAUNCH_BIN" ]; then
-    APP_IDENTIFIER="app.sparcle.bolt.personal"
-    if [ "$EDITION" = "trial" ]; then
-      APP_IDENTIFIER="app.sparcle.bolt.enterprise"
-    fi
+    APP_IDENTIFIER="app.sparcle.bolt.enterprise"
     persist_pg_runtime_sources "$APP_IDENTIFIER"
     seed_embedded_postgres_runtime "$APP_IDENTIFIER"
     persist_database_runtime_config "$APP_IDENTIFIER"
@@ -1079,10 +1048,7 @@ DESKTOP_EOF
     *) add_to_path "${INSTALL_DIR}" ;;
   esac
 
-  APP_IDENTIFIER="app.sparcle.bolt.personal"
-  if [ "$EDITION" = "trial" ]; then
-    APP_IDENTIFIER="app.sparcle.bolt.enterprise"
-  fi
+  APP_IDENTIFIER="app.sparcle.bolt.enterprise"
   persist_pg_runtime_sources "$APP_IDENTIFIER"
   seed_embedded_postgres_runtime "$APP_IDENTIFIER"
   persist_database_runtime_config "$APP_IDENTIFIER"

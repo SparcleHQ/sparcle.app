@@ -7,6 +7,7 @@ import Card from "../components/ui/Card.astro";
 import CTAStrip from "../components/ui/CTAStrip.astro";
 import Pill from "../components/ui/Pill.astro";
 import FAQ from "../components/ui/FAQ.astro";
+import { buildFaqSchema } from "../lib/faqSchema";
 
 const inclusions = [
   {
@@ -84,7 +85,7 @@ const faqs = [
   {
     question: "What does success look like at day 90?",
     answer:
-      "<p>You have measurable adoption signal across the pilot users, audit logs that map cleanly to your compliance framework, and a one-page outcomes memo we sign jointly. You decide: convert to Founding Customer (40% off list, 24-month lock, with the $15K credited), continue at standard pricing, expand the scope, or end with no further obligation.</p>",
+      "<p>You have measurable adoption signal across the pilot users, audit logs that map cleanly to your compliance framework, and a one-page outcomes memo we sign jointly. You decide: convert to Founding Customer (25% off list, 24-month lock, with the $15K credited), continue at standard pricing, expand the scope, or end with no further obligation.</p>",
   },
   {
     question: "Who needs to sign?",
@@ -94,7 +95,7 @@ const faqs = [
   {
     question: "Can the Pilot scale past 30 seats during the 90 days?",
     answer:
-      "<p>Yes, but the right move is to convert to Founding Customer at that point. The Pilot price is calibrated for up to 30 seats; if you need more, the price-per-seat math becomes much better under the Founding Customer 40%-off rate.</p>",
+      "<p>Yes, but the right move is to convert to Founding Customer at that point. The Pilot price is calibrated for up to 30 seats; if you need more, the price-per-seat math becomes much better under the Founding Customer 25%-off rate.</p>",
   },
 ];
 ---
@@ -105,6 +106,7 @@ const faqs = [
   canonical="https://sparcle.app/pilot"
 >
   <link slot="head" rel="stylesheet" href="/css/pilot-stages.css" />
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(buildFaqSchema(faqs))} />
   <main class="page-pilot">
     <Hero
       eyebrow="Pilot"
@@ -278,7 +280,7 @@ const faqs = [
               <th scope="row">Price</th>
               <td>$5,000 flat</td>
               <td><strong>$15,000 flat</strong></td>
-              <td>40% off list, 24-mo</td>
+              <td>25% off list, 24-mo</td>
             </tr>
             <tr>
               <th scope="row">Buyer profile</th>

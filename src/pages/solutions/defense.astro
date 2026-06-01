@@ -8,7 +8,7 @@ import CTAStrip from "../../components/ui/CTAStrip.astro";
 
 const frameworks = [
   ["ITAR", "International Traffic in Arms Regulations — controlled technical data cannot leave the US persons boundary, full stop. Bolt's BYO-LLM mandate and on-prem inference mode keep the prompt inside that boundary regardless of which model is configured."],
-  ["CMMC L3 / L5", "Cybersecurity Maturity Model Certification — Sparcle's controls evidence map walks every CMMC practice to a concrete implementation. The cryptographic audit chain is the artifact the C3PAO reviews during assessment."],
+  ["CMMC L3 / L5", "Cybersecurity Maturity Model Certification — Sparcle's controls evidence map walks every CMMC practice to a concrete implementation. The cryptographic audit chain is an artifact a C3PAO can review during assessment."],
   ["IL4 / IL5", "DOD Impact Level requirements for controlled unclassified information and mission-critical workloads. Air-gap deployment is the default, not the upsell."],
   ["NIST 800-171 / 800-172", "CUI and Enhanced-CUI control families. The Authority Policy SDK lets you encode classification-tier ranking floors that mechanically prevent over-cleared retrieval."],
 ];
@@ -16,7 +16,7 @@ const frameworks = [
 const residency = [
   ["Air-gap by default", "Bolt and Aeira ship with an air-gap-eligible Helm chart and a docker-compose path that requires zero outbound connectivity. The Aeira index is sharded and replicated entirely inside the customer enclave."],
   ["No public LLM API in scope", "Mode A (on-prem inference via vLLM, TGI, llama.cpp, or NVIDIA NIM) is the supported posture. Mode C (public vendor API) is explicitly out of scope for ITAR and DOD IL4+ workloads."],
-  ["Customer KMS, customer keys", "Vault Transit, AWS KMS GovCloud, or PKCS#11 HSM. Sparcle does not hold tenant master keys. The crypto-shred construction means Sparcle cannot read data even with access to the ciphertext."],
+  ["Customer KMS, customer keys", "Vault Transit, AWS KMS GovCloud, or PKCS#11 HSM. Sparcle does not hold tenant master keys. The crypto-shred construction means Sparcle cannot read tenant data without the customer-held CMK."],
   ["Sovereign cloud + classified networks", "Helm chart deployable into AWS GovCloud, Azure Government, IL4/IL5 sovereign clouds, and classified networks reachable only from CAC-authenticated terminals."],
 ];
 

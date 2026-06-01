@@ -1,9 +1,12 @@
 #!/bin/sh
-# Bolt Personal Installer — delegates to install.sh with personal edition.
+# DEPRECATED - Bolt is now one product (Bolt Enterprise), free for everyone.
+# This shim delegates to install.sh so any bookmarked link keeps working.
 #
-# Usage:
-#   curl -fsSL https://sparcle.app/personal.sh | sh                       # latest
-#   curl -fsSL https://sparcle.app/personal.sh | sh -s -- 0.1.18          # pin a version
-#   BOLT_VERSION=0.1.18 curl -fsSL https://sparcle.app/personal.sh | sh   # pin via env
+# Use:
+#   curl -fsSL https://sparcle.app/install.sh | sh
+#
+# This file may be removed in a future release.
 set -e
-curl -fsSL https://sparcle.app/install.sh | sh -s -- personal "$@"
+echo "[bolt] note: /personal.sh is deprecated. Bolt is free for everyone." >&2
+echo "[bolt]       Switching to https://sparcle.app/install.sh ..." >&2
+exec curl -fsSL https://sparcle.app/install.sh | sh -s -- "$@"

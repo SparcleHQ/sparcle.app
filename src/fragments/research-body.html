@@ -594,11 +594,11 @@
                         </tr>
                         <tr>
                             <td>PII Protection</td>
-                            <td>Automated redaction for SSNs, credit cards, API keys, and other sensitive data</td>
+                            <td>Automated PII masking at the LLM boundary for SSNs, credit cards, API keys, and other sensitive data; tools still receive real values, and audit logs stay PII-free</td>
                         </tr>
                         <tr>
                             <td>Audit Trail</td>
-                            <td>Every query logged with user, timestamp, data sources accessed</td>
+                            <td>Tamper-evident audit chain (Ed25519-signed Merkle) your auditor can verify independently; logs store metadata + hashes (user, timestamp, data sources accessed), never prompt or response content</td>
                         </tr>
                         <tr>
                             <td>Bring Your Own LLM</td>

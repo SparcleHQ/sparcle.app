@@ -70,15 +70,15 @@ export interface PricingPageContent {
 }
 
 export const boltProductContent: ProductPageContent = {
-  title: "Bolt — Patent-Pending Sovereign Enterprise AI Agent (BYO LLM) | Sparcle",
+  title: "Bolt — Private Enterprise AI Agent Platform (BYO LLM, On-Prem / VPC / Air-Gapped) | Sparcle",
   description:
-    "Bolt is the enterprise AI agent runtime with governance built in — durable agents, BYO LLM, PII masking at the LLM boundary, multi-layer security pipeline, Authority Policy SDK, MCP-native. For regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI (on-prem, VPC, fully air-gapped).",
+    "Bolt is a private, self-hosted enterprise AI agent platform built to end shadow AI in regulated teams — governed and MCP-native, with BYO LLM and PII masking at the LLM boundary. Deploy on-prem, in your VPC, or fully air-gapped; your data never leaves your network.",
   canonical: "https://sparcle.app/products.html",
   productName: "Bolt",
-  productKicker: "Enterprise Agent Platform",
+  productKicker: "Extensible & Governed Agentic Platform",
   productHeadline: "The agent your security team will actually let you ship.",
   productIntro:
-    "Bolt unifies your work — email, calendar, tasks, docs, tickets, code — through one AI agent that runs inside your own perimeter, with your own LLM, and your IP protected at every layer. Connects to your enterprise systems via the open Model Context Protocol. Patent-pending architecture; deep details under NDA.",
+    "Bolt is an extensible, governed agentic platform — for users, for admins, and for organizations. Agentic when a task needs judgment, instant and deterministic when it doesn't. It unifies your work across email, calendar, tasks, docs, tickets, and code: users build their own Apps and bring anything to the launcher, admins provision and govern org-wide capabilities through one MCP-native manifest, and organizations keep it all inside their own perimeter — identity-bound and audited at every layer. Patent-pending architecture; deep details under NDA.",
   primaryCtaLabel: "Schedule Architecture Review",
   primaryCtaHref: "#contact:Bolt Architecture Review",
   secondaryCtaLabel: "Pricing & Tiers",
@@ -95,7 +95,7 @@ export const boltProductContent: ProductPageContent = {
     "<strong>BYO LLM</strong> — OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model. Hot-swappable.",
     "<strong>For regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI</strong> — deployable for HIPAA, GDPR, DPDPA, SOX, ITAR; same architecture works for any enterprise that wants its IP and data inside the firewall",
     "<strong>Open MCP integrations</strong> — connect to your enterprise systems via Model Context Protocol; no vendor lock-in",
-    "<strong>Annual contracts, 25-seat minimum</strong> — Bolt Absolute starts at $30/seat/month. Founding Customer pricing available through 2026.",
+    "<strong>Annual contracts, 10-seat minimum</strong> — Bolt Authorize starts at $30/seat/month. Founding Customer pricing available through 2026.",
   ],
   highlights: [
     {
@@ -105,9 +105,9 @@ export const boltProductContent: ProductPageContent = {
       icon: "shield",
     },
     {
-      title: "Zero token markup. Real ROI.",
+      title: "AI's reach, without AI's tax",
       detail:
-        "Bring your own API keys (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model). No per-token surcharge. Eliminate context-switching across your stack and reclaim productive time, with measurable per-seat ROI on a defensible cost base.",
+        "Two cost levers most platforms don't give you. Bring your own LLM keys (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model) with no per-token markup — and pay only for the work that actually needs a model. Recognizing a format, decoding a token, a lookup, or calling a tool you authorized runs deterministically, with zero LLM tokens. You spend tokens where they create value, on a defensible, predictable cost base.",
       icon: "trending-up",
     },
     {
@@ -119,8 +119,20 @@ export const boltProductContent: ProductPageContent = {
     {
       title: "Open MCP integrations. No vendor lock-in.",
       detail:
-        "Built on the open Model Context Protocol. Out-of-the-box connections to Slack, Jira, Confluence, Salesforce, GitHub, Notion, Drive, M365, and a growing roster. Durable agents, three operating models from self-hosted to fully managed.",
+        "Built on the open Model Context Protocol. Out-of-the-box connections to Slack, Jira, Confluence, Salesforce, GitHub, Notion, Drive, M365, and a growing roster. Durable agents, self-hosted in your own perimeter from Docker Compose to air-gapped.",
       icon: "code",
+    },
+    {
+      title: "Bring anything to Bolt",
+      detail:
+        "Type or paste any value — a secret, a standard format, or your own proprietary record — and Bolt recognizes the shape on-device, flags what's sensitive, and proposes the right move: decode, convert, validate, or pull the related details from your connected systems (only what your identity is entitled to). Knows standard formats out of the box (JWT, base64/hex, timestamps, UUIDs, IBANs, file types, medical and geo codes); teach it your own formats once with a simple manifest. Nothing is fetched or run until you choose it.",
+      icon: "scan-search",
+    },
+    {
+      title: "Governed extensibility — one manifest, full control",
+      detail:
+        "Extend Bolt without giving up the keys. Your integrations, the launcher's recognition, and what agents may call are all one MCP-native YAML manifest. Admins provision org-wide Apps; users build their own; admin Apps always win a conflict. Entitlements are enforced server-side, every call is audited, and Apps never run arbitrary code.",
+      icon: "shield-check",
     },
   ],
   agenticActions: [
@@ -165,7 +177,7 @@ export const boltProductContent: ProductPageContent = {
     {
       title: "Can Bolt run inside our own perimeter?",
       detail:
-        "Yes. Bolt Absolute and Bolt Bundled are self-hosted — Docker Compose for staging, Kubernetes for production HA. Bolt Complete is fully managed by Sparcle. All three tiers expose the same platform; you choose by operating model and compliance posture.",
+        "Yes. Every Bolt tier — Authorize, Backbone, and Certify — is self-hosted: Docker Compose for staging, Kubernetes for production HA, inside your own perimeter. Sparcle never hosts your data. All three expose the same platform; you choose by capability (governance, orchestration, compliance), not by who operates it.",
     },
     {
       title: "What does Bolt save my team in real terms?",
@@ -185,12 +197,12 @@ export const boltProductContent: ProductPageContent = {
     {
       title: "What's the seat minimum?",
       detail:
-        "Bolt Absolute: 25 seats. Bolt Bundled: 50 seats. Bolt Complete: 100 seats. Annual contracts. Below those minimums, Bolt Personal is free with your own API key.",
+        "Bolt Authorize: 10 seats. Bolt Backbone: 25 seats. Bolt Certify: 50 seats. Annual contracts. Below those minimums, Bolt is free to download for individuals with your own API key.",
     },
     {
       title: "What's the Founding Customer Program?",
       detail:
-        "First 50 customers get 40% off published pricing locked for 24 months, direct founder access, weekly office hours, and roadmap influence. Open through end of 2026 or until 50 customers are signed.",
+        "First 50 customers get 25% off published pricing locked for 24 months, direct founder access, weekly office hours, and roadmap influence. Open through end of 2026 or until 50 customers are signed.",
     },
     {
       title: "Can we see the architecture and security details?",
@@ -201,15 +213,15 @@ export const boltProductContent: ProductPageContent = {
 };
 
 export const aeiraProductContent: ProductPageContent = {
-  title: "Aeira — Sovereign Enterprise Data Plane with ACL-Aware Hybrid Search | Sparcle",
+  title: "Aeira — Self-Hosted Enterprise Search & Data Plane, ACL-Aware (Sovereign) | Sparcle",
   description:
-    "Aeira is the 100% self-hosted enterprise data plane with governance built in. 4-axis ACL, per-tenant KMS, crypto-shred erasure for GDPR/HIPAA, weighted RRF hybrid search. For regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI (on-prem, VPC, fully air-gapped).",
+    "Aeira is a self-hosted, ACL-aware enterprise search and data plane for regulated teams — identity-bound hybrid search, per-tenant KMS, crypto-shred erasure for GDPR/HIPAA. Runs on-prem, in your VPC, or fully air-gapped; your data stays inside your perimeter.",
   canonical: "https://sparcle.app/products/aeira.html",
   productName: "Aeira",
   productKicker: "Sovereign Enterprise Data Plane",
   productHeadline: "The data plane your CISO will actually approve.",
   productIntro:
-    "Aeira is the 100% self-hosted enterprise data plane for regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI. Identity-bound search, provable erasure for GDPR / HIPAA obligations, audit-trail responses your compliance team can actually point to. Especially relevant for defense, finance, healthcare, and federal — same architecture works for any enterprise that wants its data inside the firewall. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped. Architecture details available under NDA.",
+    "Aeira is the fully self-hosted enterprise data plane for regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI. Identity-bound search, provable erasure for GDPR / HIPAA obligations, audit-trail responses your compliance team can actually point to. Especially relevant for defense, finance, healthcare, and federal — same architecture works for any enterprise that wants its data inside the firewall. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped. Architecture details available under NDA.",
   primaryCtaLabel: "Design Aeira Deployment",
   primaryCtaHref: "#contact:Aeira Deployment Design",
   secondaryCtaLabel: "Pricing & Tiers",
@@ -221,7 +233,7 @@ export const aeiraProductContent: ProductPageContent = {
   checklistHighlights: [
     "<strong>Identity-bound access control</strong> — every query is filtered to what the calling user is entitled to see; the agent never sees what they can't",
     "<strong>Provable erasure for GDPR / HIPAA</strong> — cryptographically destroy the data, not just delete the row; auditor-acceptable proof",
-    "<strong>100% self-hosted</strong> — AWS, Azure, GCP, on-prem, or fully air-gapped; data never leaves your perimeter",
+    "<strong>Fully self-hosted</strong> — AWS, Azure, GCP, on-prem, or fully air-gapped; data never leaves your perimeter",
     "<strong>Audit-trail responses</strong> — every result carries the why-filtered context regulators ask for during reviews",
     "<strong>Standalone or with Bolt</strong> — buy Aeira alone for ACL-aware enterprise search, or get Catalog free with every Bolt plan",
     "<strong>Stable API across all tiers</strong> — start with Catalog, scale to Federated without integration rewrites",
@@ -267,12 +279,12 @@ export const aeiraProductContent: ProductPageContent = {
     {
       title: "How does Aeira help with GDPR / HIPAA erasure obligations?",
       detail:
-        "Aeira gives you cryptographic erasure rather than just row-deletion — when an erasure obligation applies, the encrypted data becomes mathematically unreadable. The result is auditor-acceptable proof of erasure that satisfies GDPR Right to be Forgotten and HIPAA Right to Restrict Disclosure. We can walk through the specifics in an architecture review under NDA.",
+        "Aeira gives you cryptographic erasure rather than just row-deletion — when an erasure obligation applies, the encrypted data becomes mathematically unreadable. The result is auditor-acceptable proof of erasure designed to support GDPR Right to be Forgotten and HIPAA Right to Restrict Disclosure obligations. We can walk through the specifics in an architecture review under NDA.",
     },
     {
       title: "Can we bring our own data, embedding model, and infrastructure?",
       detail:
-        "Yes to all three. Customer pays for their own compute, storage, and infrastructure (except in Bolt Complete, which is fully managed). Aeira ships with sensible defaults but supports BYO embedding models for customers with specialized domain models. The access-control semantics stay consistent regardless of which embedder is used.",
+        "Yes to all three. Customer pays for their own compute, storage, and infrastructure. Aeira ships with sensible defaults but supports BYO embedding models for customers with specialized domain models. The access-control semantics stay consistent regardless of which embedder is used.",
     },
     {
       title: "What changes when we upgrade tiers?",
@@ -295,7 +307,7 @@ export const aeiraProductContent: ProductPageContent = {
 export const boltPricingContent: PricingPageContent = {
   title: "Bolt Pricing | Sparcle",
   description:
-    "Bolt pricing for enterprise teams: Absolute, Bundled, and Complete, with included Aeira Catalog in every plan.",
+    "Bolt pricing for enterprise teams: Authorize, Backbone, and Certify, with included Aeira Catalog in every plan.",
   canonical: "https://sparcle.app/pricing",
   pageKicker: "Bolt Pricing",
   headline: "Simple, transparent pricing for the Bolt platform.",
@@ -309,12 +321,12 @@ export const boltPricingContent: PricingPageContent = {
   includesCalloutHref: "/pricing.html#aeira",
   plans: [
     {
-      name: "Bolt Absolute",
+      name: "Bolt Authorize",
       tagline: "Self-hosted platform with full data sovereignty",
       price: "$30 / seat / month",
       note: "Annual contract",
       ctaLabel: "Request Pilot",
-      ctaHref: "#contact:Bolt Absolute Pilot",
+      ctaHref: "#contact:Bolt Authorize Pilot",
       features: [
         "Self-hosted deployment",
         "BYOK and BYO LLM (private models)",
@@ -323,36 +335,36 @@ export const boltPricingContent: PricingPageContent = {
       ],
     },
     {
-      name: "Bolt Bundled",
-      tagline: "Self-hosted platform with Sparcle-managed AI",
+      name: "Bolt Backbone",
+      tagline: "Self-hosted orchestration and automation platform",
       price: "$60 / seat / month",
       note: "Annual contract",
       highlight: "Most popular",
       ctaLabel: "Request Pilot",
-      ctaHref: "#contact:Bolt Bundled Pilot",
+      ctaHref: "#contact:Bolt Backbone Pilot",
       features: [
-        "Everything in Absolute",
-        "Managed inference and routing",
+        "Everything in Authorize",
+        "AI orchestration and smart routing",
         "Policy controls and analytics",
         "Priority support",
       ],
     },
     {
-      name: "Bolt Complete",
-      tagline: "Fully managed platform and hosting",
+      name: "Bolt Certify",
+      tagline: "Self-hosted, audit-ready, with dedicated delivery",
       price: "$90 / seat / month",
       note: "Annual contract",
       ctaLabel: "Talk to Sales",
-      ctaHref: "#contact:Bolt Complete Inquiry",
+      ctaHref: "#contact:Bolt Certify Inquiry",
       features: [
-        "Everything in Bundled",
-        "Managed hosting and scaling",
+        "Everything in Backbone",
+        "Compliance pack (SOC 2, DPA, BAA)",
         "Mobile apps and enterprise SLA",
-        "Dedicated onboarding support",
+        "Dedicated delivery engineer",
       ],
     },
   ],
-  compareHeaders: ["Absolute", "Bundled", "Complete"],
+  compareHeaders: ["Authorize", "Backbone", "Certify"],
   compareRows: [
     {
       feature: "Bolt platform (search, chat, actions)",
@@ -363,12 +375,8 @@ export const boltPricingContent: PricingPageContent = {
       values: ["Yes", "Yes", "Yes"],
     },
     {
-      feature: "Managed AI inference",
+      feature: "AI orchestration & smart routing",
       values: ["No", "Yes", "Yes"],
-    },
-    {
-      feature: "Managed hosting",
-      values: ["No", "No", "Yes"],
     },
     {
       feature: "Support model",
@@ -376,7 +384,7 @@ export const boltPricingContent: PricingPageContent = {
     },
     {
       feature: "Deployment setup",
-      values: ["Docker / K8s", "Docker / K8s", "Fully managed"],
+      values: ["Docker / K8s", "Docker / K8s", "Docker / K8s"],
     },
   ],
   faqs: [
@@ -386,9 +394,9 @@ export const boltPricingContent: PricingPageContent = {
         "Yes. Aeira Catalog is included in all Bolt pricing tiers and highlighted as the default data baseline.",
     },
     {
-      title: "Can we start self-hosted and move to managed later?",
+      title: "Can we move between tiers later?",
       detail:
-        "Yes. You can start with Absolute or Bundled and move to Complete as operational requirements change.",
+        "Yes. Start with Authorize and move to Backbone or Certify as your needs grow — same self-hosted platform throughout.",
     },
   ],
 };

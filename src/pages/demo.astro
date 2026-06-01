@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/ui/Hero.astro";
 import PageSection from "../components/ui/PageSection.astro";
 import FAQ from "../components/ui/FAQ.astro";
+import { buildFaqSchema } from "../lib/faqSchema";
 
 // Set PUBLIC_CALENDLY_URL in .env (or Cloudflare env) to enable inline booking.
 // e.g. PUBLIC_CALENDLY_URL=https://calendly.com/your-org/sparcle-demo
@@ -61,6 +62,7 @@ const faqs = [
   description="15-minute walkthrough, 30-minute technical demo, or 45-minute architecture review. Live product, your data, your laptop. Founder-led."
   canonical="https://sparcle.app/demo"
 >
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(buildFaqSchema(faqs))} />
   <main class="page-demo">
     <Hero
       eyebrow="Book a Demo"

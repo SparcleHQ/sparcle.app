@@ -408,26 +408,19 @@ function Invoke-PostgresPrewarm {
 }
 
 # ── Parse edition ───────────────────────────────────────────────────────────
-# Bolt is now free for individuals. `trial` and `enterprise` are kept as
-# aliases for backwards compatibility and resolve to the same Free build.
-# The bundle id and installed-app folder stay app.sparcle.bolt.personal so
-# upgrades from older "Bolt Personal" installs land in place.
+# Bolt is one product (Bolt Enterprise) shipped as one binary per platform,
+# free to download for everyone. Legacy `personal`, `free`, `trial` argument
+# values are accepted as no-op aliases so any bookmarked one-liner keeps
+# working. Bundle id + installed-app folder are app.sparcle.bolt.enterprise.
 switch ($Edition.ToLower()) {
-  { $_ -in "personal", "free" } {
-    $Edition       = "personal"
-    $AppName       = "Bolt"
-    $FilePrefix    = "Bolt-Personal"
-    $AppIdentifier = "app.sparcle.bolt.personal"
-  }
-  { $_ -in "trial", "enterprise" } {
-    Write-Host "  Note: '$Edition' is now an alias for the free Bolt build."
-    $Edition       = "personal"
-    $AppName       = "Bolt"
-    $FilePrefix    = "Bolt-Personal"
-    $AppIdentifier = "app.sparcle.bolt.personal"
+  { $_ -in "enterprise", "personal", "free", "trial" } {
+    $Edition       = "enterprise"
+    $AppName       = "Bolt Enterprise"
+    $FilePrefix    = "Bolt-Enterprise"
+    $AppIdentifier = "app.sparcle.bolt.enterprise"
   }
   default {
-    Fail "Unknown edition: $Edition. Bolt is free for individuals; just run without arguments."
+    Fail "Unknown edition: $Edition. Bolt is free; just run without arguments."
   }
 }
 

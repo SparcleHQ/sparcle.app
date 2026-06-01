@@ -19,14 +19,14 @@ const icons = {
 ---
 <BaseLayout
   title="Solution — Trust Scoring + Authority Policy SDK + ACL-Aware AI | Sparcle"
-  description="Bolt is an autonomous AI agent over a governance-grade data plane. ACL-aware retrieval plus the Authority Policy SDK lets every enterprise — regulated or not — define its own trust scoring. Runs inside your perimeter."
+  description="Bolt is an extensible, governed agentic platform — agentic and non-agentic — over a governance-grade data plane. Most queries run deterministically on-device with no LLM; ACL-aware retrieval plus the Authority Policy SDK lets every enterprise — regulated or not — define its own trust scoring. Runs inside your perimeter."
   canonical="https://sparcle.app/solution"
 >
   <main class="page-solution">
     <Hero
       eyebrow="The Solution"
       title="Two products. One sovereign AI platform."
-      lede="Bolt is the AI agent that eliminates context switching — running inside your own perimeter, with your own models, under your own compliance framework. Aeira is the ACL-enforced knowledge index that ensures every answer is grounded, governed, and authorized. Together, they give every knowledge worker instant access to everything your organization knows — with your IP and data protected at every layer."
+      lede="Bolt is the extensible, governed agentic platform that eliminates context switching — agentic when reasoning is needed, deterministic and on-device when it isn't, so most queries never touch a model. It runs inside your own perimeter, with your own models, under your own compliance framework. Aeira is the ACL-enforced knowledge index that ensures every answer is grounded, governed, and authorized. Together, they give every knowledge worker instant access to everything your organization knows — with your IP and data protected at every layer."
     >
       <a href="/products.html" class="btn btn-primary btn-lg">Meet Bolt</a>
       <a href="/products/aeira.html" class="btn btn-secondary btn-lg">Meet Aeira</a>
@@ -43,7 +43,8 @@ const icons = {
           infrastructure, with your own AI model, in your compliance framework. One Thing&trade;
           surfaces the single most important action right now. Works with Microsoft 365, Google
           Workspace, Zoho, or any OIDC provider — no migration, no lock-in. Unlike Copilot or
-          Gemini, nothing leaves your perimeter.
+          Gemini, your data plane never leaves your perimeter; only PII-masked prompts reach an
+          external LLM you choose.
         </Card>
         <Card icon={icons.database} eyebrow="02" title="Aeira — ACL-aware Enterprise Index">
           Access &middot; Enterprise &middot; Index &middot; Retrieval &middot; Augment. From curated
@@ -290,7 +291,7 @@ const icons = {
         </Card>
         <Card icon={icons.book} title="Enterprise Catalog">
           <strong>Curated company directory — included free.</strong>
-          20 entity types: offices, policies, apps, contacts, and more. New hires find the right
+          10 directory categories: offices, policies, apps, contacts, and more. New hires find the right
           resource on day one. Scales to Dynamic, Enhanced, and Federated search tiers.
         </Card>
       </CardGrid>

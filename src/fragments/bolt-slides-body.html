@@ -20,13 +20,13 @@
                         </defs>
                     </svg>
                 </div>
-                <div class="s-tag">Bolt Enterprise AI · 2026</div>
-                <h1 class="s-h" style="font-size:clamp(3rem,7vw,5.5rem)">The Enterprise<br><span class="grad">AI
-                        Layer</span><br>Your Team Needs</h1>
+                <div class="s-tag">Bolt · Extensible &amp; Governed Agentic Platform · 2026</div>
+                <h1 class="s-h" style="font-size:clamp(3rem,7vw,5.5rem)">The Governed<br><span class="grad">AI
+                        Platform</span><br>Your Team Needs</h1>
                 <p class="s-sub" style="text-align:center;margin:1.25rem auto;max-width:620px">Bolt plugs into every
                     system your organization already uses — and gives every employee a unified, secure,
-                    enterprise-grade AI
-                    assistant. No replacement. No migration. No friction.</p>
+                    enterprise-grade agentic platform. Most queries resolve deterministically, on-device, with no LLM
+                    call at all; agents step in only when the work needs them. No replacement. No migration. No friction.</p>
                 <div class="stats" style="justify-content:center">
                     <div class="stat">
                         <div class="n">Hours</div>
@@ -41,8 +41,8 @@
                         <div class="l">LLM Cost Reduction</div>
                     </div>
                     <div class="stat">
-                        <div class="n">3</div>
-                        <div class="l">Patents Pending</div>
+                        <div class="n">Patent</div>
+                        <div class="l">Pending architecture</div>
                     </div>
                 </div>
             </div>
@@ -285,8 +285,8 @@
                         <div class="tl-num" style="width:28px;height:28px;font-size:.72rem">2</div>
                         <div class="tl-text">
                             <h3>Advanced Data Scrubbing</h3>
-                            <p>Zero PII in LLM prompts or immutable audit logs. All data is anonymized at
-                                the edge.</p>
+                            <p>Sensitive values are masked before any LLM call; the audit trail records
+                                metadata and cryptographic hashes, never the prompt or response content.</p>
                         </div>
                     </div>
                     <div class="tl-item">
@@ -325,14 +325,14 @@
         <div class="s-tag">Compliance & Governance · SOC 2 & HIPAA Ready</div>
         <h2 class="s-h">Secure by Design. <span class="grad">Zero Trust Architecture.</span></h2>
         <p class="s-sub">Bolt operates via safe, session-bound encrypted tokens. Before leaving your boundary,
-            Bolt's edge-anonymization engine automatically strips sensitive PII. The LLM only ever reasons on
-            scrubbed, compliant tokens.</p>
+            Bolt's edge-anonymization engine automatically masks sensitive PII. The LLM reasons on
+            masked tokens.</p>
         <div class="g2">
             <div>
                 <div class="card"
                     style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:3rem">
                     <i data-lucide="shield" style="width:48px;height:48px;color:var(--g);margin-bottom:1rem"></i>
-                    <h3 style="font-size:1.5rem;margin-bottom:.5rem">100% PII Protected</h3>
+                    <h3 style="font-size:1.5rem;margin-bottom:.5rem">PII Protected at the Boundary</h3>
                     <p style="color:var(--t2)">All sensitive data is anonymized at the edge before ever reaching an
                         LLM.</p>
                 </div>
@@ -342,7 +342,7 @@
                     <div class="card"><i data-lucide="shield-check"
                             style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
                         <h3>HIPAA-Ready</h3>
-                        <p style="font-size:.78rem">PHI never exposed to cloud LLMs</p>
+                        <p style="font-size:.78rem">Designed to keep PHI out of cloud-LLM prompts</p>
                     </div>
                     <div class="card"><i data-lucide="file-check"
                             style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
@@ -356,8 +356,8 @@
                     </div>
                     <div class="card"><i data-lucide="eye-off"
                             style="color:var(--g);width:20px;height:20px;margin-bottom:.5rem"></i>
-                        <h3>Zero Data Egress</h3>
-                        <p style="font-size:.78rem">Private LLM option = no data leaves</p>
+                        <h3>Zero-Egress Option</h3>
+                        <p style="font-size:.78rem">With a self-hosted LLM, no prompt data leaves your perimeter</p>
                     </div>
                 </div>
             </div>
@@ -377,7 +377,7 @@
                 <div class="layer"><span class="ln">L1</span><span class="ll">Identity
                         Validation</span><span class="ld">JWT · SAML · OIDC on every request</span></div>
                 <div class="layer"><span class="ln">L2</span><span class="ll">Advanced Data
-                        Scrubbing</span><span class="ld">Zero PII in LLM prompts or audit logs</span></div>
+                        Scrubbing</span><span class="ld">Masking before any LLM call; logs hold metadata + hashes</span></div>
                 <div class="layer"><span class="ln">L3</span><span class="ll">Policy Guardrails</span><span
                         class="ld">RBAC · content filtering · tool ACL</span></div>
                 <div class="layer"><span class="ln">L4</span><span class="ll">Rate Limiting</span><span
@@ -385,7 +385,7 @@
                 <div class="layer"><span class="ln">L5</span><span class="ll">Multi-Tier Caching</span><span
                         class="ld">RAG → Redis → LLM</span></div>
                 <div class="layer"><span class="ln">L6</span><span class="ll">Audit Logging</span><span
-                        class="ld">Immutable trail: every query & tool call</span></div>
+                        class="ld">Tamper-evident sealed Merkle chain: every query & tool call</span></div>
                 <div class="layer"><span class="ln">L7</span><span class="ll">No Client Token
                         Storage</span><span class="ld">Ephemeral, encrypted session tunnels</span></div>
                 <div class="layer"><span class="ln">L8</span><span class="ll">PII Restoration</span><span
@@ -692,7 +692,7 @@
             <a href="#" onclick="openContactModal('Talk to Us'); return false;" class="btn btn-p"><i data-lucide="mail"
                     style="width:16px;height:16px"></i>Talk to Us</a>
         </div>
-        <p style="margin-top:1.5rem;font-size:.75rem;color:var(--t3)">3 Patents Pending · Sparcle LLC ·
+        <p style="margin-top:1.5rem;font-size:.75rem;color:var(--t3)">Patent-pending architecture · Sparcle ·
             bolt@sparcle.app</p>
     </div>
 </div>

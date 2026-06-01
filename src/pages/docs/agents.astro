@@ -14,9 +14,9 @@ import Prose from "../../components/ui/Prose.astro";
 >
   <main class="page-agents">
     <Hero
-      eyebrow="Documentation · Mode 2 · Available now"
+      eyebrow="Documentation · Mode 2 · Rolling out"
       title="Agents."
-      lede="Bolt is the superagent. The interface your users talk to. It handles tasks on its own when it can, and delegates to specialized agents your teams ship when they're a better fit. Local, Remote, or System: Bolt discovers them, routes to them, and composes them as subagents."
+      lede="Bolt is an extensible, governed agentic platform, and most queries never touch a model. When the question has a known shape, Bolt answers it deterministically, on-device, with no LLM in the loop. When reasoning is needed, Bolt is the superagent your users talk to: it handles tasks on its own when it can, and delegates to specialized agents your teams ship when they're a better fit. Local, Remote, or System: Bolt discovers them, routes to them, and composes them as subagents."
     >
       <a href="/docs/integrate" class="btn btn-primary btn-lg">
         See all three surfaces
@@ -93,6 +93,37 @@ import Prose from "../../components/ui/Prose.astro";
           and records the whole chain.
         </p>
       </Prose>
+    </PageSection>
+
+    <PageSection
+      eyebrow="The runtime"
+      title="A durable conductor, not a fire-and-forget call."
+      lede="Bolt runs durable background agents over a bearer-authenticated API. Submit a run, then stream it, steer it, snapshot it, or cancel it while it works. Runs survive process restarts and pick up exactly where they left off."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        <Card title="Submit, stream, steer, cancel">
+          Post a run to <code>/v1/agent/runs</code> and watch it live. Stream
+          tokens as they arrive, send steering input mid-run, snapshot the
+          current state, or cancel. The run is a first-class object you control,
+          not a request you fire and forget.
+        </Card>
+        <Card title="Suspend and resume, durably">
+          A run can suspend on a timer, an inbound webhook, a peer message, or a
+          long-running subprocess, then resume exactly where it left off. Runs
+          survive process restarts, so work in flight is never lost.
+        </Card>
+        <Card title="A verifiable A2A peer">
+          Bolt speaks the A2A protocol as a peer other systems can trust. It
+          publishes a signed agent card backed by a JWKS endpoint, so peers
+          authenticate it cryptographically before they route work to it.
+        </Card>
+        <Card title="Sandboxed subprocess execution">
+          When an agent shells out, it runs inside an allowlist-gated sandbox.
+          Agents never run arbitrary code: only the commands you've allowed,
+          inside the boundary you've drawn.
+        </Card>
+      </CardGrid>
     </PageSection>
 
     <PageSection
@@ -233,6 +264,12 @@ import Prose from "../../components/ui/Prose.astro";
           every tool call, every subagent invocation. The same chain Apps
           and Retrieval use. Remote and subagent calls are recorded with the
           requesting user's identity through the full chain.
+        </Card>
+        <Card title="Supervision sees status, never content">
+          Operator oversight exposes operational metadata only — a run's status
+          and what it's waiting on — never the prompt, title, result, or
+          conversation content. It's off by default, scoped to your org, and
+          every access is itself audited.
         </Card>
       </CardGrid>
     </PageSection>

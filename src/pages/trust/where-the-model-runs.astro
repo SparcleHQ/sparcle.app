@@ -55,11 +55,11 @@ const masking = [
   ["Detect before the call", "Every request body is scanned for PII before the LLM adapter is invoked. Detected values are replaced with opaque tokens, and a mapping between tokens and real values is stashed in the per-request context."],
   ["Restore on the way out", "When the LLM response comes back, an outbound layer rehydrates the tokens before the response leaves the process. The model sees masked text; the calling user sees the real values."],
   ["Tools see real values", "Tool calls bypass the masking layer by design. A tool that needs a real customer ID gets the real customer ID; only the LLM boundary is masked. This is a deliberate contract — masking the tool surface would corrupt the workflow."],
-  ["Audit log holds the truth", "The Bolt audit log records the unmasked prompt and the unmasked response, because it lives inside your perimeter and your retention rules govern it. Outside the perimeter, only the masked form is observable."],
+  ["Your perimeter keeps the record", "The conversation is retained inside your perimeter, encrypted at rest and governed by your retention rules. The cryptographically signed audit trail records tamper-evident metadata of every privileged action — who, what, when — never the prompt or response text. The LLM only ever sees the masked form."],
 ];
 
 const honest = [
-  ["What is shipped", "The five-tier privacy taxonomy, the per-endpoint tier derivation, the PII-masking layer that runs before every outbound LLM call, the outbound-restoration layer, and the audit-log capture of unmasked records. These are operational today across all three deployment modes."],
+  ["What is shipped", "The five-tier privacy taxonomy, the per-endpoint tier derivation, the PII-masking layer that runs before every outbound LLM call, the outbound-restoration layer, and the cryptographically signed, tamper-evident audit trail of every privileged action. These are operational today across all three deployment modes."],
   ["What is rolling out", "A configurable minimum-tier policy floor enforced at boot. The taxonomy is in place; the boot-time refusal-to-start-on-misconfiguration gate is being wired across all the call sites that read endpoint config. Customers who want this enforced today can have it as a contractual requirement."],
   ["What we do not claim", "We do not claim that data never leaves your perimeter in Mode C. It does — in masked form. We do not claim ZDR by default; ZDR is a contract the customer holds with their provider, and Bolt reflects that label without verifying it from the request side. The runtime is conservative in both directions: when in doubt, it labels an endpoint as less private than it might actually be."],
 ];
@@ -73,7 +73,7 @@ const honest = [
     <Hero
       eyebrow="Trust"
       title="Where the model runs."
-      lede="Sparcle does not ship a model. We ship the runtime that drives a model you chose. The prompt assembly, the access-controlled retrieval, the PII masking, and the audit log all live inside your perimeter — regardless of where the model itself lives. This page explains the three deployment modes our customers actually use, the privacy taxonomy the runtime applies to every endpoint, and the masking guarantee that holds even when the customer points us at a public LLM API."
+      lede="Sparcle does not ship a model. We ship the runtime that drives a model you chose. The prompt assembly, the access-controlled retrieval, the PII masking, and the audit log all live inside your perimeter — regardless of where the model itself lives. And much of the platform never calls a model at all: launcher recognition, manifest→MCP utility calls, and search are deterministic and on-device — no LLM, no egress, in any mode. This page explains the three deployment modes our customers actually use, the privacy taxonomy the runtime applies to every endpoint, and the masking guarantee that holds even when the customer points us at a public LLM API."
     >
       <a href="#modes" class="btn btn-primary btn-lg">Read the three modes</a>
       <a href="/architecture" class="btn btn-secondary btn-lg">See the architecture</a>

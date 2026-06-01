@@ -156,7 +156,7 @@
         '              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
         '              <polyline points="7 10 12 15 17 10"/>' +
         '              <line x1="12" y1="15" x2="12" y2="3"/>' +
-        '            </svg>Get Bolt &middot; Free</a></li>',
+        '            </svg>Get Bolt Enterprise &middot; Free</a></li>',
         '        </ul>',
         '      </div>',
         '      <div class="footer-col">',
@@ -186,7 +186,7 @@
         '      </div>',
         '    </div>',
         '    <div class="footer-bottom">',
-        '      <span>&copy; 2026 Sparcle, LLC. All rights reserved.</span>',
+        '      <span>&copy; 2026 Sparcle. All rights reserved.</span>',
         '      <span class="footer-legal"><a href="/terms#ip" style="color:inherit;text-decoration:none;">Patents pending</a></span>',
         '    </div>',
         '  </div>',

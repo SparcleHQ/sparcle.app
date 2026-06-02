@@ -171,7 +171,7 @@
         '          <li><a href="/integrations">Integrations</a></li>',
         '          <li><a href="/research.html">Research &amp; Whitepaper</a></li>',
         '          <li><a href="/media/Bolt_Strategic_Vision.pdf" target="_blank">Strategic Vision</a></li>',
-        '          <li><a href="https://sparcle.app/legacy/whitepaper-print.html" target="_blank">Full Whitepaper</a></li>',
+        '          <li><a href="https://sparcle.app/docs/pdfs/workplace-fragmentation-whitepaper.pdf" target="_blank">Full Whitepaper (PDF)</a></li>',
         '          <li><a href="/status">Status</a></li>',
         '        </ul>',
         '      </div>',

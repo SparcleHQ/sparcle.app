@@ -1,47 +1,193 @@
+# =linear — Linear (official Remote MCP, https://mcp.linear.app/mcp).
+#
+# Written against the REAL tool surface of Linear's official hosted Remote MCP
+# (verified against linear.app/docs/mcp + the public tool catalogs, 2026-06-03):
+#
+#   list_my_issues  — issues assigned to the authenticated user (default scope;
+#                     needs no caller-supplied id, so it is launcher-feasible).
+#   list_issues     — filterable / free-text issue listing. Accepts a plain-text
+#                     `query` (NOT a query DSL — it is a substring/keyword search,
+#                     so no escape filter is required) plus `assignee` ("me" or a
+#                     user id/name/email) and `limit`.
+#   get_issue       — single issue by `id` (the human identifier like ENG-123, or
+#                     the issue UUID).
+#
+# NOTE on names: an older community server (jerhadf/linear-mcp-server) used
+# `linear_get_user_issues` / `linear_search_issues` / `linear_get_issue`. The
+# OFFICIAL hosted server at mcp.linear.app uses the UNPREFIXED names above; this
+# manifest targets the official server.
+#
+# Envelope: the Linear MCP returns its payload wrapped (the content arrives as
+# JSON nested under the MCP result; some clients see stringified JSON in a `text`
+# field, others a structured object). The shared transform below tolerates the
+# wrapped (`structured_content[.data]`) and raw shapes, and walks the issue array
+# out of whichever key the server uses (issues / nodes / results / items / data /
+# bare array). Each issue already carries a ready-made browse `url`.
 schema_version: 1
 id: linear
 chip: =linear
 title: Linear
 icon: zap
-description: Search Linear issues across your teams.
+description: Search Linear issues across your teams, and look up issues by identifier.
+placeholder_examples:
+  - "ENG-123"
+  - "login bug"
+  - "anything in an issue title"
 emits: Issue
 auth_profile_ref: linear_user
 
 requires:
   - mcp: linear
-    version: ^1
-    tools: [my_issues, get_issue]
-    scopes: [read]
+    version: ">=1"
+    tools:
+      - list_my_issues
+      - list_issues
+      - get_issue
+    scopes:
+      - read
+
+# Launcher trigger semantics. confirm = right default for a network backend
+# (don't hammer Linear on every keystroke). The default scope (your issues)
+# auto-loads; an exact issue identifier auto-fires; free text searches on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Linear for "{{query}}"'
+  confirm_hint: Press Enter to search Linear issues
+  auto_when:
+    # Case-insensitive: `eng-123` auto-fires like `ENG-123`.
+    - regex: '^[A-Za-z][A-Za-z0-9]+-\d+$'
+      reason: Exact issue-identifier lookup is unambiguous and cheap.
+
+# Bare detection: a Linear-identifier-shaped token typed WITHOUT the =linear chip
+# proposes a row that hands off into =linear with the id pre-filled. `network`
+# kind = only surfaced when the Linear MCP is connected.
+bare:
+  kind: network
+  chip_key: linear
+  patterns:
+    - regex: '^[A-Za-z][A-Za-z0-9]{1,9}-\d+$'
+      flags: ''
+      priority: 20
 
 scopes:
+  # DEFAULT: issues assigned to you. list_my_issues needs no caller-supplied id,
+  # so this scope is fully launcher-expressible.
   - id: my
-    label: My open issues
+    label: My issues
     default: true
     flow:
       - call:
           kind: mcp
           mcp: linear
-          tool: my_issues
+          tool: list_my_issues
           args:
-            state: open
             limit: '{{limit}}'
+            includeArchived: false
         out: r
-      - emit: r
-        path: /issues
+      # Normalize whatever envelope the dispatcher/MCP produces into flat,
+      # render-ready rows. `?` suppresses index-on-array errors. Flat top-level
+      # keys (statusName, assigneeName, …) back the list + entity_preview card;
+      # the nested `fields` object backs any dotted presentation paths. Optional
+      # values default to "—".
+      - transform: &issues_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.issues?.nodes?)
+              // (($p.issues?) | if type == "array" then . else empty end)
+              // ($p.nodes?)
+              // ($p.results?)
+              // ($p.items?)
+              // (($p.data?) | if type == "array" then . else empty end)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("identifier") or has("id"))) then [.] else empty end)
+              // [] ) as $nodes
+          | ($nodes | map(
+                . as $iss
+                | ($iss.state // {}) as $st
+                | (if ($iss.assignee | type) == "object" then $iss.assignee else {} end) as $a
+                | (if ($iss.assignee | type) == "string" then $iss.assignee else ($a.displayName // $a.name) end) as $assigneeName
+                | (if ($iss.project | type) == "object" then ($iss.project.name) else $iss.project end) as $projectName
+                | (if ($iss.team | type) == "object" then ($iss.team.name // $iss.team.key) else $iss.team end) as $teamName
+                | ($iss.priorityLabel
+                    // ({"0":"No priority","1":"Urgent","2":"High","3":"Medium","4":"Low"}[ ($iss.priority // 0) | tostring ])
+                    // "—") as $priorityName
+                | (if ($st | type) == "object" then ($st.name // $st.type) else $st end) as $statusName
+                | ($iss.identifier // $iss.id // "") as $ident
+                | ([ $ident, $statusName, $priorityName, ($assigneeName // "Unassigned") ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    identifier: $ident,
+                    _url: ($iss.url // ""),
+                    title: ($iss.title // "(no title)"),
+                    subline: $subline,
+                    statusName: ($statusName // "—"),
+                    statusColor: ((if ($st | type) == "object" then $st.color else "" end) // ""),
+                    priorityName: $priorityName,
+                    assigneeName: ($assigneeName // "Unassigned"),
+                    assigneeAvatar: ($a.avatarUrl // ""),
+                    assigneeEmail: ($a.email // "—"),
+                    projectName: ($projectName // "—"),
+                    teamName: ($teamName // "—"),
+                    created: ($iss.createdAt // "—"),
+                    updated: ($iss.updatedAt // "—"),
+                    description: ((if ($iss.description | type) == "string" then $iss.description else "" end)
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end),
+                    fields: {
+                      title: ($iss.title // ""),
+                      state: { name: ($statusName // "") },
+                      priority: ($priorityName),
+                      assignee: { displayName: ($assigneeName // "Unassigned") },
+                      updatedAt: ($iss.updatedAt // "")
+                    }
+                  }
+              ))
+        out: enriched
+      - emit: enriched
 
-  - id: lookup
-    label: Lookup
+  # Typing after the chip: identifier → direct get_issue; any other text → search.
+  - id: search
+    label: Search
     match:
-      - regex: '^[A-Z]{2,5}-\d+$'
-        bind: { id: '{{match}}' }
+      # `ENG-123` / `eng-123` → fetch that issue directly via get_issue(id).
+      - regex: '^[A-Za-z][A-Za-z0-9]+-\d+$'
+        bind:
+          id: '{{match}}'
         flow:
           - call:
               kind: mcp
               mcp: linear
               tool: get_issue
-              args: { id: '{{id}}' }
-            out: issue
-          - emit: [issue]
+              args:
+                id: '{{id | upper}}'
+            out: r
+          - transform: *issues_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → free-text keyword search. Linear's `query` is a plain
+      # text search (not a DSL), so the user text is passed as a normal arg.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: linear
+              tool: list_issues
+              args:
+                query: '{{query}}'
+                limit: '{{limit}}'
+                includeArchived: false
+            out: r
+          - transform: *issues_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: assignee
+    kind: enum
+    label: Assignee
+    apply: pre
+    maps_to: assignee
+    static:
+      - me
 
 actions:
   - id: open
@@ -49,28 +195,56 @@ actions:
     target: row
     label: Open in Linear
     icon: external_link
-    url_template: '{{row.url}}'
+    # Each row carries the full browse URL from the issue's `url`.
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
+  # Flat keys (emitted by the transform) so list projection + card binds both
+  # resolve. subline packs identifier · status · priority · assignee.
   title_field: title
-  subtitle_field: identifier
-  list_fields: [identifier, title, state.name, priority]
-  search_fields: [title, identifier]
-  sort_field: updatedAt
+  subtitle_field: subline
+  list_fields:
+    - identifier
+    - title
+    - statusName
+    - priorityName
+    - assigneeName
+  search_fields:
+    - identifier
+    - title
+    - statusName
+    - priorityName
+    - assigneeName
+    - projectName
+    - teamName
+    - description
+  sort_field: updated
   sort_order: desc
   row_key_field: identifier
   searchable: true
+  filterable: true
+  # Detail pane bound to the highlighted row. `kind: entity_preview` is the wide
+  # pane; engines that don't implement it fall back to the standard card. All
+  # binds use FLAT row keys ({{row.x}}). Empty values arrive as "—" already.
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.identifier}} | {{row.state.name | default:''-''}}'
+      subtitle: '{{row.identifier}} · {{row.statusName}}'
+      image_url: '{{row.assigneeAvatar}}'
       fields:
-        - { label: Priority, value: '{{row.priority | default:''-''}}' }
-        - { label: Updated, value: '{{row.updatedAt | date:''rel''}}' }
-      actions: [open]
+        - { label: Status,      value: '{{row.statusName}}' }
+        - { label: Priority,    value: '{{row.priorityName}}' }
+        - { label: Assignee,    value: '{{row.assigneeName}}' }
+        - { label: Project,     value: '{{row.projectName}}' }
+        - { label: Team,        value: '{{row.teamName}}' }
+        - { label: Created,     value: '{{row.created}}' }
+        - { label: Updated,     value: '{{row.updated}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

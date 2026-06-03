@@ -1,63 +1,293 @@
+# =bitbucket — Atlassian Bitbucket Cloud via the community MCP server
+# aashari/mcp-server-atlassian-bitbucket (npm @aashari/mcp-server-atlassian-bitbucket).
+#
+# ============================ ADMIN SETUP REQUIRED ============================
+# enabled: false until an admin completes ALL of the following. This is a
+# COMMUNITY server (not an official Atlassian Remote MCP) and authenticates with
+# admin-provided credentials via process env vars, NOT per-user OAuth. There is
+# no public hosted endpoint, so the manifest cannot function out of the box.
+#
+#   1. Register the MCP server in the org MCP catalog under id `bitbucket`
+#      (the server also answers to `atlassian-bitbucket`). Launch command:
+#        npx -y @aashari/mcp-server-atlassian-bitbucket
+#      Pin major ^2 (this manifest targets the v2.0+ generic-tool API: bb_get).
+#   2. Provide credentials to that server process (one of):
+#        ATLASSIAN_USER_EMAIL + ATLASSIAN_API_TOKEN   (recommended, token ATATT…)
+#        ATLASSIAN_BITBUCKET_USERNAME + ATLASSIAN_BITBUCKET_APP_PASSWORD (legacy)
+#   3. Set the org-default workspace + repo below (search this file for
+#      `# ADMIN:`). The server's BITBUCKET_DEFAULT_WORKSPACE env var is NOT used
+#      by bb_get path-building, so the workspace MUST be supplied in the path.
+#   4. After setup, flip `enabled: true` at the bottom of this file.
+# =============================================================================
+#
+# REAL CONTRACT (verified 2026-06-03 against the aashari README + Bitbucket Cloud
+# REST API v2):
+#   • Tool `bb_get` — generic GET against any Bitbucket Cloud REST path.
+#       args: path (required, starts with /), queryParams (object), jq
+#       (JMESPath, optional), outputFormat ("toon" default | "json").
+#     We force outputFormat: "json" — the server defaults to TOON (token-compact
+#     text), which is NOT machine-mappable; "json" returns the raw Bitbucket REST
+#     JSON that the envelope unwrap + jq below expect.
+#   • List PRs path: /repositories/{workspace}/{repo}/pullrequests
+#     queryParams: state (OPEN|MERGED|DECLINED|SUPERSEDED), q (BBQL filter),
+#     pagelen (page size), fields (field selector).
+#   • Bitbucket Cloud paginated envelope: { size, page, pagelen, next, previous,
+#     values: [ <pr> ] }. Each PR: id, title, state, description,
+#     author.display_name, source.branch.name, destination.branch.name,
+#     links.html.href, created_on, updated_on, comment_count, task_count.
 schema_version: 1
 id: bitbucket
 chip: =bitbucket
 title: Bitbucket
 icon: git-branch
-description: Pull requests assigned to me.
+description: Open pull requests in your Bitbucket Cloud repository.
+placeholder_examples:
+  - "my open PRs"
+  - "123"
+  - "fix login"
 emits: Issue
+# Community server uses admin env-var credentials (API token / app password),
+# not per-user OAuth — but the v1 schema still requires an auth_profile_ref.
+# We keep the existing bitbucket_user profile (provider `bitbucket`) so the
+# reference resolves; the real credential gate is the admin env setup above.
 auth_profile_ref: bitbucket_user
 
 requires:
   - mcp: bitbucket
-    version: ^1
-    tools: ["list_my_prs"]
-    scopes: ["pullrequest", "account"]
+    version: "^2"
+    tools:
+      - bb_get
+    scopes:
+      - pullrequest
+      - account
+
+# confirm = right default for a network/MCP backend (don't hit Bitbucket on
+# every keystroke). The default scope auto-loads; a bare PR number auto-fires;
+# free text searches on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Bitbucket for "{{query}}"'
+  confirm_hint: Press Enter to search pull requests
+  auto_when:
+    - regex: '^\d+$'
+      reason: A bare PR number is an unambiguous, cheap single-PR lookup.
 
 scopes:
-  - id: my_prs
-    label: My open PRs
+  # DEFAULT: open PRs in the org-default repo, newest first.
+  - id: open
+    label: Open pull requests
     default: true
     flow:
       - call:
           kind: mcp
           mcp: bitbucket
-          tool: list_my_prs
+          tool: bb_get
           args:
-        state: open
-        limit: '{{limit}}'
+            # workspace + repo are tenant-specific and MUST NOT be guessed.
+            # ADMIN: set the org workspace slug (Bitbucket → workspace settings,
+            # the slug in bitbucket.org/<workspace>) and repo slug
+            # (bitbucket.org/<workspace>/<repo>) below.
+            path: '/repositories/{{org.bitbucket_workspace | default:''WORKSPACE_SLUG''}}/{{org.bitbucket_repo | default:''REPO_SLUG''}}/pullrequests'
+            queryParams:
+              state: OPEN
+              pagelen: '{{limit}}'
+              # Anchored field selector — projects only what the presentation
+              # and actions bind, aliased on every other call below.
+              fields: &pr_fields 'values.id,values.title,values.state,values.description,values.created_on,values.updated_on,values.comment_count,values.task_count,values.author.display_name,values.author.nickname,values.author.account_id,values.author.links.avatar.href,values.source.branch.name,values.destination.branch.name,values.source.repository.full_name,values.links.html.href,values.links.self.href,size,page,pagelen,next'
+            # Force machine-mappable JSON; server defaults to TOON text.
+            outputFormat: json
         out: r
-      - emit: r
-        path: /values
+      # MANDATORY defensive envelope unwrap (identical pattern to =jira-cloud):
+      # peel structured_content/data, then walk the Bitbucket paginated shape
+      # ({values:[…]}) tolerating items/data/nodes/results or a bare array.
+      # NEVER emit straight off .r/.values.
+      - transform: &prs_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.values?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p.results?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") and has("title"))) then [.] else empty end)
+              // [] ) as $prs
+          | ($prs | map(
+                . as $pr
+                | ($pr.author // {}) as $au
+                | (($au.links // {}).avatar // {}) as $avl
+                | ($pr.source // {}) as $src
+                | ($pr.destination // {}) as $dst
+                | (($src.branch // {}).name // "") as $srcb
+                | (($dst.branch // {}).name // "") as $dstb
+                | (($src.repository // {}).full_name // "") as $repo
+                | (($pr.links // {}).html // {}) as $html
+                | ((($pr.id // "") | tostring)) as $id
+                | ([ ("#" + $id), ($pr.state // empty),
+                     (if $srcb != "" and $dstb != "" then $srcb + " → " + $dstb else empty end),
+                     ($au.display_name // empty) ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    id: $id,
+                    key: ("#" + $id),
+                    title: ($pr.title // "(no title)"),
+                    subline: $subline,
+                    _url: ($html.href // ""),
+                    statusName: ($pr.state // "—"),
+                    authorName: ($au.display_name // $au.nickname // "—"),
+                    authorAvatar: ($avl.href // ""),
+                    sourceBranch: (if $srcb == "" then "—" else $srcb end),
+                    destBranch: (if $dstb == "" then "—" else $dstb end),
+                    repository: (if $repo == "" then "—" else $repo end),
+                    comments: ($pr.comment_count // 0),
+                    tasks: ($pr.task_count // 0),
+                    created: ($pr.created_on // "—"),
+                    updated: ($pr.updated_on // "—"),
+                    description: ((if ($pr.description | type) == "string" then $pr.description else "" end)
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end)
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # All PRs (any state) in the org-default repo.
+  - id: all
+    label: All pull requests
+    flow:
+      - call:
+          kind: mcp
+          mcp: bitbucket
+          tool: bb_get
+          args:
+            # ADMIN: same workspace/repo as the default scope above.
+            path: '/repositories/{{org.bitbucket_workspace | default:''WORKSPACE_SLUG''}}/{{org.bitbucket_repo | default:''REPO_SLUG''}}/pullrequests'
+            queryParams:
+              pagelen: '{{limit}}'
+              fields: *pr_fields
+            outputFormat: json
+        out: r
+      - transform: *prs_to_rows
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip: a bare number jumps to one PR; text filters PRs.
+  - id: search
+    label: Search
+    match:
+      # `123` → fetch that single PR (path …/pullrequests/{id}). The single-PR
+      # response is a bare PR object; the shared unwrap wraps it into [.].
+      - regex: '^\d+$'
+        bind:
+          pr_id: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: bitbucket
+              tool: bb_get
+              args:
+                # ADMIN: same workspace/repo as above. {{pr_id}} is digits-only
+                # (regex-gated) so it is safe as a path segment.
+                path: '/repositories/{{org.bitbucket_workspace | default:''WORKSPACE_SLUG''}}/{{org.bitbucket_repo | default:''REPO_SLUG''}}/pullrequests/{{pr_id}}'
+                outputFormat: json
+            out: r
+          - transform: *prs_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → Bitbucket query language (BBQL) substring match on
+      # title. The user text is interpolated into a BBQL double-quoted string
+      # literal, so it MUST be escaped — sql_escape escapes the embedded quotes
+      # (BBQL string-literal rules match SQL single/double-quote doubling).
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: bitbucket
+              tool: bb_get
+              args:
+                # ADMIN: same workspace/repo as above.
+                path: '/repositories/{{org.bitbucket_workspace | default:''WORKSPACE_SLUG''}}/{{org.bitbucket_repo | default:''REPO_SLUG''}}/pullrequests'
+                queryParams:
+                  state: OPEN
+                  q: 'title ~ "{{query | sql_escape}}"'
+                  pagelen: '{{limit}}'
+                  fields: *pr_fields
+                outputFormat: json
+            out: r
+          - transform: *prs_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: state
+    kind: enum
+    label: State
+    apply: pre
+    maps_to: queryParams.state
+    static:
+      - OPEN
+      - MERGED
+      - DECLINED
+      - SUPERSEDED
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Bitbucket
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the PR's browse URL from links.html.href.
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: title
+  title_field: title
+  subtitle_field: subline
   list_fields:
-    - id
+    - key
     - title
-    - repository.full_name
-    - state
+    - statusName
+    - authorName
+    - sourceBranch
   search_fields:
-    - id
-  searchable: true
+    - key
+    - title
+    - statusName
+    - authorName
+    - sourceBranch
+    - destBranch
+    - repository
+    - description
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.title}}'
+      subtitle: '{{row.key}} · {{row.statusName}}'
+      image_url: '{{row.authorAvatar}}'
+      fields:
+        - { label: State,       value: '{{row.statusName}}' }
+        - { label: Author,      value: '{{row.authorName}}' }
+        - { label: Source,      value: '{{row.sourceBranch}}' }
+        - { label: Target,      value: '{{row.destBranch}}' }
+        - { label: Repository,  value: '{{row.repository}}' }
+        - { label: Comments,    value: '{{row.comments}}' }
+        - { label: Tasks,       value: '{{row.tasks}}' }
+        - { label: Created,     value: '{{row.created}}' }
+        - { label: Updated,     value: '{{row.updated}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
 
-enabled: true
+# Community server + tenant-specific workspace/repo + admin env credentials =
+# cannot run until the ADMIN SETUP block at the top is completed. Flip to true
+# once the MCP server is registered, credentialed, and the workspace/repo
+# defaults below (or {{org.bitbucket_workspace}}/{{org.bitbucket_repo}}) are set.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

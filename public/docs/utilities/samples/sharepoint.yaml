@@ -1,62 +1,269 @@
+# =sharepoint — Microsoft Work IQ SharePoint (official remote MCP).
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ DISABLED until an admin completes tenant setup (enabled: false).          │
+# │ The Work IQ SharePoint MCP is a per-tenant Microsoft Agent 365 (preview)  │
+# │ server — NOT a public endpoint. Its URL embeds your tenant id and it must │
+# │ be registered in the org MCP catalog before this utility can dispatch.    │
+# │                                                                           │
+# │ ADMIN SETUP (do all of these, then flip enabled: true):                   │
+# │  1. Register the MCP server in the org catalog under the id               │
+# │     `sharepoint` pointing at:                             │
+# │       https://agent365.svc.cloud.microsoft/agents/tenants/                │
+# │         <YOUR_TENANT_ID>/servers/sharepoint               │
+# │     (replace <YOUR_TENANT_ID> — Entra ID / Microsoft Agent 365 admin).    │
+# │  2. Add the auth profile `sharepoint_user` to auth-profiles.yaml   │
+# │     (type: oauth2_user, provider: sharepoint) so the      │
+# │     OAuth token is stored under the SAME id the calls use — the existing  │
+# │     `sharepoint_user` profile points at provider `sharepoint`, a          │
+# │     different/unconnected provider, and would yield a false needs_oauth.  │
+# │  3. Complete the per-user OAuth consent (Sites.Read.All, Files.Read.All). │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# REAL CONTRACT (Microsoft Learn, Work IQ SharePoint reference, preview):
+#   findFileOrFolder(searchQuery)  → DriveItems across all accessible sites/libs
+#   findSite(searchQuery?)         → Sites (top 20 if no query)
+#   getSiteByPath(hostname, serverRelativePath)  → one Site by exact URL
+# The tools are Microsoft Graph backed, so each result row is a Graph DriveItem
+# (id/name/webUrl/lastModifiedDateTime/size/file/folder/parentReference/
+# lastModifiedBy) or Site (id/displayName/name/webUrl). Microsoft documents the
+# tools but NOT the MCP wire envelope, and explicitly warns "tool names and
+# parameters are subject to change and hard-coded dependencies should be
+# avoided" — so the transform below tolerates value[]/results/items/data/nodes
+# or a bare array rather than reading a fixed path.
 schema_version: 1
 id: sharepoint
 chip: =sharepoint
 title: SharePoint
 icon: layers
-description: Search SharePoint sites + pages.
+description: Search SharePoint files, folders, and sites (Microsoft Work IQ).
+placeholder_examples:
+  - "quarterly report"
+  - "budget.xlsx"
+  - "Marketing"
 emits: Document
+# Token lives under the MCP id `sharepoint` (where OAuth is
+# completed). See the prominent ADMIN block above — this profile must be added
+# to auth-profiles.yaml before the utility is enabled.
 auth_profile_ref: sharepoint_user
 
 requires:
   - mcp: sharepoint
-    version: ^1
-    tools: ["search"]
-    scopes: ["Sites.Read.All"]
+    version: ">=1"
+    tools:
+      - findFileOrFolder
+      - findSite
+      - getSiteByPath
+    scopes:
+      - Sites.Read.All
+      - Files.Read.All
+
+# confirm = correct default for a network/MCP backend (don't hammer Microsoft
+# Graph on every keystroke). The default scope auto-loads; free-text searches
+# files on Enter. Switch to `auto` for live keystroke search if desired.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search SharePoint for "{{query}}"'
+  confirm_hint: Press Enter to search files and folders
 
 scopes:
-  - id: search
-    label: Search
+  # DEFAULT: search files & folders across every site/library the user can see.
+  - id: files
+    label: Files & folders
     default: true
     flow:
       - call:
           kind: mcp
           mcp: sharepoint
-          tool: search
+          tool: findFileOrFolder
           args:
-        query: '{{query}}'
-        limit: '{{limit}}'
+            # Plain Graph search string (NOT a query DSL), so no escape filter.
+            # Empty default query lists recent/relevant items.
+            searchQuery: '{{query | default:""}}'
         out: r
-      - emit: r
-        path: /results
+      # Defensive envelope unwrap (jira-cloud pattern): peel structured_content/
+      # data, then walk the DriveItem array out of value/results/items/data/
+      # nodes or a bare array; tolerate a single bare DriveItem object too.
+      # Map each Graph DriveItem into the canonical Document shape (flat keys the
+      # presentation binds to). Optional values default to "—".
+      - transform: &items_to_docs |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.value?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("name") or has("webUrl"))) then [.] else empty end)
+              // [] ) as $rows
+          | ($rows | map(
+                . as $it
+                | ($it.parentReference // {}) as $pr
+                | ($it.lastModifiedBy // {}) as $lmb
+                | (($lmb.user // {}).displayName // $lmb.displayName // "—") as $author
+                | ($it.file // null) as $file
+                | ($it.folder // null) as $folder
+                | (if $folder != null then "Folder"
+                   elif ($file.mimeType // "") != "" then $file.mimeType
+                   else "File" end) as $kind
+                | {
+                    id: ($it.id // $it.name // ""),
+                    title: ($it.name // $it.displayName // "(untitled)"),
+                    url: ($it.webUrl // ""),
+                    author: $author,
+                    updated: ($it.lastModifiedDateTime // "—"),
+                    space: ($pr.name // $pr.path // "—"),
+                    kind: $kind,
+                    size: ($it.size // 0),
+                    excerpt: (($pr.path // "") | if . == "" then "—" else . end),
+                    thumbnail_url: ""
+                  }
+              ))
+        out: docs
+      - emit: docs
+
+  # Browse / discover sites by name (findSite; top 20 if query empty).
+  - id: sites
+    label: Sites
+    flow:
+      - call:
+          kind: mcp
+          mcp: sharepoint
+          tool: findSite
+          args:
+            searchQuery: '{{query | default:""}}'
+        out: r
+      # Same defensive unwrap; map Graph Site objects into Document rows.
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.value?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("webUrl"))) then [.] else empty end)
+              // [] ) as $rows
+          | ($rows | map(
+                . as $s
+                | {
+                    id: ($s.id // $s.webUrl // ""),
+                    title: ($s.displayName // $s.name // "(unnamed site)"),
+                    url: ($s.webUrl // ""),
+                    author: "—",
+                    updated: ($s.lastModifiedDateTime // "—"),
+                    space: ($s.name // "—"),
+                    kind: "Site",
+                    size: 0,
+                    excerpt: ($s.webUrl // "—"),
+                    thumbnail_url: ""
+                  }
+              ))
+        out: docs
+      - emit: docs
+
+  # Typing after the chip searches files; an exact site URL path resolves a site.
+  - id: search
+    label: Search
+    match:
+      # `hostname.sharepoint.com/sites/Foo` → resolve that exact site via
+      # getSiteByPath. We split host and server-relative path from the match.
+      - regex: '^(?P<host>[A-Za-z0-9.-]+\.sharepoint\.com)/(?P<path>.+)$'
+        bind:
+          host: '{{groups.host}}'
+          relpath: '{{groups.path}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: sharepoint
+              tool: getSiteByPath
+              args:
+                hostname: '{{host}}'
+                serverRelativePath: '{{relpath}}'
+            out: r
+          - transform: |
+              ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+              | ( ($p.value?)
+                  // ($p | if (type == "object" and (has("id") or has("webUrl"))) then [.] else empty end)
+                  // ($p | if type == "array" then . else empty end)
+                  // [] ) as $rows
+              | ($rows | map(
+                    . as $s
+                    | {
+                        id: ($s.id // $s.webUrl // ""),
+                        title: ($s.displayName // $s.name // "(unnamed site)"),
+                        url: ($s.webUrl // ""),
+                        author: "—",
+                        updated: ($s.lastModifiedDateTime // "—"),
+                        space: ($s.name // "—"),
+                        kind: "Site",
+                        size: 0,
+                        excerpt: ($s.webUrl // "—"),
+                        thumbnail_url: ""
+                      }
+                  ))
+            out: docs
+          - emit: docs
+      # Any other text → search files & folders.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: sharepoint
+              tool: findFileOrFolder
+              args:
+                searchQuery: '{{query}}'
+            out: r
+          - transform: *items_to_docs
+            out: docs
+          - emit: docs
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in SharePoint
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the Graph webUrl (browser-openable).
+    url_template: '{{row.url}}'
 
 presentation:
   widget: list
   title_field: title
-  subtitle_field: path
+  subtitle_field: space
   list_fields:
     - title
-    - path
-    - modified
+    - kind
+    - updated
+    - author
   search_fields:
     - title
-  searchable: true
+    - space
+    - author
+    - kind
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      actions: [open]
+      subtitle: '{{row.kind}}'
+      image_url: '{{row.thumbnail_url}}'
+      fields:
+        - { label: Location, value: '{{row.space}}' }
+        - { label: Modified, value: '{{row.updated}}' }
+        - { label: Author,   value: '{{row.author}}' }
+        - { label: Type,     value: '{{row.kind}}' }
+      actions:
+        - open
 
-enabled: true
+# DISABLED: requires admin tenant registration of sharepoint +
+# the sharepoint_user auth profile. See the ADMIN block at top of file.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

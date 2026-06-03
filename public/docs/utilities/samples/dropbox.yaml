@@ -1,40 +1,148 @@
+# =dropbox — Dropbox (official Remote MCP, https://mcp.dropbox.com/mcp).
+#
+# Written against the REAL tool surface of Dropbox's officially-hosted remote
+# MCP server (verified live 2026-06-03 against the Dropbox Help docs and the
+# Apigene tool catalog). The server exposes PascalCase tools — NOT the
+# snake_case `list_files` the prior manifest invented:
+#
+#   ListFolder        — browse a folder's contents (up to 100 items/call).
+#                       arg `path` (string). "" (empty string) = the account
+#                       root, which is how a launcher with no user input lists
+#                       the top level. Returns name, size, modification date,
+#                       file id, and entry type per item.
+#   Search            — search files/folders by name or content.
+#                       arg `query` (string, the search text).
+#   GetFileMetadata   — detailed file properties (size, dates, MIME type);
+#                       accepts a path or a file id.
+#
+# Envelope: Dropbox's hosted MCP, like Atlassian's, may wrap tool output in a
+# structured_content frame. The docs do not pin the exact JSON, so the emit
+# transform below defensively unwraps structured_content(.data) then walks the
+# entry array out of whichever key the server uses (entries / results / matches
+# / items / data / nodes / a bare array). This mirrors the jira-cloud manifest.
+#
+# The Dropbox files API does NOT return a ready browse URL on list/search
+# entries (a browsable link requires a separate CreateSharedLink/DownloadLink
+# call), so the "Open" action is best-effort: it uses any url-ish field the
+# server happens to surface, else falls back to the canonical Dropbox web
+# "/home" path keyed on the entry's path so the user lands in Dropbox at the
+# file's folder.
 schema_version: 1
 id: dropbox
 chip: =dropbox
 title: Dropbox
 icon: package
-description: Recent files from Dropbox.
+description: Browse and search files in your Dropbox.
+placeholder_examples:
+  - "quarterly report"
+  - "invoice.pdf"
+  - "anything in a file or folder name"
 emits: File
 auth_profile_ref: dropbox_user
 
 requires:
   - mcp: dropbox
-    version: ^1
-    tools: ["list_files"]
-    scopes: ["files.metadata.read"]
+    version: ">=1"
+    tools:
+      - ListFolder
+      - Search
+      - GetFileMetadata
+    scopes:
+      - files.metadata.read
+
+# confirm = right default for a network/MCP backend (don't hit Dropbox on every
+# keystroke). The empty default scope (browse root) auto-loads; free-text runs
+# Search on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Dropbox for "{{query}}"'
+  confirm_hint: Press Enter to search your Dropbox
 
 scopes:
-  - id: recent
-    label: Recent
+  # DEFAULT: browse the account root. ListFolder with an empty path lists the
+  # top level — the only "no user input required" listing the real server can
+  # produce (there is no recents/sort-by-modified tool).
+  - id: browse
+    label: Browse files
     default: true
     flow:
       - call:
           kind: mcp
           mcp: dropbox
-          tool: list_files
+          tool: ListFolder
           args:
-        limit: '{{limit}}'
+            path: ''
+            limit: '{{limit}}'
         out: r
-      - emit: r
-        path: /entries
+      # Defensive unwrap + normalize, exactly like jira-cloud. Tolerate the
+      # structured_content(.data) frame, then pull the entry array from whatever
+      # key the server uses, then flatten each entry into the canonical File
+      # shape the presentation/actions bind to.
+      - transform: &entries_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.entries?)
+              // ($p.results?)
+              // ($p.matches?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("name") or has("path_lower") or has("path_display"))) then [.] else empty end)
+              // [] ) as $raw
+          | ($raw | map(
+                # Search results nest the real entry under .metadata(.metadata);
+                # plain ListFolder entries are flat. Tolerate both.
+                ( .metadata?.metadata? // .metadata? // . ) as $e
+                | ($e.path_display // $e.path_lower // "") as $path
+                | (($e[".tag"] // $e.tag // (if ($e.is_dir == true) then "folder" else "file" end))) as $tag
+                | {
+                    id: ($e.id // $e.file_id // $path // ($e.name // "")),
+                    name: ($e.name // "(unnamed)"),
+                    type: ($tag // "—"),
+                    path: $path,
+                    size: ($e.size // null),
+                    modified: ($e.client_modified // $e.server_modified // $e.modified // "—"),
+                    owner: (($e.sharing_info?.owner_display_name) // ($e.owner) // "—"),
+                    mime_type: ($e.mime_type // $e.media_info?.metadata?.mime_type // "—"),
+                    _url: ( $e.url
+                            // $e.preview_url
+                            // (if ($path | type) == "string" and ($path | length) > 0
+                                  then "https://www.dropbox.com/home" + $path
+                                  else "https://www.dropbox.com/home" end) )
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches Dropbox by name or content.
+  - id: search
+    label: Search
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: dropbox
+              tool: Search
+              args:
+                # Search takes a plain `query` string. Not a query DSL, so no
+                # escape filter applies; passed as a literal arg value.
+                query: '{{query}}'
+                limit: '{{limit}}'
+            out: r
+          - transform: *entries_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Dropbox
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries a best-effort URL: any server-provided link, else the
+    # canonical Dropbox web home path keyed on the entry path.
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
@@ -42,18 +150,33 @@ presentation:
   subtitle_field: modified
   list_fields:
     - name
+    - type
     - modified
     - owner
   search_fields:
     - name
-  searchable: true
+    - path
+    - type
+    - owner
+  sort_field: modified
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
       title: '{{row.name}}'
-      actions: [open]
+      subtitle: '{{row.type}} · {{row.path}}'
+      fields:
+        - { label: Type,     value: '{{row.type}}' }
+        - { label: Path,     value: '{{row.path}}' }
+        - { label: Modified, value: '{{row.modified}}' }
+        - { label: Owner,    value: '{{row.owner}}' }
+        - { label: Type/MIME, value: '{{row.mime_type}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

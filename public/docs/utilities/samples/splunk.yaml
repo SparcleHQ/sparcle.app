@@ -1,61 +1,230 @@
+# =splunk — Splunk via the official Splunk MCP Server.
+#
+# Written against the REAL tool surface of CiscoDevNet/Splunk-MCP-Server-official
+# (Splunkbase app 7931, "built by Splunk LLC"; verified against the repo README
+# 2026-06-03). That server registers TOOLS-ONLY and the relevant tools are:
+#
+#   run_splunk_query  — "Run a SPL query and return results (logs, aggregations,
+#                        indexed data)". Args: query (the SPL string),
+#                        earliest_time (default "-24h"), latest_time (default
+#                        "now").  NOTE: the tool is run_splunk_query, NOT
+#                        splunk_run_query — the splunk_*-prefixed names belong to
+#                        the separate Splunk Cloud Platform help-docs MCP server,
+#                        not this repo.
+#   get_indexes       — "List available Splunk indexes (includes splunk_server)".
+#
+# The server's exact MCP response envelope is not publicly documented, so every
+# emitted row goes through a defensive transform that first unwraps the MCP
+# envelope (structured_content.data / structured_content / raw) and then walks
+# the event array out of whichever key the server uses (results / events / items
+# / data / rows / bare array). Splunk events carry _time / _raw / host / source /
+# sourcetype, which is what the presentation binds to.
 schema_version: 1
 id: splunk
 chip: =splunk
 title: Splunk
 icon: search
-description: Run a Splunk search.
+description: Run a Splunk search (SPL) and browse the matching events.
+placeholder_examples:
+  - "index=_internal error"
+  - "failed login"
+  - "sourcetype=access_combined status=500"
 emits: Generic
 auth_profile_ref: splunk_user
 
 requires:
   - mcp: splunk
-    version: ^1
-    tools: ["search"]
-    scopes: ["search"]
+    version: ">=1"
+    tools:
+      - run_splunk_query
+      - get_indexes
+    scopes:
+      - search
+
+# Network backend → confirm before firing (don't hammer Splunk on every
+# keystroke). The empty default scope auto-loads a bounded recent-events search;
+# free text runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Splunk for "{{query}}"'
+  confirm_hint: Press Enter to run this SPL search
 
 scopes:
-  - id: search
-    label: Search
+  # DEFAULT (empty query): a bounded, safe peek at recent internal events so the
+  # chip shows something useful before the user types. Time-bounded + head-capped
+  # to stay inside the server's non-destructive guardrails.
+  - id: recent
+    label: Recent events
     default: true
     flow:
       - call:
           kind: mcp
           mcp: splunk
-          tool: search
+          tool: run_splunk_query
           args:
-        spl: '{{query}}'
-        limit: '{{limit}}'
+            query: 'search index=_internal | head {{limit | default:''20''}}'
+            earliest_time: '-24h'
+            latest_time: 'now'
         out: r
-      - emit: r
-        path: /results
+      # Defensive unwrap + normalize (see header). $p is the unwrapped payload;
+      # $events is the event array regardless of which key carries it. Each event
+      # is flattened to the canonical Generic keys the presentation binds to.
+      - transform: &events_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.results?)
+              // ($p.events?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.rows?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("_raw") or has("_time"))) then [.] else empty end)
+              // [] ) as $events
+          | ($events | to_entries | map(
+                .key as $i
+                | (.value // {}) as $e
+                | ($e._time // $e.time // "") as $t
+                | ($e._raw // $e.raw // "") as $raw
+                | ($e.host // "") as $host
+                | ($e.source // "") as $source
+                | ($e.sourcetype // "") as $stype
+                | ([ ($host // empty), ($stype // empty) ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    id: ($e._cd // $e._bkt // ("evt-" + ($i|tostring))),
+                    time: (if $t == "" then "—" else $t end),
+                    raw: (if ($raw|type) == "string"
+                            then (if ($raw|length) > 500 then ($raw[0:497] + "…") else $raw end)
+                            else ($raw|tostring) end),
+                    host: (if $host == "" then "—" else $host end),
+                    source: (if $source == "" then "—" else $source end),
+                    sourcetype: (if $stype == "" then "—" else $stype end),
+                    index: ($e.index // "—"),
+                    subline: (if $subline == "" then "—" else $subline end)
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip runs a search.
+  - id: search
+    label: Search
+    match:
+      # Already-SPL (starts with `search` or contains a pipe / `index=` etc.) →
+      # pass through verbatim as a power-user escape hatch.
+      - regex: '(?i)^\s*(search\s|\||\bindex\s*=|\bsourcetype\s*=)'
+        bind:
+          spl: '{{match}}'
+        flow:
+          - transform: |
+              (.query // "") as $q
+              | { spl: (if ($q | test("(?i)^\\s*(search\\s|\\|)")) then $q else "search " + $q end) }
+            out: c
+          - call:
+              kind: mcp
+              mcp: splunk
+              tool: run_splunk_query
+              args:
+                query: '{{c.spl}}'
+                earliest_time: '-24h'
+                latest_time: 'now'
+            out: r
+          - transform: *events_to_rows
+            out: enriched
+          - emit: enriched
+      # Plain keywords → wrap into a safe full-text SPL search. The user text is
+      # a SPL string literal, so it MUST be sql_escape'd before interpolation
+      # into the query DSL (the linter requires an escape filter here).
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: splunk
+              tool: run_splunk_query
+              args:
+                query: 'search "{{query | sql_escape}}" | head {{limit | default:''50''}}'
+                earliest_time: '-24h'
+                latest_time: 'now'
+            out: r
+          - transform: *events_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  # Restrict to a single index. Populated live from get_indexes. apply:pre injects
+  # `index=<value>` into the SPL.
+  - id: index
+    kind: enum
+    label: Index
+    apply: pre
+    maps_to: query.index
+    populate:
+      - call:
+          kind: mcp
+          mcp: splunk
+          tool: get_indexes
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.indexes?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p | if type == "array" then . else empty end)
+              // [] )
+          | map( if type == "string" then . else (.name // .title // .index // "") end)
+          | map(select(. != null and . != ""))
+        out: indexes
+      - emit: indexes
+
+  - id: window
+    kind: date_range
+    label: Time
+    apply: pre
+    maps_to: query.earliest_time
 
 actions:
-  - id: open
-    kind: url
+  # Splunk events have no per-event browse URL from the MCP layer, so the only
+  # universally-safe action is copying the raw event into the composer.
+  - id: copy_raw
+    kind: composer
     target: row
-    label: Open
-    icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    label: Copy event
+    insert: '{{row.raw}}'
 
 presentation:
   widget: list
-  title_field: _time
-  subtitle_field: host
+  # Flat keys emitted by the transform so list projection + card binds resolve.
+  title_field: raw
+  subtitle_field: subline
   list_fields:
-    - _time
+    - time
     - host
     - sourcetype
-    - _raw
+    - raw
   search_fields:
-    - _time
-  searchable: true
+    - raw
+    - host
+    - source
+    - sourcetype
+    - index
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row._time}}'
-      actions: [open]
+      title: '{{row.host}}'
+      subtitle: '{{row.time}} · {{row.sourcetype}}'
+      fields:
+        - { label: Time,       value: '{{row.time}}' }
+        - { label: Host,       value: '{{row.host}}' }
+        - { label: Source,     value: '{{row.source}}' }
+        - { label: Sourcetype, value: '{{row.sourcetype}}' }
+        - { label: Index,      value: '{{row.index}}' }
+        - { label: Raw,        value: '{{row.raw}}' }
+      actions:
+        - copy_raw
 
 enabled: true
 provisioning_mode: public

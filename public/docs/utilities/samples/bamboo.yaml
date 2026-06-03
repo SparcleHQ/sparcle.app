@@ -1,62 +1,210 @@
+# =bamboo — BambooHR people directory via the community MCP server
+# `bamboo` (acalder-techpm/bamboo, npm: bamboo).
+#
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ ADMIN SETUP REQUIRED — this utility ships DISABLED (enabled: false).        │
+# │ It cannot function until an admin completes ALL of the following, then     │
+# │ flips `enabled: true`:                                                      │
+# │                                                                            │
+# │  1. Register the MCP server `bamboo` in the org MCP catalog, running │
+# │     `npx -y bamboo` with these process env vars (TENANT-SPECIFIC):   │
+# │       • BAMBOOHR_SUBDOMAIN = your BambooHR subdomain (the `acme` in        │
+# │         https://acme.bamboohr.com) — see ADMIN comment in `requires:`.     │
+# │       • BAMBOOHR_API_KEY   = a BambooHR API key (Account menu → API Keys). │
+# │         Used as HTTP Basic-auth username by the server. SECRET.            │
+# │  2. Confirm the catalog exposes tools bamboohr_list_employees +            │
+# │     bamboohr_get_employee (linter validates via tools/list).               │
+# │  3. Review auth: this server authenticates at the MCP-host level with a    │
+# │     SHARED company API key (env vars), NOT per-user OAuth. The referenced  │
+# │     auth profile `bamboo_user` is a placeholder so the manifest lints;     │
+# │     the real credential is the host env var. Have ops confirm this matches │
+# │     your per-user-OAuth-only policy before enabling.                       │
+# └──────────────────────────────────────────────────────────────────────────┘
+#
+# REAL CONTRACT (verified 2026-06-03 against repo source + BambooHR API docs):
+#   • bamboohr_list_employees  → calls GET /v1/employees/directory.
+#       arg: fields (optional, comma-separated field ids).
+#       Response: { "fields": [...], "employees": [ {id, displayName,
+#       firstName, lastName, jobTitle, department, workEmail, ...}, ... ] }.
+#   • bamboohr_get_employee    → calls GET /v1/employees/{id}.
+#       args: employeeId (REQUIRED), fields (optional).
+#
+# Envelope: the directory array lives at `.employees` (with a sibling `.fields`
+# metadata array). We unwrap the dispatcher envelope exactly like jira-cloud
+# before walking to `.employees` (tolerating data/results/items/bare array).
 schema_version: 1
 id: bamboo
 chip: =bamboo
 title: BambooHR
 icon: users
-description: List BambooHR employees.
+description: Look up people in the BambooHR employee directory.
+placeholder_examples:
+  - "jane"
+  - "engineering"
+  - "anyone in the directory"
 emits: Person
+# Placeholder profile so the manifest lints (auth_profile_ref must resolve).
+# NOTE: this server actually authenticates with a company-wide API key via
+# host env vars (BAMBOOHR_API_KEY), not per-user OAuth — see header ADMIN box.
 auth_profile_ref: bamboo_user
 
 requires:
   - mcp: bamboo
-    version: ^1
-    tools: ["list_employees"]
-    scopes: ["employees.read"]
+    version: ">=1"
+    tools:
+      - bamboohr_list_employees
+      - bamboohr_get_employee
+    scopes:
+      - employees.read
+
+# MCP/network backend — confirm before firing (don't hammer BambooHR on every
+# keystroke). The default scope (whole directory) auto-loads; typing after the
+# chip searches the directory on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search BambooHR for "{{query}}"'
+  confirm_hint: Press Enter to search the employee directory
 
 scopes:
-  - id: all
-    label: Employees
+  # DEFAULT: the whole employee directory. The directory endpoint returns only
+  # the fields visible to the API key; `fields` requests a richer projection.
+  - id: directory
+    label: Employee directory
     default: true
     flow:
       - call:
           kind: mcp
           mcp: bamboo
-          tool: list_employees
+          tool: bamboohr_list_employees
           args:
-        limit: '{{limit}}'
+            # Comma-separated BambooHR field ids. These are the standard
+            # directory fields the transform below maps into the Person type.
+            fields: 'id,displayName,firstName,lastName,jobTitle,department,workEmail,mobilePhone,workPhone,location,supervisor,photoUrl'
         out: r
-      - emit: r
-        path: /employees
+      - transform: &dir_to_people |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.employees?)
+              // ($p.data?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $emps
+          | ($emps | map(
+                . as $e
+                | (($e.displayName // (([$e.firstName, $e.lastName]
+                     | map(select(. != null and . != "")) | join(" "))))) as $name
+                | {
+                    id: (($e.id // "") | tostring),
+                    name: (if ($name // "") == "" then "(no name)" else $name end),
+                    email: ($e.workEmail // "—"),
+                    title: ($e.jobTitle // "—"),
+                    department: ($e.department // "—"),
+                    location: ($e.location // "—"),
+                    phone: ($e.mobilePhone // $e.workPhone // "—"),
+                    manager_name: ($e.supervisor // "—"),
+                    photo_url: ($e.photoUrl // ""),
+                    subline: ([ ($e.jobTitle // empty), ($e.department // empty) ]
+                              | map(select(. != null and . != "")) | join("  ·  "))
+                  }
+              ))
+        out: people
+      - emit: people
+
+  # Typing after the chip. A bare integer is a BambooHR employee id → direct
+  # lookup via bamboohr_get_employee; any other text refines the directory
+  # client-side (search_fields below) over the default directory pull.
+  - id: search
+    label: Search
+    match:
+      # Numeric employee id → fetch that single record.
+      - regex: '^[0-9]+$'
+        bind:
+          employeeId: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: bamboo
+              tool: bamboohr_get_employee
+              args:
+                # Required by the tool. {{employeeId}} is the numeric id matched
+                # above; numeric-only so no escape filter is needed.
+                employeeId: '{{employeeId}}'
+                fields: 'id,displayName,firstName,lastName,jobTitle,department,workEmail,mobilePhone,workPhone,location,supervisor,photoUrl'
+            out: r
+          - transform: *dir_to_people
+            out: people
+          - emit: people
+      # Any other text → pull the directory; client-side search_fields refine
+      # narrows by name/title/department/email. (The directory tool takes no
+      # server-side text query, so we fetch and refine.)
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: bamboo
+              tool: bamboohr_list_employees
+              args:
+                fields: 'id,displayName,firstName,lastName,jobTitle,department,workEmail,mobilePhone,workPhone,location,supervisor,photoUrl'
+            out: r
+          - transform: *dir_to_people
+            out: people
+          - emit: people
+
+filters:
+  - id: department
+    kind: enum
+    label: Department
+    apply: post
+    matches_field: department
 
 actions:
-  - id: open
+  - id: email
     kind: url
     target: row
-    label: Open
-    icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    label: Email
+    icon: mail
+    # mailto: built from the row's workEmail. url_escape on the path component.
+    url_template: 'mailto:{{row.email | url_escape}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: displayName
+  title_field: name
+  subtitle_field: subline
   list_fields:
-    - id
-    - displayName
-    - jobTitle
+    - name
+    - title
     - department
+    - email
   search_fields:
-    - id
+    - name
+    - title
+    - department
+    - email
   searchable: true
+  filterable: true
   row_key_field: id
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.name}}'
+      subtitle: '{{row.title}} · {{row.department}}'
+      image_url: '{{row.photo_url}}'
+      fields:
+        - { label: Email,      value: '{{row.email}}' }
+        - { label: Title,      value: '{{row.title}}' }
+        - { label: Department, value: '{{row.department}}' }
+        - { label: Location,   value: '{{row.location}}' }
+        - { label: Phone,      value: '{{row.phone}}' }
+        - { label: Manager,    value: '{{row.manager_name}}' }
+      actions:
+        - email
 
-enabled: true
+# DISABLED until admin completes the setup in the header ADMIN box above
+# (register bamboo with BAMBOOHR_SUBDOMAIN + BAMBOOHR_API_KEY, confirm
+# tools, confirm auth model), then flip to true.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

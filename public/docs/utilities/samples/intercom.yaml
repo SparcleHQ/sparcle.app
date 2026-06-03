@@ -1,61 +1,241 @@
+# =intercom — Intercom (official Remote MCP, https://mcp.intercom.com/mcp).
+#
+# Written against the REAL Intercom MCP server (intercom/intercom-mcp-server,
+# verified live 2026-06-03). That server's "Direct API" tools wrap the Intercom
+# REST API 1:1:
+#
+#   search_conversations  → POST /conversations/search. Takes a `query` object
+#     { field, operator, value } (+ optional `pagination`). Returns the REST
+#     envelope:
+#       { "type": "conversation.list",
+#         "conversations": [ <conversation>, ... ],
+#         "total_count": N,
+#         "pages": { ... } }
+#     i.e. the array is at `.conversations` (NOT `.data`/`.results`). Each
+#     conversation carries id, title, state, updated_at and `source.subject` /
+#     `source.body`.
+#   get_conversation      → GET /conversations/{id}. Arg key is `id`.
+#   search_contacts       → POST /contacts/search (same query DSL).
+#   get_contact           → GET /contacts/{id}.
+#
+# There is NO `my_conversations` tool (the prior manifest invented it) and no
+# whoami tool, so a true "mine" scope can't be expressed — the default scope is
+# "open conversations" via the supported `query` filter (state = open). See the
+# residual risk note about per-teammate scoping.
+#
+# Intercom conversations have no field carrying a browsable app URL, so the
+# `open` action builds one from the workspace id when the tenant has configured
+# `org.intercom_app_id`; otherwise it falls back to the API self link.
 schema_version: 1
 id: intercom
 chip: =intercom
 title: Intercom
 icon: message-square
-description: My open conversations.
-emits: Document
+description: Search Intercom conversations and look one up by id (open conversations by default).
+placeholder_examples:
+  - "billing"
+  - "refund request"
+  - "123456789"
+  - "anything in a conversation subject"
+emits: Generic
 auth_profile_ref: intercom_user
 
 requires:
   - mcp: intercom
-    version: ^1
-    tools: ["my_conversations"]
-    scopes: ["conversations.read"]
+    version: ">=1"
+    tools:
+      - search_conversations
+      - get_conversation
+    scopes:
+      - conversations.read
+
+# Network backend → confirm (don't hit Intercom on every keystroke). The empty
+# default scope (open conversations) auto-loads; a bare numeric conversation id
+# auto-fires a direct lookup; free-text searches on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Intercom for "{{query}}"'
+  confirm_hint: Press Enter to search Intercom conversations
+  auto_when:
+    - regex: '^[0-9]{4,}$'
+      reason: A bare numeric id is an unambiguous, cheap conversation lookup.
 
 scopes:
-  - id: my_open
-    label: My open
+  # DEFAULT: open conversations, most-recently-updated first.
+  - id: open
+    label: Open conversations
     default: true
     flow:
       - call:
           kind: mcp
           mcp: intercom
-          tool: my_conversations
+          tool: search_conversations
           args:
-        state: open
-        limit: '{{limit}}'
+            query:
+              field: state
+              operator: '='
+              value: open
+            pagination:
+              per_page: '{{limit}}'
         out: r
-      - emit: r
-        path: /conversations
+      # Normalize whatever envelope the MCP/dispatcher produces (REST
+      # {conversations:[...]}, a tool wrapper {structured_content:{data:...}},
+      # or a bare array — `?` suppresses index-on-array errors) into flat,
+      # render-ready rows. Flat top-level keys are what the list + card bind to.
+      - transform: &convs_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.conversations?)
+              // ($p.data?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $arr
+          | ( $arr | if type == "array" then . else [] end ) as $rows
+          | ($rows | map(
+                . as $c
+                | ($c.source // {}) as $src
+                | ($c.contacts // {}) as $cw
+                | (($cw.contacts // []) | map(.id) | join(", ")) as $contactIds
+                | ($c.updated_at // null) as $upd
+                | ((if ($src.body | type) == "string" then $src.body else "" end)
+                    | gsub("<[^>]+>"; " ") | gsub("\\s+"; " ")
+                    | sub("^ +"; "") | sub(" +$"; "")) as $bodyText
+                | {
+                    id: (($c.id // "") | tostring),
+                    title: ( ($c.title // $src.subject // "")
+                             | if . == "" then "(no subject)" else . end ),
+                    subject: ($src.subject // "—"),
+                    preview: ( if ($bodyText | length) > 160
+                               then ($bodyText[0:157] + "…")
+                               else (if $bodyText == "" then "—" else $bodyText end) end ),
+                    state: ($c.state // "—"),
+                    priority: ($c.priority // "—"),
+                    read: ($c.read // false),
+                    sourceType: ($src.type // "—"),
+                    sourceAuthor: (($src.author // {}).name // "—"),
+                    contactIds: (if $contactIds == "" then "—" else $contactIds end),
+                    created_at: ($c.created_at // null),
+                    updated_at: $upd,
+                    _self: ($c.self // ""),
+                    subline: ([ ($c.state // empty),
+                                ($src.type // empty),
+                                (($c.priority // "") | if . == "priority" then "priority" else empty end) ]
+                              | map(select(. != null and . != "")) | join("  ·  "))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches conversations.
+  - id: search
+    label: Search
+    match:
+      # A bare numeric id → direct conversation lookup. get_conversation's
+      # single-object response flows through the same shared transform (the
+      # has("id") → [.] branch wraps it into a one-row array).
+      - regex: '^[0-9]{4,}$'
+        bind:
+          id: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: intercom
+              tool: get_conversation
+              args:
+                id: '{{id}}'
+            out: r
+          - transform: *convs_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → full-text search across conversation source subject +
+      # body via the `~` (contains) operator. The user text is the `value` of a
+      # structured query object — it is NOT concatenated into any DSL string, so
+      # no escape filter is required (the MCP server parameter-binds it). We
+      # restrict to the source.body field, which the conversation search index
+      # supports for contains matching.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: intercom
+              tool: search_conversations
+              args:
+                query:
+                  field: source.body
+                  operator: '~'
+                  value: '{{query}}'
+                pagination:
+                  per_page: '{{limit}}'
+            out: r
+          - transform: *convs_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: state
+    kind: enum
+    label: State
+    apply: pre
+    maps_to: query.state
+    static:
+      - open
+      - closed
+      - snoozed
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Intercom
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Build the inbox deep-link from the tenant-configured workspace id when
+    # present; otherwise fall back to the conversation's API self link.
+    url_template: '{{row._self | default:''#''}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: subject
+  # Flat keys (emitted by the transform) so list projection + card binds both
+  # resolve. subline packs state · source · priority.
+  title_field: title
+  subtitle_field: subline
   list_fields:
     - id
-    - subject
-    - preview
+    - title
+    - state
+    - sourceType
     - updated_at
   search_fields:
     - id
-  searchable: true
+    - title
+    - subject
+    - preview
+    - state
+    - sourceType
+    - sourceAuthor
+    - contactIds
+  sort_field: updated_at
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.title}}'
+      subtitle: 'Conversation {{row.id}} · {{row.state}}'
+      fields:
+        - { label: Subject,  value: '{{row.subject}}' }
+        - { label: State,    value: '{{row.state}}' }
+        - { label: Priority, value: '{{row.priority}}' }
+        - { label: Source,   value: '{{row.sourceType}}' }
+        - { label: Author,   value: '{{row.sourceAuthor}}' }
+        - { label: Contacts, value: '{{row.contactIds}}' }
+        - { label: Preview,  value: '{{row.preview}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

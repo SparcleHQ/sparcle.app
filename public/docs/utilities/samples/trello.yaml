@@ -1,19 +1,72 @@
+# =trello — Trello cards/lists/boards via the community MCP server
+# delorenj/mcp-server-trello (https://github.com/delorenj/mcp-server-trello).
+#
+# DISABLED BY DEFAULT (enabled: false) — this is NOT a public/hosted server.
+# It is a self-hosted MCP that authenticates with a Trello API key + token
+# supplied as PROCESS ENV on the MCP server, not per-user OAuth. An admin MUST
+# complete the following before flipping enabled: true:
+#
+#   1. Deploy delorenj/mcp-server-trello and register it in the org MCP catalog
+#      under the id `trello` (must match `requires[].mcp` + `call.mcp` below).
+#   2. Set on that server's process env:
+#        TRELLO_API_KEY   — from https://trello.com/power-ups/admin (API key)
+#        TRELLO_TOKEN     — token generated against that API key (read scope)
+#      (cited: README "Required Environment Variables").
+#   3. OPTIONAL org defaults (see "# ADMIN:" markers in the flow below):
+#        TRELLO_BOARD_ID       — default board for get_lists when no boardId
+#                                given (README: optional, deprecated; prefer
+#                                set_active_board). Mirror its value into the
+#                                `default_board_id` constant below so the Lists
+#                                scope works org-wide.
+#        TRELLO_WORKSPACE_ID / TRELLO_ALLOWED_WORKSPACES — workspace scoping.
+#   4. Confirm the auth profile: this manifest points at the existing
+#      `trello_user` profile (provider `trello`) in auth-profiles.yaml. If the
+#      deployment instead fronts the key/token behind a per-user OAuth proxy,
+#      repoint auth_profile_ref accordingly.
+#
+# WIRE SHAPE (verified against README + trello-client.ts, 2026-06-03): every
+# tool returns the MCP text-content envelope
+#   { content: [ { type: "text", text: "<JSON.stringify(<raw Trello JSON>)>" } ] }
+# which the bolt-api dispatcher surfaces as structured_content. The decoded
+# payload is the RAW Trello REST API JSON (a bare array for list-returning
+# tools, a bare object for get_card) — NO results/items/data wrapper. The
+# defensive unwrap below tolerates every envelope shape regardless.
 schema_version: 1
 id: trello
 chip: =trello
 title: Trello
 icon: trello
-description: My open cards.
+description: Your Trello cards, plus lists and boards (self-hosted Trello MCP).
+placeholder_examples:
+  - "(empty) — my cards"
+  - "5f2abc...  (card id)"
+  - "list 5f2def...  (cards in a list)"
 emits: Issue
+# Per-user token store lives under MCP id `trello` (provider `trello`).
 auth_profile_ref: trello_user
 
 requires:
   - mcp: trello
-    version: ^1
-    tools: ["my_cards"]
-    scopes: ["read"]
+    version: ">=1"
+    tools:
+      - get_my_cards
+      - get_lists
+      - list_boards
+      - get_card
+      - get_cards_by_list_id
+    scopes:
+      - read
+
+# MCP/network backend → confirm dispatch (don't hammer Trello on each keystroke).
+# The default scope (your cards) auto-loads; free-text runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Trello: "{{query}}"'
+  confirm_hint: Press Enter to look up in Trello
 
 scopes:
+  # DEFAULT: cards assigned to the current user. get_my_cards takes NO args
+  # (cited: README "get_my_cards — Arguments: {} (no parameters)").
   - id: my_cards
     label: My cards
     default: true
@@ -21,42 +74,249 @@ scopes:
       - call:
           kind: mcp
           mcp: trello
-          tool: my_cards
-          args:
-        filter: open
+          tool: get_my_cards
+          args: {}
         out: r
-      - emit: r
-        path: /cards
+      # MANDATORY defensive envelope unwrap (same pattern as jira-cloud), then
+      # walk the raw Trello array out of $p (bare array OR results/items/data/
+      # nodes) and flatten each card into the Issue contract. Trello cards carry
+      # id/name/url/shortUrl/idBoard/idList/desc/due/dateLastActivity/closed/
+      # labels (cited: trello-client.ts TrelloCard usage + Trello REST card
+      # object definition).
+      - transform: &cards_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p | if type == "array" then . else empty end)
+              // ($p.cards?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $cards
+          | ($cards | map(
+                . as $c
+                | (($c.labels // []) | map(.name // .color // empty)
+                    | map(select(. != null and . != "")) | join(", ")) as $labels
+                | {
+                    id: ($c.id // ""),
+                    key: ($c.shortLink // $c.id // ""),
+                    title: ($c.name // "(untitled card)"),
+                    url: ($c.url // $c.shortUrl // ""),
+                    status: (if ($c.closed // false) then "Archived" else "Open" end),
+                    priority: (if ($c.due // null) != null then "Has due date" else "—" end),
+                    assignee: ((($c.idMembers // []) | length | tostring) + " member(s)"),
+                    updated: ($c.dateLastActivity // "—"),
+                    board_id: ($c.idBoard // ""),
+                    list_id: ($c.idList // ""),
+                    labels: (if $labels == "" then "—" else $labels end),
+                    description: ((if ($c.desc | type) == "string" then $c.desc else "" end)
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end),
+                    due: ($c.due // "—")
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # All boards you can access. list_boards takes NO args (cited: README
+  # "list_boards — Arguments: {} (no parameters)"). Boards carry id/name/url
+  # (cited: trello-client.ts listBoards / TrelloBoard).
+  - id: boards
+    label: My boards
+    flow:
+      - call:
+          kind: mcp
+          mcp: trello
+          tool: list_boards
+          args: {}
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p | if type == "array" then . else empty end)
+              // ($p.boards?) // ($p.results?) // ($p.items?) // ($p.data?) // ($p.nodes?)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $boards
+          | ($boards | map(
+                {
+                  id: (.id // ""),
+                  key: (.id // ""),
+                  title: (.name // "(unnamed board)"),
+                  url: (.url // ""),
+                  status: (if (.closed // false) then "Closed" else "Open" end),
+                  priority: "—",
+                  assignee: "—",
+                  updated: "—",
+                  board_id: (.id // ""),
+                  list_id: "",
+                  labels: "—",
+                  description: "Trello board",
+                  due: "—"
+                }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Lists on a board. get_lists takes an OPTIONAL boardId; with none it falls
+  # back to the server's TRELLO_BOARD_ID / active board (cited: README
+  # "get_lists — Arguments: boardId? (optional; uses default if omitted)").
+  - id: lists
+    label: Lists on default board
+    flow:
+      # ADMIN: set default_board_id to the same value as the server's
+      # TRELLO_BOARD_ID env (find it in the board URL trello.com/b/<id>/... or
+      # via the My boards scope). Leave "" to defer to the server's active board.
+      - transform: |
+          { board_id: "" }
+        out: cfg
+      - call:
+          kind: mcp
+          mcp: trello
+          tool: get_lists
+          args:
+            # Empty → server uses its configured default/active board.
+            boardId: '{{cfg.board_id}}'
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p | if type == "array" then . else empty end)
+              // ($p.lists?) // ($p.results?) // ($p.items?) // ($p.data?) // ($p.nodes?)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $lists
+          | ($lists | map(
+                {
+                  id: (.id // ""),
+                  key: (.id // ""),
+                  title: (.name // "(unnamed list)"),
+                  url: "",
+                  status: (if (.closed // false) then "Archived" else "Open" end),
+                  priority: "—",
+                  assignee: "—",
+                  updated: "—",
+                  board_id: (.idBoard // ""),
+                  list_id: (.id // ""),
+                  labels: "—",
+                  description: "Trello list",
+                  due: "—"
+                }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip: a bare 24-hex Trello id → fetch that one card;
+  # `list <id>` → fetch the cards in that list; otherwise client-side refine
+  # over My cards (Trello card text isn't server-queryable via these tools).
+  - id: search
+    label: Search
+    match:
+      # Single Trello object id (24 hex chars) → get_card(cardId).
+      # (cited: README "get_card — Arguments: cardId (required)".)
+      - regex: '^[0-9a-fA-F]{24}$'
+        bind:
+          card_id: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: trello
+              tool: get_card
+              args:
+                cardId: '{{card_id}}'
+                includeMarkdown: false
+            out: r
+          # get_card returns a single card OBJECT; the unwrap wraps it to [.].
+          - transform: *cards_to_rows
+            out: enriched
+          - emit: enriched
+      # `list <listId>` → cards in that list via get_cards_by_list_id(listId).
+      # (cited: README "get_cards_by_list_id — Arguments: boardId? (optional),
+      # listId (required)".) listId comes from the user-typed match group; an
+      # admin can hardcode a default below for an org-wide "team backlog" view.
+      - regex: '^[Ll]ist\s+([0-9a-fA-F]{24})$'
+        bind:
+          list_id: '{{groups.1}}'
+        flow:
+          # ADMIN: optional default boardId — set to your board id (same as
+          # TRELLO_BOARD_ID) to constrain the list lookup; "" lets the server
+          # resolve the board from the list itself / active board.
+          - transform: |
+              { board_id: "" }
+            out: cfg
+          - call:
+              kind: mcp
+              mcp: trello
+              tool: get_cards_by_list_id
+              args:
+                listId: '{{list_id}}'
+                boardId: '{{cfg.board_id}}'
+            out: r
+          - transform: *cards_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → fall back to my cards; the launcher refines them
+      # client-side against search_fields below (no server-side card text
+      # search is exposed by this MCP).
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: trello
+              tool: get_my_cards
+              args: {}
+            out: r
+          - transform: *cards_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Trello
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Trello cards/boards carry a full https URL; lists have none → '#'.
+    url_template: '{{row.url | default:''#''}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: name
+  title_field: title
+  subtitle_field: key
   list_fields:
-    - id
-    - name
-    - board_name
-    - list_name
+    - title
+    - status
+    - updated
+    - labels
   search_fields:
-    - id
-  searchable: true
+    - title
+    - key
+    - status
+    - labels
+    - description
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.title}}'
+      subtitle: '{{row.key}} · {{row.status}}'
+      fields:
+        - { label: Status,      value: '{{row.status}}' }
+        - { label: Due,         value: '{{row.due}}' }
+        - { label: Members,     value: '{{row.assignee}}' }
+        - { label: Labels,      value: '{{row.labels}}' }
+        - { label: Last active, value: '{{row.updated}}' }
+        - { label: Board id,    value: '{{row.board_id}}' }
+        - { label: List id,     value: '{{row.list_id}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
 
-enabled: true
+# DISABLED until an admin completes the setup in the header comment above
+# (deploy the MCP, set TRELLO_API_KEY + TRELLO_TOKEN, optionally fill the
+# default board/list ids). Flip to true once that is done.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

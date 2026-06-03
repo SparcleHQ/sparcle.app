@@ -1,21 +1,60 @@
+# =stripe — Stripe (official Remote MCP, https://mcp.stripe.com).
+#
+# Verified live against the official Stripe docs + the open-source Stripe Agent
+# Toolkit (2026-06-03):
+#
+#   • Tool name is `list_customers` (identity — already correct; do NOT rename).
+#     Args: `limit` (1..100) and an optional `email` (case-sensitive exact
+#     filter on the customer's email).  Docs: https://docs.stripe.com/mcp
+#
+#   • Response envelope. The remote mcp.stripe.com server returns its result as
+#     MCP *text content* whose text is the JSON-stringified Stripe API list
+#     response. The underlying Stripe `customers.list` shape is:
+#         { "object": "list", "data": [ <customer>, ... ], "has_more": bool,
+#           "url": "/v1/customers" }
+#     i.e. the customer array lives under `.data`. (Proxy source:
+#     stripe/agent-toolkit mcp-client.ts → result.content[].text.)
+#     bolt-api's MCP dispatcher parses that text JSON into `structured_content`,
+#     but raw text-passthrough is also possible, so the transform below unwraps
+#     BOTH the MCP envelope and the Stripe list envelope defensively.
+#
+#   • A Stripe Customer has NO browsable `url`/`html_url`. The dashboard URL is
+#     synthesized from the id: https://dashboard.stripe.com/customers/<id>.
+#
+#   • `created` is a Unix epoch (seconds) integer on the real API; the transform
+#     tolerates both an int and a pre-formatted string.
 schema_version: 1
 id: stripe
 chip: =stripe
 title: Stripe
 icon: credit-card
-description: Recent customers.
+description: Recent Stripe customers (official Stripe Remote MCP).
+placeholder_examples:
+  - "billing@acme.com"
+  - "anything to filter by email"
 emits: Account
 auth_profile_ref: stripe_user
 
 requires:
   - mcp: stripe
-    version: ^1
-    tools: ["list_customers"]
-    scopes: ["read_only"]
+    version: ">=1"
+    tools:
+      - list_customers
+    scopes:
+      - read_only
+
+# MCP/network backend → confirm so we don't hit Stripe on every keystroke. The
+# empty default scope (recent customers) auto-loads; typing an email after the
+# chip filters by that exact email on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'List Stripe customers'
+  confirm_hint: Press Enter to load recent customers
 
 scopes:
+  # DEFAULT: most-recently-created customers, top ~{{limit}} (~20).
   - id: recent
-    label: Recent
+    label: Recent customers
     default: true
     flow:
       - call:
@@ -23,37 +62,108 @@ scopes:
           mcp: stripe
           tool: list_customers
           args:
-        limit: '{{limit}}'
+            limit: '{{limit}}'
         out: r
-      - emit: r
-        path: /data
+      # Defensive unwrap, mirrored on =jira-cloud. First peel the MCP envelope
+      # (structured_content.data → structured_content → raw), then peel the
+      # Stripe list envelope: the rows live under `.data`, but tolerate
+      # results/items/nodes or a bare array too. `?` suppresses index-on-array
+      # errors. Each customer is flattened to canonical Account keys the
+      # presentation + actions bind to (flat {{row.x}} — no dotted paths).
+      - transform: &customers_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.data?     | if type == "array" then . else empty end)
+              // ($p.results? | if type == "array" then . else empty end)
+              // ($p.items?   | if type == "array" then . else empty end)
+              // ($p.nodes?   | if type == "array" then . else empty end)
+              // ($p          | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $rows
+          | ( $rows | map(
+                . as $c
+                | ($c.created) as $cr
+                | ( if   ($cr | type) == "number" then ($cr | todate)
+                    elif ($cr | type) == "string" then $cr
+                    else "—" end ) as $created
+                | {
+                    id:       ($c.id // ""),
+                    name:     ($c.name // $c.description // "(no name)"),
+                    email:    ($c.email // "—"),
+                    domain:   ( ($c.email // "")
+                                | if test("@") then (split("@")[1]) else "" end ),
+                    currency: (($c.currency // "") | ascii_upcase),
+                    phone:    ($c.phone // "—"),
+                    created:  $created,
+                    description: ($c.description // "—"),
+                    _url:     (if (($c.id // "") | length) > 0
+                               then "https://dashboard.stripe.com/customers/\($c.id)"
+                               else "" end)
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip filters by exact customer email (Stripe's `email` arg
+  # is a case-sensitive exact match — there is no partial/text search on the
+  # list endpoint). Catch-all text branch.
+  - id: search
+    label: Find by email
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: stripe
+              tool: list_customers
+              args:
+                email: '{{query}}'
+                limit: '{{limit}}'
+            out: r
+          - transform: *customers_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Stripe
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Stripe customers have no API-supplied URL; the dashboard link is
+    # synthesized from the id by the transform (row._url).
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: name
+  title_field: name
+  subtitle_field: email
   list_fields:
-    - id
     - name
     - email
+    - currency
     - created
   search_fields:
     - id
-  searchable: true
+    - name
+    - email
+    - domain
+  sort_field: created
+  sort_order: desc
   row_key_field: id
+  searchable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.id}}'
+      title: '{{row.name}}'
+      subtitle: '{{row.id}}'
+      fields:
+        - { label: Email,       value: '{{row.email}}' }
+        - { label: Domain,      value: '{{row.domain | default:''—''}}' }
+        - { label: Currency,    value: '{{row.currency | default:''—''}}' }
+        - { label: Phone,       value: '{{row.phone}}' }
+        - { label: Created,     value: '{{row.created}}' }
+        - { label: Description, value: '{{row.description}}' }
       actions: [open]
 
 enabled: true

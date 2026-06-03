@@ -1,19 +1,78 @@
+# =workday — Workday HCM worker search (Person).
+#
+# ============================================================================
+# CUSTOM / NOT PUBLICLY AVAILABLE — DISABLED BY DEFAULT (enabled: false).
+# ============================================================================
+# Workday does NOT ship an official, public Model Context Protocol server.
+# The Workday-MCP options that exist are all CUSTOM or third-party and differ
+# in tool names, argument keys, and response envelope:
+#   • CData open-source Workday MCP — generic SQL-over-MCP only
+#     (get_tables / get_columns / run_query); there is NO native worker-search
+#     tool, you must SELECT against a Workday OData/Reports table.
+#   • Composio / Zapier / viaSocket hosted Workday MCPs — expose worker
+#     retrieval actions (e.g. "Get Workers Collection Staffing",
+#     "Get Worker Info"), but tool names + shapes are vendor-specific and the
+#     instance/tenant binding is per-customer.
+# There is therefore NO single tool name + envelope this manifest can pin
+# without a customer decision. Everything below the "real-contract" line is a
+# PLACEHOLDER worker-search shape that Sparcle must adapt during onboarding.
+#
+# BEFORE THIS UTILITY CAN RUN, SPARCLE MUST CONFIGURE (per customer tenant):
+#   1. Which Workday MCP server to register under the org MCP id `workday`
+#      (CData self-host vs Composio/Zapier hosted vs a bespoke wrapper).
+#   2. The Workday tenant + service endpoint / data-center host
+#      (e.g. https://wd5-impl-services1.workday.com/ccx/...). TENANT-SPECIFIC.
+#   3. The exact worker-search/list tool name + argument keys for that server
+#      (replace `search_workers` / `query` below).
+#   4. The response envelope + worker field paths (replace the transform's
+#      $worker field mapping below to match the real JSON).
+#   5. OAuth client registration (auth_profile_ref: workday_user, provider
+#      `workday`) — Workday API Client for Integrations + the worker.read-
+#      equivalent scope.
+# Once 1-5 are done, flip `enabled: true` and re-run `bolt-utility lint`.
+# ============================================================================
 schema_version: 1
 id: workday
 chip: =workday
 title: Workday
 icon: users
-description: Search Workday workers.
+description: Search Workday workers (requires custom Workday MCP setup).
+placeholder_examples:
+  - "jane"
+  - "engineering"
+  - "Sara Lee"
 emits: Person
+# OAuth tokens for the Workday MCP are stored under provider id `workday`.
+# ADMIN: confirm the org MCP catalog registers your Workday server under the
+# id `workday`; if you register it under a different id, update both this
+# auth profile's `provider` (config/utilities/auth-profiles.yaml) and the
+# `requires[].mcp` + every `call.mcp` below to match.
 auth_profile_ref: workday_user
 
 requires:
+  # ADMIN: `workday` is the org MCP-catalog id you assign to whichever Workday
+  # MCP server you stand up (CData self-host / Composio / bespoke). The tool
+  # name below is a PLACEHOLDER — set it to the real worker-search/list tool
+  # your chosen server exposes.
   - mcp: workday
-    version: ^1
-    tools: ["search_workers"]
-    scopes: ["worker.read"]
+    version: ">=1"
+    tools:
+      - search_workers   # PLACEHOLDER — real name is server-specific
+    scopes:
+      - worker.read      # ADMIN: real Workday API scope for worker reads
+
+# Network backend → confirm-to-fire (don't hit Workday on every keystroke).
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Workday for "{{query}}"'
+  confirm_hint: Press Enter to search workers
 
 scopes:
+  # DEFAULT scope. Empty query lists the first {{limit}} workers; typed text
+  # filters by name/title/department. The PLACEHOLDER tool `search_workers`
+  # takes a free-text `query` arg (NOT a query-DSL string, so no escape filter
+  # is required); if your real server is SQL/WQL-based, switch the arg to the
+  # DSL form and add `| sql_escape` to the user text.
   - id: search
     label: Search
     default: true
@@ -23,42 +82,125 @@ scopes:
           mcp: workday
           tool: search_workers
           args:
-        query: '{{query}}'
-        limit: '{{limit}}'
+            # ADMIN: replace `query` with your server's real search arg key
+            # (e.g. `search`, `q`, `name`, or a WQL/SQL string with sql_escape).
+            query: '{{query}}'
+            limit: '{{limit}}'
+            # ADMIN: many Workday MCPs require the tenant id explicitly. Fill
+            # the constant below with your tenant (e.g. "acme_p<env>"); find it
+            # in Workday > Tenant Setup, or the host segment of your API URL.
+            tenant: 'CHANGEME_TENANT'   # ADMIN: default Workday tenant id
         out: r
-      - emit: r
-        path: /workers
+      # MANDATORY defensive envelope unwrap (identical pattern to jira-cloud):
+      # tolerate {structured_content:{data:{...}}} / {structured_content:{...}}
+      # / bare provider JSON, then walk the worker array out of $p (workers /
+      # items / data / results / nodes / bare array / single object). NEVER
+      # emit straight off a bare path:/workers — the envelope is server-shaped.
+      # The $worker field reads below are PLACEHOLDERS: re-map them to the real
+      # Workday worker JSON during onboarding (descriptor/primaryWorkEmail/
+      # businessTitle/supervisoryOrganization vary by API + report).
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.workers?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.results?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("name") or has("descriptor"))) then [.] else empty end)
+              // [] ) as $list
+          | ( $list | if type == "array" then . else [] end ) as $workers
+          | ($workers | map(
+                . as $w
+                # ADMIN: adjust these paths to your real worker JSON.
+                | ($w.id // $w.workerId // $w.employeeId // $w.wid // "") as $id
+                | ($w.name // $w.descriptor // $w.fullName
+                   // (((($w.firstName // "") + " " + ($w.lastName // "")) | gsub("^ +| +$";""))
+                       | if . == "" then null else . end)
+                   // "(unknown)") as $name
+                | ($w.email // $w.primaryWorkEmail // $w.workEmail // "—") as $email
+                | ($w.title // $w.businessTitle // $w.jobTitle // "—") as $title
+                | ($w.department // ($w.supervisoryOrganization?.descriptor)
+                   // $w.organization // "—") as $dept
+                | ($w.managerName // ($w.manager?.descriptor) // "—") as $manager
+                | ($w.location // ($w.location?.descriptor) // "—") as $location
+                | ($w.photoUrl // $w.photo // "") as $photo
+                # ADMIN: replace CHANGEME_WD_HOST / CHANGEME_TENANT with your
+                # Workday web host + tenant id so the directory deep link works
+                # org-wide when the server returns no per-worker url.
+                | ($w.url // $w.href // ($w.links?.self)
+                   // ("https://CHANGEME_WD_HOST/CHANGEME_TENANT/d/inst/worker/" + ($id | tostring))) as $url
+                | {
+                    # Person canonical type: id + name + email required.
+                    id: ($id | tostring),
+                    name: $name,
+                    email: $email,
+                    title: $title,
+                    department: $dept,
+                    manager_name: $manager,
+                    location: $location,
+                    photo_url: $photo,
+                    _url: $url,
+                    subline: ([ $title, $dept ]
+                              | map(select(. != null and . != "" and . != "—"))
+                              | join("  ·  "))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
 
 actions:
+  # ADMIN: Workday worker profile deep-link. The transform carries a per-row
+  # `_url` when the server returns one; otherwise this opens the tenant worker
+  # directory keyed by id. Replace the host with your tenant's Workday URL
+  # (find it in any Workday browser session: https://<wd-host>/<tenant>/...).
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Workday
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # The transform emits a per-row `_url`. The transform falls back to a
+    # tenant worker-directory deep link built from `row.id` when the server
+    # returns no url, so this template just opens `_url`.
+    # ADMIN: CHANGEME_WD_HOST = your Workday web host, CHANGEME_TENANT = tenant.
+    url_template: "{{row._url | default:'#'}}"
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: name
+  title_field: name
+  subtitle_field: subline
   list_fields:
-    - id
     - name
     - title
     - department
+    - email
   search_fields:
-    - id
+    - name
+    - title
+    - department
+    - email
   searchable: true
   row_key_field: id
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.name}}'
+      subtitle: '{{row.title}}'
+      image_url: '{{row.photo_url}}'
+      fields:
+        - { label: Title,      value: '{{row.title}}' }
+        - { label: Department, value: '{{row.department}}' }
+        - { label: Email,      value: '{{row.email}}' }
+        - { label: Manager,    value: '{{row.manager_name}}' }
+        - { label: Location,   value: '{{row.location}}' }
+      actions:
+        - open
 
-enabled: true
-provisioning_mode: public
+# Disabled until Sparcle completes the custom Workday MCP setup above.
+enabled: false
+# admin_ready = surfaced to admins for configuration, not auto-public.
+provisioning_mode: admin_ready
 departments: []
 roles: []
 groups: []

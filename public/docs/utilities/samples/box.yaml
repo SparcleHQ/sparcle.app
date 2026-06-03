@@ -1,41 +1,142 @@
+# =box — Box (official Remote MCP, mcp.box.com).
+#
+# Written against the REAL tool surface of Box's official remote MCP server
+# (mcp.box.com), verified against developer.box.com/guides/box-mcp/tools
+# (2026-06-03). The community box-community/mcp-server-box repo is ARCHIVED and
+# uses different names (box_search_tool, etc.) — do NOT target it.
+#
+# Real tools used here:
+#   • list_folder_content_by_folder_id  — REQUIRES folder_id; root folder id is
+#     the string "0". Optional `limit`. Returns items with id, type, name, etag
+#     (+ many optional fields: size, modified_at, owned_by, …).
+#   • search_files_keyword              — keyword query across NAME/DESCRIPTION/
+#     FILE_CONTENT/etc. The query-bearing arg is `query`.
+#   • who_am_i                          — current authenticated Box user (no args).
+#
+# The launcher CAN supply folder_id "0" for the default (root) listing, so the
+# default scope is feasible without the user knowing any folder id.
+#
+# Envelope: Box's remote MCP returns tool output as text/structured content; the
+# exact wrapping is not pinned in public docs, so every emit goes through the
+# same defensive unwrap as =jira-cloud — tolerating structured_content.data,
+# structured_content, a raw object, or a bare array, with the item list found
+# under entries / items / results / data / nodes or a bare array.
 schema_version: 1
 id: box
 chip: =box
 title: Box
 icon: package
-description: Recent items from Box.
+description: Browse your Box files and search Box by keyword.
+placeholder_examples:
+  - "quarterly report"
+  - "contract.pdf"
+  - "anything in a file name or content"
 emits: File
+# Token lives under MCP id `box` (where OAuth was completed). box_user points at
+# provider `box` — see auth-profiles.yaml.
 auth_profile_ref: box_user
 
 requires:
   - mcp: box
-    version: ^1
-    tools: ["list_items"]
-    scopes: ["items.read"]
+    version: ">=1"
+    tools:
+      - list_folder_content_by_folder_id
+      - search_files_keyword
+      - who_am_i
+    scopes:
+      - items.read
+
+# confirm = right default for a network/MCP backend. The empty default scope
+# (root folder listing) auto-loads; free-text search runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Box for "{{query}}"'
+  confirm_hint: Press Enter to search Box
 
 scopes:
+  # DEFAULT: contents of the Box root folder (folder_id "0"), most recent first.
   - id: recent
-    label: Recent
+    label: My Box (root)
     default: true
     flow:
       - call:
           kind: mcp
           mcp: box
-          tool: list_items
+          tool: list_folder_content_by_folder_id
           args:
-        sort: modified_at
-        limit: '{{limit}}'
+            folder_id: "0"
+            limit: '{{limit}}'
         out: r
-      - emit: r
-        path: /entries
+      # Defensive unwrap, identical in spirit to =jira-cloud. Box item arrays may
+      # arrive under entries / items / results / data / nodes, or as a bare array.
+      - transform: &items_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.entries?)
+              // ($p.items?)
+              // ($p.results?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("name"))) then [.] else empty end)
+              // [] ) as $items
+          | ($items
+             | map(select(type == "object"))
+             | map(
+                 . as $f
+                 | ($f.owned_by // $f.created_by // $f.modified_by // {}) as $own
+                 | ($f.shared_link // {}) as $sl
+                 | ($f.size // 0) as $sz
+                 | {
+                     id: (($f.id // "") | tostring),
+                     name: ($f.name // "(unnamed)"),
+                     type: ($f.type // "file"),
+                     mime_type: ($f.extension // "—"),
+                     size: $sz,
+                     modified: ($f.modified_at // $f.content_modified_at // "—"),
+                     created: ($f.created_at // $f.content_created_at // "—"),
+                     owner_name: ($own.name // $own.login // "—"),
+                     owner_email: ($own.login // "—"),
+                     description: (($f.description // "")
+                                   | if type == "string" then . else "" end
+                                   | if length > 280 then (.[0:277] + "…") else . end
+                                   | if . == "" then "No description" else . end),
+                     # Box web URL: /folder/<id> for folders, /file/<id> for files.
+                     url: (if ($f.type // "file") == "folder"
+                           then "https://app.box.com/folder/\($f.id // "")"
+                           else "https://app.box.com/file/\($f.id // "")" end),
+                     shared_url: ($sl.url // "")
+                   }
+               ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches Box by keyword.
+  - id: search
+    label: Search
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: box
+              tool: search_files_keyword
+              args:
+                # Plain keyword string (not a query DSL); passed verbatim.
+                query: '{{query}}'
+                limit: '{{limit}}'
+            out: r
+          - transform: *items_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Box
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Prefer the row's resolved Box web URL; fall back to any shared link.
+    url_template: '{{row.url | default:row.shared_url | default:''#''}}'
 
 presentation:
   widget: list
@@ -44,18 +145,32 @@ presentation:
   list_fields:
     - name
     - type
-    - modified_at
+    - modified
     - owner_name
   search_fields:
     - name
-  searchable: true
+    - type
+    - owner_name
+    - description
+  sort_field: modified
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: false
   right_widget:
     kind: card
     mode: selected_row
     bind:
       title: '{{row.name}}'
-      actions: [open]
+      subtitle: '{{row.type}} · {{row.modified}}'
+      fields:
+        - { label: Type,        value: '{{row.type}}' }
+        - { label: Owner,       value: '{{row.owner_name}}' }
+        - { label: Modified,    value: '{{row.modified}}' }
+        - { label: Created,     value: '{{row.created}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

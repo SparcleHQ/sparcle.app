@@ -1,61 +1,259 @@
+# =asana — Asana (official hosted Remote MCP, mcp.asana.com/v2/mcp).
+#
+# Written against the REAL Asana MCP V2 tool surface (verified 2026-06-03 against
+# developers.asana.com/docs/mcp-tools-reference). The official server is HOSTED at
+# https://mcp.asana.com/v2/mcp — there is NO tenant-specific host/subdomain, so
+# nothing host-related needs admin config for the default scope.
+#
+# Tools used (all real, V2):
+#   get_my_tasks  → incomplete tasks assigned to the authenticated user (NO
+#                   workspace arg required; works org-wide with zero config).
+#   search_tasks  → advanced task search; REQUIRES a workspace gid (premium).
+#   get_task      → single task by gid.
+#   get_me        → the authenticated user (used to resolve gid for self-assign).
+#   update_task   → write tool (change assignee), used by the assign_me action.
+# Asana wraps its REST API, so tool output is the REST envelope { "data": ... }
+# ( "data" is an array for list tools, a single object for get_task ). The bolt
+# dispatcher's structured_content wrapper is unwrapped defensively below exactly
+# like =jira-cloud before any field is read.
+#
+# Field names are Asana REST task fields surfaced via opt_fields: gid, name,
+# permalink_url, due_on, completed, assignee{gid,name}, projects[]{name},
+# memberships[].project.name. permalink_url is the browser-openable task URL.
+#
+# ADMIN: search_tasks needs a workspace gid. The default scope (get_my_tasks)
+# does NOT, so the utility is fully functional out-of-the-box; only the keyword
+# "search" branch needs the one-time workspace gid below. Set it and search works
+# org-wide. enabled: true because the default scope needs no tenant config.
 schema_version: 1
 id: asana
 chip: =asana
 title: Asana
 icon: check-circle
-description: My open tasks.
+description: Your assigned Asana tasks, search tasks, and look up a task by gid.
+placeholder_examples:
+  - "launch checklist"
+  - "anything in a task name"
+  - "1201234567890123"
 emits: Issue
 auth_profile_ref: asana_user
 
 requires:
   - mcp: asana
-    version: ^1
-    tools: ["my_tasks"]
-    scopes: ["default"]
+    version: ">=1"
+    tools:
+      - get_my_tasks
+      - search_tasks
+      - get_task
+      - get_me
+      - update_task
+    scopes:
+      - default
+
+# confirm is the right default for a network/MCP backend (don't hit Asana on
+# every keystroke). The empty default scope (your incomplete tasks) auto-loads;
+# a bare numeric gid auto-fires; free-text search runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Asana for "{{query}}"'
+  confirm_hint: Press Enter to search Asana tasks
+  auto_when:
+    - regex: '^[0-9]{6,}$'
+      reason: A bare task gid is an unambiguous, cheap direct lookup.
 
 scopes:
-  - id: my_tasks
+  # DEFAULT: your incomplete assigned tasks. get_my_tasks needs NO workspace —
+  # works for every user org-wide with zero admin config. opt_fields pulls the
+  # render fields (compact-by-default otherwise).
+  - id: my
     label: My tasks
     default: true
     flow:
       - call:
           kind: mcp
           mcp: asana
-          tool: my_tasks
+          tool: get_my_tasks
           args:
-        completed: false
-        limit: '{{limit}}'
+            completed: false
+            opt_fields: &task_fields 'gid,name,completed,due_on,due_at,start_on,notes,permalink_url,assignee.name,assignee.gid,projects.name,projects.gid,memberships.project.name,tags.name'
+            limit: '{{limit}}'
         out: r
-      - emit: r
-        path: /data
+      # Normalize whatever envelope the dispatcher/MCP produces (Asana REST
+      # { data: [...] }, a bare array, or the structured_content wrapper) into a
+      # flat, render-ready row. Flat top-level keys are what the entity_preview
+      # card binds to ({{row.x}}). `?` suppresses index-on-array errors.
+      - transform: &tasks_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.data?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("gid") or has("name"))) then [.] else empty end)
+              // [] ) as $tasks
+          | ($tasks | map(
+                . as $t
+                | ($t.assignee // {}) as $as
+                | (($t.projects // []) | map(.name) | map(select(. != null and . != "")) | join(", ")) as $projs
+                | (($t.memberships // []) | map(.project.name) | map(select(. != null and . != "")) | join(", ")) as $mprojs
+                | (if $projs != "" then $projs elif $mprojs != "" then $mprojs else "—" end) as $projName
+                | (($t.tags // []) | map(.name) | map(select(. != null and . != "")) | join(", ")) as $tags
+                | (($t.notes // "") | if type == "string" then . else "" end
+                    | if length > 280 then (.[0:277] + "…") else . end
+                    | if . == "" then "No description" else . end) as $desc
+                | ([ ($as.name // "Unassigned"), $projName, ($t.due_on // empty) ]
+                    | map(select(. != null and . != "" and . != "—")) | join("  ·  ")) as $subline
+                | {
+                    gid: ($t.gid // ""),
+                    name: ($t.name // "(untitled task)"),
+                    _url: ($t.permalink_url // ""),
+                    subline: (if $subline == "" then "Asana task" else $subline end),
+                    completed: ($t.completed // false),
+                    statusName: (if ($t.completed // false) then "Completed" else "Incomplete" end),
+                    assigneeName: ($as.name // "Unassigned"),
+                    assigneeGid: ($as.gid // ""),
+                    projectName: $projName,
+                    due: ($t.due_on // $t.due_at // "—"),
+                    start: ($t.start_on // "—"),
+                    tags: (if $tags == "" then "—" else $tags end),
+                    description: $desc
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Search. A bare numeric gid jumps straight to that task; any other text runs
+  # search_tasks (which REQUIRES a workspace gid — see ADMIN constant below).
+  - id: search
+    label: Search
+    match:
+      # Bare task gid → direct lookup via get_task. Works org-wide, no workspace.
+      - regex: '^[0-9]{6,}$'
+        bind:
+          gid: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: asana
+              tool: get_task
+              args:
+                task_gid: '{{gid}}'
+                opt_fields: *task_fields
+            out: r
+          - transform: *tasks_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → full-text search across task name + description.
+      # search_tasks requires the workspace gid; assignee_any="me" is omitted so
+      # search spans the whole workspace, not just your tasks. {{query}} is the
+      # only DSL-free arg Asana exposes (text is a plain full-text param, not a
+      # query language), so no escape filter is required — it is passed as a
+      # value, never interpolated into a DSL string.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: asana
+              tool: search_tasks
+              args:
+                # ADMIN: set your Asana workspace gid here. Find it at
+                # https://app.asana.com/api/1.0/workspaces (the "gid" field) or in
+                # any project URL. Required for keyword search; the default "My
+                # tasks" scope does NOT need it. Leave as-is and only keyword
+                # search is affected.
+                workspace: '0000000000000000'   # ADMIN: default workspace gid
+                text: '{{query}}'
+                sort_by: relevance
+                opt_fields: *task_fields
+                limit: '{{limit}}'
+            out: r
+          - transform: *tasks_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: status
+    kind: enum
+    label: Status
+    apply: post
+    matches_field: statusName
+    static:
+      - Incomplete
+      - Completed
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Asana
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the task's permalink_url.
+    url_template: '{{row._url}}'
+
+  - id: assign_me
+    kind: tool
+    target: row
+    label: Assign to me
+    confirm: 'Assign "{{row.name}}" to me?'
+    # Asana needs the assignee's user gid. Resolve the current user via get_me,
+    # then update the task's assignee. update_task is the real V2 write tool.
+    flow:
+      - call:
+          kind: mcp
+          mcp: asana
+          tool: get_me
+        out: me
+      - transform: |
+          ((.me.structured_content?.data? // .me.structured_content? // .me) // {})
+          | { gid: (.gid // "") }
+        out: u
+      - call:
+          kind: mcp
+          mcp: asana
+          tool: update_task
+          args:
+            task_gid: '{{row.gid}}'
+            assignee: '{{u.gid}}'
+        out: r
+      - emit: r
 
 presentation:
   widget: list
-  title_field: gid
-  subtitle_field: name
+  # Flat keys (emitted by the transform) so list projection + card binds resolve.
+  title_field: name
+  subtitle_field: subline
   list_fields:
-    - gid
     - name
-    - project_name
-    - due_on
+    - assigneeName
+    - projectName
+    - due
+    - statusName
   search_fields:
-    - gid
+    - name
+    - assigneeName
+    - projectName
+    - tags
+    - description
+  row_key_field: gid
   searchable: true
-  row_key_field: id
+  filterable: true
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.gid}}'
-      actions: [open]
+      title: '{{row.name}}'
+      subtitle: '{{row.statusName}}'
+      fields:
+        - { label: Status,      value: '{{row.statusName}}' }
+        - { label: Assignee,    value: '{{row.assigneeName}}' }
+        - { label: Project,     value: '{{row.projectName}}' }
+        - { label: Due,         value: '{{row.due}}' }
+        - { label: Start,       value: '{{row.start}}' }
+        - { label: Tags,        value: '{{row.tags}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
+        - assign_me
 
 enabled: true
 provisioning_mode: public

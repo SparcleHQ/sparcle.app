@@ -1,20 +1,21 @@
 # =jira-cloud — Atlassian Cloud (official Remote MCP, mcp.atlassian.com/v1/mcp).
 #
-# Written against the wire shapes the official Atlassian Remote MCP returns,
-# which differ from generic/community Jira MCPs:
+# Written against the REAL wire shapes returned by the official Atlassian
+# Remote MCP (verified live 2026-06-03), which differ from generic Jira MCPs:
 #
 #   searchJiraIssuesUsingJql / getJiraIssue both return:
 #     { "issues": { "totalCount": N, "nodes": [ <issue>, ... ], "pageInfo": {...} } }
-#   i.e. the issue array is at `.issues.nodes` (NOT `.issues`), and each node
+#   i.e. the issue array is at `.issues.nodes` (NOT `.issues`), and EACH node
 #   carries a ready-made browse URL at `.webUrl`
-#   (https://<site>.atlassian.net/browse/KEY). The node's `.self` is an
+#   (https://<site>.atlassian.net/browse/KEY). The node's `.self` is now an
 #   api.atlassian.com proxy URL and is NOT browsable, so we use `.webUrl`.
 #
 #   getVisibleJiraProjects returns { "values": [ {key,name,...}, ... ] }.
 #
-# cloudId: required on every Jira call, but NOT set here — the Bolt runtime
-#   auto-resolves it once per user (via getAccessibleAtlassianResources) and
-#   injects it for the recognized Atlassian MCP id below.
+# cloudId: required on every Jira call, but NOT set here — the bolt-api
+#   dispatcher auto-resolves it once per user (getAccessibleAtlassianResources)
+#   and injects it, because the MCP id below (`mcp-atlassian-com`) is
+#   recognized by is_atlassian_cloud_mcp (src/routes/agent.rs).
 #
 # Unbounded JQL is rejected by this server ("add a search restriction"), so
 # every scope's JQL carries a restriction (assignee / text / created).
@@ -30,8 +31,10 @@ placeholder_examples:
   - "navigation light"
   - "anything in a summary or description"
 emits: Issue
-# OAuth tokens live under the MCP id the Atlassian app connects as
-# (mcp-atlassian-com), so this profile's provider must match that id.
+# Token lives under MCP id `mcp-atlassian-com` (where OAuth was completed), so
+# the OAuth gate must check that provider — see jira_cloud_user_obo in
+# auth-profiles.yaml. Using the generic jira_user_obo (provider atlassian-jira)
+# yields a false needs_oauth even when the official MCP is connected.
 auth_profile_ref: jira_cloud_user_obo
 
 requires:
@@ -56,7 +59,8 @@ dispatch:
   confirm_label: 'Search Jira for "{{query}}"'
   confirm_hint: Press Enter to search all of Jira
   auto_when:
-    # Case-insensitive so `sl-1` auto-fires just like `SL-1`.
+    # Case-insensitive so `sl-1` auto-fires just like `SL-1` (frontend tests
+    # this with no /i flag, so the insensitivity is baked into the class).
     - regex: '^[A-Za-z][A-Za-z0-9]+-\d+$'
       reason: Exact issue-key lookup is unambiguous and cheap.
 
@@ -64,7 +68,8 @@ dispatch:
 # WITHOUT the =jira-cloud chip (e.g. `SL-1` / `sl-1`), the launcher recognizes
 # it and proposes a row that hands off into =jira-cloud with the key pre-filled
 # (Enter → direct ticket lookup). `network` kind = only surfaced when the
-# Atlassian app is connected.
+# Atlassian MCP is connected. Served on GET /v1/agent/utilities; the launcher's
+# runtime.utility responder claims the token.
 bare:
   kind: network
   chip_key: jira-cloud
@@ -110,12 +115,14 @@ scopes:
               - description
               - subtasks
         out: r
-      # Normalize whatever envelope the MCP produces ({issues:{nodes}}, flat
-      # {issues:[...]}, or a bare array — `?` suppresses index-on-array errors)
-      # into a flat, render-ready row. Flat top-level keys (statusName,
-      # assigneeName, …) are what the entity_preview card binds to ({{row.x}});
-      # the nested `fields` object backs the list presentation paths
-      # (fields.summary, …). Optional values default to "—".
+      # The issue array lives at `.issues.nodes`. We tolerate the legacy flat
+      # `.issues` array too. webUrl is taken straight off each node.
+      # Normalize whatever envelope the dispatcher/MCP produces
+      # ({issues:{nodes}}, flat {issues:[...]}, or bare array — `?` suppresses
+      # index-on-array errors) into a flat, render-ready row. Flat top-level
+      # keys (statusName, assigneeName, …) are what the entity_preview card
+      # binds to ({{row.x}}); the nested `fields` object backs the list
+      # presentation paths (fields.summary, …). Optional values default to "—".
       - transform: &issues_to_rows |
           ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
           | ( ($p.issues?.nodes?)
@@ -234,7 +241,11 @@ scopes:
     label: Search
     match:
       # `PROJ-123` / `proj-123` → jump straight to that ticket. Case-insensitive
-      # (Jira keys are uppercase, so we upper() before the lookup).
+      # (Jira keys are uppercase, so we upper() before the lookup). We resolve
+      # via searchJiraIssuesUsingJql(`key = …`) rather than getJiraIssue: both
+      # return the same issue, but the search tool yields the {issues:{nodes}}
+      # envelope the shared transform already renders, whereas getJiraIssue's
+      # single-issue shape did not surface a row.
       - regex: '^[A-Za-z][A-Za-z0-9]+-\d+$'
         bind:
           key: '{{match}}'
@@ -253,7 +264,7 @@ scopes:
           - emit: enriched
       # Any other text → compile the query into JQL, then search.
       #
-      # Query grammar (all declarative; any app can adapt this jq for its own
+      # Query grammar (all declarative; any util can adapt this jq for its own
       # backend's filter syntax):
       #   • bare words            → search everywhere: text index (summary +
       #     description + comments) OR labels, plus the exact key when the word
@@ -267,7 +278,8 @@ scopes:
       #   • sort:updated|created|priority|due  → ORDER BY <field> DESC
       #   • a full JQL expression (contains =, ~, "in", "order by", currentUser())
       #     is passed through verbatim — power-user escape hatch.
-      # The transform reads {{query}} and emits `q.jql`, which feeds the call.
+      # The transform reads {{query}} (the flow exposes the context root as the
+      # jq input), so its output `q.jql` flows into the call args below.
       - text: '{{query}}'
         flow:
           - transform: |
@@ -359,8 +371,8 @@ actions:
     target: row
     label: Assign to me
     confirm: 'Assign {{row.key}} to me?'
-    # Jira Cloud needs the assignee's Atlassian accountId — resolve the current
-    # user via atlassianUserInfo, then assign.
+    # Jira Cloud needs the assignee's *Atlassian accountId* — NOT the Bolt
+    # user id. Resolve the current user via atlassianUserInfo, then assign.
     flow:
       - call:
           kind: mcp
@@ -416,8 +428,10 @@ presentation:
   searchable: true
   filterable: true
   # Detail pane bound to the highlighted row. `kind: entity_preview` is the
-  # wide pane (media + facts + sticky max-3+overflow footer). All bind values
-  # use FLAT row keys ({{row.x}}); empty values arrive as "—" from the transform.
+  # wide pane (media + facts + sticky max-3+overflow footer); engines that
+  # don't yet implement it fall back to the standard card. All bind values use
+  # FLAT row keys ({{row.x}}) so interpolation resolves without dotted-path
+  # support. Empty values already arrive as "—" from the transform.
   right_widget:
     kind: entity_preview
     mode: selected_row

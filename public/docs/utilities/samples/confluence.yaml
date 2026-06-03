@@ -1,62 +1,251 @@
+# =confluence — Atlassian Confluence Cloud (official Remote MCP,
+# mcp.atlassian.com/v1/mcp — the SAME server as =jira-cloud).
+#
+# Written against the REAL Atlassian Remote MCP tool surface (verified against
+# the live tool schema + official "Supported tools" docs, 2026-06-03):
+#
+#   searchConfluenceUsingCql(cloudId, cql, limit?, cqlcontext?, cursor?, expand?)
+#     → CQL search. cql is REQUIRED. limit default 25, max 250.
+#   getConfluencePage(cloudId, pageId, contentFormat?, contentType?)
+#   getConfluenceSpaces(cloudId, keys?, limit?, ...)
+#
+# Response envelope: the underlying Confluence CQL search REST shape is
+#   { results: [ { content: { id, type, title, status, space{key,name},
+#                             _links: { webui } },
+#                  title, excerpt, url, lastModified, friendlyLastModified,
+#                  user{...} }, ... ],
+#     _links: { base } }
+# The MCP may re-wrap this under structured_content / data. The page URL is
+# RELATIVE (content._links.webui, e.g. /spaces/ENG/pages/123/Title) — the
+# absolute browse URL is _links.base (the wiki root) + that webui path. We
+# build that in the transform and fall back to the result-level `url`.
+#
+# cloudId: REQUIRED on every Confluence call, but NOT set here — the bolt-api
+#   dispatcher auto-resolves it once per user (getAccessibleAtlassianResources)
+#   and injects it on every Jira/Confluence call, because the MCP id below
+#   (`mcp-atlassian-com`) is recognized by is_atlassian_cloud_mcp
+#   (src/routes/agent.rs). Do NOT add cloudId to args.
 schema_version: 1
 id: confluence
 chip: =confluence
-title: Confluence
+title: Confluence (Cloud)
 icon: book-open
-description: Search Confluence pages.
+description: Search Confluence pages and look them up by space (Atlassian Cloud).
+placeholder_examples:
+  - "release notes"
+  - "onboarding"
+  - "space:ENG architecture"
+  - "anything in a page title or body"
 emits: Document
-auth_profile_ref: confluence_user
+# Token lives under MCP id `mcp-atlassian-com` (where OAuth was completed) and
+# the Confluence content scope. Using the generic `confluence_user` profile
+# (provider `confluence`) yields a false needs_oauth even when the official
+# Atlassian MCP is connected — same gotcha that drove jira_cloud_user_obo.
+auth_profile_ref: confluence_cloud_user_obo
 
 requires:
-  - mcp: confluence
-    version: ^1
-    tools: [search]
-    scopes: [read:confluence-content]
+  - mcp: mcp-atlassian-com
+    version: ">=1"
+    tools:
+      - searchConfluenceUsingCql
+      - getConfluenceSpaces
+    scopes:
+      - read:confluence-content.summary
+      - read:confluence-content.all
+
+# Launcher trigger semantics. confirm = the right default for an MCP/network
+# backend (don't hammer Atlassian on every keystroke). The empty default scope
+# (recently-updated pages) always auto-loads; free-text search runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Confluence for "{{query}}"'
+  confirm_hint: Press Enter to search all of Confluence
 
 scopes:
-  - id: search
-    label: Search pages
+  # DEFAULT: recently-updated pages, newest first, top ~{{limit}}.
+  - id: recent
+    label: Recently updated
     default: true
     flow:
       - call:
           kind: mcp
-          mcp: confluence
-          tool: search
+          mcp: mcp-atlassian-com
+          tool: searchConfluenceUsingCql
           args:
-            cql: 'type=page AND text ~ "{{query | jql_escape}}"'
+            cql: 'type = page ORDER BY lastmodified DESC'
             limit: '{{limit}}'
         out: r
-      - emit: r
-        path: /results
+      # Normalize whatever envelope the dispatcher/MCP produces
+      # ({structured_content:{data:{results}}}, flat {results}, {nodes},
+      # {items}, or bare array — `?` suppresses index-on-array errors) into a
+      # flat, render-ready Document row. Flat top-level keys (title, url, …) are
+      # what the entity_preview card binds to ({{row.x}}); they also back the
+      # list presentation. Optional values default to "—".
+      - transform: &pages_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ($p._links?.base? // "") as $base
+          | ( ($p.results?)
+              // ($p.nodes?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("content") or has("title"))) then [.] else empty end)
+              // [] ) as $rows
+          | ($rows | map(
+                . as $res
+                | ($res.content // $res) as $c
+                | ($c.space // $res.space // {}) as $sp
+                | ($res.user // $c.history?.createdBy // {}) as $usr
+                | ($c._links // {}) as $cl
+                | ( if (($cl.webui? // "") | length) > 0 then ($base + $cl.webui)
+                    elif (($res.url? // "") | length) > 0 then ($base + $res.url)
+                    else "" end ) as $url
+                | ( ($res.lastModified // $res.friendlyLastModified
+                     // $c.version?.when // $c.history?.lastUpdated?.when // "—") ) as $modified
+                | {
+                    id: ($c.id // $res.id // ""),
+                    title: ($c.title // $res.title // "(untitled)"),
+                    url: $url,
+                    contentType: ($c.type // "page"),
+                    spaceName: ($sp.name // "—"),
+                    spaceKey: ($sp.key // ""),
+                    excerpt: ((($res.excerpt // "") | gsub("[\\n\\r]+"; " "))
+                              | if length > 280 then (.[0:277] + "…") else . end
+                              | if . == "" then "No preview" else . end),
+                    authorName: ($usr.displayName // $usr.publicName // "—"),
+                    authorAvatar: ($usr.profilePicture?.path // ""),
+                    lastModified: $modified,
+                    subline: ([ ($sp.name // empty), ($c.type // empty) ]
+                              | map(select(. != null and . != "")) | join("  ·  "))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches all of Confluence.
+  - id: search
+    label: Search
+    match:
+      # space:KEY [free text] → scope the CQL to that space. The KEY is escaped
+      # for the CQL string literal; remaining words become a text/title match.
+      - regex: '^space:(?P<space>[A-Za-z0-9_]+)\s*(?P<rest>.*)$'
+        bind:
+          space: '{{groups.space}}'
+          rest: '{{groups.rest}}'
+        flow:
+          # Build CQL declaratively so the space key and free text are escaped
+          # for the CQL string literal (jql_escape is the CQL-compatible string
+          # escaper here — both reject stray quotes/backslashes the same way).
+          - transform: |
+              (.groups.space // "") as $sp
+              | (.groups.rest // "" | gsub("^\\s+|\\s+$"; "")) as $txt
+              | { cql: ("space = \"" + ($sp | gsub("\""; "\\\"")) + "\""
+                        + (if ($txt | length) > 0
+                           then " AND (title ~ \"" + ($txt | gsub("\""; "\\\"")) + "*\""
+                                + " OR text ~ \"" + ($txt | gsub("\""; "\\\"")) + "\")"
+                           else "" end)
+                        + " AND type = page ORDER BY lastmodified DESC") }
+            out: q
+          - call:
+              kind: mcp
+              mcp: mcp-atlassian-com
+              tool: searchConfluenceUsingCql
+              args:
+                cql: '{{q.cql}}'
+                limit: '{{limit}}'
+            out: r
+          - transform: *pages_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → title OR text match across all pages. The user text is
+      # escaped for the CQL string literal via jql_escape.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: mcp-atlassian-com
+              tool: searchConfluenceUsingCql
+              args:
+                cql: '(title ~ "{{query | jql_escape}}*" OR text ~ "{{query | jql_escape}}") AND type = page ORDER BY lastmodified DESC'
+                limit: '{{limit}}'
+            out: r
+          - transform: *pages_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: space
+    kind: enum
+    label: Space
+    apply: pre
+    maps_to: cql.space
+    populate:
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: getConfluenceSpaces
+          args:
+            limit: 100
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.results?) // ($p.values?) // ($p | if type == "array" then . else empty end) // [] )
+          | map({ value: (.key // .id // ""), label: (.name // .key // "") })
+        out: spaces
+      - emit: spaces
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Confluence
     icon: external_link
+    # Each row carries the absolute browse URL built in the transform
+    # (_links.base + content._links.webui).
     url_template: '{{row.url}}'
 
 presentation:
   widget: list
+  # Flat keys (emitted by the transform) so list projection + card binds both
+  # resolve. subline packs space · type.
   title_field: title
-  subtitle_field: space_name
-  list_fields: [title, space_name, last_modified]
-  search_fields: [title]
-  sort_field: last_modified
+  subtitle_field: subline
+  list_fields:
+    - title
+    - spaceName
+    - lastModified
+  # Client-side refine/highlight across the shown fields.
+  search_fields:
+    - title
+    - spaceName
+    - spaceKey
+    - excerpt
+    - authorName
+  sort_field: lastModified
   sort_order: desc
   row_key_field: id
   searchable: true
+  filterable: true
+  # Detail pane bound to the highlighted row. `kind: entity_preview` is the
+  # wide pane (media + facts + sticky footer); engines that don't implement it
+  # fall back to the standard card. All bind values use FLAT row keys
+  # ({{row.x}}) so interpolation resolves without dotted-path support. Empty
+  # values already arrive as "—" from the transform.
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.space_name | default:''-''}}'
+      subtitle: '{{row.spaceName}}'
+      image_url: '{{row.authorAvatar}}'
       fields:
-        - { label: Modified, value: '{{row.last_modified | date:''rel''}}' }
-        - { label: Author, value: '{{row.author_name | default:''-''}}' }
-      actions: [open]
+        - { label: Space,    value: '{{row.spaceName}}' }
+        - { label: Type,     value: '{{row.contentType}}' }
+        - { label: Author,   value: '{{row.authorName}}' }
+        - { label: Modified, value: '{{row.lastModified | date:''rel''}}' }
+        - { label: Preview,  value: '{{row.excerpt}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

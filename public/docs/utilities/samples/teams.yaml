@@ -1,62 +1,249 @@
+# =teams — Microsoft Teams via the floriscornel/microsoft-teams server.
+#
+# ===========================================================================
+#  enabled: false  — ADMIN SETUP REQUIRED BEFORE THIS UTILITY WILL FUNCTION
+# ===========================================================================
+#  This is a SELF-HOSTED / community MCP server. There is NO Sparcle-operated
+#  or vendor-hosted public endpoint, and the message-reading scopes need
+#  tenant-specific ids that cannot be guessed. To enable:
+#
+#   1. Register the floriscornel/microsoft-teams server in the org MCP catalog
+#      under the id `microsoft-teams` (npm: @floriscornel/microsoft-teams@latest).
+#      It runs against YOUR Microsoft Entra app registration — there is no
+#      shared instance.  # ADMIN: stand up microsoft-teams and add it to the catalog.
+#   2. Complete the per-user OAuth / device-code flow (auth profile
+#      `teams_user`, provider `microsoft-teams`, scopes Chat.Read /
+#      ChannelMessage.Read.All / Channel.ReadBasic.All).
+#   3. Pin the default chat id and the default team+channel ids below
+#      (search this file for "# ADMIN:"). The =teams default scope (recent
+#      chats) works as soon as OAuth is connected and needs NO ids; the
+#      `chat` and `channel` message scopes are non-functional until their
+#      ids are filled in.
+#   4. Flip `enabled: true` at the bottom of this file.
+#
+#  VERIFIED REAL CONTRACT (github.com/floriscornel/microsoft-teams, 2026-06-03):
+#    list_chats           -> the user's recent 1:1 + group chats (no args)
+#    get_chat_messages    -> args: chatId, limit, contentFormat, descending
+#    get_channel_messages -> args: teamId, channelId, limit, contentFormat
+#  These wrap Microsoft Graph, which returns { "value": [ ... ] }; each chat
+#  carries id/topic/chatType/lastUpdatedDateTime and each message carries
+#  id, body.content, body.contentType, from.user.displayName, createdDateTime,
+#  webUrl. We do NOT wire a free-text search scope (see residual_risks).
+# ===========================================================================
 schema_version: 1
 id: teams
 chip: =teams
 title: Microsoft Teams
 icon: message-circle
-description: Recent messages from Teams chats.
-emits: Document
+description: Recent Teams chats and messages from a pinned chat or channel.
+placeholder_examples:
+  - "recent chats"
+  - "team channel messages"
+emits: Generic
 auth_profile_ref: teams_user
 
 requires:
   - mcp: microsoft-teams
-    version: ^1
-    tools: ["search_messages"]
-    scopes: ["Chat.Read"]
+    version: ">=1"
+    tools:
+      - list_chats
+      - get_chat_messages
+      - get_channel_messages
+    scopes:
+      - Chat.Read
+      - ChannelMessage.Read.All
+      - Channel.ReadBasic.All
+
+# confirm = correct default for a network/MCP backend (don't hammer Graph on
+# every keystroke). The default scope (recent chats) auto-loads on chip open.
+dispatch:
+  mode: confirm
+  confirm_label: 'Load Teams'
+  confirm_hint: Press Enter to load your recent Teams chats
 
 scopes:
-  - id: recent
-    label: Recent
+  # DEFAULT: your recent chats. Needs NO tenant ids, so this scope works as
+  # soon as the user has completed OAuth. Microsoft Graph GET /chats returns
+  # { value: [ {id, topic, chatType, lastUpdatedDateTime}, ... ] }.
+  - id: recent_chats
+    label: Recent chats
     default: true
     flow:
       - call:
           kind: mcp
           mcp: microsoft-teams
-          tool: search_messages
-          args:
-        top: '{{limit}}'
+          tool: list_chats
         out: r
-      - emit: r
-        path: /value
+      # MANDATORY defensive envelope unwrap (identical pattern to =jira-cloud):
+      # peel structured_content/data, then walk the array out of whatever
+      # key the server used (value / results / items / data / nodes / bare).
+      - transform: &chats_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.value?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and has("id")) then [.] else empty end)
+              // [] ) as $chats
+          | ($chats | map(
+                . as $c
+                | ($c.topic // ($c.chatType // "Chat")) as $title
+                | {
+                    id: ($c.id // ""),
+                    title: $title,
+                    subtitle: ($c.chatType // "—"),
+                    chatType: ($c.chatType // "—"),
+                    preview: ($c.chatType // "—"),
+                    from: $title,
+                    updated: ($c.lastUpdatedDateTime // "—"),
+                    _url: ($c.webUrl // "")
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Messages from ONE pinned chat. Requires a chatId — taken from a query
+  # match-branch when the user pastes/scopes one, else falls back to the
+  # admin-pinned default so the scope works org-wide once configured.
+  - id: chat
+    label: Pinned chat messages
+    match:
+      # A raw Graph chat id (e.g. 19:...@thread.v2) typed after the chip jumps
+      # straight to that chat's messages.
+      - regex: '^(19:[^ ]+)$'
+        bind:
+          chat_id: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: microsoft-teams
+              tool: get_chat_messages
+              args:
+                chatId: '{{chat_id}}'
+                limit: '{{limit}}'
+                contentFormat: markdown
+                descending: true
+            out: r
+          - transform: &messages_to_rows |
+              ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+              | ( ($p.value?)
+                  // ($p.results?)
+                  // ($p.items?)
+                  // ($p.data?)
+                  // ($p.nodes?)
+                  // ($p | if type == "array" then . else empty end)
+                  // ($p | if (type == "object" and has("id")) then [.] else empty end)
+                  // [] ) as $msgs
+              | ($msgs | map(
+                    . as $m
+                    | ($m.from // {}) as $fr
+                    | ($fr.user // {}) as $usr
+                    | ($m.body // {}) as $body
+                    | ($usr.displayName // $fr.application.displayName? // "Unknown") as $sender
+                    | (($body.content // "")
+                        | gsub("<[^>]*>"; "")
+                        | gsub("&nbsp;"; " ")
+                        | if length > 280 then (.[0:277] + "…") else . end) as $text
+                    | {
+                        id: ($m.id // ""),
+                        from: $sender,
+                        title: $sender,
+                        subtitle: ($m.createdDateTime // "—"),
+                        preview: (if $text == "" then "(no text)" else $text end),
+                        body: (if $text == "" then "(no text)" else $text end),
+                        contentType: ($body.contentType // "—"),
+                        createdDateTime: ($m.createdDateTime // "—"),
+                        _url: ($m.webUrl // "")
+                      }
+                  ))
+            out: enriched
+          - emit: enriched
+      # No id typed → read the admin-pinned default chat.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: microsoft-teams
+              tool: get_chat_messages
+              args:
+                # ADMIN: default chatId. Find it via the =teams "Recent chats"
+                # scope (each row's id), or Graph GET /me/chats. Looks like
+                # 19:xxxxxxxx@thread.v2. Bolt has no tenant config key for this,
+                # so paste the literal id here.
+                chatId: 'REPLACE_WITH_DEFAULT_CHAT_ID'
+                limit: '{{limit}}'
+                contentFormat: markdown
+                descending: true
+            out: r
+          - transform: *messages_to_rows
+            out: enriched
+          - emit: enriched
+
+  # Messages from ONE pinned team channel. Requires teamId + channelId; both
+  # are tenant-specific, so they MUST be pinned by an admin below.
+  - id: channel
+    label: Pinned channel messages
+    flow:
+      - call:
+          kind: mcp
+          mcp: microsoft-teams
+          tool: get_channel_messages
+          args:
+            # ADMIN: default teamId (the team's group id / GUID). Find via
+            # Graph GET /me/joinedTeams or the microsoft-teams `list_teams` tool.
+            teamId: 'REPLACE_WITH_DEFAULT_TEAM_ID'
+            # ADMIN: default channelId (e.g. 19:xxxx@thread.tacv2). Find via
+            # Graph GET /teams/{teamId}/channels or microsoft-teams `list_channels`.
+            channelId: 'REPLACE_WITH_DEFAULT_CHANNEL_ID'
+            limit: '{{limit}}'
+            contentFormat: markdown
+        out: r
+      - transform: *messages_to_rows
+        out: enriched
+      - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Teams
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the message/chat webUrl from Graph. Falls back to the
+    # Teams web app root when a row has no webUrl.
+    url_template: '{{row._url | default:''https://teams.microsoft.com''}}'
 
 presentation:
   widget: list
-  title_field: from
-  subtitle_field: subject
+  title_field: title
+  subtitle_field: subtitle
   list_fields:
     - from
-    - subject
     - preview
     - createdDateTime
   search_fields:
     - from
+    - preview
+    - body
   searchable: true
+  filterable: false
   row_key_field: id
   right_widget:
     kind: card
     mode: selected_row
     bind:
       title: '{{row.from}}'
-      actions: [open]
+      subtitle: '{{row.createdDateTime}}'
+      fields:
+        - { label: From,    value: '{{row.from}}' }
+        - { label: Sent,    value: '{{row.createdDateTime}}' }
+        - { label: Type,    value: '{{row.contentType}}' }
+        - { label: Message, value: '{{row.preview}}' }
+      actions:
+        - open
 
-enabled: true
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

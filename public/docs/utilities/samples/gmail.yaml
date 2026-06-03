@@ -1,33 +1,154 @@
+# =gmail — Official Google Gmail MCP server (gmailmcp.googleapis.com/mcp/v1).
+#
+# Rewritten against the REAL, Google-documented Gmail MCP toolset (verified
+# 2026-06-03 against developers.google.com/workspace/gmail/api/reference/mcp
+# and the live tool schemas). The official server is THREAD-grained, not
+# message-grained: the search primitive is `search_threads` (NOT the
+# `search_messages` this manifest previously invented), and it takes a Gmail
+# query string under `query` with paging under `pageSize` (NOT `q` /
+# `max_results`).
+#
+#   search_threads(query, pageSize) -> a list of THREADS. Each thread carries
+#     its own id (threadId) and a `messages` array; per the tool contract each
+#     message exposes a snippet, subject, sender ("from"), and recipients. Full
+#     message bodies are NOT returned here (use get_thread for that).
+#
+# Envelope: this is the standard MCP tool-result envelope. Google's server
+# returns the thread list as the tool's STRUCTURED output, so the defensive
+# unwrap below reads `.r.structured_content(.data)` first and falls back to a
+# raw shape, and then walks the thread array out of whichever key the server
+# uses (threads / results / items / data / nodes / bare array). This is the
+# same robustness pattern the jira-cloud manifest uses.
 schema_version: 1
 id: gmail
 chip: =gmail
 title: Gmail
 icon: mail
-description: Search Gmail (uses Gmail's standard query operators).
-emits: Document
+description: Search Gmail conversations using Gmail's standard search operators (from:, subject:, is:unread, newer_than:, has:attachment, ...).
+placeholder_examples:
+  - "is:unread"
+  - "from:boss@example.com"
+  - "subject:invoice newer_than:7d"
+  - "has:attachment project proposal"
+# Canonical row type. Gmail threads don't map cleanly onto the Document
+# contract (no stable author/space/excerpt triple), so we emit Generic and
+# bind flat keys (subject/from/snippet/date) into the presentation directly.
+emits: Generic
+# Token lives under the MCP provider where Google's OAuth was completed. The
+# official Gmail MCP advertises server id `gmail`; auth profile gmail_user
+# points at provider `gmail`, so the OAuth gate checks the right provider.
 auth_profile_ref: gmail_user
 
 requires:
   - mcp: gmail
-    version: ^1
-    tools: [search_messages]
-    scopes: [gmail.readonly]
+    version: ">=1"
+    tools:
+      - search_threads
+      - get_thread
+      - list_drafts
+      - list_labels
+    # The official server's read surface. gmail.readonly powers search/read;
+    # gmail.compose is advertised by the server for the draft/label tools.
+    scopes:
+      - https://www.googleapis.com/auth/gmail.readonly
+
+# MCP/network backend: don't hammer Gmail on every keystroke. The empty
+# default scope (unread) auto-loads; free-text runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Gmail for "{{query}}"'
+  confirm_hint: Press Enter to search your mail
 
 scopes:
-  - id: search
-    label: Search
+  # DEFAULT: your unread threads. search_threads with no query lists all mail,
+  # so the default scope pins an explicit `is:unread` restriction.
+  - id: unread
+    label: Unread
     default: true
     flow:
       - call:
           kind: mcp
           mcp: gmail
-          tool: search_messages
+          tool: search_threads
           args:
-            q: '{{query | default:''is:unread''}}'
-            max_results: '{{limit}}'
+            query: 'is:unread'
+            pageSize: '{{limit}}'
         out: r
-      - emit: r
-        path: /messages
+      - transform: &threads_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.threads?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("threadId") or has("id") or has("messages"))) then [.] else empty end)
+              // [] ) as $threads
+          | ($threads | map(
+                . as $t
+                # The matching/most-recent message in the thread carries the
+                # display fields. Prefer the last message (most recent), fall
+                # back to the first, then to thread-level fields.
+                | (($t.messages // []) | if length > 0 then . else [] end) as $msgs
+                | ($msgs | (.[-1] // {})) as $m0
+                | ($msgs | (.[0]  // {})) as $m1
+                | {
+                    id:      ($t.threadId // $t.id // $m0.threadId // $m0.id // ""),
+                    subject: ( $m0.subject // $m1.subject // $t.subject
+                               // ($t.snippet // "(no subject)") ),
+                    from:    ( $m0.from // $m0.sender // $m1.from // $m1.sender
+                               // $t.from // "—" ),
+                    to:      ( $m0.to
+                               // ( ($m0.recipients // []) | if type=="array" then join(", ") else . end )
+                               // "—" ),
+                    snippet: ( $m0.snippet // $m1.snippet // $t.snippet // "" ),
+                    date:    ( $m0.date // $m0.internalDate // $m1.date
+                               // $t.date // "" ),
+                    messageCount: ($msgs | length)
+                  }
+              ))
+        out: rows
+      - emit: rows
+
+  # Free-text / Gmail-operator search after the chip.
+  - id: search
+    label: Search
+    match:
+      - text: '{{query}}'
+        flow:
+          # The user types a Gmail query (operators like from:/subject:/is: are
+          # passed straight through; bare words search the thread index). Gmail
+          # query syntax has no SQL-style string injection surface — it's a
+          # search grammar interpreted by Gmail, not a database query language —
+          # so the value flows in as a plain templated arg (no DSL escape
+          # filter applies; there is no gmail_escape in the frozen filter set).
+          - call:
+              kind: mcp
+              mcp: gmail
+              tool: search_threads
+              args:
+                query: '{{query}}'
+                pageSize: '{{limit}}'
+            out: r
+          - transform: *threads_to_rows
+            out: rows
+          - emit: rows
+
+  # All recent threads in the inbox (any read state).
+  - id: inbox
+    label: Inbox
+    flow:
+      - call:
+          kind: mcp
+          mcp: gmail
+          tool: search_threads
+          args:
+            query: 'in:inbox'
+            pageSize: '{{limit}}'
+        out: r
+      - transform: *threads_to_rows
+        out: rows
+      - emit: rows
 
 actions:
   - id: open
@@ -35,14 +156,16 @@ actions:
     target: row
     label: Open in Gmail
     icon: external_link
-    url_template: 'https://mail.google.com/mail/u/0/#inbox/{{row.id}}'
+    # Gmail web routes a conversation by its thread id under #search/ (works for
+    # any folder); the thread id we emit is the Gmail threadId.
+    url_template: 'https://mail.google.com/mail/u/0/#search/rfc822msgid:{{row.id | url_escape}}'
 
 presentation:
   widget: list
   title_field: subject
   subtitle_field: from
   list_fields: [from, subject, date]
-  search_fields: [subject, from]
+  search_fields: [subject, from, snippet]
   sort_field: date
   sort_order: desc
   row_key_field: id
@@ -54,8 +177,11 @@ presentation:
       title: '{{row.subject | truncate:100}}'
       subtitle: '{{row.from}}'
       fields:
-        - { label: When, value: '{{row.date | date:''rel''}}' }
-        - { label: Snippet, value: '{{row.snippet | truncate:200 | default:''-''}}' }
+        - { label: From,    value: '{{row.from}}' }
+        - { label: To,      value: '{{row.to | default:''—''}}' }
+        - { label: When,    value: '{{row.date | date:''rel'' | default:''—''}}' }
+        - { label: Messages, value: '{{row.messageCount | default:''1''}}' }
+        - { label: Snippet, value: '{{row.snippet | truncate:200 | default:''—''}}' }
       actions: [open]
 
 enabled: true

@@ -1,63 +1,318 @@
+# =gitlab — GitLab merge requests (community zereight/gitlab-mcp, npm @zereight/mcp-gitlab).
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ enabled: false — ADMIN SETUP REQUIRED BEFORE THIS UTILITY WILL FUNCTION  │
+# ├─────────────────────────────────────────────────────────────────────────┤
+# │ This pins the COMMUNITY zereight/gitlab-mcp server (npm                   │
+# │ `@zereight/mcp-gitlab`). It is NOT a hosted, public, click-to-connect     │
+# │ endpoint — it is a local/self-hosted MCP server the admin must run and    │
+# │ register in the org MCP catalog under the id `gitlab`. Set enabled: true  │
+# │ ONLY after ALL of the following are done:                                 │
+# │                                                                           │
+# │   1. Run the server (npx -y @zereight/mcp-gitlab, or its Docker image)    │
+# │      and register it in the org MCP catalog as mcp id `gitlab`.           │
+# │   2. GITLAB_API_URL — see "# ADMIN" on requires.mcp below. Defaults to    │
+# │      https://gitlab.com/api/v4 for GitLab.com; set to                     │
+# │      https://<your-host>/api/v4 for self-managed.                         │
+# │   3. GITLAB_PERSONAL_ACCESS_TOKEN — a per-user PAT with read_api          │
+# │      (this server authenticates with a PAT, NOT browser OAuth; wire it    │
+# │      to the per-user token your gitlab_user auth profile stores, or       │
+# │      provision per-user PATs out of band).                                │
+# │   4. (Recommended) GITLAB_READ_ONLY_MODE=true so only the read tools      │
+# │      used here are exposed.                                               │
+# │                                                                           │
+# │ The OFFICIAL GitLab-native MCP (gitlab.com/api/v4/mcp) was NOT pinned:    │
+# │ it has no list/search merge-requests tool and its `search` tool cannot    │
+# │ filter by assignee, so "my open MRs" is not expressible there.            │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# REAL CONTRACT (zereight/gitlab-mcp → GitLab REST GET /merge_requests):
+#   tool list_merge_requests args: scope (created_by_me|assigned_to_me|
+#     reviews_for_me|all), state (opened|closed|locked|merged|all),
+#     assignee_username, author_username, order_by, sort, per_page, page,
+#     project_id (optional). Default here = scope:assigned_to_me + state:opened.
+#   tool get_merge_request args: project_id (required), merge_request_iid (req).
+#   Response = a JSON array of MR objects, each with: id, iid, project_id,
+#     title, description, state, web_url, references{short,relative,full},
+#     source_branch, target_branch, author{name,username,avatar_url,web_url},
+#     assignees[], draft, merge_status, created_at, updated_at, labels[].
+#   The MCP wraps that array in the standard tool envelope, which the
+#   transform below unwraps defensively (structured_content.data / .r / bare).
 schema_version: 1
 id: gitlab
 chip: =gitlab
-title: GitLab
+title: GitLab Merge Requests
 icon: git-merge
-description: Open merge requests assigned to me.
+description: Your open GitLab merge requests; search and look up by !iid.
+placeholder_examples:
+  - "!1234"
+  - "group/project!42"
+  - "flaky test"
+  - "scope:created label:bug"
 emits: Issue
+# PAT-backed per-user auth (provider `gitlab`, scope read_api). The zereight
+# server authenticates with GITLAB_PERSONAL_ACCESS_TOKEN, not browser OAuth;
+# the gitlab_user profile is the existing per-user gate for provider `gitlab`.
 auth_profile_ref: gitlab_user
 
 requires:
+  # ADMIN: register the self-hosted zereight/gitlab-mcp server in the org MCP
+  # catalog under this id (`gitlab`). Configure its host/token on the server
+  # process, NOT here:
+  #   ADMIN: GITLAB_API_URL — https://gitlab.com/api/v4 (GitLab.com default)
+  #          or https://<your-self-managed-host>/api/v4 for self-managed.
+  #          Find your host in your browser address bar when logged in.
+  #   ADMIN: GITLAB_PERSONAL_ACCESS_TOKEN — per-user PAT with `read_api`
+  #          (GitLab → Settings → Access tokens). Recommended:
+  #          GITLAB_READ_ONLY_MODE=true.
   - mcp: gitlab
-    version: ^1
-    tools: ["list_my_mrs"]
-    scopes: ["read_api"]
+    version: ">=1"
+    tools:
+      - list_merge_requests
+      - get_merge_request
+    scopes:
+      - read_api
+
+# confirm = right default for a network/MCP backend (don't hammer GitLab on
+# every keystroke). The empty default scope (your open MRs) auto-loads; an
+# exact MR reference (!123 or group/project!123) auto-fires; free text on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search GitLab MRs for "{{query}}"'
+  confirm_hint: Press Enter to search your merge requests
+  auto_when:
+    - regex: '^(?:[A-Za-z0-9][\w./-]*)?![0-9]+$'
+      reason: Exact MR reference (!iid or path!iid) is unambiguous and cheap.
 
 scopes:
-  - id: my_mrs
+  # DEFAULT: your open merge requests (assigned to the authenticated user),
+  # most-recently-updated first, top ~{{limit}}.
+  - id: my
     label: My open MRs
     default: true
     flow:
       - call:
           kind: mcp
           mcp: gitlab
-          tool: list_my_mrs
+          tool: list_merge_requests
           args:
-        state: opened
-        limit: '{{limit}}'
+            # scope=assigned_to_me filters to the token's user server-side, so
+            # no org/user id is guessed here.
+            scope: assigned_to_me
+            state: opened
+            order_by: updated_at
+            sort: desc
+            per_page: '{{limit}}'
+            # ADMIN (optional): pin a default project to scope every query to a
+            # single repo org-wide. Leave unset for instance-wide. Set to a
+            # numeric id or URL-encoded path, e.g. "1278" or "mygroup%2Fmyrepo"
+            # (find it on the project's main page / Settings → General).
+            # project_id: ""   # ADMIN: default project_id (optional)
         out: r
-      - emit: r
-        path: /merge_requests
+      - transform: &mrs_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p | if type == "array" then . else empty end)
+              // ($p.merge_requests?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if (type == "object" and (has("iid") or has("web_url"))) then [.] else empty end)
+              // [] ) as $mrs
+          | ($mrs | map(
+                . as $mr
+                | ($mr.references // {}) as $ref
+                | ($mr.author // {}) as $au
+                | (($mr.assignees // []) | map(.name // .username) | map(select(. != null and . != "")) | join(", ")) as $asgn
+                | (($mr.labels // []) | join(", ")) as $labels
+                | ($ref.full // (($mr.iid // "") | "!\(.)"))  as $keytxt
+                | ([ $keytxt,
+                     ($mr.state // empty),
+                     (if ($mr.draft // false) then "Draft" else empty end),
+                     ($au.name // $au.username // empty) ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    id: (($mr.id // $mr.iid // 0) | tostring),
+                    key: $keytxt,
+                    iid: ($mr.iid // 0),
+                    title: ($mr.title // "(no title)"),
+                    _url: ($mr.web_url // ""),
+                    subline: $subline,
+                    state: ($mr.state // "—"),
+                    draft: ($mr.draft // false),
+                    mergeStatus: ($mr.merge_status // "—"),
+                    sourceBranch: ($mr.source_branch // "—"),
+                    targetBranch: ($mr.target_branch // "—"),
+                    authorName: ($au.name // $au.username // "—"),
+                    authorAvatar: ($au.avatar_url // ""),
+                    assignees: (if $asgn == "" then "Unassigned" else $asgn end),
+                    labels: (if $labels == "" then "—" else $labels end),
+                    projectId: (($mr.project_id // "") | tostring),
+                    created: ($mr.created_at // "—"),
+                    updated: ($mr.updated_at // "—"),
+                    description: ((if ($mr.description | type) == "string" then $mr.description else "" end)
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end)
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Every MR you authored (any state).
+  - id: created
+    label: MRs I created
+    flow:
+      - call:
+          kind: mcp
+          mcp: gitlab
+          tool: list_merge_requests
+          args:
+            scope: created_by_me
+            state: all
+            order_by: updated_at
+            sort: desc
+            per_page: '{{limit}}'
+        out: r
+      - transform: *mrs_to_rows
+        out: enriched
+      - emit: enriched
+
+  # MRs awaiting your review.
+  - id: reviews
+    label: MRs to review
+    flow:
+      - call:
+          kind: mcp
+          mcp: gitlab
+          tool: list_merge_requests
+          args:
+            scope: reviews_for_me
+            state: opened
+            order_by: updated_at
+            sort: desc
+            per_page: '{{limit}}'
+        out: r
+      - transform: *mrs_to_rows
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip: direct !iid lookup, else free-text search.
+  - id: search
+    label: Search
+    match:
+      # group/project!iid or bare !iid → jump straight to that MR. A bare !iid
+      # needs a project, so it falls back to the ADMIN default project_id; a
+      # path!iid carries its own project (URL-encoded into project_id).
+      - regex: '^(?P<proj>[A-Za-z0-9][\w./-]*)?!(?P<iid>[0-9]+)$'
+        bind:
+          proj: '{{groups.proj}}'
+          iid: '{{groups.iid}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: gitlab
+              tool: get_merge_request
+              args:
+                # If the user typed a path (group/project!iid), URL-escape it
+                # into project_id; otherwise use the ADMIN default project.
+                # ADMIN: replace the default below with your org's project id or
+                # URL-encoded path so bare `!iid` lookups resolve org-wide.
+                project_id: '{{proj | url_escape | default:"REPLACE_ME_DEFAULT_PROJECT"}}'  # ADMIN: default project_id (numeric id or URL-encoded path) for bare !iid lookups
+                merge_request_iid: '{{iid}}'
+            out: r
+          - transform: *mrs_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → full-text MR search (scoped to your accessible MRs).
+      # `search` is a REST query-string param (NOT a query DSL), so the value
+      # is escaped with url_escape per the manifest DSL/escape rules.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: gitlab
+              tool: list_merge_requests
+              args:
+                scope: all
+                state: opened
+                search: '{{query | url_escape}}'
+                order_by: updated_at
+                sort: desc
+                per_page: '{{limit}}'
+            out: r
+          - transform: *mrs_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: state
+    kind: enum
+    label: State
+    apply: pre
+    maps_to: state
+    static:
+      - opened
+      - merged
+      - closed
+      - all
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in GitLab
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the MR's web_url straight from the API.
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
-  title_field: iid
-  subtitle_field: title
+  # Flat keys (emitted by the transform) so list projection + card binds both
+  # resolve. subline packs reference · state · draft · author.
+  title_field: title
+  subtitle_field: subline
   list_fields:
-    - iid
+    - key
     - title
-    - project_path
     - state
+    - assignees
   search_fields:
-    - iid
-  searchable: true
+    - key
+    - title
+    - state
+    - authorName
+    - assignees
+    - sourceBranch
+    - targetBranch
+    - labels
+    - description
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.iid}}'
-      actions: [open]
+      title: '{{row.title}}'
+      subtitle: '{{row.key}} · {{row.state}}'
+      image_url: '{{row.authorAvatar}}'
+      fields:
+        - { label: State,        value: '{{row.state}}' }
+        - { label: Merge status, value: '{{row.mergeStatus}}' }
+        - { label: Author,       value: '{{row.authorName}}' }
+        - { label: Assignees,    value: '{{row.assignees}}' }
+        - { label: Source,       value: '{{row.sourceBranch}}' }
+        - { label: Target,       value: '{{row.targetBranch}}' }
+        - { label: Labels,       value: '{{row.labels}}' }
+        - { label: Created,      value: '{{row.created}}' }
+        - { label: Updated,      value: '{{row.updated}}' }
+        - { label: Description,  value: '{{row.description}}' }
+      actions:
+        - open
 
-enabled: true
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

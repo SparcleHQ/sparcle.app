@@ -1,19 +1,75 @@
+# =salesforce — Salesforce CRM via the OFFICIAL Salesforce Hosted MCP Server.
+#
+# Written against the REAL tools of Salesforce's standard "SObject Reads"
+# hosted MCP server (developer.salesforce.com/docs/platform/hosted-mcp-servers,
+# verified 2026-06-03). The relevant read tools are:
+#
+#   soqlQuery       — arg `query` (a SOQL string). Returns the matched records.
+#   find            — arg `search` (a SOSL string). Cross-object text search.
+#   getObjectSchema — arg `object-name` (optional). Schema discovery.
+#   getCurrentUser  — no args. Authenticated user identity/context.
+#
+# (NOTE: the tool is `soqlQuery` in camelCase — NOT `soql_query` — and the SOQL
+# string is passed as `query`. The prior audit anchor's snake_case name was
+# stale; the live docs use camelCase.)
+#
+# The hosted server is strictly per-user OAuth and enforces FLS / object perms /
+# sharing rules on every call, so there is no org/instance id to inject (unlike
+# Atlassian's cloudId): the user's token already scopes to their org. The MCP id
+# below (`salesforce`) is the installed Salesforce hosted-MCP server id; OAuth
+# tokens live there under the `salesforce_user` auth profile.
+#
+# The server's response envelope is not contractually documented as wrapped vs
+# raw, so EVERY emitted row goes through the same defensive unwrap as
+# =jira-cloud: peel structured_content[.data] if present, else use the raw
+# value, then walk the record array out of whatever key it lands under
+# (records / results / items / data / nodes / bare array). Never emit straight
+# off a bare /records path.
+#
+# All user text that reaches a SOQL string is passed through `sql_escape`
+# (single-quote / backslash escaping) before interpolation — the linter
+# requires it for DSL args and it blocks SOQL string-literal injection.
 schema_version: 1
 id: salesforce
 chip: =salesforce
 title: Salesforce
 icon: cloud
-description: Search Salesforce accounts, contacts, and opportunities.
+description: Search Salesforce accounts by name or owner, and look up an account by record Id.
+placeholder_examples:
+  - "Acme"
+  - "Global Media"
+  - "001xx000003DGbAAAW"
 emits: Account
 auth_profile_ref: salesforce_user
 
 requires:
   - mcp: salesforce
-    version: ^1
-    tools: [query]
-    scopes: [api]
+    version: ">=1"
+    tools:
+      - soqlQuery
+      - find
+      - getObjectSchema
+      - getCurrentUser
+    scopes:
+      - api
+      - refresh_token
+
+# confirm = the right default for a network/CRM backend (don't hammer the org on
+# every keystroke). The empty default scope (your accounts) auto-loads; a bare
+# 15/18-char Salesforce record Id auto-fires; free-text search runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Salesforce for "{{query}}"'
+  confirm_hint: Press Enter to search your accounts
+  auto_when:
+    # A bare Salesforce record Id (15 or 18 chars, alnum) is unambiguous + cheap.
+    - regex: '^[A-Za-z0-9]{15}([A-Za-z0-9]{3})?$'
+      reason: Exact Account Id lookup is unambiguous.
 
 scopes:
+  # DEFAULT: accounts you own, most-recently-modified first, top ~{{limit}}.
+  # Owner.Email is matched to the OAuth user's email; the hosted server scopes
+  # the token to the user's org so this resolves to the caller's own records.
   - id: my_accounts
     label: My accounts
     default: true
@@ -21,12 +77,144 @@ scopes:
       - call:
           kind: mcp
           mcp: salesforce
-          tool: query
+          tool: soqlQuery
           args:
-            soql: 'SELECT Id, Name, Industry, Owner.Name FROM Account WHERE Owner.Email = ''{{user.email | sql_escape}}'' LIMIT {{limit}}'
+            query: >-
+              SELECT Id, Name, Type, Industry, Website, Phone,
+              AnnualRevenue, NumberOfEmployees, BillingCity, BillingState,
+              BillingCountry, OwnerId, Owner.Name, Owner.Email, LastModifiedDate
+              FROM Account
+              WHERE Owner.Email = '{{user.email | sql_escape}}'
+              ORDER BY LastModifiedDate DESC
+              LIMIT {{limit}}
         out: r
-      - emit: r
-        path: /records
+      # Defensive unwrap (mirrors =jira-cloud): peel the MCP envelope, then walk
+      # the record array out of whichever key the server uses, then flatten each
+      # record into the canonical Account row the presentation/actions bind to.
+      - transform: &accounts_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.records?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("Id") or has("Name"))) then [.] else empty end)
+              // [] ) as $recs
+          | ($recs | map(
+                . as $a
+                | ($a.Owner // {}) as $own
+                | (($a.Website // "") | sub("(?i)^https?://";"") | sub("/.*$";"")) as $domain
+                | ([ ($a.BillingCity // empty), ($a.BillingState // empty),
+                     ($a.BillingCountry // empty) ]
+                    | map(select(. != null and . != "")) | join(", ")) as $loc
+                | ([ ($a.Type // empty), ($a.Industry // empty), ($own.Name // empty) ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    id: ($a.Id // ""),
+                    name: ($a.Name // "(no name)"),
+                    subline: (if $subline == "" then "—" else $subline end),
+                    type: ($a.Type // "—"),
+                    industry: ($a.Industry // "—"),
+                    website: ($a.Website // "—"),
+                    domain: (if $domain == "" then "—" else $domain end),
+                    phone: ($a.Phone // "—"),
+                    revenue: ($a.AnnualRevenue // null),
+                    employees: ($a.NumberOfEmployees // null),
+                    location: (if $loc == "" then "—" else $loc end),
+                    ownerName: ($own.Name // "—"),
+                    ownerEmail: ($own.Email // "—"),
+                    lastModified: ($a.LastModifiedDate // "—")
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Every account in the org you can see (FLS/sharing still enforced server-side).
+  - id: all_accounts
+    label: All accounts
+    flow:
+      - call:
+          kind: mcp
+          mcp: salesforce
+          tool: soqlQuery
+          args:
+            query: >-
+              SELECT Id, Name, Type, Industry, Website, Phone,
+              AnnualRevenue, NumberOfEmployees, BillingCity, BillingState,
+              BillingCountry, OwnerId, Owner.Name, Owner.Email, LastModifiedDate
+              FROM Account
+              ORDER BY LastModifiedDate DESC
+              LIMIT {{limit}}
+        out: r
+      - transform: *accounts_to_rows
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip: Id → direct lookup; anything else → name search.
+  - id: search
+    label: Search
+    match:
+      # A 15- or 18-char Salesforce record Id → fetch that one account by Id.
+      # Id is itself constrained to [A-Za-z0-9], so it carries no SOQL-meta
+      # characters, but we still sql_escape it for defense in depth.
+      - regex: '^[A-Za-z0-9]{15}([A-Za-z0-9]{3})?$'
+        bind:
+          recId: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: salesforce
+              tool: soqlQuery
+              args:
+                query: >-
+                  SELECT Id, Name, Type, Industry, Website, Phone,
+                  AnnualRevenue, NumberOfEmployees, BillingCity, BillingState,
+                  BillingCountry, OwnerId, Owner.Name, Owner.Email, LastModifiedDate
+                  FROM Account
+                  WHERE Id = '{{recId | sql_escape}}'
+                  LIMIT 1
+            out: r
+          - transform: *accounts_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → name search (case-insensitive contains). The user text
+      # is sql_escape'd before it lands inside the SOQL string literal.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: salesforce
+              tool: soqlQuery
+              args:
+                query: >-
+                  SELECT Id, Name, Type, Industry, Website, Phone,
+                  AnnualRevenue, NumberOfEmployees, BillingCity, BillingState,
+                  BillingCountry, OwnerId, Owner.Name, Owner.Email, LastModifiedDate
+                  FROM Account
+                  WHERE Name LIKE '%{{query | sql_escape}}%'
+                  ORDER BY LastModifiedDate DESC
+                  LIMIT {{limit}}
+            out: r
+          - transform: *accounts_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: industry
+    kind: enum
+    label: Industry
+    apply: post
+    matches_field: industry
+    static:
+      - Technology
+      - Financial Services
+      - Healthcare
+      - Manufacturing
+      - Retail
+      - Energy
+      - Consulting
+      - Education
 
 actions:
   - id: open
@@ -34,27 +222,50 @@ actions:
     target: row
     label: Open in Salesforce
     icon: external_link
-    url_template: 'https://{{org.salesforce_host | default:''acme.lightning.force.com''}}/lightning/r/Account/{{row.Id}}/view'
+    # SOQL returns no browse URL; we build the Lightning record URL from the
+    # tenant-configured org host + the record Id. Host is a literal/tenant
+    # override (never user text), so no host-templating injection.
+    url_template: 'https://{{org.salesforce_host | default:''login.salesforce.com''}}/lightning/r/Account/{{row.id}}/view'
 
 presentation:
   widget: list
-  title_field: Name
-  subtitle_field: Industry
-  list_fields: [Name, Industry, Owner.Name]
-  search_fields: [Name]
-  sort_field: Name
-  sort_order: asc
-  row_key_field: Id
+  # Flat keys (emitted by the transform) so list projection + the preview card
+  # both resolve without dotted-path support.
+  title_field: name
+  subtitle_field: subline
+  list_fields:
+    - name
+    - industry
+    - ownerName
+    - location
+  search_fields:
+    - name
+    - type
+    - industry
+    - domain
+    - ownerName
+    - location
+  sort_field: lastModified
+  sort_order: desc
+  row_key_field: id
   searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.Name}}'
-      subtitle: '{{row.Industry | default:''-''}}'
+      title: '{{row.name}}'
+      subtitle: '{{row.industry | default:''—''}}'
       fields:
-        - { label: Owner, value: '{{row.Owner.Name | default:''-''}}' }
-      actions: [open]
+        - { label: Type,      value: '{{row.type}}' }
+        - { label: Industry,  value: '{{row.industry}}' }
+        - { label: Website,   value: '{{row.website}}' }
+        - { label: Phone,     value: '{{row.phone}}' }
+        - { label: Location,  value: '{{row.location}}' }
+        - { label: Owner,     value: '{{row.ownerName}}' }
+        - { label: Updated,   value: '{{row.lastModified}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

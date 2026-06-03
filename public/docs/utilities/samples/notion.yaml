@@ -1,33 +1,114 @@
+# =notion — Notion (official remote MCP, mcp.notion.com/mcp).
+#
+# Rewritten against the REAL official makenotion/notion-mcp-server v2 / the
+# hosted remote Notion MCP (https://mcp.notion.com/mcp). Verified live
+# 2026-06-03 against developers.notion.com/docs/mcp-supported-tools:
+#
+#   • The search tool is `notion-search` (NOT `search`). Its arguments are
+#     `query` (text) and `page_size` (default 10, max 25) — there is no `limit`
+#     arg. We also pass `query_type: "internal"` to keep results inside the
+#     Notion workspace rather than fanning out to connected sources.
+#   • The read tool is `notion-fetch` (URL or page/database id).
+#
+# Response envelope: the remote v2 server is an AI-agent-tailored server whose
+# search results are returned as content blocks (each carrying a title, a URL
+# and a highlight snippet), and the structured payload is NOT publicly
+# documented as a fixed JSON schema. So — exactly like jira-cloud — every
+# emitted row goes through a defensive transform that FIRST unwraps the MCP
+# envelope (structured_content.data / structured_content / raw) and THEN walks
+# the result array out of whichever key the server used (results / items /
+# data / nodes / pages / a bare array). We never emit straight off /results.
 schema_version: 1
 id: notion
 chip: =notion
 title: Notion
 icon: file-text
-description: Search Notion pages across your workspaces.
+description: Search Notion pages and databases across your workspace.
+placeholder_examples:
+  - "roadmap"
+  - "q3 planning"
+  - "onboarding checklist"
 emits: Document
 auth_profile_ref: notion_user
 
 requires:
   - mcp: notion
-    version: ^1
-    tools: [search]
-    scopes: [read_content]
+    version: ">=2"
+    tools:
+      - notion-search
+      - notion-fetch
+    scopes:
+      - read_content
+
+# MCP/network backend → don't hammer Notion on every keystroke. The empty
+# default scope auto-loads (recently-edited); free-text search runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Notion for "{{query}}"'
+  confirm_hint: Press Enter to search your workspace
 
 scopes:
+  # DEFAULT: empty-query search returns the workspace's most relevant /
+  # recently-touched pages (the remote server treats an empty query as a
+  # recents-style listing). page_size capped at the server max (25).
   - id: search
     label: Search pages
     default: true
-    flow:
-      - call:
-          kind: mcp
-          mcp: notion
-          tool: search
-          args:
-            query: '{{query}}'
-            limit: '{{limit}}'
-        out: r
-      - emit: r
-        path: /results
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: notion
+              tool: notion-search
+              args:
+                query: '{{query}}'
+                page_size: '{{limit}}'
+                query_type: internal
+            out: r
+          - transform: |
+              ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+              | ( ($p.results?)
+                  // ($p.items?)
+                  // ($p.data?)
+                  // ($p.nodes?)
+                  // ($p.pages?)
+                  // ($p | if type == "array" then . else empty end)
+                  // ($p | if (type == "object" and (has("url") or has("title") or has("id"))) then [.] else empty end)
+                  // [] ) as $hits
+              | ($hits | map(
+                    . as $h
+                    | ($h.properties // {}) as $props
+                    | ($h.parent // {}) as $par
+                    | ($h.last_edited_by // $h.edited_by // {}) as $eb
+                    | ($h.created_by // {}) as $cb
+                    # title can arrive as a plain string, as Notion's rich-text
+                    # title array (.title[].plain_text), or under a property.
+                    | ( ($h.title
+                          | if type == "array" then (map(.plain_text // .text?.content // "") | join(""))
+                            elif type == "string" then .
+                            else null end)
+                        // $h.name
+                        // ($props.title?.title? | if type == "array" then (map(.plain_text // "") | join("")) else null end)
+                        // ($h.highlight?.title?)
+                        // "(untitled)" ) as $title
+                    | ( $h.url // $h.public_url // "" ) as $url
+                    | ( $h.last_edited_time // $h.edited_time // $h.updated_at // "" ) as $updated
+                    | ( $par.title? // $par.database_id? // $par.page_id? // $par.workspace? // "" ) as $parentTitle
+                    | ( $h.highlight?.text? // $h.snippet? // $h.excerpt? // "" ) as $excerpt
+                    | {
+                        id: ($h.id // $url // $title),
+                        title: $title,
+                        url: $url,
+                        object: ($h.object // "page"),
+                        parent_title: (if ($parentTitle | type) == "string" and $parentTitle != "" then $parentTitle else "—" end),
+                        excerpt: (if ($excerpt | type) == "string" and $excerpt != "" then ($excerpt | if length > 280 then (.[0:277] + "…") else . end) else "—" end),
+                        author: ($eb.name // $cb.name // "—"),
+                        updated: (if $updated != "" then $updated else "—" end)
+                      }
+                  ))
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
@@ -39,11 +120,19 @@ actions:
 
 presentation:
   widget: list
+  # Flat keys emitted by the transform so list projection + card binds resolve.
   title_field: title
   subtitle_field: parent_title
-  list_fields: [title, parent_title, last_edited_time]
-  search_fields: [title]
-  sort_field: last_edited_time
+  list_fields:
+    - title
+    - parent_title
+    - updated
+  search_fields:
+    - title
+    - parent_title
+    - excerpt
+    - author
+  sort_field: updated
   sort_order: desc
   row_key_field: id
   searchable: true
@@ -54,8 +143,10 @@ presentation:
       title: '{{row.title}}'
       subtitle: '{{row.parent_title | default:''-''}}'
       fields:
-        - { label: Last edited, value: '{{row.last_edited_time | date:''rel''}}' }
-        - { label: Author, value: '{{row.last_edited_by.name | default:''-''}}' }
+        - { label: Excerpt,   value: '{{row.excerpt}}' }
+        - { label: Author,    value: '{{row.author | default:''-''}}' }
+        - { label: Updated,   value: '{{row.updated | date:''rel''}}' }
+        - { label: Type,      value: '{{row.object}}' }
       actions: [open]
 
 enabled: true

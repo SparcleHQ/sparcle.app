@@ -1,64 +1,282 @@
+# =freshdesk — Freshdesk tickets via the community effytech/freshdesk_mcp server.
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ ADMIN SETUP REQUIRED — this manifest ships DISABLED (enabled: false).     │
+# │ It cannot function until an operator completes ALL of the following and   │
+# │ flips enabled: true:                                                      │
+# │                                                                           │
+# │ 1. Register the community MCP server `effytech/freshdesk_mcp` in the org  │
+# │    MCP catalog under the id `freshdesk` (see `requires:` below).          │
+# │      repo: https://github.com/effytech/freshdesk_mcp (MIT)                │
+# │ 2. Configure the server process env (these are TENANT-SPECIFIC and must   │
+# │    NOT be guessed — they live at the MCP-server registration layer, not   │
+# │    in this manifest):                                                     │
+# │      FRESHDESK_DOMAIN = yourco.freshdesk.com   # your Freshdesk subdomain │
+# │      FRESHDESK_API_KEY = <per-tenant API key>  # Freshdesk Admin →        │
+# │                                                #   Profile Settings →     │
+# │                                                #   "Your API Key"         │
+# │ 3. This server authenticates with a single shared Freshdesk API key (NOT  │
+# │    per-user OAuth). v1 auth profiles are per-user OAuth only, so there is  │
+# │    no manifest-level auth type for an env API key — the credential lives   │
+# │    on the registered MCP server. `auth_profile_ref: freshdesk_user` below │
+# │    only satisfies the loader's reference check; the real credential is the │
+# │    server-side FRESHDESK_API_KEY. Treat access as shared-service.         │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# REAL CONTRACT (verified against effytech/freshdesk_mcp README + server.py,
+# 2026-06-03):
+#   • get_tickets(page?, per_page?)  → { tickets: [ <ticket>, ... ],
+#                                        pagination: { current_page, ... } }
+#   • search_tickets(query)          → { results: [ <ticket>, ... ], total: N }
+#       (proxies Freshdesk GET /api/v2/search/tickets)
+#   • get_ticket(ticket_id)          → bare <ticket> object
+# Ticket fields are raw Freshdesk API v2: id, subject, description_text,
+# status (numeric code), priority (numeric code), requester_id, responder_id,
+# type, tags[], created_at, updated_at, due_by. status/priority are integers
+# (Open=2 Pending=3 Resolved=4 Closed=5; Low=1 Medium=2 High=3 Urgent=4);
+# we map them to labels in the transform.
 schema_version: 1
 id: freshdesk
 chip: =freshdesk
-title: Freshdesk
+title: Freshdesk Tickets
 icon: life-buoy
-description: My assigned tickets.
+description: Browse and search Freshdesk support tickets.
+placeholder_examples:
+  - "12345"
+  - "login error"
+  - "billing"
 emits: Issue
+# Resolves in auth-profiles.yaml (oauth2_user / provider freshdesk) so the
+# loader's reference check passes. NOTE: effytech/freshdesk_mcp does NOT use
+# OAuth — it uses a server-side FRESHDESK_API_KEY (see header). The real
+# credential is configured on the MCP server, not via this profile.
 auth_profile_ref: freshdesk_user
 
 requires:
-  - mcp: freshdesk
-    version: ^1
-    tools: ["my_tickets"]
-    scopes: ["tickets.read"]
+  - mcp: freshdesk          # ADMIN: register effytech/freshdesk_mcp under this id
+    version: ">=0.1"        # ADMIN: pin to the version you deployed
+    tools:
+      - get_tickets
+      - search_tickets
+      - get_ticket
+    scopes:
+      - tickets.read
+
+# MCP/network backend → confirm (don't hammer Freshdesk on every keystroke).
+# A bare numeric ticket id is an unambiguous, cheap lookup, so auto-fire it.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Freshdesk for "{{query}}"'
+  confirm_hint: Press Enter to search tickets
+  auto_when:
+    - regex: '^[0-9]+$'
+      reason: A bare ticket id is an unambiguous, cheap single-ticket lookup.
+
+# When the user types a bare ticket-id-shaped token without the =freshdesk
+# chip, propose a hand-off row. network kind = only surfaced when the freshdesk
+# MCP is connected.
+bare:
+  kind: network
+  chip_key: freshdesk
+  patterns:
+    - regex: '^[0-9]{2,12}$'
+      flags: ''
+      priority: 10
 
 scopes:
-  - id: my_open
-    label: My open tickets
+  # DEFAULT: most-recent tickets (newest first), top page of {{limit}}.
+  - id: recent
+    label: Recent tickets
     default: true
     flow:
       - call:
           kind: mcp
           mcp: freshdesk
-          tool: my_tickets
+          tool: get_tickets
           args:
-        status: open
-        limit: '{{limit}}'
+            page: 1
+            # Freshdesk paginates by per_page (NOT a limit/offset). We pull one
+            # page sized to the launcher limit; Freshdesk caps per_page at 100.
+            per_page: '{{limit}}'
         out: r
-      - emit: r
-        path: /tickets
+      - transform: &tickets_to_rows |
+          # MANDATORY defensive envelope unwrap (mirrors jira-cloud): tolerate
+          # structured_content.data / structured_content / raw, then walk the
+          # provider JSON out of $p. get_tickets => {tickets:[...]},
+          # search_tickets => {results:[...]}, get_ticket => a bare object.
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.tickets?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("subject"))) then [.] else empty end)
+              // [] ) as $nodes
+          | ( {"1":"Low","2":"Medium","3":"High","4":"Urgent"} ) as $prio
+          | ( {"2":"Open","3":"Pending","4":"Resolved","5":"Closed","6":"Waiting on Customer","7":"Waiting on Third Party"} ) as $stat
+          | ($nodes | map(
+                . as $t
+                | ($t.status // null) as $sc
+                | ($t.priority // null) as $pc
+                | (($t.tags // []) | join(", ")) as $tags
+                | ($prio[($pc|tostring)] // (if $pc == null then "—" else ($pc|tostring) end)) as $prioName
+                | ($stat[($sc|tostring)] // (if $sc == null then "—" else ($sc|tostring) end)) as $statName
+                | (($t.description_text // $t.description // "")
+                    | if type == "string" then . else "" end) as $desc
+                | ([ ("#" + ($t.id|tostring)), $statName, $prioName, ($t.type // empty) ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    id: ($t.id // ""),
+                    key: ("#" + (($t.id // "") | tostring)),
+                    subject: ($t.subject // "(no subject)"),
+                    subline: $subline,
+                    statusName: $statName,
+                    priorityName: $prioName,
+                    type: ($t.type // "—"),
+                    requesterId: (($t.requester_id // "") | tostring),
+                    responderId: (($t.responder_id // "") | tostring),
+                    tags: (if $tags == "" then "—" else $tags end),
+                    created: ($t.created_at // "—"),
+                    updated: ($t.updated_at // "—"),
+                    due: ($t.due_by // "—"),
+                    description: ($desc
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end),
+                    # ADMIN: default Freshdesk subdomain for the Open action.
+                    # Replace yourco below with your tenant (e.g. acme.freshdesk.com).
+                    # bolt has no {{org.*}} host override registered for freshdesk,
+                    # so this is a constant the admin edits once, here.
+                    _url: ("https://yourco.freshdesk.com/a/tickets/" + (($t.id // "") | tostring))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  - id: search
+    label: Search
+    match:
+      # A bare numeric id → single-ticket lookup via get_ticket.
+      - regex: '^[0-9]+$'
+        bind:
+          ticketId: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: freshdesk
+              tool: get_ticket
+              args:
+                ticket_id: '{{ticketId}}'
+            out: r
+          - transform: *tickets_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → Freshdesk search query.
+      #
+      # search_tickets proxies Freshdesk GET /api/v2/search/tickets, whose
+      # `query` arg is a Freshdesk filter-query DSL (e.g. "status:2 OR
+      # priority:3", or substring match on subject). User free text is wrapped
+      # as a quoted subject contains-match and MUST be escaped — sql_escape
+      # neutralizes embedded quotes/backslashes before it lands in the DSL
+      # string literal (Freshdesk query strings are double-quoted literals).
+      # Any other text → Freshdesk's /search/tickets filter API supports only
+      # structured fields (status, priority, agent_id, tag, type, dates, custom
+      # fields), NOT free-text subject/body match. So free text falls back to the
+      # most-recent tickets; the launcher's client-side search_fields refine then
+      # highlights matches in subject/description.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: freshdesk
+              tool: get_tickets
+              args:
+                page: 1
+                per_page: '{{limit}}'
+            out: r
+          - transform: *tickets_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: status
+    kind: enum
+    label: Status
+    apply: post
+    matches_field: statusName
+    static:
+      - Open
+      - Pending
+      - Resolved
+      - Closed
+
+  - id: priority
+    kind: enum
+    label: Priority
+    apply: post
+    matches_field: priorityName
+    static:
+      - Low
+      - Medium
+      - High
+      - Urgent
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Freshdesk
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the full ticket URL built from the (admin-edited)
+    # subdomain in the transform above.
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: subject
+  title_field: subject
+  subtitle_field: subline
   list_fields:
-    - id
+    - key
     - subject
-    - status
-    - priority
-    - requester_name
+    - statusName
+    - priorityName
+    - type
   search_fields:
-    - id
-  searchable: true
+    - key
+    - subject
+    - statusName
+    - priorityName
+    - type
+    - tags
+    - description
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.subject}}'
+      subtitle: '{{row.key}} · {{row.statusName}}'
+      fields:
+        - { label: Status,      value: '{{row.statusName}}' }
+        - { label: Priority,    value: '{{row.priorityName}}' }
+        - { label: Type,        value: '{{row.type}}' }
+        - { label: Tags,        value: '{{row.tags}}' }
+        - { label: Requester,   value: '{{row.requesterId}}' }
+        - { label: Responder,   value: '{{row.responderId}}' }
+        - { label: Due,         value: '{{row.due}}' }
+        - { label: Created,     value: '{{row.created}}' }
+        - { label: Updated,     value: '{{row.updated}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
 
-enabled: true
+# DISABLED until admin setup (see header). Flip to true after registering the
+# MCP server, setting FRESHDESK_DOMAIN/FRESHDESK_API_KEY, and editing the
+# subdomain in the _url transform above.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

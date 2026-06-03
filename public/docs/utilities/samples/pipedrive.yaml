@@ -1,61 +1,275 @@
+# =pipedrive — Pipedrive CRM (community MCP: iamsamuelfraga/mcp-pipedrive).
+#
+# Server pin: github.com/iamsamuelfraga/mcp-pipedrive @ main
+#   (npm: @iamsamuelfraga/mcp-pipedrive). COMMUNITY server, not an official
+#   Pipedrive product. Runs as a per-user stdio MCP (npx) authenticated with
+#   the calling user's own Pipedrive API token / OAuth — there is NO public
+#   hosted endpoint. Once the user connects (per-user OAuth via the `pipedrive`
+#   MCP provider), every scope below works org-wide; only the deep-link host
+#   and the optional saved-filter id are tenant-specific (see # ADMIN below).
+#
+# Verified tool contract (source: src/tools/* @ main, 2026-06-03):
+#   deals_list   -> Pipedrive GET /deals
+#       args: status(enum open|won|lost|deleted|all_not_deleted),
+#             owned_by_you(0|1), user_id, person_id, org_id, pipeline_id,
+#             stage_id, filter_id, sort, sort_by(asc|desc), start, limit
+#       envelope: { success, data: [ <deal>, ... ], additional_data:{pagination} }
+#   deals_search -> Pipedrive GET /deals/search
+#       args: term(REQUIRED, >=2 chars), fields(title|notes|custom_fields|all),
+#             exact_match(bool), person_id, org_id, status, start, limit
+#       envelope: { success, data: { items: [ { item:<deal>, result_score }, ...] } }
+#   persons_list -> Pipedrive GET /persons
+#       args: start, limit, user_id, org_id, first_char, filter_id, sort
+#       envelope: { success, data: [ <person>, ... ], additional_data:{pagination} }
+#
+# Each deal carries flat fields (src/types/pipedrive-api.ts DealBase): id, title,
+# value, currency, formatted_value, status, stage_id, pipeline_id, org_name,
+# person_name, owner_name, update_time, expected_close_date, probability.
+# NOTE: user_id/person_id/org_id may be a bare number OR a nested reference
+# object ({value,name,...}); the transform tolerates both.
 schema_version: 1
 id: pipedrive
 chip: =pipedrive
 title: Pipedrive
 icon: trending-up
-description: My open deals.
+description: My open deals, deal search, and people in Pipedrive CRM.
+placeholder_examples:
+  - "acme"
+  - "renewal"
+  - "contract"
 emits: Account
+# Per-user OAuth token lives under MCP id `pipedrive` (provider pipedrive in
+# auth-profiles.yaml). The community server authenticates with the calling
+# user's own Pipedrive credentials; no shared service account.
 auth_profile_ref: pipedrive_user
 
 requires:
   - mcp: pipedrive
-    version: ^1
-    tools: ["my_deals"]
-    scopes: ["deals:read"]
+    version: ">=1"
+    tools:
+      - deals_list
+      - deals_search
+      - persons_list
+    scopes:
+      - deals:read
+
+# MCP/network backend: don't fire on every keystroke. Empty query auto-loads
+# the default scope (my open deals); free text searches on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Pipedrive for "{{query}}"'
+  confirm_hint: Press Enter to search your deals
 
 scopes:
-  - id: my_deals
+  # DEFAULT: my open deals (status=open + owned_by_you=1), newest update first.
+  - id: my
     label: My open deals
     default: true
     flow:
       - call:
           kind: mcp
           mcp: pipedrive
-          tool: my_deals
+          tool: deals_list
           args:
-        status: open
-        limit: '{{limit}}'
+            status: open
+            owned_by_you: 1
+            # ADMIN (optional): default saved-filter id to pin org-wide. Find it
+            # in Pipedrive under Deals > Filters > (edit filter) — the numeric id
+            # is in the URL (.../deals?filterId=123). Leave commented to show all
+            # of the user's own open deals.
+            # filter_id: 123   # ADMIN: default Pipedrive saved-filter id
+            sort: update_time
+            sort_by: desc
+            limit: '{{limit}}'
         out: r
-      - emit: r
-        path: /data
+      - transform: &deals_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.data?.items?)
+              // (($p.data?) | if type == "array" then . else empty end)
+              // ($p.items?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $raw
+          | ($raw | map( (.item? // .) )) as $deals
+          | ($deals | map(
+                . as $d
+                | ($d.org_id  // {}) as $orgref
+                | ($d.user_id // {}) as $userref
+                | ($d.value // 0) as $val
+                | ($d.currency // "") as $cur
+                | (($d.org_name // (if ($orgref|type)=="object" then $orgref.name else null end)) // "—") as $org
+                | (($d.owner_name // (if ($userref|type)=="object" then $userref.name else null end)) // "—") as $owner
+                | {
+                    id: (($d.id // "") | tostring),
+                    name: ($d.title // "(untitled deal)"),
+                    subline: ([ ($d.formatted_value // (($val|tostring) + " " + $cur)),
+                                ($d.status // empty), $org ]
+                              | map(select(. != null and . != "")) | join("  ·  ")),
+                    value: $val,
+                    currency: $cur,
+                    formatted_value: ($d.formatted_value // (($val|tostring) + " " + $cur)),
+                    status: ($d.status // "—"),
+                    stage_id: ($d.stage_id // "—"),
+                    pipeline_id: ($d.pipeline_id // "—"),
+                    probability: ($d.probability // "—"),
+                    expected_close: ($d.expected_close_date // "—"),
+                    updated: ($d.update_time // "—"),
+                    org_name: $org,
+                    person_name: ($d.person_name // "—"),
+                    owner: $owner
+                  }
+              ))
+        out: rows
+      - emit: rows
+
+  # All my deals (any status).
+  - id: all
+    label: All my deals
+    flow:
+      - call:
+          kind: mcp
+          mcp: pipedrive
+          tool: deals_list
+          args:
+            status: all_not_deleted
+            owned_by_you: 1
+            sort: update_time
+            sort_by: desc
+            limit: '{{limit}}'
+        out: r
+      - transform: *deals_to_rows
+        out: rows
+      - emit: rows
+
+  # People in the CRM (persons_list). Owner-scoped to the calling user.
+  - id: people
+    label: My people
+    flow:
+      - call:
+          kind: mcp
+          mcp: pipedrive
+          tool: persons_list
+          args:
+            # ADMIN (optional): default saved-filter id for persons. Find it in
+            # Pipedrive under Contacts > People > Filters (numeric id in URL).
+            # filter_id: 456   # ADMIN: default Pipedrive person saved-filter id
+            sort: update_time
+            limit: '{{limit}}'
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( (($p.data?) | if type == "array" then . else empty end)
+              // ($p.items?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $people
+          | ($people | map(
+                . as $pn
+                | ($pn.org_id // {}) as $orgref
+                | (($pn.primary_email
+                    // (($pn.email // []) | if type=="array" then (.[0].value? // null) else (.|tostring) end))
+                   // "—") as $email
+                | {
+                    id: (($pn.id // "") | tostring),
+                    name: ($pn.name // "(no name)"),
+                    subline: ([ $email,
+                                (if ($orgref|type)=="object" then $orgref.name else ($pn.org_name // null) end) ]
+                              | map(select(. != null and . != "")) | join("  ·  ")),
+                    email: $email,
+                    org_name: (if ($orgref|type)=="object" then ($orgref.name // "—") else ($pn.org_name // "—") end),
+                    owner: ($pn.owner_name // "—"),
+                    updated: ($pn.update_time // "—"),
+                    value: 0,
+                    status: "—",
+                    formatted_value: "—",
+                    person_name: ($pn.name // "—")
+                  }
+              ))
+        out: rows
+      - emit: rows
+
+  # Typing after the chip searches deals by term (deals_search). `term` is a
+  # plain query string (NOT a query DSL), passed as a JSON string arg — no
+  # escape filter applies. Minimum 2 chars enforced server-side.
+  - id: search
+    label: Search deals
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: pipedrive
+              tool: deals_search
+              args:
+                term: '{{query}}'
+                fields: all
+                status: open
+                limit: '{{limit}}'
+            out: r
+          - transform: *deals_to_rows
+            out: rows
+          - emit: rows
+
+filters:
+  - id: status
+    kind: enum
+    label: Status
+    apply: pre
+    maps_to: args.status
+    static:
+      - open
+      - won
+      - lost
+      - all_not_deleted
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Pipedrive
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # ADMIN: set your Pipedrive company domain (the subdomain in your Pipedrive
+    # URL, e.g. acme.pipedrive.com -> "acme"). Find it in Pipedrive Settings >
+    # Company settings, or read it off any in-app URL. The community MCP does
+    # not return a browsable deal URL, so this deep-link host must be pinned
+    # here. Replace YOUR_COMPANY below.
+    url_template: 'https://YOUR_COMPANY.pipedrive.com/deal/{{row.id}}'   # ADMIN: replace YOUR_COMPANY with your Pipedrive subdomain
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: title
+  title_field: name
+  subtitle_field: subline
   list_fields:
-    - id
-    - title
-    - value
+    - name
+    - formatted_value
+    - status
     - org_name
   search_fields:
-    - id
-  searchable: true
+    - name
+    - org_name
+    - person_name
+    - owner
+    - status
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.name}}'
+      subtitle: '{{row.formatted_value}} · {{row.status}}'
+      fields:
+        - { label: Value,        value: '{{row.formatted_value}}' }
+        - { label: Status,       value: '{{row.status}}' }
+        - { label: Probability,  value: '{{row.probability}}' }
+        - { label: Organization, value: '{{row.org_name}}' }
+        - { label: Contact,      value: '{{row.person_name}}' }
+        - { label: Owner,        value: '{{row.owner}}' }
+        - { label: Expected close, value: '{{row.expected_close}}' }
+        - { label: Updated,      value: '{{row.updated}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

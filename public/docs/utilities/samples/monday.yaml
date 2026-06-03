@@ -1,60 +1,248 @@
+# =monday — monday.com work management (official mondaycom/mcp).
+#
+# Pinned to the OFFICIAL monday.com MCP server (github.com/mondaycom/mcp,
+# npm @mondaydotcomorg/monday-api-mcp). Hosted remote endpoint
+# https://mcp.monday.com/sse, OAuth 2.1 via auth.monday.com. Registered in the
+# org MCP catalog as `monday` (config/base.yaml; canonical alias `monday-mcp`).
+# OAuth is per-user (auth_profile_ref: monday_user, provider `monday`), so no
+# tenant secret lives here — each user connects their own monday.com account.
+#
+# Tool contract verified live 2026-06-03 against the repo source:
+#   • get_board_items_page  — REQUIRES boardId (number). Optional: searchTerm,
+#     limit, includeColumns, columnIds, cursor, filters, orderBy, ...
+#     Returns content = {
+#         board:      { id, name },
+#         items:      [ { id, name, url, created_at, updated_at,
+#                         column_values: { <columnId>: <value>, ... } } ],
+#         pagination: { has_more, nextCursor, count }
+#       }
+#     (mapResult/mapItem in get-board-items-page-tool.ts).
+#   • get_board_info        — boardId (number); board metadata + columns/groups.
+#   • list_users_and_teams  — getMe / userIds / name / teamIds (no boardId).
+#
+# ──────────────────────────────────────────────────────────────────────────
+# ADMIN SETUP (default scope): get_board_items_page REQUIRES a board id. There
+# is NO public/global default board — it is tenant-specific. The =monday chip
+# works WITHOUT setup if the user types `board:<id>` or a bare board id (e.g.
+# `=monday 1234567890`). For the bare `=monday` default scope to return rows,
+# an admin MUST set DEFAULT_BOARD_ID below (see the `# ADMIN:` comment in the
+# `recent` scope). Find a board id in the board URL
+# (https://<subdomain>.monday.com/boards/<BOARD_ID>) or via get_board_info.
+# ──────────────────────────────────────────────────────────────────────────
 schema_version: 1
 id: monday
 chip: =monday
 title: Monday
 icon: trello
-description: Items from boards I follow.
+description: Items from a monday.com board — search, look up by board id, browse.
+placeholder_examples:
+  - "board:1234567890"
+  - "1234567890"
+  - "launch checklist"
+  - "anything in an item name"
 emits: Issue
+# Per-user OAuth; tokens stored under MCP id/provider `monday`. Profile already
+# defined in config/utilities/auth-profiles.yaml (provider: monday).
 auth_profile_ref: monday_user
 
 requires:
   - mcp: monday
-    version: ^1
-    tools: ["my_items"]
-    scopes: ["boards:read"]
+    version: ">=1"
+    tools:
+      - get_board_items_page
+      - get_board_info
+      - list_users_and_teams
+    scopes:
+      - boards:read
+
+# MCP/network backend — confirm before firing (don't hammer monday on every
+# keystroke). A bare board id auto-fires (cheap, unambiguous lookup).
+dispatch:
+  mode: confirm
+  confirm_label: 'Search monday.com for "{{query}}"'
+  confirm_hint: Press Enter to search the configured board
+  auto_when:
+    - regex: '^\d{5,}$'
+      reason: A bare board id is an unambiguous direct board lookup.
 
 scopes:
-  - id: my_items
-    label: My items
+  # DEFAULT: most-recent items on the org's default board.
+  # ADMIN: set the default board id below. get_board_items_page requires a
+  # numeric boardId and there is NO public default — without this the default
+  # scope returns nothing (use `=monday board:<id>` until it's set).
+  - id: recent
+    label: Recent items
     default: true
     flow:
+      - transform: |
+          # ADMIN: set default board id (digits only, e.g. 1234567890).
+          # Find it in the board URL https://<subdomain>.monday.com/boards/<id>
+          # or via the get_board_info tool. Leave as "" to require board:<id>.
+          { boardId: "" }
+        out: cfg
       - call:
           kind: mcp
           mcp: monday
-          tool: my_items
+          tool: get_board_items_page
           args:
-        limit: '{{limit}}'
+            # boardId must be a number; the default-board id is admin-set above.
+            boardId: '{{cfg.boardId}}'
+            limit: '{{limit}}'
+            includeColumns: true
         out: r
-      - emit: r
-        path: /items
+      - transform: &items_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.items?)
+              // ($p.results?)
+              // ($p.data?.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $items
+          | ($p.board // {}) as $bd
+          | ($items | map(
+                . as $it
+                | ($it.column_values // {}) as $cv
+                | ($cv.status // $cv.status4 // "") as $status
+                | ($cv.priority // $cv.priority_1 // "") as $priority
+                | (if ($status|type)=="string" then $status else ($status.text // $status.label // "") end) as $statusTxt
+                | (if ($priority|type)=="string" then $priority else ($priority.text // $priority.label // "") end) as $priorityTxt
+                | ($cv.person // $cv.people // $cv.owner // "") as $assignRaw
+                | (if ($assignRaw|type)=="string" then $assignRaw else ($assignRaw.text // "") end) as $assignTxt
+                | {
+                    id: (($it.id // "") | tostring),
+                    key: (($it.id // "") | tostring),
+                    name: ($it.name // "(untitled item)"),
+                    title: ($it.name // "(untitled item)"),
+                    _url: ($it.url // ""),
+                    boardId: (($bd.id // "") | tostring),
+                    boardName: ($bd.name // "—"),
+                    statusName: (if $statusTxt == "" then "—" else $statusTxt end),
+                    status: (if $statusTxt == "" then "—" else $statusTxt end),
+                    priorityName: (if $priorityTxt == "" then "—" else $priorityTxt end),
+                    priority: (if $priorityTxt == "" then "—" else $priorityTxt end),
+                    assigneeName: (if $assignTxt == "" then "Unassigned" else $assignTxt end),
+                    assignee: (if $assignTxt == "" then "Unassigned" else $assignTxt end),
+                    created: ($it.created_at // "—"),
+                    updated: ($it.updated_at // "—"),
+                    subline: ([ ($it.name // empty),
+                                (if $statusTxt == "" then empty else $statusTxt end),
+                                (if $assignTxt == "" then empty else $assignTxt end) ]
+                              | map(select(. != null and . != "")) | join("  ·  "))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip: board:<id> / bare id jump straight to that board;
+  # free text searches the default board by item name.
+  - id: search
+    label: Search
+    match:
+      # board:<id> — explicit board scope from user text.
+      - regex: '^board:(?P<bid>\d+)$'
+        bind:
+          bid: '{{groups.bid}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: monday
+              tool: get_board_items_page
+              args:
+                boardId: '{{bid}}'
+                limit: '{{limit}}'
+                includeColumns: true
+            out: r
+          - transform: *items_to_rows
+            out: enriched
+          - emit: enriched
+      # Bare numeric id → treat as a board id and list its items.
+      - regex: '^(?P<bid>\d{5,})$'
+        bind:
+          bid: '{{groups.bid}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: monday
+              tool: get_board_items_page
+              args:
+                boardId: '{{bid}}'
+                limit: '{{limit}}'
+                includeColumns: true
+            out: r
+          - transform: *items_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → free-text item search on the default board.
+      # searchTerm is monday's own fuzzy free-text param (NOT a query DSL),
+      # so no escape filter applies — it is passed as a plain string arg.
+      - text: '{{query}}'
+        flow:
+          - transform: |
+              # ADMIN: set default board id (digits only). Same value as the
+              # `recent` scope above. Text search needs a board to search within.
+              { boardId: "" }
+            out: cfg
+          - call:
+              kind: mcp
+              mcp: monday
+              tool: get_board_items_page
+              args:
+                boardId: '{{cfg.boardId}}'
+                searchTerm: '{{query}}'
+                limit: '{{limit}}'
+                includeColumns: true
+            out: r
+          - transform: *items_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in monday
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each item carries its own monday.com URL from the tool response.
+    url_template: '{{row._url}}'
 
 presentation:
   widget: list
-  title_field: id
-  subtitle_field: name
+  title_field: name
+  subtitle_field: subline
   list_fields:
-    - id
     - name
-    - board_name
-    - state
+    - statusName
+    - priorityName
+    - assigneeName
   search_fields:
     - id
-  searchable: true
+    - name
+    - statusName
+    - priorityName
+    - assigneeName
+    - boardName
+  sort_field: updated
+  sort_order: desc
   row_key_field: id
+  searchable: true
+  filterable: true
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
-      title: '{{row.id}}'
-      actions: [open]
+      title: '{{row.name}}'
+      subtitle: '{{row.boardName}} · {{row.statusName}}'
+      fields:
+        - { label: Status,   value: '{{row.statusName}}' }
+        - { label: Priority, value: '{{row.priorityName}}' }
+        - { label: Assignee, value: '{{row.assigneeName}}' }
+        - { label: Board,    value: '{{row.boardName}}' }
+        - { label: Item ID,  value: '{{row.id}}' }
+        - { label: Created,  value: '{{row.created}}' }
+        - { label: Updated,  value: '{{row.updated}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

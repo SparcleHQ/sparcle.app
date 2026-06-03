@@ -1,61 +1,250 @@
+# =hubspot — HubSpot CRM (official Remote MCP, mcp.hubspot.com).
+#
+# Written against the REAL official HubSpot Remote MCP server, which went GA
+# on 2026-04-13 (https://developers.hubspot.com/changelog/remote-hubspot-mcp-server-is-now-generally-available).
+# Endpoint: https://mcp.hubspot.com. Connected via per-user OAuth.
+#
+# Real tools (verified against the official tool reference, 2026-06-03):
+#   • search_crm_objects(objectType, query, filterGroups, limit, properties)
+#       — searches/filters CRM records; objectType ∈ {contacts, companies,
+#         deals, tickets, products, ...}; `query` is a free-text search.
+#   • get_crm_objects(...)        — fetch by IDs (not used here).
+#   • search_properties(...)      — property-definition keyword search (not used).
+#   (https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server)
+#
+# This manifest emits canonical `Account` rows, so the DEFAULT scope searches
+# COMPANIES (objectType=companies) — a company is HubSpot's Account analogue
+# (name/domain/industry/owner). The legacy manifest's `search_contacts` tool
+# does NOT exist on the official server; it is replaced by search_crm_objects
+# with objectType=companies (and a contacts sub-scope for people lookups, which
+# still maps onto Account via associatedcompany for the canonical type).
+#
+# RESPONSE SHAPE: search_crm_objects wraps the HubSpot CRM v3 Search API, whose
+# body is { total, results: [ { id, properties:{...}, createdAt, updatedAt } ],
+# paging }. The MCP server may wrap that in a structured_content envelope; the
+# shared transform below unwraps both the envelope AND the results array
+# (results / items / data / nodes / bare array) before mapping each record's
+# flat `properties.*` keys into the canonical Account fields.
 schema_version: 1
 id: hubspot
 chip: =hubspot
-title: HubSpot
+title: HubSpot CRM
 icon: users
-description: Search HubSpot contacts.
-emits: Person
+description: Search HubSpot companies and contacts (official HubSpot Remote MCP).
+placeholder_examples:
+  - "acme"
+  - "stripe.com"
+  - "anything in a company name or domain"
+emits: Account
 auth_profile_ref: hubspot_user
 
 requires:
   - mcp: hubspot
-    version: ^1
-    tools: ["search_contacts"]
-    scopes: ["crm.objects.contacts.read"]
+    version: ">=1"
+    tools:
+      - search_crm_objects
+    scopes:
+      - crm.objects.companies.read
+      - crm.objects.contacts.read
+
+# Network backend → confirm dispatch (don't hit HubSpot on every keystroke).
+# The empty default scope (recent companies) auto-loads; free-text runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search HubSpot for "{{query}}"'
+  confirm_hint: Press Enter to search HubSpot CRM
 
 scopes:
-  - id: search
-    label: Search
+  # DEFAULT: recently-modified companies (Accounts). `query` empty → recents.
+  - id: companies
+    label: Companies
     default: true
     flow:
       - call:
           kind: mcp
           mcp: hubspot
-          tool: search_contacts
+          tool: search_crm_objects
           args:
-        query: '{{query}}'
-        limit: '{{limit}}'
+            objectType: companies
+            query: '{{query}}'
+            limit: '{{limit}}'
+            # Project only the properties the presentation/actions bind to.
+            properties:
+              - name
+              - domain
+              - website
+              - industry
+              - hubspot_owner_id
+              - city
+              - state
+              - country
+              - phone
+              - numberofemployees
+              - annualrevenue
+              - lifecyclestage
+              - description
+              - hs_object_id
         out: r
-      - emit: r
-        path: /results
+      # Defensive unwrap (identical strategy to =jira-cloud): first peel the MCP
+      # envelope, then walk the record array out of results/items/data/nodes or
+      # a bare array, then map each record's flat `properties.*` into canonical
+      # Account fields. `?` suppresses index-on-array errors. Missing → "—".
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("properties"))) then [.] else empty end)
+              // [] ) as $recs
+          | ($recs | map(
+                . as $rec
+                | ($rec.properties // {}) as $pr
+                | ($pr.name // $pr.firstname // ("Record " + ($rec.id // ""))) as $nm
+                | (($pr.domain // $pr.website // "") | sub("^https?://"; "") | sub("/.*$"; "")) as $dom
+                | ([ $pr.city, $pr.state, $pr.country ]
+                    | map(select(. != null and . != "")) | join(", ")) as $loc
+                | {
+                    id: ($rec.id // $pr.hs_object_id // ""),
+                    name: $nm,
+                    domain: (if $dom == "" then "—" else $dom end),
+                    _url: (if $dom != "" then ("https://" + $dom) else "" end),
+                    industry: ($pr.industry // "—"),
+                    owner: ($pr.hubspot_owner_id // "—"),
+                    location: (if $loc == "" then "—" else $loc end),
+                    phone: ($pr.phone // "—"),
+                    employees: ($pr.numberofemployees // "—"),
+                    revenue: ($pr.annualrevenue // "—"),
+                    lifecycle: ($pr.lifecyclestage // "—"),
+                    email: ($pr.email // "—"),
+                    company: ($pr.name // "—"),
+                    description: (((if ($pr.description | type) == "string" then $pr.description else "" end))
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end),
+                    subline: ([ $dom, ($pr.industry // empty), ($pr.lifecyclestage // empty) ]
+                               | map(select(. != null and . != "")) | join("  ·  "))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # People: search contacts. Still emits Account-shaped rows so the canonical
+  # type stays consistent; name = person name, company = associated company.
+  - id: contacts
+    label: Contacts
+    flow:
+      - call:
+          kind: mcp
+          mcp: hubspot
+          tool: search_crm_objects
+          args:
+            objectType: contacts
+            query: '{{query}}'
+            limit: '{{limit}}'
+            properties:
+              - firstname
+              - lastname
+              - email
+              - company
+              - jobtitle
+              - phone
+              - city
+              - state
+              - country
+              - lifecyclestage
+              - hubspot_owner_id
+              - hs_object_id
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.results?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("properties"))) then [.] else empty end)
+              // [] ) as $recs
+          | ($recs | map(
+                . as $rec
+                | ($rec.properties // {}) as $pr
+                | ([ ($pr.firstname // empty), ($pr.lastname // empty) ]
+                    | map(select(. != null and . != "")) | join(" ")) as $full
+                | (if $full == "" then ($pr.email // ("Contact " + ($rec.id // ""))) else $full end) as $nm
+                | ([ $pr.city, $pr.state, $pr.country ]
+                    | map(select(. != null and . != "")) | join(", ")) as $loc
+                | {
+                    id: ($rec.id // $pr.hs_object_id // ""),
+                    name: $nm,
+                    domain: "—",
+                    _url: "",
+                    industry: ($pr.jobtitle // "—"),
+                    owner: ($pr.hubspot_owner_id // "—"),
+                    location: (if $loc == "" then "—" else $loc end),
+                    phone: ($pr.phone // "—"),
+                    employees: "—",
+                    revenue: "—",
+                    lifecycle: ($pr.lifecyclestage // "—"),
+                    email: ($pr.email // "—"),
+                    company: ($pr.company // "—"),
+                    description: "No description",
+                    subline: ([ ($pr.email // empty), ($pr.company // empty), ($pr.jobtitle // empty) ]
+                               | map(select(. != null and . != "")) | join("  ·  "))
+                  }
+              ))
+        out: enriched
+      - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open website
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Company domain → website. HubSpot record-detail URLs need the portal id
+    # (not available to the launcher), so we link the company's own domain.
+    url_template: '{{row._url | default:''#''}}'
 
 presentation:
   widget: list
-  title_field: firstname
-  subtitle_field: lastname
+  # Flat keys emitted by the transform so list projection + card binds resolve.
+  title_field: name
+  subtitle_field: subline
   list_fields:
-    - firstname
-    - lastname
-    - email
-    - company
+    - name
+    - domain
+    - industry
+    - location
   search_fields:
-    - firstname
-  searchable: true
+    - name
+    - domain
+    - industry
+    - location
+    - company
+    - email
+    - lifecycle
   row_key_field: id
+  searchable: true
+  filterable: false
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.firstname}}'
-      actions: [open]
+      title: '{{row.name}}'
+      subtitle: '{{row.domain}}'
+      fields:
+        - { label: Domain,    value: '{{row.domain}}' }
+        - { label: Industry,  value: '{{row.industry}}' }
+        - { label: Location,  value: '{{row.location}}' }
+        - { label: Employees, value: '{{row.employees}}' }
+        - { label: Revenue,   value: '{{row.revenue}}' }
+        - { label: Lifecycle, value: '{{row.lifecycle}}' }
+        - { label: Phone,     value: '{{row.phone}}' }
+        - { label: Owner,     value: '{{row.owner}}' }
+        - { label: Email,     value: '{{row.email}}' }
+        - { label: About,     value: '{{row.description}}' }
+      actions:
+        - open
 
 enabled: true
 provisioning_mode: public

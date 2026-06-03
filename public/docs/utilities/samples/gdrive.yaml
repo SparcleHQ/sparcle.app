@@ -1,41 +1,177 @@
+# =gdrive — Google Drive recent files / search (canonical MCP `search` tool).
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ DISABLED PENDING ADMIN SETUP (enabled: false).                          │
+# │                                                                          │
+# │ Pinned servers — community piotr-agier/google-drive-mcp                  │
+# │ (npm @piotr-agier/google-drive-mcp) OR Anthropic's ARCHIVED              │
+# │ @modelcontextprotocol/server-gdrive — both expose tool `search`          │
+# │ (arg `query`) but return results ONLY as a formatted TEXT blob           │
+# │ (content[].text = "Found N files:\n<line per file>"), NOT structured     │
+# │ JSON. There is therefore no machine-readable File row to bind to out of  │
+# │ the box, and no per-file open URL (webViewLink is not retrieved).        │
+# │                                                                          │
+# │ Before enabling, an admin MUST:                                          │
+# │  1. Register a Google Drive MCP server in the org MCP catalog under the  │
+# │     id referenced by `requires[].mcp` / every call's `mcp:` below        │
+# │     (default `google-drive`). See `# ADMIN:` markers if your catalog id  │
+# │     differs.                                                             │
+# │  2. Complete per-user Google OAuth (drive.readonly) for that server      │
+# │     (auth profile `gdrive_user`, provider `google-drive`).               │
+# │  3. STRONGLY RECOMMENDED: pin a server build/fork whose `search` tool    │
+# │     emits structuredContent (a JSON `files` array incl. id, name,        │
+# │     mimeType, modifiedTime, webViewLink, owners) so rows render with     │
+# │     real metadata and a working Open action. The `$p` defensive-unwrap   │
+# │     transform below maps that JSON directly. The text-blob fallback in   │
+# │     the same transform yields name/mime/id/modified only and NO open     │
+# │     URL — adequate for display, not for navigation.                      │
+# │  4. Then flip `enabled: true`.                                           │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# Tool contract (verified against both pinned servers' source, 2026-06-03):
+#   search(query: string [required], pageSize?: number, rawQuery?: boolean)
+#   - non-raw query: server wraps + ESCAPES it as
+#       `fullText contains '<escaped>' and trashed = false`  (safe; the server
+#       does its own Drive-query escaping, so user text is passed as-is here).
+#   - rawQuery: true  → query passed straight to the Drive API `q` param
+#       (we only ever use rawQuery with a CONSTANT, never user text).
 schema_version: 1
 id: gdrive
 chip: =gdrive
 title: Google Drive
 icon: hard-drive
-description: Recent files from your Google Drive.
+description: Recent files and search across your Google Drive.
+placeholder_examples:
+  - "quarterly report"
+  - "design spec"
+  - "anything in a file name or contents"
 emits: File
 auth_profile_ref: gdrive_user
 
 requires:
+  # ADMIN: this MCP server id must match the id you registered the Google
+  # Drive MCP server under in the org MCP catalog. Default `google-drive`
+  # (matches auth profile gdrive_user.provider). Change here AND in every
+  # scope/action `mcp:` below if your catalog uses a different id.
   - mcp: google-drive
-    version: ^1
-    tools: ["list_files"]
-    scopes: ["drive.readonly"]
+    version: ">=1"
+    tools:
+      - search
+    scopes:
+      - drive.readonly
+
+# MCP/network backend — confirm dispatch so we don't hit Drive on every
+# keystroke. Empty default scope (recent files) auto-loads; free text runs on
+# Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Google Drive for "{{query}}"'
+  confirm_hint: Press Enter to search your Drive
 
 scopes:
+  # DEFAULT: recent files. The pinned `search` tool has no orderBy arg and
+  # sorts by relevance, so "recent" is expressed as a broad rawQuery that
+  # matches everything not trashed; the transform sorts client-side by
+  # modified time (presentation.sort_field) where modified times are present.
   - id: recent
-    label: Recent
+    label: Recent files
     default: true
     flow:
       - call:
           kind: mcp
-          mcp: google-drive
-          tool: list_files
+          mcp: google-drive       # ADMIN: keep in sync with requires[].mcp
+          tool: search
           args:
-        order_by: modifiedTime desc
-        page_size: '{{limit}}'
+            # Constant Drive query (NOT user input) → safe to pass raw.
+            query: 'trashed = false'
+            rawQuery: true
+            pageSize: '{{limit}}'
         out: r
-      - emit: r
-        path: /files
+      - transform: &files_to_rows |
+          # MANDATORY defensive envelope unwrap (identical pattern to
+          # jira-cloud) — tolerate {structured_content:{data}}, {structured_content},
+          # or bare $r.
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          # Path A — STRUCTURED server fork: walk the provider JSON out of $p
+          # (files / items / data / nodes / bare array). Preferred shape.
+          | ( ($p.files?)
+              // ($p.items?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $json_files
+          # Path B — TEXT-ONLY pinned servers: the result is a text blob
+          # ("Found N files:\n<line>..."). Pull the lines out of the text and
+          # parse each per-file line:
+          #   "<name> (<mime>) [id: <id>, path: <p>] [created: <c>, modified: <m>]"
+          | ( ( ($p.content?) // [] )
+              | map(.text? // empty) | join("\n") ) as $blob
+          | ( $blob
+              | [ scan("(?m)^(.+?) \\(([^)]*)\\) \\[id: ([^,\\]]+)(?:, path: ([^\\]]*))?\\](?: \\[created: ([^,\\]]*), modified: ([^\\]]*)\\])?") ]
+              | map({
+                  name: (.[0] // ""),
+                  mimeType: (.[1] // ""),
+                  id: (.[2] // "" | gsub("^\\s+|\\s+$";"")),
+                  path: (.[3] // ""),
+                  modifiedTime: (.[5] // "")
+                }) ) as $text_files
+          # Prefer structured rows when present; else the text-parsed rows.
+          | ( if ($json_files | length) > 0 then $json_files else $text_files end ) as $files
+          | ($files | map(
+                . as $f
+                | ($f.owners // []) as $own
+                | {
+                    # File canonical flat keys the presentation binds to.
+                    id: ($f.id // ""),
+                    name: ($f.name // "(untitled)"),
+                    mime_type: ($f.mimeType // $f.mime_type // "—"),
+                    modified: ($f.modifiedTime // $f.modified // "—"),
+                    # ADMIN/STRUCTURED-FORK ONLY: open URL. Text-only pinned
+                    # servers do NOT return webViewLink, so url stays "" and
+                    # the Open action is inert until a structured fork supplies it.
+                    url: ($f.webViewLink // $f.url // $f.html_url // ""),
+                    owner_name: (($own[0].displayName?) // $f.owner_name // "—"),
+                    size: ($f.size // "—"),
+                    path: ($f.path // "")
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches Drive by file name / full-text. User text is
+  # passed as a NON-raw query: the server wraps it as `fullText contains
+  # '<escaped>'` and does its own Drive-query escaping, so it is safe as-is.
+  - id: search
+    label: Search
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: google-drive   # ADMIN: keep in sync with requires[].mcp
+              tool: search
+              args:
+                query: '{{query}}'
+                pageSize: '{{limit}}'
+            out: r
+          - transform: *files_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Drive
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the file's webViewLink at row.url WHEN a structured
+    # server fork supplies it; text-only pinned servers leave it empty (the
+    # default below keeps the action from producing a broken link). As a
+    # graceful fallback, an admin can swap this for the canonical Drive open URL
+    # if file ids are present:
+    # ADMIN (optional): if your server omits webViewLink but returns ids, use:
+    #   url_template: 'https://drive.google.com/file/d/{{row.id}}/view'
+    url_template: '{{row.url | default:''#''}}'
 
 presentation:
   widget: list
@@ -44,10 +180,14 @@ presentation:
   list_fields:
     - name
     - mime_type
-    - modifiedTime
+    - modified
     - owner_name
   search_fields:
     - name
+    - mime_type
+    - owner_name
+  sort_field: modified
+  sort_order: desc
   searchable: true
   row_key_field: id
   right_widget:
@@ -55,9 +195,18 @@ presentation:
     mode: selected_row
     bind:
       title: '{{row.name}}'
-      actions: [open]
+      subtitle: '{{row.mime_type}}'
+      fields:
+        - { label: Type,     value: '{{row.mime_type}}' }
+        - { label: Owner,    value: '{{row.owner_name}}' }
+        - { label: Modified, value: '{{row.modified}}' }
+        - { label: Size,     value: '{{row.size}}' }
+        - { label: Path,     value: '{{row.path | default:''—''}}' }
+      actions:
+        - open
 
-enabled: true
+# DISABLED until admin setup is complete — see header comment.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

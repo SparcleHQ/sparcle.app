@@ -1,71 +1,218 @@
+# =gcal — Google Calendar (community MCP, github.com/nspady/google-calendar-mcp).
+#
+# PINNED SERVER (verify before shipping): nspady/google-calendar-mcp. This is a
+# COMMUNITY, SELF-HOSTED server — it runs on the user's own machine under their
+# own Google OAuth; there is NO hosted/public endpoint. Tools are KEBAB-case.
+#
+# Real, verified contract (src/tools/registry.ts + handlers/core/ListEventsHandler.ts
+# + types/structured-responses.ts, checked 2026-06-03):
+#   list-events   args: calendarId (string | string[], REQUIRED — no default),
+#                       timeMin, timeMax (optional ISO-8601), timeZone, fields, account
+#   search-events args: calendarId, query (free-text over title/desc/attendees),
+#                       timeMin, timeMax, timeZone, fields, account
+#   list-calendars args: account (optional)
+#   Response envelope: structured { events: StructuredEvent[], totalCount,
+#     calendars?, ... }. Each StructuredEvent: id, summary?, description?,
+#     location?, start{dateTime?|date?,timeZone?}, end{...}, status?, htmlLink?,
+#     hangoutLink?, organizer{email,...}, attendees[]. NOT formatted text.
+#
+# ADMIN SETUP REQUIRED before this dispatches at runtime (manifest still lints
+# clean without it): register an MCP server with id `google-calendar` in the org
+# catalog pointing at the pinned nspady server, and have each user complete the
+# Google OAuth (calendar.events.read). calendarId defaults to the universal
+# Google "primary" alias (each user's own calendar) so no per-tenant id is
+# guessed; override only to target a shared org calendar (see ADMIN comments).
+#
+# NOTE: Bolt v1 has no relative-date / "now" template primitive, so the default
+# scope cannot synthesize a real ISO timeMin/timeMax window. It therefore omits
+# them (the server returns the calendar's events) and relies on ascending
+# start-time sort for "upcoming" ordering. The prior manifest's
+# `time_min: today` / `time_max: tomorrow` were not real ISO values or bolt
+# vars and have been removed.
 schema_version: 1
 id: gcal
 chip: =gcal
 title: Google Calendar
 icon: calendar
-description: Show today's events from your primary calendar.
+description: Show upcoming events on your primary calendar, or search your calendar by keyword.
+placeholder_examples:
+  - "standup"
+  - "1:1"
+  - "anything in an event title or description"
 emits: Event
 auth_profile_ref: gcal_user
 
 requires:
   - mcp: google-calendar
-    version: ^1
-    tools: [list_events]
-    scopes: [calendar.events.read]
+    version: ">=1"
+    tools:
+      - list-events
+      - search-events
+      - list-calendars
+    scopes:
+      - calendar.events.read
+
+# MCP/network backend → confirm dispatch (don't hit Google on every keystroke).
+# The default scope (upcoming on primary) auto-loads; free-text searches on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search your calendar for "{{query}}"'
+  confirm_hint: Press Enter to search your calendar
 
 scopes:
-  - id: today
-    label: Today's events
+  # DEFAULT: upcoming events on the primary calendar, soonest first.
+  - id: upcoming
+    label: Upcoming events
     default: true
     flow:
       - call:
           kind: mcp
           mcp: google-calendar
-          tool: list_events
+          tool: list-events
           args:
-            calendar_id: primary
-            time_min: today
-            time_max: tomorrow
-            limit: '{{limit}}'
+            # ADMIN: default 'primary' = each user's own main calendar (works
+            # org-wide, no config). To target a SHARED org calendar, replace
+            # with its Calendar ID from Google Calendar -> Settings -> <calendar>
+            # -> Integrate calendar -> Calendar ID (e.g. team@group.calendar.google.com).
+            calendarId: primary
+            # ADMIN: optional. Uncomment + set an IANA tz (e.g. America/Los_Angeles)
+            # to force an org time zone; omit to use each user's calendar tz.
+            # timeZone: America/Los_Angeles
         out: r
-      - emit: r
-        path: /events
+      # Defensive envelope unwrap (identical pattern to jira-cloud): tolerate the
+      # dispatcher's structured_content wrapper, then walk the events array out
+      # of the provider JSON ({events:[...]}, or items/data/results, or a bare
+      # array). NEVER emit straight off a bare path. Flatten each StructuredEvent
+      # into the canonical Event row the presentation binds to.
+      - transform: &events_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.events?) // ($p.items?) // ($p.data?) // ($p.results?)
+              // ($p | if type == "array" then . else empty end) // [] ) as $events
+          | ($events | map(
+              . as $e
+              | ($e.start // {}) as $s
+              | ($e."end" // {}) as $en
+              | ($e.organizer // {}) as $org
+              | (($e.attendees // []) | map(.displayName // .email // "") | map(select(. != "")) | join(", ")) as $att
+              | (($e.attendees // []) | length) as $attn
+              | ($s.dateTime // $s.date // "") as $start_raw
+              | ($en.dateTime // $en.date // "") as $end_raw
+              | ($e.description // "") as $draw
+              | {
+                  id: ($e.id // ""),
+                  title: ($e.summary // "(no title)"),
+                  start: $start_raw,
+                  "end": $end_raw,
+                  location: ($e.location // "—"),
+                  url: ($e.htmlLink // ""),
+                  join_url: ($e.hangoutLink // $e.location // ""),
+                  status: ($e.status // "—"),
+                  organizer: ($org.displayName // $org.email // "—"),
+                  attendees: (if $att == "" then "—" else $att end),
+                  attendee_count: $attn,
+                  description: ((if ($draw | type) == "string" then $draw else "" end) | if length > 280 then (.[0:277] + "…") else . end | if . == "" then "No description" else . end)
+                }
+            ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches the calendar by keyword.
+  - id: search
+    label: Search
+    match:
+      # Any text → search-events. `query` is a FREE-TEXT search arg (not a query
+      # DSL), so it is passed through plainly — there is no DSL escape to apply
+      # and none of the frozen *_escape filters fit a plain text-search field.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: google-calendar
+              tool: search-events
+              args:
+                # ADMIN: same 'primary' default as the upcoming scope; override
+                # to a shared org Calendar ID if searching a team calendar.
+                calendarId: primary
+                query: '{{query}}'
+            out: r
+          - transform: *events_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  # Calendar picker, populated from the user's own calendar list. Injects the
+  # chosen calendar id into the list-events/search-events calendarId arg.
+  - id: calendar
+    kind: enum
+    label: Calendar
+    apply: pre
+    maps_to: args.calendarId
+    populate:
+      - call:
+          kind: mcp
+          mcp: google-calendar
+          tool: list-calendars
+        out: r
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.calendars?) // ($p.items?) // ($p.data?)
+              // ($p | if type == "array" then . else empty end) // [] )
+          | map({ value: (.id // ""), label: (.summary // .summaryOverride // .id // "") })
+          | map(select(.value != ""))
+        out: cals
+      - emit: cals
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in Google Calendar
     icon: external_link
-    url_template: '{{row.htmlLink}}'
+    url_template: '{{row.url}}'
 
   - id: join
     kind: url
     target: row
     label: Join
     icon: video
-    url_template: '{{row.hangoutLink | default:row.location}}'
+    url_template: '{{row.join_url}}'
 
 presentation:
   widget: list
-  title_field: summary
-  subtitle_field: start.dateTime
-  list_fields: [start.dateTime, summary, location]
-  search_fields: [summary]
-  sort_field: start.dateTime
+  # Flat keys emitted by the transform so list projection + card binds resolve.
+  title_field: title
+  subtitle_field: start
+  list_fields:
+    - start
+    - title
+    - location
+  search_fields:
+    - title
+    - location
+    - organizer
+    - attendees
+    - description
+  sort_field: start
   sort_order: asc
   row_key_field: id
   searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.summary}}'
-      subtitle: '{{row.start.dateTime | date:''short''}}'
+      title: '{{row.title}}'
+      subtitle: '{{row.start | date:''short''}}'
       fields:
-        - { label: When, value: '{{row.start.dateTime | date:''short''}} - {{row.end.dateTime | date:''short''}}' }
-        - { label: Where, value: '{{row.location | default:''-''}}' }
-      actions: [open, join]
+        - { label: When,      value: '{{row.start | date:''short''}} - {{row.end | date:''short''}}' }
+        - { label: Where,     value: '{{row.location}}' }
+        - { label: Organizer, value: '{{row.organizer}}' }
+        - { label: Attendees, value: '{{row.attendees}}' }
+        - { label: Status,    value: '{{row.status}}' }
+        - { label: Details,   value: '{{row.description}}' }
+      actions:
+        - open
+        - join
 
 enabled: true
 provisioning_mode: public

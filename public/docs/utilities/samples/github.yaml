@@ -1,20 +1,91 @@
-# =github — pull requests and issues across the user's repos.
+# =github — GitHub issues + pull requests across the user's repos.
+#
+# Written against the REAL, publicly-documented tool surface of GitHub's
+# official server `github/github-mcp-server` (verified against the main-branch
+# README tool reference + tool-registration source, 2026-06-03):
+#
+#   • search_issues       (query REQUIRED; owner/repo/sort/order/page/perPage opt)
+#   • search_pull_requests(query REQUIRED; owner/repo/sort/order/page/perPage opt)
+#   • list_issues         (owner+repo REQUIRED; state/labels/since/perPage/after opt)
+#   • list_pull_requests  (owner+repo REQUIRED; state/head/base/sort/direction opt)
+#   • issue_read          (method+owner+repo+issue_number REQUIRED; method∈
+#                          {get,get_comments,get_sub_issues,get_labels})
+#
+# CHANGES vs the previous manifest (all of which referenced tools that do NOT
+# exist on the real server):
+#   • `list_my_prs`  → REMOVED. No such tool. The default "my open PRs" scope
+#     now uses `search_pull_requests` with query `author:@me is:open` (GitHub's
+#     own server doc says: if an author is specified use search_pull_requests,
+#     not list_pull_requests). search_* do NOT require owner/repo, so the
+#     launcher can fire this with no repo context — scope IS feasible.
+#   • `get_issue`    → REMOVED/RENAMED. The read tool is now `issue_read` and it
+#     does NOT take a single `identifier`; it needs owner+repo+issue_number+
+#     method=get as separate args. The `owner/repo#N` branch parses the match
+#     into those three args via a transform.
+#   • `search_issues` with arg `q` → real arg is `query` (and it is REQUIRED).
+#
+# RESPONSE ENVELOPE: search_issues / search_pull_requests marshal the GitHub
+# REST *search* response: { total_count, incomplete_results, items:[ <issue|pr> ] }.
+# list_issues / list_pull_requests marshal a BARE ARRAY of issue/PR objects.
+# issue_read(method=get) marshals a SINGLE issue object. Each issue/PR object
+# carries number, title, state, html_url, user.{login,avatar_url}, updated_at,
+# body, labels[], repository_url, and (for PRs) a `pull_request` sub-object.
+# The MCP transport wraps any of these under structured_content / structured_
+# content.data, so the shared transform unwraps that first, then walks the
+# array out of items / results / data / nodes / bare-array / single-object.
 schema_version: 1
 id: github
 chip: =github
 title: GitHub
 icon: github
 description: Search pull requests + issues, or look up by owner/repo#N.
+placeholder_examples:
+  - "octocat/Hello-World#42"
+  - "is:open label:bug"
+  - "memory leak"
+  - "author:@me is:pr"
 emits: Issue
 auth_profile_ref: github_user
 
 requires:
   - mcp: github
-    version: ^1
-    tools: [list_my_prs, get_issue, search_issues]
-    scopes: [repo, read:user]
+    version: ">=1"
+    tools:
+      - search_issues
+      - search_pull_requests
+      - list_pull_requests
+      - list_issues
+      - issue_read
+    scopes:
+      - repo
+      - read:user
+
+# MCP/network backend → confirm (don't hammer GitHub on every keystroke). The
+# empty default scope (your open PRs) auto-loads; an exact owner/repo#N token
+# auto-fires; free-text search runs on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search GitHub for "{{query}}"'
+  confirm_hint: Press Enter to search issues + PRs across your repos
+  auto_when:
+    - regex: '^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#\d+$'
+      reason: Exact owner/repo#number lookup is unambiguous and cheap.
+
+# Bare detection: a `owner/repo#N` token typed WITHOUT the =github chip is
+# recognized and proposed as a handoff into =github (Enter → direct lookup).
+# `network` kind = only surfaced when the GitHub MCP is connected.
+bare:
+  kind: network
+  chip_key: github
+  patterns:
+    - regex: '^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#\d+$'
+      flags: ''
+      priority: 20
 
 scopes:
+  # DEFAULT: your open PRs, most-recently-updated first. search_pull_requests
+  # takes GitHub PR search syntax; `author:@me is:open` resolves to the calling
+  # user server-side and needs no owner/repo, so the launcher can fire it cold.
   - id: my_prs
     label: My open PRs
     default: true
@@ -22,30 +93,110 @@ scopes:
       - call:
           kind: mcp
           mcp: github
-          tool: list_my_prs
+          tool: search_pull_requests
           args:
-            state: open
-            limit: '{{limit}}'
+            query: 'author:@me is:open sort:updated-desc'
+            perPage: '{{limit}}'
         out: r
-      - emit: r
-        path: /pull_requests
+      # Defensive unwrap (mirrors jira-cloud): peel structured_content[.data],
+      # then walk the row array out of items / results / data / nodes / bare
+      # array / single object, then flatten each issue|PR into render-ready,
+      # FLAT canonical-Issue keys the presentation + actions bind to.
+      - transform: &items_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.items?)
+              // ($p.results?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("number") or has("html_url"))) then [.] else empty end)
+              // [] ) as $items
+          | ($items | map(
+                . as $it
+                | ($it.user // {}) as $u
+                | (($it.labels // []) | map(if type == "object" then .name else . end)
+                     | map(select(. != null and . != "")) | join(", ")) as $labels
+                # repository_url tail = "owner/repo"; html_url already browsable.
+                | (($it.repository_url // "") | sub("^https://[^/]+/repos/"; "")) as $repo_full
+                | (if ($it.pull_request != null) then "PR" else "Issue" end) as $kind
+                | ([ ("#" + (($it.number // "?") | tostring)),
+                     $kind,
+                     ($it.state // empty),
+                     ($u.login // empty) ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    id: ($it.id // $it.node_id // ($repo_full + "#" + (($it.number // 0) | tostring))),
+                    number: ($it.number // 0),
+                    key: ($repo_full + "#" + (($it.number // 0) | tostring)),
+                    repo: (if $repo_full == "" then "—" else $repo_full end),
+                    title: ($it.title // "(no title)"),
+                    subline: $subline,
+                    kind: $kind,
+                    state: ($it.state // "—"),
+                    url: ($it.html_url // ""),
+                    authorLogin: ($u.login // "—"),
+                    authorAvatar: ($u.avatar_url // ""),
+                    labels: (if $labels == "" then "—" else $labels end),
+                    updated: ($it.updated_at // "—"),
+                    created: ($it.created_at // "—"),
+                    comments: ($it.comments // 0),
+                    body: ((if ($it.body | type) == "string" then $it.body else "" end)
+                            | if length > 280 then (.[0:277] + "…") else . end
+                            | if . == "" then "No description" else . end)
+                  }
+              ))
+        out: enriched
+      - emit: enriched
 
+  # Every issue + PR open for you, any repo.
+  - id: my_issues
+    label: My open issues
+    flow:
+      - call:
+          kind: mcp
+          mcp: github
+          tool: search_issues
+          args:
+            query: 'assignee:@me is:open is:issue sort:updated-desc'
+            perPage: '{{limit}}'
+        out: r
+      - transform: *items_to_rows
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches issues + PRs.
   - id: search
     label: Search
     match:
-      - regex: '^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#\d+$'
+      # owner/repo#N → jump straight to that issue/PR via issue_read(method=get).
+      # issue_read needs owner+repo+issue_number split out; the regex groups
+      # supply them. issue_read on a PR number also returns the issue view, so
+      # this works for both issues and PRs.
+      - regex: '^(?P<owner>[A-Za-z0-9._-]+)/(?P<repo>[A-Za-z0-9._-]+)#(?P<num>\d+)$'
         bind:
-          repo_pr: '{{match}}'
+          owner: '{{groups.owner}}'
+          repo: '{{groups.repo}}'
+          num: '{{groups.num}}'
         flow:
           - call:
               kind: mcp
               mcp: github
-              tool: get_issue
+              tool: issue_read
               args:
-                identifier: '{{repo_pr}}'
-            out: issue
-          - emit:
-              - issue
+                method: get
+                owner: '{{owner}}'
+                repo: '{{repo}}'
+                issue_number: '{{num}}'
+            out: r
+          - transform: *items_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → GitHub issue search syntax, passed through as the
+      # REQUIRED `query` arg. (search_issues already accepts the full GitHub
+      # issue/PR search grammar — is:open, label:x, author:@me, repo:o/r, etc.
+      # — so the raw user text IS the query; no DSL synthesis needed. There is
+      # no JQL-style escape filter for GitHub search and the server validates
+      # the grammar itself.)
       - text: '{{query}}'
         flow:
           - call:
@@ -53,19 +204,31 @@ scopes:
               mcp: github
               tool: search_issues
               args:
-                q: '{{query}}'
-                limit: '{{limit}}'
+                query: '{{query}}'
+                perPage: '{{limit}}'
             out: r
-          - emit: r
-            path: /items
+          - transform: *items_to_rows
+            out: enriched
+          - emit: enriched
 
 filters:
   - id: state
     kind: enum
     label: State
-    apply: pre
-    maps_to: q.state
-    static: [open, closed]
+    apply: post
+    matches_field: state
+    static:
+      - open
+      - closed
+
+  - id: kind
+    kind: enum
+    label: Type
+    apply: post
+    matches_field: kind
+    static:
+      - Issue
+      - PR
 
 actions:
   - id: open
@@ -73,7 +236,7 @@ actions:
     target: row
     label: Open on GitHub
     icon: external_link
-    url_template: '{{row.html_url}}'
+    url_template: '{{row.url}}'
 
   - id: comment
     kind: composer
@@ -85,7 +248,7 @@ actions:
 presentation:
   widget: list
   title_field: title
-  subtitle_field: repo
+  subtitle_field: subline
   list_fields:
     - number
     - title
@@ -94,20 +257,32 @@ presentation:
   search_fields:
     - title
     - repo
-  sort_field: updated_at
+    - state
+    - kind
+    - authorLogin
+    - labels
+    - body
+  sort_field: updated
   sort_order: desc
-  row_key_field: id
+  row_key_field: key
   searchable: true
+  filterable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.repo}}#{{row.number}} | {{row.state}}'
-      image_url: '{{row.user.avatar_url}}'
+      subtitle: '{{row.repo}}#{{row.number}} · {{row.state}}'
+      image_url: '{{row.authorAvatar}}'
       fields:
-        - { label: Author, value: '{{row.user.login}}' }
-        - { label: Updated, value: '{{row.updated_at | date:''rel''}}' }
+        - { label: Type,    value: '{{row.kind}}' }
+        - { label: State,   value: '{{row.state}}' }
+        - { label: Author,  value: '{{row.authorLogin}}' }
+        - { label: Repo,    value: '{{row.repo}}' }
+        - { label: Labels,  value: '{{row.labels}}' }
+        - { label: Comments, value: '{{row.comments}}' }
+        - { label: Updated, value: '{{row.updated | date:''rel''}}' }
+        - { label: Body,    value: '{{row.body}}' }
       actions: [open, comment]
 
 enabled: true

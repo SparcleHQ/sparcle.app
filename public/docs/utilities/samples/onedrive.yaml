@@ -1,61 +1,229 @@
+# =onedrive — OneDrive files via Microsoft Graph (Softeria onedrive-mcp-server).
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ ADMIN SETUP REQUIRED — this manifest ships enabled: false.                │
+# │                                                                           │
+# │ Pinned server: Softeria onedrive-mcp-server (community, MIT). NOT an        │
+# │   official Microsoft MCP. Register it in your org MCP catalog under the   │
+# │   id `onedrive` before enabling. (https://github.com/Softeria/onedrive-mcp-server)
+# │                                                                           │
+# │ WHY enabled:false — every OneDrive file tool in this server requires a    │
+# │   `drive-id` PATH param. There is NO `/me/drive` shortcut tool: you must  │
+# │   know the user's default OneDrive drive id. drive-id is per-user /       │
+# │   per-tenant and CANNOT be guessed. The flow below resolves it at runtime │
+# │   from list-drives (picks the user's OneDrive personal drive), but an     │
+# │   admin must (a) confirm `onedrive` is registered + OAuth'd with Files.Read │
+# │   and (b) optionally pin a default drive id for org-wide determinism      │
+# │   (see `# ADMIN: default drive-id` below). Flip enabled: true once done.  │
+# │                                                                           │
+# │ Tool names + args + the {value:[...]} Graph envelope are REAL and pinned  │
+# │   (verified against src/endpoints.json, 2026-06-03). Only the tenant      │
+# │   drive id is admin-specific.                                             │
+# └─────────────────────────────────────────────────────────────────────────┘
 schema_version: 1
 id: onedrive
 chip: =onedrive
 title: OneDrive
 icon: hard-drive
-description: Recent files from your OneDrive.
+description: Browse and search files in your OneDrive (Microsoft Graph).
+placeholder_examples:
+  - "budget"
+  - "Q3 report"
+  - "anything in a file name"
 emits: File
+# Token lives under MCP id `onedrive` (where OAuth was completed) with the
+# Files.Read delegated scope. onedrive_user already points provider: onedrive /
+# scope Files.Read in auth-profiles.yaml.
+# ADMIN: if your auth-profiles.yaml binds onedrive_user to a different MCP
+# provider id than `onedrive`, update either this ref or the profile's provider
+# so the OAuth gate checks the server where you actually completed OAuth.
 auth_profile_ref: onedrive_user
 
 requires:
-  - mcp: onedrive
-    version: ^1
-    tools: ["list_files"]
-    scopes: ["Files.Read"]
+  - mcp: onedrive            # ADMIN: register Softeria onedrive-mcp-server under this catalog id
+    version: ">=0"
+    tools:
+      - list-drives
+      - list-folder-files
+      - search-onedrive-files
+    scopes:
+      - Files.Read
+
+# confirm = right default for a network/Graph backend (don't hammer Graph on
+# every keystroke). Empty default scope (recent root files) auto-loads; typed
+# text searches on Enter.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search OneDrive for "{{query}}"'
+  confirm_hint: Press Enter to search your OneDrive
 
 scopes:
+  # DEFAULT: top-level items in the user's OneDrive root, newest first.
   - id: recent
-    label: Recent
+    label: Recent files
     default: true
     flow:
+      # 1) Resolve the user's drive id. list-drives → GET /me/drives →
+      #    { "value": [ { id, name, driveType, ... } ] }. We pick the personal
+      #    OneDrive (driveType == "personal" | "business"); fall back to the
+      #    first drive. An admin can hard-pin instead — see $ADMIN_DRIVE_ID.
       - call:
           kind: mcp
           mcp: onedrive
-          tool: list_files
+          tool: list-drives
+          args: {}
+        out: drives
+      - transform: |
+          ((.drives.structured_content?.data? // .drives.structured_content? // .drives) // {}) as $p
+          | ( ($p.value?)
+              // ($p.drives?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $ds
+          # ADMIN: default drive-id — to make this org-deterministic, replace
+          # the empty string below with the user's/org default OneDrive drive
+          # id (Graph: GET /me/drive → "id"). When non-empty it wins; when
+          # empty we auto-pick the user's drive from list-drives.
+          | ("" ) as $ADMIN_DRIVE_ID
+          | ( if ($ADMIN_DRIVE_ID | length) > 0 then $ADMIN_DRIVE_ID
+              else ( ( $ds | map(select((.driveType // "") | test("personal|business"))) | (.[0].id // empty) )
+                     // ($ds[0].id // "") )
+              end ) as $drive
+          | { driveId: $drive }
+        out: dv
+      # 2) List children of that drive's root. The Softeria tool path is
+      #    /drives/{drive-id}/items/{driveItem-id}/children; the literal
+      #    "root" is a valid driveItem id alias for the drive root in Graph.
+      #    $top + $orderby are passed straight through as OData query args.
+      - call:
+          kind: mcp
+          mcp: onedrive
+          tool: list-folder-files
           args:
-        top: '{{limit}}'
+            drive-id: '{{dv.driveId}}'
+            driveItem-id: 'root'
+            $top: '{{limit}}'
+            $orderby: 'lastModifiedDateTime desc'
         out: r
-      - emit: r
-        path: /value
+      # Defensive envelope unwrap, then walk the Graph collection ({value:[...]}).
+      # Map each driveItem into the File canonical shape (flat keys the
+      # presentation binds to). NEVER emit straight off /value.
+      - transform: &items_to_files |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.value?)
+              // ($p.items?)
+              // ($p.children?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("id") or has("name"))) then [.] else empty end)
+              // [] ) as $items
+          | ($items | map(
+                . as $it
+                | ($it.createdBy // {}) as $cb
+                | (($cb.user // {}).displayName // ($cb.application // {}).displayName // "") as $owner
+                | ($it.parentReference // {}) as $pr
+                | (if ($it.folder // null) != null then "folder" else (($it.file // {}).mimeType // "file") end) as $mime
+                | {
+                    id: ($it.id // ""),
+                    name: ($it.name // "(unnamed)"),
+                    url: ($it.webUrl // ""),
+                    download_url: ($it["@microsoft.graph.downloadUrl"] // ""),
+                    mime_type: $mime,
+                    is_folder: (($it.folder // null) != null),
+                    size: ($it.size // 0),
+                    owner: (if $owner == "" then "—" else $owner end),
+                    modified: ($it.lastModifiedDateTime // "—"),
+                    created: ($it.createdDateTime // "—"),
+                    location: ($pr.path // $pr.name // "—"),
+                    child_count: (($it.folder // {}).childCount // 0)
+                  }
+              ))
+        out: files
+      - emit: files
+
+  # Typing after the chip searches the user's OneDrive.
+  - id: search
+    label: Search
+    match:
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: onedrive
+              tool: list-drives
+              args: {}
+            out: drives
+          - transform: |
+              ((.drives.structured_content?.data? // .drives.structured_content? // .drives) // {}) as $p
+              | ( ($p.value?) // ($p.drives?)
+                  // ($p | if type == "array" then . else empty end) // [] ) as $ds
+              # ADMIN: default drive-id — see the recent scope. Same pin point.
+              | ("" ) as $ADMIN_DRIVE_ID
+              | ( if ($ADMIN_DRIVE_ID | length) > 0 then $ADMIN_DRIVE_ID
+                  else ( ( $ds | map(select((.driveType // "") | test("personal|business"))) | (.[0].id // empty) )
+                         // ($ds[0].id // "") )
+                  end ) as $drive
+              | { driveId: $drive }
+            out: dv
+          # search-onedrive-files → GET /drives/{drive-id}/search(q='{q}').
+          # `q` lands inside an OData function-call path segment, so the user
+          # text is url_escape'd to neutralize quote/paren injection into that
+          # path before it reaches Graph.
+          - call:
+              kind: mcp
+              mcp: onedrive
+              tool: search-onedrive-files
+              args:
+                drive-id: '{{dv.driveId}}'
+                q: '{{query | url_escape}}'
+                $top: '{{limit}}'
+            out: r
+          - transform: *items_to_files
+            out: files
+          - emit: files
 
 actions:
   - id: open
     kind: url
     target: row
-    label: Open
+    label: Open in OneDrive
     icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    # Each row carries the file's Graph webUrl.
+    url_template: '{{row.url}}'
 
 presentation:
   widget: list
+  # Flat keys emitted by the transform.
   title_field: name
   subtitle_field: modified
   list_fields:
     - name
     - modified
-    - createdBy
+    - owner
   search_fields:
     - name
-  searchable: true
+    - owner
+  sort_field: modified
+  sort_order: desc
   row_key_field: id
+  searchable: true
   right_widget:
     kind: card
     mode: selected_row
     bind:
       title: '{{row.name}}'
-      actions: [open]
+      subtitle: '{{row.mime_type}}'
+      fields:
+        - { label: Owner,    value: '{{row.owner}}' }
+        - { label: Modified, value: '{{row.modified}}' }
+        - { label: Created,  value: '{{row.created}}' }
+        - { label: Location, value: '{{row.location}}' }
+        - { label: Type,     value: '{{row.mime_type}}' }
+      actions:
+        - open
 
-enabled: true
+# ADMIN: flip to true after (1) onedrive-mcp-server is registered as MCP id
+# `onedrive` and OAuth'd with Files.Read, and (2) you have confirmed the
+# runtime drive-id resolution works for your users (or pinned $ADMIN_DRIVE_ID).
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

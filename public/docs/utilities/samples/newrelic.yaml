@@ -1,59 +1,191 @@
+# =newrelic — New Relic official Remote MCP (https://mcp.newrelic.com/mcp/).
+#
+# Written against the REAL official New Relic MCP server (verified against
+# docs.newrelic.com/docs/agentic-ai/mcp/tool-reference, 2026-06-03):
+#
+#   • execute_nrql_query           — "Execute an NRQL query against NRDB."
+#       arg `query`   = the NRQL string (NOT `nrql`)
+#       arg `accountId` (optional)  = target account; omitted here so the
+#         account bound at OAuth-connect time is used. The query text itself
+#         carries the data scope (FROM <event> ... SINCE ...).
+#   • natural_language_to_nrql_query — converts a plain-English request into
+#       NRQL, runs it, returns results. arg `query` = the natural-language text.
+#
+# Envelope: the official docs do not publish the result envelope, so the
+# emit transform below is fully defensive — it unwraps the MCP
+# structured_content wrapper, then walks the NRDB result array out of
+# whichever key the server uses (results / data / nodes / events / facets /
+# bare array). The previous manifest emitted straight off a bare `/results`
+# path; that was wrong (NRDB returns the rows under `results` only in the
+# GraphQL-NRQL shape, and the MCP wrapper nests it). Never emit off a bare
+# path with this server.
+#
+# accountId is intentionally NOT set as a manifest arg: the official server
+# binds the user's account at OAuth time, and the launcher cannot supply a
+# meaningful per-fire accountId. See residual_risks.
 schema_version: 1
 id: newrelic
 chip: =newrelic
 title: New Relic
 icon: activity
-description: Run a NRQL query.
+description: Run an NRQL query against your New Relic account, or ask in plain English.
+placeholder_examples:
+  - "errors in the last hour"
+  - "SELECT count(*) FROM Transaction SINCE 1 hour ago"
+  - "average duration by appName"
 emits: Generic
 auth_profile_ref: newrelic_user
 
 requires:
   - mcp: newrelic
-    version: ^1
-    tools: ["query"]
-    scopes: ["user.read"]
+    version: ">=1"
+    tools:
+      - execute_nrql_query
+      - natural_language_to_nrql_query
+    scopes:
+      - user.read
+
+# MCP/network backend: don't fire on every keystroke. The default scope
+# (a recent-error snapshot) auto-loads on chip activation; typed text runs
+# on Enter. Text that looks like raw NRQL (starts with SELECT/FROM) is routed
+# to execute_nrql_query; anything else goes through the natural-language tool.
+dispatch:
+  mode: confirm
+  confirm_label: 'Run on New Relic: "{{query}}"'
+  confirm_hint: Press Enter to query New Relic
 
 scopes:
-  - id: query
-    label: Query
+  # DEFAULT: a safe, bounded canned NRQL so the chip returns something useful
+  # on activation with no query. (NRQL has no generic "list" form — every
+  # result depends on the query text — so the default is an explicit, bounded
+  # snapshot rather than an open-ended list.)
+  - id: recent
+    label: Recent errors (last hour)
     default: true
     flow:
       - call:
           kind: mcp
           mcp: newrelic
-          tool: query
+          tool: execute_nrql_query
           args:
-        nrql: '{{query}}'
+            query: 'SELECT count(*), latest(error.message) AS errorMessage FROM TransactionError FACET appName SINCE 1 hour ago LIMIT 50'
         out: r
-      - emit: r
-        path: /results
+      # Defensive unwrap — identical strategy to =jira-cloud. First peel the
+      # MCP structured_content wrapper, then walk the NRDB row array out of
+      # whichever key the server uses. Each NRDB row is a flat object whose
+      # keys are the SELECT aliases plus any FACET names; we project them into
+      # flat canonical Generic fields the presentation binds to.
+      - transform: &nrql_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.results?)
+              // ($p.data?.results?)
+              // ($p.nrql?.results?)
+              // ($p.facets?)
+              // ($p.events?)
+              // ($p.data?)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and ((keys|length) > 0)) then [.] else empty end)
+              // [] ) as $rows
+          | ($rows | to_entries | map(
+                .key as $i
+                | (.value // {}) as $row
+                | ( ($row.facet?)
+                    // ($row.name?)
+                    // ($row.appName?)
+                    // ($row.entityName?)
+                    // ($row.timestamp?)
+                    // ("Result " + ($i + 1 | tostring)) ) as $label
+                | ( $label | if type == "array" then join(" · ") else (. | tostring) end ) as $title
+                | ( ($row.count?)
+                    // ($row.errorMessage?)
+                    // ($row["latest.error.message"]?)
+                    // ($row.average?)
+                    // ($row.sum?)
+                    // ($row.result?)
+                    // "" ) as $primary
+                | {
+                    id: ($i | tostring),
+                    title: $title,
+                    value: ($primary | tostring),
+                    detail: ($row | to_entries
+                              | map("\(.key): \(.value | if type=="object" or type=="array" then tojson else tostring end)")
+                              | join("\n")),
+                    raw: $row
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip: route raw NRQL vs natural language.
+  - id: query
+    label: Query
+    match:
+      # Looks like raw NRQL (SELECT ... / FROM ...) → run it verbatim via
+      # execute_nrql_query. The user is authoring NRQL directly; we pass it
+      # through with sql_escape applied to neutralize quote-breakouts while
+      # preserving the statement. (NRQL is the matching DSL family for the
+      # sql_escape filter required by the manifest security lint.)
+      - regex: '^\s*(?i:select|from)\b'
+        bind:
+          nrql: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: newrelic
+              tool: execute_nrql_query
+              args:
+                query: '{{query | sql_escape}}'
+            out: r
+          - transform: *nrql_to_rows
+            out: enriched
+          - emit: enriched
+      # Anything else → natural-language request; the server compiles it to
+      # NRQL, runs it, and returns results. Same defensive unwrap.
+      - text: '{{query}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: newrelic
+              tool: natural_language_to_nrql_query
+              args:
+                query: '{{query | sql_escape}}'
+            out: r
+          - transform: *nrql_to_rows
+            out: enriched
+          - emit: enriched
 
 actions:
-  - id: open
-    kind: url
+  - id: copy
+    kind: composer
     target: row
-    label: Open
-    icon: external_link
-    url_template: '{{row.url | default:row.html_url | default:row.htmlLink | default:''#''}}'
+    label: Copy result
+    insert: '{{row.detail}}'
 
 presentation:
   widget: list
-  title_field: timestamp
-  subtitle_field: appName
+  title_field: title
+  subtitle_field: value
   list_fields:
-    - timestamp
-    - appName
+    - title
     - value
   search_fields:
-    - timestamp
+    - title
+    - value
+    - detail
   searchable: true
+  filterable: false
   row_key_field: id
   right_widget:
     kind: card
     mode: selected_row
     bind:
-      title: '{{row.timestamp}}'
-      actions: [open]
+      title: '{{row.title}}'
+      subtitle: '{{row.value}}'
+      fields:
+        - { label: Result, value: '{{row.detail}}' }
+      actions:
+        - copy
 
 enabled: true
 provisioning_mode: public

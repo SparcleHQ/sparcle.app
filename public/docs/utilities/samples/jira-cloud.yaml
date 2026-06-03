@@ -122,6 +122,7 @@ scopes:
               // (($p.issues?) | if type == "array" then . else empty end)
               // ($p.nodes?)
               // ($p | if type == "array" then . else empty end)
+              // ($p | if (type == "object" and (has("key") or has("fields"))) then [.] else empty end)
               // [] ) as $nodes
           | ($nodes | map(
                 . as $iss
@@ -241,9 +242,10 @@ scopes:
           - call:
               kind: mcp
               mcp: mcp-atlassian-com
-              tool: getJiraIssue
+              tool: searchJiraIssuesUsingJql
               args:
-                issueIdOrKey: '{{key | upper}}'
+                jql: 'key = "{{key | upper}}"'
+                maxResults: '{{limit}}'
                 fields: *issue_fields
             out: r
           - transform: *issues_to_rows

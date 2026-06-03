@@ -18,6 +18,7 @@
   {"id": "incidents", "title": "Active Incidents", "chip": "=incidents", "description": "PagerDuty + Datadog + ServiceNow incidents in one list.", "emits": "Incident", "filename": "incidents.yaml"},
   {"id": "intercom", "title": "Intercom", "chip": "=intercom", "description": "My open conversations.", "emits": "Document", "filename": "intercom.yaml"},
   {"id": "jira", "title": "Jira Work", "chip": "=jira", "description": "Search Jira issues, browse sprints, and look up tickets by key.", "emits": "Issue", "filename": "jira.yaml"},
+  {"id": "jira-cloud", "title": "Jira Work (Cloud)", "chip": "=jira-cloud", "description": "Atlassian Cloud (official Remote MCP): text or JQL-token search, key lookup, and a rich detail preview.", "emits": "Issue", "filename": "jira-cloud.yaml"},
   {"id": "linear", "title": "Linear", "chip": "=linear", "description": "Search Linear issues across your teams.", "emits": "Issue", "filename": "linear.yaml"},
   {"id": "monday", "title": "Monday", "chip": "=monday", "description": "Items from boards I follow.", "emits": "Issue", "filename": "monday.yaml"},
   {"id": "newrelic", "title": "New Relic", "chip": "=newrelic", "description": "Run a NRQL query.", "emits": "Generic", "filename": "newrelic.yaml"},

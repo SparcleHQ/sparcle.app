@@ -1,0 +1,429 @@
+# =jira-cloud — Atlassian Cloud (official Remote MCP, mcp.atlassian.com/v1/mcp).
+#
+# Written against the wire shapes the official Atlassian Remote MCP returns,
+# which differ from generic/community Jira MCPs:
+#
+#   searchJiraIssuesUsingJql / getJiraIssue both return:
+#     { "issues": { "totalCount": N, "nodes": [ <issue>, ... ], "pageInfo": {...} } }
+#   i.e. the issue array is at `.issues.nodes` (NOT `.issues`), and each node
+#   carries a ready-made browse URL at `.webUrl`
+#   (https://<site>.atlassian.net/browse/KEY). The node's `.self` is an
+#   api.atlassian.com proxy URL and is NOT browsable, so we use `.webUrl`.
+#
+#   getVisibleJiraProjects returns { "values": [ {key,name,...}, ... ] }.
+#
+# cloudId: required on every Jira call, but NOT set here — the Bolt runtime
+#   auto-resolves it once per user (via getAccessibleAtlassianResources) and
+#   injects it for the recognized Atlassian MCP id below.
+#
+# Unbounded JQL is rejected by this server ("add a search restriction"), so
+# every scope's JQL carries a restriction (assignee / text / created).
+schema_version: 1
+id: jira-cloud
+chip: =jira-cloud
+title: Jira Work (Cloud)
+icon: jira
+description: Search Jira issues, browse sprints, and look up tickets by key (Atlassian Cloud).
+placeholder_examples:
+  - "ENG-123"
+  - "printer"
+  - "navigation light"
+  - "anything in a summary or description"
+emits: Issue
+# OAuth tokens live under the MCP id the Atlassian app connects as
+# (mcp-atlassian-com), so this profile's provider must match that id.
+auth_profile_ref: jira_cloud_user_obo
+
+requires:
+  - mcp: mcp-atlassian-com
+    version: ">=1"
+    tools:
+      - searchJiraIssuesUsingJql
+      - getJiraIssue
+      - getVisibleJiraProjects
+      - editJiraIssue
+      - atlassianUserInfo
+    scopes:
+      - read:jira-work
+      - write:jira-work
+
+# Launcher trigger semantics. confirm = the right default for an MCP/network
+# backend (don't hammer Atlassian on every keystroke). The empty default scope
+# (your open issues) always auto-loads; an exact issue key auto-fires; free-text
+# search runs on Enter. Switch mode to `auto` if you want live keystroke search.
+dispatch:
+  mode: confirm
+  confirm_label: 'Search Jira for "{{query}}"'
+  confirm_hint: Press Enter to search all of Jira
+  auto_when:
+    # Case-insensitive so `sl-1` auto-fires just like `SL-1`.
+    - regex: '^[A-Za-z][A-Za-z0-9]+-\d+$'
+      reason: Exact issue-key lookup is unambiguous and cheap.
+
+# Bare detection: when the user types a Jira-key-shaped token in the launcher
+# WITHOUT the =jira-cloud chip (e.g. `SL-1` / `sl-1`), the launcher recognizes
+# it and proposes a row that hands off into =jira-cloud with the key pre-filled
+# (Enter → direct ticket lookup). `network` kind = only surfaced when the
+# Atlassian app is connected.
+bare:
+  kind: network
+  chip_key: jira-cloud
+  patterns:
+    - regex: '^[A-Za-z][A-Za-z0-9]{1,9}-\d+$'
+      flags: ''
+      priority: 20
+
+scopes:
+  # DEFAULT: your open issues, most-recently-updated first, top ~{{limit}} (~20).
+  - id: my
+    label: My open issues
+    default: true
+    flow:
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: searchJiraIssuesUsingJql
+          args:
+            jql: 'assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC'
+            maxResults: '{{limit}}'
+            # Anchored field list (project + issuetype power the detail card),
+            # aliased on every other issue call below.
+            fields: &issue_fields
+              - summary
+              - status
+              - priority
+              - issuetype
+              - assignee
+              - reporter
+              - creator
+              - created
+              - updated
+              - duedate
+              - resolution
+              - labels
+              - components
+              - fixVersions
+              - votes
+              - watches
+              - parent
+              - project
+              - description
+              - subtasks
+        out: r
+      # Normalize whatever envelope the MCP produces ({issues:{nodes}}, flat
+      # {issues:[...]}, or a bare array — `?` suppresses index-on-array errors)
+      # into a flat, render-ready row. Flat top-level keys (statusName,
+      # assigneeName, …) are what the entity_preview card binds to ({{row.x}});
+      # the nested `fields` object backs the list presentation paths
+      # (fields.summary, …). Optional values default to "—".
+      - transform: &issues_to_rows |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.issues?.nodes?)
+              // (($p.issues?) | if type == "array" then . else empty end)
+              // ($p.nodes?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $nodes
+          | ($nodes | map(
+                . as $iss
+                | ($iss.fields // {}) as $f
+                | ($f.assignee // {}) as $a
+                | ($f.reporter // {}) as $rp
+                | ($f.creator // {}) as $cr
+                | ($f.status // {}) as $st
+                | ($st.statusCategory // {}) as $sc
+                | ($f.priority // {}) as $pr
+                | ($f.issuetype // {}) as $it
+                | ($f.project // {}) as $pj
+                | ($f.parent // {}) as $par
+                | ($f.resolution // {}) as $res
+                | ($a.avatarUrls // {}) as $av
+                | ($f.votes // {}) as $vt
+                | ($f.watches // {}) as $wt
+                | (($f.labels // []) | join(", ")) as $labels
+                | (($f.components // []) | map(.name) | join(", ")) as $comps
+                | (($f.fixVersions // []) | map(.name) | join(", ")) as $fixv
+                | ([ $iss.key, ($it.name // empty), ($st.name // empty),
+                     ($pr.name // empty), ($a.displayName // "Unassigned") ]
+                    | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | {
+                    key: ($iss.key // ""),
+                    _url: ($iss.webUrl // ""),
+                    summary: ($f.summary // "(no summary)"),
+                    subline: $subline,
+                    type: ($it.name // "—"),
+                    typeIcon: ($it.iconUrl // ""),
+                    statusName: ($st.name // "—"),
+                    statusCategory: ($sc.name // "—"),
+                    statusColor: ($sc.colorName // ""),
+                    priorityName: ($pr.name // "—"),
+                    priorityIcon: ($pr.iconUrl // ""),
+                    assigneeName: ($a.displayName // "Unassigned"),
+                    assigneeAvatar: ($a.avatarUrl // $av["48x48"] // ""),
+                    assigneeEmail: ($a.emailAddress // "—"),
+                    reporterName: ($rp.displayName // "—"),
+                    creatorName: ($cr.displayName // "—"),
+                    created: ($f.created // "—"),
+                    updated: ($f.updated // "—"),
+                    due: ($f.duedate // "—"),
+                    resolutionName: ($res.name // "—"),
+                    labels: (if $labels == "" then "—" else $labels end),
+                    components: (if $comps == "" then "—" else $comps end),
+                    fixVersions: (if $fixv == "" then "—" else $fixv end),
+                    votes: ($vt.votes // 0),
+                    watchers: ($wt.watchCount // 0),
+                    projectName: ($pj.name // "—"),
+                    projectKey: ($pj.key // ""),
+                    parentKey: ($par.key // ""),
+                    parentSummary: (($par.fields // {}).summary // ""),
+                    description: ((if ($f.description | type) == "string" then $f.description else "" end)
+                                  | if length > 280 then (.[0:277] + "…") else . end
+                                  | if . == "" then "No description" else . end),
+                    fields: {
+                      summary: ($f.summary // ""),
+                      status: { name: ($st.name // "") },
+                      priority: { name: ($pr.name // "") },
+                      assignee: {
+                        displayName: ($a.displayName // "Unassigned"),
+                        avatarUrl: ($a.avatarUrl // $av["48x48"] // "")
+                      },
+                      reporter: { displayName: ($rp.displayName // "") },
+                      updated: ($f.updated // "")
+                    }
+                  }
+              ))
+        out: enriched
+      - emit: enriched
+
+  # Every issue assigned to you, any status.
+  - id: all
+    label: All my issues
+    flow:
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: searchJiraIssuesUsingJql
+          args:
+            jql: 'assignee = currentUser() ORDER BY updated DESC'
+            maxResults: '{{limit}}'
+            fields: *issue_fields
+        out: r
+      - transform: *issues_to_rows
+        out: enriched
+      - emit: enriched
+
+  # Your active-sprint issues.
+  - id: sprint
+    label: Active sprint
+    flow:
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: searchJiraIssuesUsingJql
+          args:
+            jql: 'sprint in openSprints() AND assignee = currentUser() ORDER BY updated DESC'
+            maxResults: '{{limit}}'
+            fields: *issue_fields
+        out: r
+      - transform: *issues_to_rows
+        out: enriched
+      - emit: enriched
+
+  # Typing after the chip searches all of Jira.
+  - id: search
+    label: Search
+    match:
+      # `PROJ-123` / `proj-123` → jump straight to that ticket. Case-insensitive
+      # (Jira keys are uppercase, so we upper() before the lookup).
+      - regex: '^[A-Za-z][A-Za-z0-9]+-\d+$'
+        bind:
+          key: '{{match}}'
+        flow:
+          - call:
+              kind: mcp
+              mcp: mcp-atlassian-com
+              tool: getJiraIssue
+              args:
+                issueIdOrKey: '{{key | upper}}'
+                fields: *issue_fields
+            out: r
+          - transform: *issues_to_rows
+            out: enriched
+          - emit: enriched
+      # Any other text → compile the query into JQL, then search.
+      #
+      # Query grammar (all declarative; any app can adapt this jq for its own
+      # backend's filter syntax):
+      #   • bare words            → substring match (summary ~ "w*" OR text ~ "w*")
+      #   • status:open           → status = "open"
+      #   • assignee:me|none|name → assignee = currentUser() | is EMPTY | = "name"
+      #   • project:SL label:x priority:High type:Bug
+      #   • updated:-7d created:-30d (relative or YYYY-MM-DD; unquoted)
+      #   • sort:updated|created|priority|due  → ORDER BY <field> DESC
+      #   • a full JQL expression (contains =, ~, "in", "order by", currentUser())
+      #     is passed through verbatim — power-user escape hatch.
+      # The transform reads {{query}} and emits `q.jql`, which feeds the call.
+      - text: '{{query}}'
+        flow:
+          - transform: |
+              (.query // "") as $q
+              | if ($q | test("(?i)( = | != | ~ | in |order by|currentuser\\()")) then { jql: $q }
+                else
+                  ([ $q | scan("([A-Za-z]+):(\"[^\"]+\"|[^ ]+)") ]) as $pairs
+                  | (reduce $pairs[] as $p ({clauses:[], order:null};
+                      ($p[0]|ascii_downcase) as $k | ($p[1]|sub("^\"";"")|sub("\"$";"")) as $v |
+                      if   $k=="status"   then .clauses += ["status = \"\($v)\""]
+                      elif $k=="assignee" then (if ($v|ascii_downcase)=="me" then .clauses += ["assignee = currentUser()"]
+                                                elif ($v|ascii_downcase)=="none" then .clauses += ["assignee is EMPTY"]
+                                                else .clauses += ["assignee = \"\($v)\""] end)
+                      elif $k=="project"  then .clauses += ["project = \"\($v)\""]
+                      elif $k=="label"    then .clauses += ["labels = \"\($v)\""]
+                      elif $k=="priority" then .clauses += ["priority = \"\($v)\""]
+                      elif $k=="type"     then .clauses += ["issuetype = \"\($v)\""]
+                      elif ($k=="updated" or $k=="created")
+                        then .clauses += ["\($k) >= " + (if ($v|test("^-?[0-9]")) then $v else "\"\($v)\"" end)]
+                      elif $k=="sort"     then .order = "ORDER BY \($v|ascii_downcase) DESC"
+                      else . end)) as $acc
+                  | ($q | gsub("([A-Za-z]+):(\"[^\"]+\"|[^ ]+)";"") | gsub(" +";" ") | sub("^ +";"") | sub(" +$";"")) as $text
+                  | (if ($text|length)>0 then ["(summary ~ \"\($text)*\" OR text ~ \"\($text)*\")"] else [] end) as $tc
+                  | (($tc + $acc.clauses) | join(" AND ")) as $where
+                  # Always carry a restriction — this server rejects unbounded JQL.
+                  | (if ($where|length)>0 then $where else "created >= \"1970-01-01\"" end) as $base
+                  | { jql: ($base + (if $acc.order then " " + $acc.order else " ORDER BY updated DESC" end)) }
+                end
+            out: q
+          - call:
+              kind: mcp
+              mcp: mcp-atlassian-com
+              tool: searchJiraIssuesUsingJql
+              args:
+                jql: '{{q.jql}}'
+                maxResults: '{{limit}}'
+                fields: *issue_fields
+            out: r
+          - transform: *issues_to_rows
+            out: enriched
+          - emit: enriched
+
+filters:
+  - id: project
+    kind: enum
+    label: Project
+    apply: pre
+    maps_to: jql.project
+    populate:
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: getVisibleJiraProjects
+          args:
+            action: view
+        out: r
+      - transform: |
+          (.r.structured_content?.data? // .r.structured_content? // .r) // {}
+        out: projects
+      - emit: projects
+        path: /values
+
+  - id: status
+    kind: enum
+    label: Status
+    apply: pre
+    maps_to: jql.status
+    static:
+      - Open
+      - In Progress
+      - Done
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in Jira
+    icon: external_link
+    # Each row carries the full browse URL from the issue's webUrl.
+    url_template: '{{row._url}}'
+
+  - id: assign_me
+    kind: tool
+    target: row
+    label: Assign to me
+    confirm: 'Assign {{row.key}} to me?'
+    # Jira Cloud needs the assignee's Atlassian accountId — resolve the current
+    # user via atlassianUserInfo, then assign.
+    flow:
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: atlassianUserInfo
+        out: me
+      - transform: |
+          ((.me.structured_content?.data? // .me.structured_content? // .me) // {})
+          | { accountId: (.account_id // .accountId // "") }
+        out: u
+      - call:
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: editJiraIssue
+          args:
+            issueIdOrKey: '{{row.key}}'
+            fields:
+              assignee:
+                accountId: '{{u.accountId}}'
+        out: r
+      - emit: r
+
+presentation:
+  widget: list
+  # Flat keys (emitted by the transform) so list projection + card binds both
+  # resolve. subline packs key · type · status · priority · assignee.
+  title_field: summary
+  subtitle_field: subline
+  list_fields:
+    - key
+    - summary
+    - statusName
+    - priorityName
+    - assigneeName
+  search_fields:
+    - key
+    - summary
+    - statusName
+    - assigneeName
+  sort_field: updated
+  sort_order: desc
+  row_key_field: key
+  searchable: true
+  filterable: true
+  # Detail pane bound to the highlighted row. `kind: entity_preview` is the
+  # wide pane (media + facts + sticky max-3+overflow footer). All bind values
+  # use FLAT row keys ({{row.x}}); empty values arrive as "—" from the transform.
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: '{{row.summary}}'
+      subtitle: '{{row.key}} · {{row.statusName}}'
+      image_url: '{{row.assigneeAvatar}}'
+      fields:
+        - { label: Status,      value: '{{row.statusName}} · {{row.statusCategory}}' }
+        - { label: Type,        value: '{{row.type}}' }
+        - { label: Priority,    value: '{{row.priorityName}}' }
+        - { label: Assignee,    value: '{{row.assigneeName}}' }
+        - { label: Reporter,    value: '{{row.reporterName}}' }
+        - { label: Project,     value: '{{row.projectName}}' }
+        - { label: Components,  value: '{{row.components}}' }
+        - { label: Labels,      value: '{{row.labels}}' }
+        - { label: Due,         value: '{{row.due}}' }
+        - { label: Created,     value: '{{row.created}}' }
+        - { label: Updated,     value: '{{row.updated}}' }
+        - { label: Watchers,    value: '{{row.watchers}}' }
+        - { label: Description, value: '{{row.description}}' }
+      actions:
+        - open
+        - assign_me
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

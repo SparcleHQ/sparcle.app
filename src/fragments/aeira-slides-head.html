@@ -1,4 +1,7 @@
-<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Pinned (not @latest): avoids the unpkg redirect hop and version drift that
+     intermittently left control-bar icons unrendered. Render-blocking on purpose
+     so the inline lucide.createIcons() call in the body runs after this loads. -->
+<script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
 <style>
         /* Hide shared nav & footer on slides page — max specificity */
         html body .navbar,

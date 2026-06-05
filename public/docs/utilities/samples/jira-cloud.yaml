@@ -5,10 +5,13 @@
 #
 #   searchJiraIssuesUsingJql / getJiraIssue both return:
 #     { "issues": { "totalCount": N, "nodes": [ <issue>, ... ], "pageInfo": {...} } }
-#   i.e. the issue array is at `.issues.nodes` (NOT `.issues`), and EACH node
-#   carries a ready-made browse URL at `.webUrl`
-#   (https://<site>.atlassian.net/browse/KEY). The node's `.self` is now an
-#   api.atlassian.com proxy URL and is NOT browsable, so we use `.webUrl`.
+#   i.e. the issue array is at `.issues.nodes` (NOT `.issues`). Each node's
+#   `.self` is an api.atlassian.com proxy URL and is NOT browsable. A `.webUrl`
+#   IS sometimes present but is NOT reliable on the Remote MCP (production
+#   2026-06-05 returned `null`/missing), so we ALWAYS derive the browse URL
+#   from getAccessibleAtlassianResources()[0].url + "/browse/" + key. The
+#   resources call is also what the dispatcher uses for cloudId resolution
+#   (cached per user), so this is essentially free.
 #
 #   getVisibleJiraProjects returns { "values": [ {key,name,...}, ... ] }.
 #
@@ -84,6 +87,18 @@ scopes:
     label: My open issues
     default: true
     flow:
+      # Resolve the user's site URL ONCE per flow. getAccessibleAtlassianResources
+      # returns [{ id, url, scopes, avatarUrl }, ...] where `url` is the actual
+      # browsable site (e.g. https://your-site.atlassian.net). The bolt-api
+      # dispatcher already calls this tool (cached) for cloudId injection, so
+      # the second call is served from the MCP server's cache too; cost ~free.
+      # We thread the result through `out: site` and read it from the shared
+      # transform via $site.
+      - call: &resources_call
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: getAccessibleAtlassianResources
+        out: site
       - call:
           kind: mcp
           mcp: mcp-atlassian-com
@@ -114,9 +129,17 @@ scopes:
               - project
               - description
               - subtasks
+              # `comment` returns { comments: [...], total: N }. The latest
+              # comment lights up the entity_preview "Latest activity" line so
+              # the user gets context without leaving the launcher. Zero
+              # extra MCP calls — same getJiraIssue/searchJiraIssuesUsingJql
+              # round trip just carries the field.
+              - comment
         out: r
       # The issue array lives at `.issues.nodes`. We tolerate the legacy flat
-      # `.issues` array too. webUrl is taken straight off each node.
+      # `.issues` array too. The browse URL is built from the
+      # getAccessibleAtlassianResources site URL + "/browse/" + key — `.webUrl`
+      # on the node is unreliable on the Remote MCP.
       # Normalize whatever envelope the dispatcher/MCP produces
       # ({issues:{nodes}}, flat {issues:[...]}, or bare array — `?` suppresses
       # index-on-array errors) into a flat, render-ready row. Flat top-level
@@ -124,7 +147,27 @@ scopes:
       # binds to ({{row.x}}); the nested `fields` object backs the list
       # presentation paths (fields.summary, …). Optional values default to "—".
       - transform: &issues_to_rows |
+          # Flatten Atlassian Document Format → plain text. Comment bodies
+          # come back as ADF JSON ({type:doc, content:[{type:paragraph,
+          # content:[{type:text, text:"..."}]}, ...]}); we depth-first
+          # extract every text node and join with spaces. Safe on strings
+          # (pass through), null/missing (→ ""), and arbitrarily-nested
+          # marks (the recursion catches them).
+          def adfText:
+            if type == "string" then .
+            elif type == "object" then
+              (if .type == "text" then (.text // "")
+               elif (.content | type) == "array" then (.content | map(adfText) | join(" "))
+               else "" end)
+            elif type == "array" then (map(adfText) | join(" "))
+            else "" end;
           ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ((.site.structured_content?.data? // .site.structured_content? // .site) // {}) as $sp
+          | ( ($sp | if type == "array" then . else empty end)
+              // ($sp.resources?)
+              // ($sp.values?)
+              // [] ) as $res
+          | (($res[0] // {}) | (.url // "")) as $siteUrl
           | ( ($p.issues?.nodes?)
               // (($p.issues?) | if type == "array" then . else empty end)
               // ($p.nodes?)
@@ -144,6 +187,19 @@ scopes:
                 | ($f.project // {}) as $pj
                 | ($f.parent // {}) as $par
                 | ($f.resolution // {}) as $res
+                # Latest comment + author + when. `comment` field returns
+                # {comments:[…], total:N} with comments in chronological
+                # order (oldest first), so `last` is the newest. Author
+                # field on the official Remote MCP is .author.displayName
+                # (or .publicName for the older Cloud variants).
+                | (($f.comment // {}).comments // []) as $allComments
+                | (($allComments | last) // {}) as $lcmt
+                | ((($lcmt.body // null) | adfText)
+                    | gsub("[ \t\n\r]+"; " ")
+                    | gsub("^ +| +$"; "")) as $lcmtText
+                | ($lcmt.author.displayName // $lcmt.author.publicName // "") as $lcmtAuthor
+                | ($lcmt.created // "") as $lcmtAt
+                | (($f.comment // {}).total // ($allComments | length)) as $cmtCount
                 | ($a.avatarUrls // {}) as $av
                 | ($f.votes // {}) as $vt
                 | ($f.watches // {}) as $wt
@@ -153,9 +209,14 @@ scopes:
                 | ([ $iss.key, ($it.name // empty), ($st.name // empty),
                      ($pr.name // empty), ($a.displayName // "Unassigned") ]
                     | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+                | ($iss.key // "") as $key
+                | (if ($siteUrl | length) > 0 and ($key | length) > 0
+                     then ($siteUrl + "/browse/" + $key)
+                     else ($iss.webUrl // "") end) as $browseUrl
                 | {
-                    key: ($iss.key // ""),
-                    _url: ($iss.webUrl // ""),
+                    key: $key,
+                    _url: $browseUrl,
+                    _siteUrl: $siteUrl,
                     summary: ($f.summary // "(no summary)"),
                     subline: $subline,
                     type: ($it.name // "—"),
@@ -186,6 +247,16 @@ scopes:
                     description: ((if ($f.description | type) == "string" then $f.description else "" end)
                                   | if length > 280 then (.[0:277] + "…") else . end
                                   | if . == "" then "No description" else . end),
+                    # Latest-comment slot for the right_widget Activity row.
+                    # Empty string when no comments — UI shows "— No comments yet"
+                    # via the bind default. Body capped at 200 chars to keep
+                    # the preview compact.
+                    latestCommentBody: (if ($lcmtText | length) == 0 then ""
+                                        elif ($lcmtText | length) > 200 then ($lcmtText[0:197] + "…")
+                                        else $lcmtText end),
+                    latestCommentAuthor: (if $lcmtAuthor == "" then "—" else $lcmtAuthor end),
+                    latestCommentAt: $lcmtAt,
+                    commentCount: $cmtCount,
                     fields: {
                       summary: ($f.summary // ""),
                       status: { name: ($st.name // "") },
@@ -206,6 +277,8 @@ scopes:
   - id: all
     label: All my issues
     flow:
+      - call: *resources_call
+        out: site
       - call:
           kind: mcp
           mcp: mcp-atlassian-com
@@ -223,6 +296,8 @@ scopes:
   - id: sprint
     label: Active sprint
     flow:
+      - call: *resources_call
+        out: site
       - call:
           kind: mcp
           mcp: mcp-atlassian-com
@@ -250,6 +325,8 @@ scopes:
         bind:
           key: '{{match}}'
         flow:
+          - call: *resources_call
+            out: site
           - call:
               kind: mcp
               mcp: mcp-atlassian-com
@@ -282,6 +359,8 @@ scopes:
       # jq input), so its output `q.jql` flows into the call args below.
       - text: '{{query}}'
         flow:
+          - call: *resources_call
+            out: site
           - transform: |
               (.query // "") as $q
               | if ($q | test("(?i)( = | != | ~ | in |order by|currentuser\\()")) then { jql: $q }
@@ -363,7 +442,8 @@ actions:
     target: row
     label: Open in Jira
     icon: external_link
-    # Each row carries the full browse URL from the issue's webUrl.
+    # Each row carries the full browse URL (siteUrl + /browse/ + key), derived
+    # in the shared transform from getAccessibleAtlassianResources.
     url_template: '{{row._url}}'
 
   - id: assign_me
@@ -440,19 +520,24 @@ presentation:
       subtitle: '{{row.key}} · {{row.statusName}}'
       image_url: '{{row.assigneeAvatar}}'
       fields:
-        - { label: Status,      value: '{{row.statusName}} · {{row.statusCategory}}' }
-        - { label: Type,        value: '{{row.type}}' }
-        - { label: Priority,    value: '{{row.priorityName}}' }
-        - { label: Assignee,    value: '{{row.assigneeName}}' }
-        - { label: Reporter,    value: '{{row.reporterName}}' }
-        - { label: Project,     value: '{{row.projectName}}' }
-        - { label: Components,  value: '{{row.components}}' }
-        - { label: Labels,      value: '{{row.labels}}' }
-        - { label: Due,         value: '{{row.due}}' }
-        - { label: Created,     value: '{{row.created}}' }
-        - { label: Updated,     value: '{{row.updated}}' }
-        - { label: Watchers,    value: '{{row.watchers}}' }
-        - { label: Description, value: '{{row.description}}' }
+        - { label: Status,        value: '{{row.statusName}} · {{row.statusCategory}}' }
+        - { label: Type,          value: '{{row.type}}' }
+        - { label: Priority,      value: '{{row.priorityName}}' }
+        - { label: Assignee,      value: '{{row.assigneeName}}' }
+        - { label: Reporter,      value: '{{row.reporterName}}' }
+        - { label: Project,       value: '{{row.projectName}}' }
+        - { label: Components,    value: '{{row.components}}' }
+        - { label: Labels,        value: '{{row.labels}}' }
+        - { label: Due,           value: '{{row.due}}' }
+        - { label: Created,       value: '{{row.created}}' }
+        - { label: Updated,       value: '{{row.updated}}' }
+        - { label: Watchers,      value: '{{row.watchers}}' }
+        # Latest comment + author + when. When there are no comments the
+        # transform emits latestCommentBody="" — the bind-time fallback
+        # surfaces "— No comments yet" so the row never appears blank.
+        - label: Latest comment
+          value: '{{row.latestCommentAuthor}} · {{row.latestCommentAt | date:''rel''}}: {{row.latestCommentBody | default:''No comments yet''}}'
+        - { label: Description,   value: '{{row.description}}' }
       actions:
         - open
         - assign_me

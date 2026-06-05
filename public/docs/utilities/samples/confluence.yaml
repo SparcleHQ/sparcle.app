@@ -67,6 +67,22 @@ scopes:
     label: Recently updated
     default: true
     flow:
+      # Resolve the user's site URL once per flow (mirrors the jira-cloud
+      # manifest). getAccessibleAtlassianResources returns
+      # [{id, url, scopes, avatarUrl}, ...] where `url` is the actual
+      # browsable site root (e.g. https://your-site.atlassian.net). The
+      # bolt-api dispatcher already calls this tool for cloudId injection;
+      # the MCP server caches it so the second call is ~free. Threaded
+      # through `out: site` and read from the shared transform via $siteUrl.
+      # Without this, the CQL search response's `_links.base` field is
+      # frequently null on the Remote MCP and row.url comes back empty —
+      # Enter then has nothing to open and the launcher falls through to
+      # the "Not available from the preview yet" disabled-action tooltip.
+      - call: &resources_call
+          kind: mcp
+          mcp: mcp-atlassian-com
+          tool: getAccessibleAtlassianResources
+        out: site
       - call:
           kind: mcp
           mcp: mcp-atlassian-com
@@ -74,6 +90,10 @@ scopes:
           args:
             cql: 'type = page ORDER BY lastmodified DESC'
             limit: '{{limit}}'
+            # Expand the result's content so space{key,name} + version.when
+            # (ISO timestamp) come back — without this the Remote MCP omits the
+            # space name (card showed "—") and the modified date.
+            expand: 'content.space,content.version'
         out: r
       # Normalize whatever envelope the dispatcher/MCP produces
       # ({structured_content:{data:{results}}}, flat {results}, {nodes},
@@ -83,6 +103,13 @@ scopes:
       # list presentation. Optional values default to "—".
       - transform: &pages_to_rows |
           ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ((.site.structured_content?.data? // .site.structured_content? // .site) // {}) as $sp
+          | ( ($sp | if type == "array" then . else empty end)
+              // ($sp.resources?)
+              // ($sp.values?)
+              // [] ) as $resources
+          | (($resources[0] // {}) | (.url // "")) as $siteUrl
+          | ( if ($siteUrl | length) > 0 then ($siteUrl + "/wiki") else "" end ) as $siteWiki
           | ($p._links?.base? // "") as $base
           | ( ($p.results?)
               // ($p.nodes?)
@@ -97,25 +124,58 @@ scopes:
                 | ($c.space // $res.space // {}) as $sp
                 | ($res.user // $c.history?.createdBy // {}) as $usr
                 | ($c._links // {}) as $cl
-                | ( if (($cl.webui? // "") | length) > 0 then ($base + $cl.webui)
-                    elif (($res.url? // "") | length) > 0 then ($base + $res.url)
+                # URL precedence: search response's _links.base + content._links.webui
+                # (most accurate, includes the page title slug); fall back to
+                # $siteWiki ($siteUrl + "/wiki") + webui when the search
+                # response didn't include _links.base (Remote MCP often
+                # returns it null); final fallback to direct page-id route
+                # /wiki/spaces/{spaceKey}/pages/{pageId} which always works
+                # when we know the space + id.
+                | ( ($c.id // $res.id // "") ) as $pageId
+                | ( if (($base | length) > 0) and (($cl.webui? // "") | length) > 0
+                      then ($base + $cl.webui)
+                    elif ($siteWiki | length) > 0 and (($cl.webui? // "") | length) > 0
+                      then ($siteWiki + $cl.webui)
+                    elif ($siteWiki | length) > 0 and (($sp.key? // "") | length) > 0 and ($pageId | length) > 0
+                      then ($siteWiki + "/spaces/" + $sp.key + "/pages/" + $pageId)
+                    elif (($res.url? // "") | length) > 0 and ($base | length) > 0
+                      then ($base + $res.url)
                     else "" end ) as $url
-                | ( ($res.lastModified // $res.friendlyLastModified
-                     // $c.version?.when // $c.history?.lastUpdated?.when // "—") ) as $modified
+                # Prefer ISO timestamps (lastModified / version.when) so the
+                # client `date:'rel'` filter can parse them into "2d ago".
+                # friendlyLastModified ("2 days ago") is the last-resort fallback —
+                # the client date filter passes unparseable strings through as-is.
+                | ( ($res.lastModified
+                     // $c.version?.when // $c.history?.lastUpdated?.when
+                     // $res.friendlyLastModified // "—") ) as $modified
+                | (($c.type // "page")) as $ctype
+                # Humanize the content type for the card subtitle/facts.
+                | ( if $ctype == "page" then "Page"
+                    elif $ctype == "blogpost" then "Blog post"
+                    else (($ctype[0:1] | ascii_upcase) + $ctype[1:]) end ) as $typeLabel
+                # "Engineering (ENG)" — space name with key; "—" when absent.
+                | ( if (($sp.name // "") | length) > 0
+                      then ($sp.name + (if (($sp.key // "") | length) > 0
+                                        then " (" + $sp.key + ")" else "" end))
+                    else "—" end ) as $spaceLabel
                 | {
                     id: ($c.id // $res.id // ""),
                     title: ($c.title // $res.title // "(untitled)"),
                     url: $url,
-                    contentType: ($c.type // "page"),
+                    _url: $url,
+                    _siteUrl: $siteUrl,
+                    contentType: $ctype,
+                    typeLabel: $typeLabel,
                     spaceName: ($sp.name // "—"),
                     spaceKey: ($sp.key // ""),
+                    spaceLabel: $spaceLabel,
                     excerpt: ((($res.excerpt // "") | gsub("[\\n\\r]+"; " "))
                               | if length > 280 then (.[0:277] + "…") else . end
                               | if . == "" then "No preview" else . end),
                     authorName: ($usr.displayName // $usr.publicName // "—"),
                     authorAvatar: ($usr.profilePicture?.path // ""),
                     lastModified: $modified,
-                    subline: ([ ($sp.name // empty), ($c.type // empty) ]
+                    subline: ([ ($sp.name // empty), $typeLabel ]
                               | map(select(. != null and . != "")) | join("  ·  "))
                   }
               ))
@@ -133,6 +193,8 @@ scopes:
           space: '{{groups.space}}'
           rest: '{{groups.rest}}'
         flow:
+          - call: *resources_call
+            out: site
           # Build CQL declaratively so the space key and free text are escaped
           # for the CQL string literal (jql_escape is the CQL-compatible string
           # escaper here — both reject stray quotes/backslashes the same way).
@@ -153,6 +215,40 @@ scopes:
               args:
                 cql: '{{q.cql}}'
                 limit: '{{limit}}'
+                expand: 'content.space,content.version'
+            out: r
+          - transform: *pages_to_rows
+            out: enriched
+          - emit: enriched
+      # `author:user [free text]` — Confluence creator-scoped search. CQL
+      # `creator` accepts username (older sites) or accountId (modern); the
+      # MCP accepts either string and lets Atlassian resolve. We pass the
+      # raw value escaped for the CQL string literal.
+      - regex: '^author:(?P<author>[^\s]+)\s*(?P<rest>.*)$'
+        bind:
+          author: '{{groups.author}}'
+          rest: '{{groups.rest}}'
+        flow:
+          - call: *resources_call
+            out: site
+          - transform: |
+              (.groups.author // "") as $a
+              | (.groups.rest // "" | gsub("^\\s+|\\s+$"; "")) as $txt
+              | { cql: ("creator = \"" + ($a | gsub("\""; "\\\"")) + "\""
+                        + (if ($txt | length) > 0
+                           then " AND (title ~ \"" + ($txt | gsub("\""; "\\\"")) + "*\""
+                                + " OR text ~ \"" + ($txt | gsub("\""; "\\\"")) + "\")"
+                           else "" end)
+                        + " AND type = page ORDER BY lastmodified DESC") }
+            out: q
+          - call:
+              kind: mcp
+              mcp: mcp-atlassian-com
+              tool: searchConfluenceUsingCql
+              args:
+                cql: '{{q.cql}}'
+                limit: '{{limit}}'
+                expand: 'content.space,content.version'
             out: r
           - transform: *pages_to_rows
             out: enriched
@@ -161,6 +257,8 @@ scopes:
       # escaped for the CQL string literal via jql_escape.
       - text: '{{query}}'
         flow:
+          - call: *resources_call
+            out: site
           - call:
               kind: mcp
               mcp: mcp-atlassian-com
@@ -168,6 +266,7 @@ scopes:
               args:
                 cql: '(title ~ "{{query | jql_escape}}*" OR text ~ "{{query | jql_escape}}") AND type = page ORDER BY lastmodified DESC'
                 limit: '{{limit}}'
+                expand: 'content.space,content.version'
             out: r
           - transform: *pages_to_rows
             out: enriched
@@ -203,6 +302,12 @@ actions:
     # Each row carries the absolute browse URL built in the transform
     # (_links.base + content._links.webui).
     url_template: '{{row.url}}'
+  - id: copy
+    kind: clipboard
+    target: row
+    label: Copy link
+    icon: copy
+    value: '{{row.url}}'
 
 presentation:
   widget: list
@@ -231,21 +336,25 @@ presentation:
   # fall back to the standard card. All bind values use FLAT row keys
   # ({{row.x}}) so interpolation resolves without dotted-path support. Empty
   # values already arrive as "—" from the transform.
+  # Clean facts card: no hero image (the Confluence author avatar is a relative
+  # path that won't load, and a face is the wrong lead for a doc). subtitle packs
+  # the "Space · Type" breadcrumb; the facts list carries the freshness signals;
+  # the excerpt is the last, richest block. The Modified value uses the client
+  # `date:'rel'` filter (now supported) to render "2d ago".
   right_widget:
     kind: entity_preview
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.spaceName}}'
-      image_url: '{{row.authorAvatar}}'
+      subtitle: '{{row.subline}}'
       fields:
-        - { label: Space,    value: '{{row.spaceName}}' }
-        - { label: Type,     value: '{{row.contentType}}' }
+        - { label: Space,    value: '{{row.spaceLabel}}' }
         - { label: Author,   value: '{{row.authorName}}' }
-        - { label: Modified, value: '{{row.lastModified | date:''rel''}}' }
+        - { label: Updated,  value: '{{row.lastModified | date:''rel''}}' }
         - { label: Preview,  value: '{{row.excerpt}}' }
       actions:
         - open
+        - copy
 
 enabled: true
 provisioning_mode: public

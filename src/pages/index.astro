@@ -5,6 +5,7 @@ import CardGrid from "../components/ui/CardGrid.astro";
 import Card from "../components/ui/Card.astro";
 import CTAStrip from "../components/ui/CTAStrip.astro";
 import Pill from "../components/ui/Pill.astro";
+import PersonaStrip from "../components/marketing/PersonaStrip.astro";
 
 const proofs = [
   { metric: "100+",     label: "Enterprise Systems", body: "Via open MCP, not proprietary APIs." },
@@ -62,6 +63,9 @@ const proofs = [
               </div>
             </div>
           </div>
+
+          <!-- Bolt is for everyone — role decks; click to open full screen -->
+          <PersonaStrip />
 
           <div class="hero-video-full">
             <!-- Hero video: Bolt + Aeira combined story (1:40). Bigger than the

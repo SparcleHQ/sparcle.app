@@ -1,0 +1,193 @@
+---
+// PersonaStrip — an auto-sliding band of role decks. Click a card to zoom the
+// deck to a full-screen overlay; Esc returns to the page; the deck's own arrow
+// keys navigate. Decks are served same-origin from /decks/ (CSP-safe).
+const decks = [
+  { file: "persona-ciso",              icon: "🛡️", tag: "CISO · Security",     title: "AI without the breach" },
+  { file: "persona-cio",               icon: "🖥️", tag: "CIO · IT",            title: "Consolidate the sprawl" },
+  { file: "persona-cfo",               icon: "💰", tag: "CFO · Finance",        title: "Cut the AI bill" },
+  { file: "persona-compliance",        icon: "⚖️", tag: "Compliance · DPO",     title: "GDPR by architecture" },
+  { file: "persona-developer",         icon: "💻", tag: "Developer",            title: "One keystroke, 20 tabs closed" },
+  { file: "persona-finance-ops",       icon: "🧮", tag: "Finance · Ops",        title: "Catch the typo before the wire" },
+  { file: "persona-security-analyst",  icon: "📡", tag: "Security · SOC",       title: "Triage in a keystroke" },
+  { file: "persona-support",           icon: "🎧", tag: "Support · CS",         title: "Faster replies, fewer tabs" },
+  { file: "persona-knowledge-worker",  icon: "💼", tag: "Everyday",             title: "Your day, minus the friction" },
+];
+// duplicate the list so the marquee loops seamlessly
+const loop = [...decks, ...decks];
+---
+
+<section class="bfe" aria-label="Bolt is for everyone">
+  <div class="bfe-head">
+    <p class="bfe-eyebrow">Built for every role</p>
+    <h2 class="bfe-title">Bolt is for <span>everyone</span></h2>
+    <p class="bfe-sub">From the boardroom to the keyboard. Open the deck for your role — full screen, <kbd>Esc</kbd> to come back.</p>
+  </div>
+
+  <div class="bfe-strip-wrap">
+    <button class="bfe-arrow l" type="button" data-dir="l" aria-label="Scroll left">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="bfe-strip">
+      <div class="bfe-track">
+        {loop.map((d, i) => (
+          <button class="bfe-card" type="button" data-deck={`/decks/${d.file}.html`} aria-label={`Open the ${d.tag} deck`} tabindex={i < decks.length ? 0 : -1}>
+            <span class="bfe-ic">{d.icon}</span>
+            <span class="bfe-tag">{d.tag}</span>
+            <span class="bfe-name">{d.title}</span>
+            <span class="bfe-open">Open deck →</span>
+          </button>
+        ))}
+      </div>
+    </div>
+    <button class="bfe-arrow r" type="button" data-dir="r" aria-label="Scroll right">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+</section>
+
+<div class="bfe-overlay" id="bfeOverlay" hidden>
+  <button class="bfe-close" id="bfeClose" type="button" aria-label="Close deck (Esc)">&times;</button>
+  <iframe class="bfe-frame" id="bfeFrame" title="Bolt role deck" allow="fullscreen"></iframe>
+</div>
+
+<style>
+  /* Uses the site's real design tokens (from /css/variables.css) so it matches
+     the theme and follows light/dark automatically. */
+  .bfe { padding: clamp(1.75rem, 3.5vw, 3rem) 0; text-align: center; overflow: hidden; width: 100%; align-self: stretch; }
+  .bfe-head { max-width: 52ch; margin: 0 auto clamp(1.25rem, 2.5vw, 2rem); padding: 0 1.25rem; }
+  .bfe-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-primary); margin: 0 0 0.5rem; }
+  .bfe-title { font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin: 0; color: var(--text-heading); }
+  .bfe-title span { color: var(--brand-primary); }
+  .bfe-sub { color: var(--text-muted); font-size: clamp(0.95rem, 1.3vw, 1.08rem); margin: 0.6rem 0 0; line-height: 1.5; }
+  .bfe-sub kbd { font: inherit; font-size: 0.85em; background: var(--brand-primary-light); border: 1px solid var(--border-default); border-radius: 5px; padding: 0.05em 0.4em; color: var(--brand-primary); }
+
+  /* marquee strip (~190px tall cards) with faded edges. Auto-scrolls via JS;
+     pauses on hover and lets the mouse wheel / drag scroll it horizontally. */
+  .bfe-strip { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 0.5rem 0; -webkit-mask: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
+  .bfe-strip::-webkit-scrollbar { display: none; }
+  .bfe-strip.dragging { cursor: grabbing; }
+  .bfe-track { display: flex; gap: 1rem; width: max-content; padding: 0 0.5rem; }
+
+  /* left / right arrow buttons */
+  .bfe-strip-wrap { position: relative; }
+  .bfe-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3; width: 40px; height: 40px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; background: var(--bg-surface-solid); border: 1px solid var(--border-default); color: var(--text-heading); cursor: pointer; box-shadow: 0 6px 18px rgba(10, 22, 48, 0.16); transition: border-color 0.15s, color 0.15s, transform 0.15s; }
+  .bfe-arrow:hover { border-color: var(--brand-primary); color: var(--brand-primary); transform: translateY(-50%) scale(1.06); }
+  .bfe-arrow.l { left: 8px; }
+  .bfe-arrow.r { right: 8px; }
+  .bfe-arrow svg { width: 20px; height: 20px; }
+  @media (max-width: 640px) { .bfe-arrow { display: none; } }
+
+  .bfe-card { flex: 0 0 248px; height: 192px; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; text-align: left; background: var(--bg-surface-solid); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: 1.2rem 1.25rem; cursor: pointer; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s; position: relative; overflow: hidden; font-family: inherit; color: var(--text-body); box-shadow: 0 6px 20px rgba(10, 22, 48, 0.1); }
+  .bfe-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent)); opacity: 0.9; transition: opacity 0.18s; }
+  .bfe-card:hover { transform: translateY(-5px); border-color: var(--brand-primary); box-shadow: 0 22px 48px rgba(10, 22, 48, 0.22); }
+  .bfe-card:hover::before { opacity: 1; }
+  .bfe-card:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; }
+  .bfe-ic { display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 12px; font-size: 1.55rem; line-height: 1; background: var(--brand-primary-light); box-shadow: inset 0 0 0 1px var(--brand-primary-light); }
+  .bfe-tag { font-size: 0.67rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+  .bfe-name { font-size: 1.1rem; font-weight: 700; line-height: 1.18; color: var(--text-heading); flex: 1; }
+  .bfe-open { font-size: 0.8rem; font-weight: 600; color: var(--brand-primary); }
+
+  /* full-screen deck overlay (decks are dark by design) */
+  .bfe-overlay { position: fixed; inset: 0; z-index: 9999; background: #050810; display: flex; }
+  .bfe-overlay[hidden] { display: none; }
+  .bfe-frame { width: 100%; height: 100%; border: 0; }
+  .bfe-close { position: fixed; top: 14px; right: 18px; z-index: 10000; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(13, 20, 38, 0.85); color: #f1f5f9; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .bfe-close:hover { border-color: var(--brand-accent); color: var(--brand-accent); }
+
+  @media (max-width: 640px) { .bfe-card { flex-basis: 216px; height: 174px; } }
+</style>
+
+<script>
+  const overlay = document.getElementById("bfeOverlay") as HTMLElement | null;
+  const frame = document.getElementById("bfeFrame") as HTMLIFrameElement | null;
+  const closeBtn = document.getElementById("bfeClose");
+  if (overlay && frame) {
+    const openDeck = (src: string) => {
+      frame.src = src;
+      overlay.hidden = false;
+      document.body.style.overflow = "hidden";
+      setTimeout(() => { try { frame.contentWindow?.focus(); } catch (e) {} }, 80);
+    };
+    const closeDeck = () => {
+      overlay.hidden = true;
+      frame.src = "about:blank";
+      document.body.style.overflow = "";
+    };
+    document.querySelectorAll<HTMLElement>(".bfe-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const src = card.dataset.deck;
+        if (src) openDeck(src);
+      });
+    });
+    closeBtn?.addEventListener("click", closeDeck);
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeDeck(); });
+    // Esc also works while focus is inside the deck (same-origin iframe); the
+    // deck's own ← → handler keeps working for slide navigation.
+    frame.addEventListener("load", () => {
+      try {
+        frame.contentWindow?.addEventListener("keydown", (e: KeyboardEvent) => {
+          if (e.key === "Escape") closeDeck();
+        });
+      } catch (e) {}
+    });
+  }
+
+  // ── auto-scroll marquee that pauses on hover and yields to wheel/drag ───────
+  const strip = document.querySelector<HTMLElement>(".bfe-strip");
+  const track = strip?.querySelector<HTMLElement>(".bfe-track");
+  if (strip && track) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let overWrap = false, stepping = false, stepT: ReturnType<typeof setTimeout>;
+    const half = () => track.scrollWidth / 2; // cards are duplicated → loop at the midpoint
+    const wrap = () => {
+      const h = half();
+      if (strip.scrollLeft >= h) strip.scrollLeft -= h;
+      else if (strip.scrollLeft <= 0) strip.scrollLeft += h;
+    };
+    const tick = () => {
+      if (!reduce && !overWrap && !stepping) { strip.scrollLeft += 0.75; wrap(); }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    strip.addEventListener("mouseenter", () => { overWrap = true; });
+    strip.addEventListener("mouseleave", () => { overWrap = false; });
+
+    // mouse wheel (or trackpad) scrolls the strip horizontally while paused
+    strip.addEventListener("wheel", (e: WheelEvent) => {
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (d !== 0) { strip.scrollLeft += d; wrap(); e.preventDefault(); }
+    }, { passive: false });
+
+    // click-and-drag to scroll
+    let down = false, startX = 0, startLeft = 0, moved = 0;
+    strip.addEventListener("pointerdown", (e: PointerEvent) => {
+      down = true; moved = 0; startX = e.pageX; startLeft = strip.scrollLeft;
+      strip.classList.add("dragging");
+    });
+    strip.addEventListener("pointermove", (e: PointerEvent) => {
+      if (!down) return;
+      const dx = e.pageX - startX; moved += Math.abs(dx);
+      strip.scrollLeft = startLeft - dx; wrap();
+    });
+    const endDrag = () => { down = false; strip.classList.remove("dragging"); };
+    strip.addEventListener("pointerup", endDrag);
+    strip.addEventListener("pointerleave", endDrag);
+    // suppress the click that follows a real drag (so it doesn't open a deck)
+    strip.addEventListener("click", (e) => { if (moved > 6) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+    // left / right arrows step by one card; hovering them pauses auto-scroll
+    const step = () => (track.querySelector<HTMLElement>(".bfe-card")?.offsetWidth ?? 248) + 16;
+    document.querySelectorAll<HTMLElement>(".bfe-arrow").forEach((btn) => {
+      btn.addEventListener("mouseenter", () => { overWrap = true; });
+      btn.addEventListener("mouseleave", () => { overWrap = false; });
+      btn.addEventListener("click", () => {
+        wrap(); // normalize into [0, half) so the smooth scroll never hits a seam
+        const dir = btn.dataset.dir === "l" ? -1 : 1;
+        stepping = true; clearTimeout(stepT); stepT = setTimeout(() => { stepping = false; }, 550);
+        strip.scrollBy({ left: dir * step(), behavior: "smooth" });
+      });
+    });
+  }
+</script>

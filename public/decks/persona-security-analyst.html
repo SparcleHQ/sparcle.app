@@ -1,0 +1,429 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bolt for the SOC — the SuperAgent that triages at the speed of paste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="/decks/lucide.min.js"></script>
+<style>:root{--bg:#050810;--s:#0d1426;--s2:#111827;--b:rgba(37,99,235,.18);--a:#60a5fa;--a2:#2563eb;--g:#22d3a0;--am:#f59e0b;--r:#f87171;--t:#f1f5f9;--t2:#94a3b8;--t3:#64748b}
+[data-theme="light"]{--bg:#eef3ff;--s:#fff;--s2:#f6f9ff;--b:rgba(37,99,235,.2);--a:#2563eb;--a2:#1d4ed8;--g:#166534;--am:#b45309;--r:#b91c1c;--t:#0b1220;--t2:#334155;--t3:#475569}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);overflow:hidden}
+#deck{width:100vw;height:100dvh;display:flex;flex-direction:column;position:relative}
+#viewport{flex:1 1 0;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;padding:clamp(2rem,4.5vw,5rem) clamp(2rem,6vw,7rem);overflow:hidden;flex-direction:column;justify-content:center}
+.slide.active{display:flex}
+.grad{background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.s-content{width:100%;max-width:1180px;margin:0 auto}
+.s-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a);background:var(--b);border:1px solid var(--b);padding:.32rem .7rem;border-radius:999px;margin-bottom:1rem}
+.s-tag.t-net{color:var(--a2);background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.25)}
+.s-tag.t-llm{color:var(--am);background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25)}
+.s-h{font-size:clamp(1.7rem,3.6vw,3rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;margin-bottom:.7rem}
+.s-h.big{font-size:clamp(2.4rem,5.5vw,4.4rem)}
+.s-sub{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--t2);max-width:60ch;line-height:1.5}
+/* hero */
+.hero{align-items:center;text-align:center;background:radial-gradient(110% 80% at 50% 0%,rgba(37,99,235,.10),transparent 55%),radial-gradient(120% 90% at 50% 120%,rgba(96,165,250,.10),transparent 55%),var(--bg)}
+.hero-in{max-width:1000px}
+.hero-h{font-size:clamp(2.6rem,7vw,5.6rem);font-weight:800;line-height:1.02;letter-spacing:-.03em;margin-bottom:1rem}
+.hero-sub{font-size:clamp(1.05rem,2vw,1.6rem);color:var(--t2);line-height:1.45;max-width:46ch;margin:0 auto}
+.hero-stats{display:flex;gap:clamp(1.5rem,4vw,4rem);justify-content:center;margin-top:2.5rem}
+.hstat{display:flex;flex-direction:column;gap:.2rem}
+.hn{font-size:clamp(1.8rem,4vw,3.2rem);font-weight:800;background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hl{font-size:.8rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+/* section divider */
+.s-accent{align-items:center;text-align:center;background:radial-gradient(100% 80% at 50% 30%,rgba(37,99,235,.08),transparent 60%),var(--bg)}
+.s-accent.t-net{background:radial-gradient(100% 80% at 50% 30%,rgba(96,165,250,.10),transparent 60%),var(--bg)}
+.s-accent.t-llm{background:radial-gradient(100% 80% at 50% 30%,rgba(245,158,11,.10),transparent 60%),var(--bg)}
+.sec-mid{max-width:920px}
+.sec-count{margin-top:1.4rem;font-size:.85rem;color:var(--t3);font-weight:600;letter-spacing:.04em}
+/* feature slide — top-down: realistic wide Bolt view on top, details below */
+.slide.feat{padding-left:clamp(1.5rem,3vw,3rem);padding-right:clamp(1.5rem,3vw,3rem)}
+.s-content.feat-stack{display:flex;flex-direction:column;align-items:center;gap:clamp(1.1rem,2.4vw,2rem);max-width:1320px}
+.feat-top{width:100%;display:flex;justify-content:center}
+.feat-btm{width:100%;max-width:880px;text-align:center}
+.feat-btm .s-tag{margin-bottom:.6rem}
+.feat-btm .s-h{font-size:clamp(1.4rem,2.7vw,2.25rem);margin-bottom:.45rem}
+.feat-btm .s-sub{margin:0 auto}
+.feat-note{display:inline-flex;align-items:center;gap:.5rem;margin-top:.85rem;font-size:.92rem;color:var(--g);font-weight:600}
+.feat-note i{color:var(--g)}
+.feat-btm .badges{justify-content:center}
+/* ── .bolt-ui — faithful light replica of the live Bolt launcher (wide) ─────── */
+@keyframes bl{50%{opacity:0}}
+.bolt-ui{width:100%;max-width:1280px;background:#fbfcff;border:1px solid #d4ddee;border-radius:18px;padding:.55rem .7rem .7rem;box-shadow:0 30px 80px rgba(8,16,40,.5);color:#1a2233;font-size:1rem;text-align:left}
+.bsearch{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid #e3e8f2;border-radius:12px;padding:.72rem .85rem}
+.bmag{width:18px;height:18px;color:#8a97b0;flex:none}
+.bcv{width:14px;height:14px;color:#aab4c8;flex:none}
+.bq{flex:1;color:#1a2233;white-space:nowrap;overflow:hidden;font-size:1.05rem}
+.bq b{color:#3b5bdb;font-weight:700}
+.bcaret{width:2px;height:1.15em;background:#3b5bdb;animation:bl 1.1s steps(1) infinite;flex:none}
+.bx{width:28px;height:28px;border-radius:50%;background:#eef1f8;display:flex;align-items:center;justify-content:center;color:#8a97b0;flex:none}
+.bx i{width:15px;height:15px}
+.butilchip{display:inline-flex;align-items:center;gap:.32rem;font-family:ui-monospace,'SF Mono',monospace;font-size:.92rem;font-weight:600;color:#3b5bdb;background:#eef2fd;border:1px solid #d3defb;border-radius:9px;padding:.3rem .55rem;flex:none}
+.butilchip>i:first-child{width:13px;height:13px;color:#3b5bdb}
+.butilchip i[data-lucide=x]{width:13px;height:13px;opacity:.5;margin-left:.05rem}
+.bq .ph2{color:#9aa6bd}
+.butils{display:flex;flex-wrap:wrap;gap:.3rem 1.15rem;padding:.6rem .55rem .45rem;font-size:.82rem;color:#5b6680}
+.buc{display:inline-flex;align-items:center;gap:.32rem}
+.buc i{width:14px;height:14px;color:#7c89a3}
+.buc.plus{margin-left:auto;color:#aab4c8}
+.brecog{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.84rem;color:#5b6680;padding:.5rem .55rem;border-top:1px solid #eef1f8;white-space:nowrap;overflow:hidden}
+.brecog .rin{overflow:hidden;text-overflow:ellipsis}
+.brecog .rl{color:#2f6df0;font-weight:600}
+.brecog b{color:#16203a;font-weight:600}
+.bauto{color:#9aa6bd;font-weight:500;white-space:nowrap;flex:none}
+.bscopes{display:flex;align-items:center;gap:.5rem;padding:.5rem .35rem;overflow:hidden}
+.bsa{display:flex;width:26px;height:26px;align-items:center;justify-content:center;border:1px solid #e3e8f2;border-radius:50%;color:#b6c0d4;flex:none;background:#fff}
+.bsa i{width:13px;height:13px}
+.bsc{display:inline-flex;align-items:center;gap:.42rem;font-family:ui-monospace,'SF Mono',monospace;font-size:.85rem;font-weight:600;color:#445069;background:#fff;border:1px solid #e3e8f2;border-radius:999px;padding:.34rem .72rem;white-space:nowrap}
+.bsc.on{border-color:#cdd9fb;background:#f3f6ff}
+.bsc i{width:13px;height:13px;color:#7c89a3}
+.bsc b{font-family:'Inter',sans-serif;font-weight:700;color:#3b5bdb;background:#e3ecff;border-radius:6px;padding:.02rem .34rem;font-size:.74rem}
+.bresults{margin-top:.2rem}
+.brow{display:flex;align-items:center;gap:.7rem;padding:.7rem .6rem;border-radius:12px}
+.brow.lead{background:#eef2fd}
+.bind{width:3px;align-self:stretch;border-radius:3px;background:transparent;flex:none}
+.brow.lead .bind{background:#3b5bdb}
+.bi{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;background:#e6ecfd;border-radius:9px;color:#3b5bdb}
+.bi i{width:18px;height:18px}
+.bi.emoji{font-size:19px;background:#eef2fd}
+.bi .sw{width:19px;height:19px;border-radius:5px;display:block;border:1px solid rgba(0,0,0,.14)}
+.bbody{flex:1;min-width:0}
+.bstat{font-size:.63rem;font-weight:700;letter-spacing:.09em;color:#9aa6bd;text-transform:uppercase}
+.btitle{font-size:1.08rem;font-weight:700;color:#16203a;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsub{font-size:.82rem;color:#5b6680;font-family:ui-monospace,'SF Mono',monospace;margin-top:.08rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.readas{display:flex;align-items:center;flex-wrap:wrap;gap:.32rem;margin-top:.55rem}
+.ral{font-size:.62rem;font-weight:700;letter-spacing:.09em;color:#9aa6bd}
+.rap{display:inline-flex;align-items:center;gap:.26rem;font-size:.78rem;font-weight:600;color:#5b6680;background:#f1f4fa;border:1px solid #e3e8f2;border-radius:7px;padding:.22rem .5rem}
+.rap.on{color:#fff;background:#3b5bdb;border-color:#3b5bdb}
+.rap i{width:12px;height:12px;opacity:.8}
+.rap .ph{font-size:.76rem;font-weight:700;opacity:.7}
+.rap .pe{font-size:.9rem}
+.benter{display:flex;align-items:center;gap:.45rem;flex:none}
+.bek{font-size:.76rem;color:#5b6680;background:#fff;border:1px solid #e3e8f2;border-radius:7px;padding:.3rem .55rem;white-space:nowrap}
+.bcopy{display:flex;width:30px;height:30px;align-items:center;justify-content:center;border:1px solid #e3e8f2;border-radius:7px;color:#8a97b0;background:#fff}
+.bcopy i{width:15px;height:15px}
+.shot img{width:100%;max-width:1280px;border-radius:16px;border:1px solid var(--b);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+/* cards / content */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.4rem}
+.card{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:1.2rem}
+.card .ci{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--b);border-radius:10px;color:var(--a);margin-bottom:.7rem}
+.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.35rem}
+.card p{font-size:.88rem;color:var(--t2);line-height:1.45}
+.badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem}
+.badge{font-size:.7rem;font-weight:600;color:var(--t2);background:var(--s2);border:1px solid var(--b);padding:.18rem .5rem;border-radius:6px}
+.badge.g{color:var(--g);background:rgba(34,211,160,.1);border-color:rgba(34,211,160,.22)}
+/* control bar */
+#bar{height:50px;flex:none;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;background:var(--s);border-top:1px solid var(--b)}
+#bar button{display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:transparent;border:1px solid var(--b);border-radius:8px;color:var(--t2);cursor:pointer}
+#bar button:hover{color:var(--a);border-color:var(--a)}
+#bar button i{width:18px;height:18px}
+#counter{font-size:.82rem;font-weight:700;color:var(--t)}
+#deckname{flex:1;font-size:.78rem;color:var(--t3);text-align:center;letter-spacing:.04em}
+@media(max-width:820px){.feat-grid{grid-template-columns:1fr;gap:1.5rem}.feat-r{order:-1}}
+
+/* ── value-deck slide kinds (cover / split / metric / quote / checklist) ───── */
+.cover .s-tag.persona{font-size:.78rem}
+.cover-role{margin-top:1.6rem;font-size:.9rem;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
+/* split: today vs with-bolt */
+.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.5vw,2rem);margin-top:1.6rem;text-align:left}
+.spanel{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:clamp(1.2rem,2.2vw,1.8rem)}
+.spanel.today{border-color:rgba(248,113,113,.25)}
+.spanel.bolt{border-color:rgba(37,99,235,.3);background:linear-gradient(180deg,rgba(37,99,235,.06),transparent)}
+.sp-tag{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.7rem}
+.spanel.today .sp-tag{color:var(--r)}
+.spanel.bolt .sp-tag{color:var(--a)}
+.sp-h{font-size:clamp(1rem,1.6vw,1.2rem);font-weight:700;margin-bottom:.9rem;line-height:1.25}
+.sp-list{list-style:none;display:flex;flex-direction:column;gap:.7rem}
+.sp-list li{display:flex;align-items:flex-start;gap:.55rem;font-size:clamp(.85rem,1.15vw,.98rem);color:var(--t2);line-height:1.4}
+.spanel.today .sp-list li::before{content:"\00d7";color:var(--r);font-weight:800;flex:none}
+.spanel.bolt .sp-list li::before{content:"\2713";color:var(--a);font-weight:800;flex:none}
+/* metric band — the change in numbers */
+.metric-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(1.5rem,4vw,3.5rem);margin-top:2rem}
+.mstat{display:flex;flex-direction:column;gap:.3rem;max-width:16rem}
+.mn{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1;background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ml{font-size:1rem;font-weight:600;color:var(--t)}
+.md{font-size:.85rem;color:var(--t3);line-height:1.35}
+/* quote — the crux */
+.quote-slide .hero-in{max-width:1020px}
+.q-mark{font-size:5rem;line-height:.4;color:var(--a);opacity:.45;font-family:Georgia,serif}
+.q-text{font-size:clamp(1.5rem,3.3vw,2.7rem);font-weight:700;line-height:1.28;letter-spacing:-.01em;margin-top:.8rem}
+.q-by{margin-top:1.4rem;font-size:.85rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+/* checklist — governance pillars */
+.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1rem;margin-top:1.5rem;text-align:left}
+.check{display:flex;gap:.75rem;align-items:flex-start;background:var(--s);border:1px solid var(--b);border-radius:14px;padding:1.1rem}
+.check .ck{width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(34,211,160,.12);border-radius:8px;color:var(--g)}
+.check h4{font-size:1rem;font-weight:700;margin-bottom:.25rem}
+.check p{font-size:.86rem;color:var(--t2);line-height:1.4}
+</style></head>
+<body><div id="deck"><div id="viewport"><div class="slide hero dark-hero cover" data-title="Triage at [[the speed of paste]].">
+      <div class="hero-in">
+        <div class="s-tag persona">For the Security Analyst · SOC</div>
+        <h1 class="hero-h">Triage at <span class="grad">the speed of paste</span>.</h1>
+        <p class="hero-sub">Bolt is the AI SuperAgent for work. Every indicator that lands in your queue — a URL, an IP, a hash, a token — is one keystroke from <span class="grad">safe, identified, and ready to ticket</span>. No CyberChef tab. No defang website. No paste into a model you don’t trust.</p>
+        <div class="cover-role">A day in your shift, in 90 seconds</div>
+      </div></div>
+<div class="slide quote-slide hero dark-hero" data-title="The crux"><div class="hero-in">
+      <div class="q-mark">&#8220;</div>
+      <h2 class="q-text">An alert fires. You paste the indicator. Bolt <span class="grad">already knows what it is</span> — hash, CVE, IP, JWT — <span class="grad">defangs it, decodes it, identifies it</span> on-device, and the background watches you set up are already running. <span class="grad">One keystroke</span> instead of six tabs.</h2>
+      
+    </div></div>
+<div class="slide" data-title="[[Empower]]. [[Govern]]. [[Audit]]."><div class="s-content">
+      <div class="s-tag">Built for the AI age</div>
+      <h2 class="s-h"><span class="grad">Empower</span>. <span class="grad">Govern</span>. <span class="grad">Audit</span>.</h2>
+      <p class="s-sub">The three things an enterprise actually needs from AI at work — in one SuperAgent, not three products.</p>
+      <div class="grid"><div class="card"><div class="ci"><i data-lucide="zap" style="width:18px;height:18px"></i></div><h3>Empower</h3><p>Get work done in <span class="grad">one keystroke</span> — recognize, compute, search, ask, act across every system. ~95% answered on-device, at zero tokens.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>Govern</h3><p>PII masked at the model boundary, RBAC over systems and models, identity passthrough, and admin <span class="grad">kill-switches</span> on anything.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audit</h3><p>Every action recorded and offline-verifiable — answer “<span class="grad">what did AI touch?</span>” the instant you’re asked.</p></div></div>
+    </div></div>
+<div class="slide" data-title="Six tabs to triage one IOC. [[Or one keystroke.]]"><div class="s-content">
+      <div class="s-tag">The shift</div>
+      <h2 class="s-h">Six tabs to triage one IOC. <span class="grad">Or one keystroke.</span></h2>
+      
+      <div class="split-grid"><div class="spanel today"><div class="sp-tag">Triage today</div><h3 class="sp-h">A tab for every step</h3><ul class="sp-list"><li><span>VirusTotal + a defang site to make the URL safe to paste</span></li><li><span>CyberChef to base64 / hex / JWT decode the payload</span></li><li><span>A hash-ID site to name the digest, a separate tab for the CVE</span></li><li><span>Manual cert checks and breach lookups, when you remember to run them</span></li><li><span>Sensitive IOCs pasted into a consumer model you can’t vouch for</span></li></ul></div><div class="spanel bolt"><div class="sp-tag">With Bolt</div><h3 class="sp-h">One SuperAgent, on-device</h3><ul class="sp-list"><li><span>Paste the indicator — it’s recognized and defanged instantly</span></li><li><span>base64 / hex / JWT decoded locally, nothing leaves the box</span></li><li><span>Hash and CVE named on sight; flip the hash’s “Read as”</span></li><li><span>:cert :kev :crt :hibp watches run in the background for free</span></li><li><span>When you do ask AI, the IOC is masked at the boundary</span></li></ul></div></div>
+    </div></div>
+<div class="slide feat" data-title="Defang a URL or IP before it leaves your hands"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><span class="butilchip"><i data-lucide="shield" style="width:18px;height:18px"></i>=defang<i data-lucide="x"></i></span><span class="bq">http://evil-c2.example.com/payload</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="shield-off" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">hxxp://evil-c2[.]example[.]com/payload</div><div class="bsub">=defang · neutralized · safe to paste into a ticket</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Make an indicator safe to paste</div>
+      <h2 class="s-h">Defang a URL or IP before it leaves your hands</h2>
+      <p class="s-sub">Drop a live malicious URL or IP and Bolt hands you the defanged form — no auto-clicking, no accidental detonation — ready to paste into the incident ticket or the email to the team. Need it back? =refang reverses it.</p>
+      <div class="feat-note"><i data-lucide="shield-off" style="width:18px;height:18px"></i><span>Runs on-device. The indicator never touches a defang website.</span></div>
+      <div class="badges"><span class="badge">defang</span><span class="badge">ioc</span><span class="badge">offline</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="Recognize a hash the moment you paste it"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq">5d41402abc4b2a76b9719d911017c592</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="fingerprint" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">MD5 hash</div><div class="bsub">32 hex · identified instantly · ←/→ to flip how you read it</div><div class="readas"><span class="ral">READ AS</span><span class="rap on"><i data-lucide="hash" style="width:18px;height:18px"></i>MD5</span><span class="rap"><span class="pe">⊕</span>UUID</span></div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Name a digest on sight</div>
+      <h2 class="s-h">Recognize a hash the moment you paste it</h2>
+      <p class="s-sub">A bare hex blob in a log line is named on sight — Bolt recognizes it as MD5, SHA-1, SHA-256 or SHA-512 by length, no sigil needed — and the “Read as” switcher lets you flip a 32-hex value between MD5 and a compact UUID when you’re not sure which it is. Need it explicit? =hashid spells out the candidate types.</p>
+      <div class="feat-note"><i data-lucide="fingerprint" style="width:18px;height:18px"></i><span>No hash-identifier site. Pure local pattern + length.</span></div>
+      <div class="badges"><span class="badge">hash</span><span class="badge">hashid</span><span class="badge">switcher</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="Decode a JWT locally — never paste it on a site"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="key-round" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">JWT · alg HS256 · typ JWT</div><div class="bsub">recognized bare · header + claims decoded on-device</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Decode a token without trusting a website</div>
+      <h2 class="s-h">Decode a JWT locally — never paste it on a site</h2>
+      <p class="s-sub">Paste a JSON Web Token from a captured request — no sigil, Bolt recognizes the shape — and it decodes the header and claims right in front of you, so you can read the alg and subject without pasting a credential into jwt.io or any other site.</p>
+      <div class="feat-note"><i data-lucide="key-round" style="width:18px;height:18px"></i><span>A token is a secret. It decodes locally; it does not leave your machine.</span></div>
+      <div class="badges"><span class="badge">jwt</span><span class="badge">decode</span><span class="badge">offline</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="base64 / hex decode an obfuscated payload"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq">aHR0cDovL2V2aWwtYzIuZXhhbXBsZS5jb20vYg==</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="binary" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">http://evil-c2.example.com/b</div><div class="bsub">base64 recognized bare · decoded locally (then =defang it)</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Deobfuscate a payload on sight</div>
+      <h2 class="s-h">base64 / hex decode an obfuscated payload</h2>
+      <p class="s-sub">A base64 or hex blob from a phishing lure or a script is recognized on sight — no sigil — and decodes in place, revealing the URL or command hiding inside. Chain it: decode, then =defang the result before it goes in the ticket. No CyberChef round-trip.</p>
+      <div class="feat-note"><i data-lucide="binary" style="width:18px;height:18px"></i><span>Local decode. The payload never leaves the box.</span></div>
+      <div class="badges"><span class="badge">base64</span><span class="badge">hex</span><span class="badge">deobfuscate</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="Spot a CVE on sight — Tab to the advisory"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq">CVE-2024-3094</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="shield-alert" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">CVE-2024-3094</div><div class="bsub">recognized bare · vulnerability identifier · Tab to open the advisory</div></div>
+    <div class="benter"><span class="bek">Enter open advisory</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Recognize a vulnerability ID</div>
+      <h2 class="s-h">Spot a CVE on sight — Tab to the advisory</h2>
+      <p class="s-sub">A CVE id in an alert or a vendor email is recognized instantly as a vulnerability reference — typed bare, no sigil — and Tab opens the advisory page, so you stop copying it into a search bar just to find out what it is.</p>
+      <div class="feat-note"><i data-lucide="shield-alert" style="width:18px;height:18px"></i><span>Offline recognition. Bolt opens the advisory; it does not fetch a live severity score for you.</span></div>
+      <div class="badges"><span class="badge">cve</span><span class="badge">recognize</span><span class="badge">link</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="IPv4, IPv6, CIDR, ASN, MAC — named the instant you paste"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq">10.0.0.0/24</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="network" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">10.0.0.0/24 · 256 addresses</div><div class="bsub">IPv4 CIDR · private network — no subnet calculator</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div><div class="brow">
+    <span class="bind"></span><span class="bi"><i data-lucide="network" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">AS15169 · valid range</div><div class="bsub">Autonomous System Number — reason about ownership at a glance</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div><div class="brow">
+    <span class="bind"></span><span class="bi"><i data-lucide="network" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">INSTANT</div><div class="btitle">00:1A:2B:3C:4D:5E · MAC-48</div><div class="bsub">hardware address · local/global + unicast bits read</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Read network indicators on sight</div>
+      <h2 class="s-h">IPv4, IPv6, CIDR, ASN, MAC — named the instant you paste</h2>
+      <p class="s-sub">Every network shape that lands in your queue — an IPv4 or IPv6, a CIDR range, an ASN, a MAC address — is recognized and classified on sight, typed bare with no sigil. Private vs public, how many hosts a block covers, whose AS it is. The cheat sheet you used to keep is built in.</p>
+      <div class="feat-note"><i data-lucide="network" style="width:18px;height:18px"></i><span>All offline. No subnet calc, no whois tab just to identify it.</span></div>
+      <div class="badges"><span class="badge">ipv4</span><span class="badge">ipv6</span><span class="badge">cidr</span><span class="badge">asn</span><span class="badge">mac</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="Spot — and redact — a leaked secret in seconds"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><span class="butilchip"><i data-lucide="eye-off" style="width:18px;height:18px"></i>=secret<i data-lucide="x"></i></span><span class="bq">sk_live_xxxxREDACTEDxxxx</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="shield-x" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">SENSITIVE</div><div class="btitle">Stripe secret key · detected</div><div class="bsub">=secret · flagged sensitive · masked for sharing</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Catch a leaked secret</div>
+      <h2 class="s-h">Spot — and redact — a leaked secret in seconds</h2>
+      <p class="s-sub">Run =secret over a blob from a leaked config or a pastebin and Bolt names the secret it contains — Stripe key, AWS key, token — and flags it sensitive so you can hand off a masked, shareable version instead of the live credential. =pem inspects a leaked certificate or key the same way.</p>
+      <div class="feat-note"><i data-lucide="shield-x" style="width:18px;height:18px"></i><span>Detected and masked on-device. The real value never leaves your machine.</span></div>
+      <div class="badges"><span class="badge">secret</span><span class="badge">pem</span><span class="badge">redact</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="Set a watch once — it runs in the background"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq"><b>:</b>:cert sparcle.app</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="shield-check" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">WATCHING</div><div class="btitle">:cert sparcle.app — TLS cert expiry</div><div class="bsub">native watcher · surfaces in Bolt before it expires</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div><div class="brow">
+    <span class="bind"></span><span class="bi"><i data-lucide="shield-alert" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">WATCHING</div><div class="btitle">:kev vendor:cisco — CISA KEV additions</div><div class="bsub">know when a vendor lands on the Known-Exploited list</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div><div class="brow">
+    <span class="bind"></span><span class="bi"><i data-lucide="badge-alert" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">WATCHING</div><div class="btitle">:crt acme.com · :hibp you@corp.com</div><div class="bsub">new certs in the CT log · breach exposure for an address</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-off">Background coverage, for free</div>
+      <h2 class="s-h">Set a watch once — it runs in the background</h2>
+      <p class="s-sub">Set a watch once with the `:` sigil and a native checker runs it in the background — TLS cert expiry (:cert), CISA KEV additions (:kev), new certificates in the transparency log (:crt), breach exposure (:hibp), domain expiry (:domain), file changes (:file). They surface in Bolt when something moves, so the slow-burn signals stop slipping through.</p>
+      <div class="feat-note"><i data-lucide="radar" style="width:18px;height:18px"></i><span>Six native security watches, running on your machine for free.</span></div>
+      <div class="badges"><span class="badge">watches</span><span class="badge">cert</span><span class="badge">kev</span><span class="badge">crt</span><span class="badge">hibp</span></div>
+    </div>
+  </div></div>
+<div class="slide feat" data-title="Ask a security question — get a cited answer"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><span class="butilchip"><i data-lucide="sparkles" style="width:18px;height:18px"></i>=ask<i data-lucide="x"></i></span><span class="bq">what is the impact of the xz-utils backdoor</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="message-square-quote" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">CITED</div><div class="btitle">Answer with sources [1][2]</div><div class="bsub">=ask · web-searched · footnoted so you can verify</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-llm">Ask, with receipts</div>
+      <h2 class="s-h">Ask a security question — get a cited answer</h2>
+      <p class="s-sub">When you do need to reach out, =ask runs a real web search and gives you a short answer with numbered [1][2] citations you can open — so you can sanity-check a claim or get context on a fresh threat without leaving Bolt, and without taking the answer on faith.</p>
+      <div class="feat-note"><i data-lucide="message-square-quote" style="width:18px;height:18px"></i><span>Cited and verifiable. The answer cache is shared, so the second analyst gets it instantly.</span></div>
+      <div class="badges"><span class="badge">ask</span><span class="badge">cited</span><span class="badge">verify</span></div>
+    </div>
+  </div></div>
+<div class="slide s-accent" data-title="Indicators triaged faster. [[Tools collapsed.]] Watches free."><div class="s-content sec-mid">
+      <div class="s-tag">What changes on your shift</div>
+      <h2 class="s-h big">Indicators triaged faster. <span class="grad">Tools collapsed.</span> Watches free.</h2>
+      
+      <div class="metric-grid"><div class="mstat"><span class="mn">1</span><span class="ml">keystroke to defang, decode, identify</span><span class="md">recognized on-device the instant you paste</span></div><div class="mstat"><span class="mn">6+</span><span class="ml">browser tabs collapsed into one surface</span><span class="md">defang site · CyberChef · hash-ID · CVE · whois · cert check</span></div><div class="mstat"><span class="mn">6</span><span class="ml">native security watches running for free</span><span class="md">:cert :kev :crt :hibp :domain :file — on your machine</span></div></div>
+    </div></div>
+<div class="slide" data-title="You handle the most sensitive IOCs. [[It stays on-device.]]"><div class="s-content">
+      <div class="s-tag">Why this is safe to live in</div>
+      <h2 class="s-h">You handle the most sensitive IOCs. <span class="grad">It stays on-device.</span></h2>
+      <p class="s-sub">Defang, decode, hash-ID, secret detection, cert and breach watches — all run locally, with <span class="grad">zero network and zero tokens</span>. The indicator you’re triaging never leaves your machine just to be understood.</p>
+      <div class="grid"><div class="card"><div class="ci"><i data-lucide="cpu" style="width:18px;height:18px"></i></div><h3>On-device by default</h3><p>Recognition, decoding and defanging are pure local logic — <span class="grad">no egress, no model, no waiting</span>. The fastest answer is the one that never left the box.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>Masked when you do ask AI</h3><p>If you escalate an IOC to AI, sensitive values are <span class="grad">tokenized before the model sees them</span> and restored in the answer — automatically, every time.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Governed, and provable</h3><p>On the governed server, every AI action is <span class="grad">masked, gated and audited</span> — so the analyst’s speed never becomes the security team’s exposure.</p></div></div>
+    </div></div>
+<div class="slide feat" data-title="Your secrets never reach the model"><div class="s-content feat-stack">
+    <div class="feat-top"><div class="bolt-ui">
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq"><b>/</b>ai summarize this renewal for Acme Corp — contact jane@acme.com</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
+    
+    <div class="bresults"><div class="brow lead">
+    <span class="bind"></span><span class="bi"><i data-lucide="lock" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">MASKED</div><div class="btitle">Model sees: “summarize this renewal for «ORG» — «EMAIL»”</div><div class="bsub">names · emails · cards · keys · IDs tokenized before the prompt</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div><div class="brow">
+    <span class="bind"></span><span class="bi"><i data-lucide="shield-check" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">RESTORED</div><div class="btitle">You see: “summarize this renewal for Acme Corp — jane@acme.com”</div><div class="bsub">the answer is restored with the real values, locally</div></div>
+    <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
+  </div></div>
+  </div></div>
+    <div class="feat-btm">
+      <div class="s-tag t-llm">Governed AI</div>
+      <h2 class="s-h">Your secrets never reach the model</h2>
+      <p class="s-sub">Use AI on real work without leaking it. Sensitive values are masked before anything goes to the model and restored in the reply — automatically, every time.</p>
+      <div class="feat-note"><i data-lucide="zap" style="width:18px;height:18px"></i><span>The tool sees the real value. The model never does.</span></div>
+      <div class="badges"><span class="badge">privacy</span><span class="badge">governed</span><span class="badge">safe</span></div>
+    </div>
+  </div></div>
+<div class="slide" data-title="Put it in [[every]] hand for free — keep [[every]] action under control"><div class="s-content">
+      <div class="s-tag">Free, but governed</div>
+      <h2 class="s-h">Put it in <span class="grad">every</span> hand for free — keep <span class="grad">every</span> action under control</h2>
+      <p class="s-sub">The SuperAgent is free to deploy. The governed server is the part you don’t want to skip — it’s the difference between an AI tool and an AI tool your security team can sign off on.</p>
+      <div class="split-grid"><div class="spanel today"><div class="sp-tag">Free client</div><h3 class="sp-h">Productivity for everyone</h3><ul class="sp-list"><li><span>Runs on every desktop, no per-seat AI bill</span></li><li><span>Hundreds of instant answers with zero tokens</span></li><li><span>The whole work surface — recognize, compute, search, ask</span></li><li><span>Nothing to lose by rolling it out widely</span></li></ul></div><div class="spanel bolt"><div class="sp-tag">Governed server</div><h3 class="sp-h">Control your security team will sign off on</h3><ul class="sp-list"><li><span>Every AI prompt masked at the boundary</span></li><li><span>RBAC over systems, models, tools and skills</span></li><li><span>Every action in a tamper-evident audit log</span></li><li><span>Data stays in your infrastructure — never ours</span></li></ul></div></div>
+    </div></div>
+<div class="slide hero dark-hero" data-title="Put it on every SOC desk. [[Triage gets faster today.]]">
+      <div class="hero-in">
+        <div class="s-tag">The ask</div>
+        <h1 class="hero-h">Put it on every SOC desk. <span class="grad">Triage gets faster today.</span></h1>
+        <p class="hero-sub">Bolt is free to roll out across the team — defang, decode, hash-ID, CVE recognition and the native watches all work on day one. Turn on the governed server when you’re ready, and every IOC you escalate to AI is masked, gated and audited.</p>
+        <div class="hero-stats"><div class="hstat"><span class="hn">Free</span><span class="hl">the SuperAgent on every analyst’s desk</span></div><div class="hstat"><span class="hn">$0</span><span class="hl">tokens for on-device triage</span></div><div class="hstat"><span class="hn">1</span><span class="hl">keystroke from paste to ticket</span></div></div>
+      </div></div></div>
+<div id="bar"><button id="prev" aria-label="prev"><i data-lucide="chevron-left"></i></button>
+<span id="counter">1 / 18</span>
+<span id="deckname">Bolt for the SOC — the SuperAgent that triages at the speed of paste</span>
+<button id="theme" aria-label="theme"><i data-lucide="sun"></i></button>
+<button id="next" aria-label="next"><i data-lucide="chevron-right"></i></button></div></div>
+<script>
+const S=document.querySelectorAll('.slide'),N=S.length;let i=0;
+const idx=[{t:"Triage at [[the speed of paste]].",i:0},{t:"The crux",i:1},{t:"[[Empower]]. [[Govern]]. [[Audit]].",i:2},{t:"Six tabs to triage one IOC. [[Or one keystroke.]]",i:3},{t:"Defang a URL or IP before it leaves your hands",i:4},{t:"Recognize a hash the moment you paste it",i:5},{t:"Decode a JWT locally — never paste it on a site",i:6},{t:"base64 / hex decode an obfuscated payload",i:7},{t:"Spot a CVE on sight — Tab to the advisory",i:8},{t:"IPv4, IPv6, CIDR, ASN, MAC — named the instant you paste",i:9},{t:"Spot — and redact — a leaked secret in seconds",i:10},{t:"Set a watch once — it runs in the background",i:11},{t:"Ask a security question — get a cited answer",i:12},{t:"Indicators triaged faster. [[Tools collapsed.]] Watches free.",i:13},{t:"You handle the most sensitive IOCs. [[It stays on-device.]]",i:14},{t:"Your secrets never reach the model",i:15},{t:"Put it in [[every]] hand for free — keep [[every]] action under control",i:16},{t:"Put it on every SOC desk. [[Triage gets faster today.]]",i:17}];
+function show(n){i=Math.max(0,Math.min(N-1,n));S.forEach((s,k)=>s.classList.toggle('active',k===i));document.getElementById('counter').textContent=(i+1)+' / '+N;location.hash='#'+i;}
+document.getElementById('next').onclick=()=>show(i+1);document.getElementById('prev').onclick=()=>show(i-1);
+document.getElementById('theme').onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';};
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')show(i+1);else if(e.key==='ArrowLeft')show(i-1);else if(e.key==='Home')show(0);else if(e.key==='End')show(N-1);});
+show(location.hash?parseInt(location.hash.slice(1))||0:0);
+if(window.lucide)lucide.createIcons();
+</script></body></html>

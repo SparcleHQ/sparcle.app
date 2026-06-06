@@ -88,8 +88,8 @@ const loop = [...decks, ...decks];
   .bfe-name { font-size: 1.1rem; font-weight: 700; line-height: 1.18; color: var(--text-heading); flex: 1; }
   .bfe-open { font-size: 0.8rem; font-weight: 600; color: var(--brand-primary); }
 
-  /* overlay: just a subtle dim; the blur lives on .slide inside the iframe */
-  .bfe-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: clamp(10px, 1.6vh, 22px); background: rgba(0, 0, 15, 0.18); }
+  /* overlay blurs the website; deck floats as a glass panel on that blurred surface */
+  .bfe-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: clamp(10px, 1.6vh, 22px); background: rgba(5, 8, 20, 0.52); -webkit-backdrop-filter: blur(24px) saturate(1.2); backdrop-filter: blur(24px) saturate(1.2); }
   .bfe-overlay[hidden] { display: none; }
   .bfe-frame { width: 100%; height: 100%; border: 0; border-radius: 14px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5); background: transparent; color-scheme: normal; }
   .bfe-close { position: fixed; top: 14px; right: 18px; z-index: 10000; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(13, 20, 38, 0.85); color: #f1f5f9; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -133,11 +133,11 @@ const loop = [...decks, ...decks];
           const st = doc.createElement("style");
           st.id = "bfe-frost";
           st.textContent =
-            'html,body,#deck,#viewport{background:transparent!important}' +
-            '.slide{-webkit-backdrop-filter:blur(22px) saturate(1.15);backdrop-filter:blur(22px) saturate(1.15);background:rgba(10,14,26,.80)!important}' +
-            'html[data-theme="light"] .slide{background:rgba(245,248,255,.80)!important}' +
-            '#bar{background:rgba(8,12,22,.90)!important;border-top:1px solid rgba(128,128,180,.18)!important}' +
-            'html[data-theme="light"] #bar{background:rgba(230,234,248,.92)!important}';
+            'html,body,#deck,#viewport,.hero,.s-accent,.dark-hero{background:transparent!important}' +
+            '.slide{background:rgba(248,251,255,.88)!important}' +
+            'html[data-theme="dark"] .slide{background:rgba(10,14,26,.88)!important}' +
+            '#bar{background:rgba(8,12,22,.92)!important;border-top:1px solid rgba(255,255,255,.08)!important}' +
+            'html[data-theme="light"] #bar{background:rgba(230,234,248,.95)!important}';
           doc.head.appendChild(st);
         }
         // keep the page URL in sync with the slide as the user navigates inside the deck

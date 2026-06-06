@@ -1,7 +1,4 @@
 ---
-// PersonaStrip — an auto-sliding band of role decks. Click a card to zoom the
-// deck to a full-screen overlay; Esc returns to the page; the deck's own arrow
-// keys navigate. Decks are served same-origin from /decks/ (CSP-safe).
 const decks = [
   { file: "persona-ciso",              icon: "🛡️", tag: "CISO · Security",     title: "AI without the breach" },
   { file: "persona-cio",               icon: "🖥️", tag: "CIO · IT",            title: "Consolidate the sprawl" },
@@ -13,7 +10,6 @@ const decks = [
   { file: "persona-support",           icon: "🎧", tag: "Support · CS",         title: "Faster replies, fewer tabs" },
   { file: "persona-knowledge-worker",  icon: "💼", tag: "Everyday",             title: "Your day, minus the friction" },
 ];
-// duplicate the list so the marquee loops seamlessly
 const loop = [...decks, ...decks];
 ---
 
@@ -46,14 +42,14 @@ const loop = [...decks, ...decks];
   </div>
 </section>
 
+<!-- overlay backdrop blurs the live website; deck host is a real DOM node so
+     backdrop-filter actually reaches through — no iframe compositing boundary -->
 <div class="bfe-overlay" id="bfeOverlay" hidden>
   <button class="bfe-close" id="bfeClose" type="button" aria-label="Close deck (Esc)">&times;</button>
-  <iframe class="bfe-frame" id="bfeFrame" title="Bolt role deck" allow="fullscreen" allowtransparency="true"></iframe>
+  <div class="bfe-deck-host" id="bfeDeckHost"></div>
 </div>
 
 <style>
-  /* Uses the site's real design tokens (from /css/variables.css) so it matches
-     the theme and follows light/dark automatically. */
   .bfe { padding: clamp(1.75rem, 3.5vw, 3rem) 0; text-align: center; overflow: hidden; width: 100%; align-self: stretch; }
   .bfe-head { max-width: 52ch; margin: 0 auto clamp(1.25rem, 2.5vw, 2rem); padding: 0 1.25rem; }
   .bfe-eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-primary); margin: 0 0 0.5rem; }
@@ -62,14 +58,11 @@ const loop = [...decks, ...decks];
   .bfe-sub { color: var(--text-muted); font-size: clamp(0.95rem, 1.3vw, 1.08rem); margin: 0.6rem 0 0; line-height: 1.5; }
   .bfe-sub kbd { font: inherit; font-size: 0.85em; background: var(--brand-primary-light); border: 1px solid var(--border-default); border-radius: 5px; padding: 0.05em 0.4em; color: var(--brand-primary); }
 
-  /* marquee strip (~190px tall cards) with faded edges. Auto-scrolls via JS;
-     pauses on hover and lets the mouse wheel / drag scroll it horizontally. */
   .bfe-strip { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 0.5rem 0; -webkit-mask: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
   .bfe-strip::-webkit-scrollbar { display: none; }
   .bfe-strip.dragging { cursor: grabbing; }
   .bfe-track { display: flex; gap: 1rem; width: max-content; padding: 0 0.5rem; }
 
-  /* left / right arrow buttons */
   .bfe-strip-wrap { position: relative; }
   .bfe-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3; width: 40px; height: 40px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; background: var(--bg-surface-solid); border: 1px solid var(--border-default); color: var(--text-heading); cursor: pointer; box-shadow: 0 6px 18px rgba(10, 22, 48, 0.16); transition: border-color 0.15s, color 0.15s, transform 0.15s; }
   .bfe-arrow:hover { border-color: var(--brand-primary); color: var(--brand-primary); transform: translateY(-50%) scale(1.06); }
@@ -88,90 +81,243 @@ const loop = [...decks, ...decks];
   .bfe-name { font-size: 1.1rem; font-weight: 700; line-height: 1.18; color: var(--text-heading); flex: 1; }
   .bfe-open { font-size: 0.8rem; font-weight: 600; color: var(--brand-primary); }
 
-  /* overlay blurs the website; deck is a semi-transparent glass panel on that surface */
-  .bfe-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: clamp(10px, 1.6vh, 22px); background: rgba(8, 12, 28, 0.22); -webkit-backdrop-filter: blur(28px) saturate(1.3); backdrop-filter: blur(28px) saturate(1.3); }
+  /* Overlay blurs the live website behind it. The deck host is a real DOM element
+     (not an iframe) so no compositing boundary — the blurred backdrop shows through
+     transparent regions of the deck exactly as intended. */
+  .bfe-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(10px, 1.6vh, 22px);
+    background: rgba(6, 10, 24, 0.38);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    backdrop-filter: blur(24px) saturate(1.3);
+  }
   .bfe-overlay[hidden] { display: none; }
-  .bfe-frame { width: 100%; height: 100%; border: 0; border-radius: 14px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5); background: transparent; color-scheme: normal; }
-  .bfe-close { position: fixed; top: 14px; right: 18px; z-index: 10000; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(13, 20, 38, 0.85); color: #f1f5f9; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* The shadow host fills the overlay and clips the deck at rounded corners */
+  .bfe-deck-host {
+    width: 100%; height: 100%;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.48), 0 0 0 1px rgba(255,255,255,0.10);
+  }
+
+  .bfe-close { position: fixed; top: 14px; right: 18px; z-index: 10000; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); background: rgba(13,20,38,0.85); color: #f1f5f9; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .bfe-close:hover { border-color: var(--brand-accent); color: var(--brand-accent); }
 
   @media (max-width: 640px) { .bfe-card { flex-basis: 216px; height: 174px; } }
 </style>
 
 <script>
-  const overlay = document.getElementById("bfeOverlay") as HTMLElement | null;
-  const frame = document.getElementById("bfeFrame") as HTMLIFrameElement | null;
+  // ── Frosted-glass CSS injected into every shadow root ────────────────────────
+  // Override --bg and --s to semi-transparent values. Because the deck's own CSS
+  // uses var(--bg) for .hero / .s-accent backgrounds, this one rule makes every
+  // slide frosted. Cards (var(--s)) stay near-opaque so text is always readable.
+  const FROST_CSS = `
+    :host {
+      display: block; width: 100%; height: 100%;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    /* light mode */
+    #deck {
+      --bg:  rgba(250, 253, 255, 0.72);
+      --s:   rgba(255, 255, 255, 0.90);
+      --s2:  rgba(243, 247, 255, 0.78);
+      --b:   rgba(37,  99,  235, 0.18);
+      --t:   #0b1220;
+      --t2:  #334155;
+      --t3:  #64748b;
+      --a:   #2563eb;
+      --a2:  #1d4ed8;
+      --g:   #166534;
+      background: transparent !important;
+    }
+    /* dark mode */
+    #deck[data-theme="dark"] {
+      --bg:  rgba(7,  11,  22,  0.76);
+      --s:   rgba(14, 20,  38,  0.90);
+      --s2:  rgba(18, 26,  48,  0.78);
+      --b:   rgba(37, 99,  235, 0.22);
+      --t:   #f1f5f9;
+      --t2:  #94a3b8;
+      --t3:  #64748b;
+      --a:   #60a5fa;
+      --a2:  #2563eb;
+      --g:   #22d3a0;
+    }
+    /* slide viewport must be transparent so the host sees the overlay backdrop */
+    #viewport { background: transparent !important; }
+    /* bar: frosted glass matching the theme */
+    #bar {
+      -webkit-backdrop-filter: blur(10px) saturate(1.1);
+      backdrop-filter: blur(10px) saturate(1.1);
+      background: rgba(230, 236, 255, 0.88) !important;
+      border-top: 1px solid rgba(180, 200, 240, 0.3) !important;
+    }
+    #deck[data-theme="dark"] #bar {
+      background: rgba(6, 10, 22, 0.88) !important;
+      border-top: 1px solid rgba(255,255,255,0.07) !important;
+    }
+    /* icon fallbacks while Lucide loads */
+    [data-lucide="chevron-left"]:empty::before  { content: '‹'; font-size: 1.2em; }
+    [data-lucide="chevron-right"]:empty::before { content: '›'; font-size: 1.2em; }
+    [data-lucide="sun"]:empty::before           { content: '☀'; font-size: 1em;   }
+    [data-lucide="moon"]:empty::before          { content: '🌙'; font-size: 0.9em; }
+  `;
+
+  const overlay  = document.getElementById("bfeOverlay")  as HTMLElement | null;
+  const deckHost = document.getElementById("bfeDeckHost") as HTMLElement | null;
   const closeBtn = document.getElementById("bfeClose");
-  if (overlay && frame) {
-    const siteTheme = () => document.documentElement.getAttribute("data-theme") || "dark";
-    // the deck is same-origin, so we set its theme to match the site
-    const applyTheme = () => { try { frame.contentDocument?.documentElement.setAttribute("data-theme", siteTheme()); } catch (e) {} };
+
+  if (overlay && deckHost) {
+    const siteTheme = () =>
+      document.documentElement.getAttribute("data-theme") || "light";
+
+    const sync = (key: string, slide: number) =>
+      history.replaceState(null, "", `#deck=${key}&slide=${slide}`);
+
     let current = "";
-    const sync = (key: string, slide: number) => history.replaceState(null, "", `#deck=${key}&slide=${slide}`);
-    const openDeck = (key: string, slide = 0) => {
-      current = key;
-      frame.src = `/decks/persona-${key}.html#${slide}`;
-      overlay.hidden = false;
-      document.body.style.overflow = "hidden";
-      sync(key, slide);
-      setTimeout(() => { try { frame.contentWindow?.focus(); } catch (e) {} }, 80);
+
+    // Ensure Lucide is loaded once, then call cb when ready
+    const withLucide = (cb: () => void) => {
+      if ((window as any).lucide) { cb(); return; }
+      if (!document.getElementById("bfe-lucide")) {
+        const s = document.createElement("script");
+        s.id = "bfe-lucide";
+        s.src = "https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js";
+        s.onload = cb;
+        document.head.appendChild(s);
+      }
     };
-    const closeDeck = () => {
-      if (overlay.hidden) return;
+
+    async function openDeck(key: string, startSlide = 0) {
+      current = key;
+      overlay!.hidden = false;
+      document.body.style.overflow = "hidden";
+      sync(key, startSlide);
+
+      // Fetch + parse the deck HTML
+      const res  = await fetch(`/decks/persona-${key}.html`);
+      const html = await res.text();
+      const dp   = new DOMParser();
+      const ddoc = dp.parseFromString(html, "text/html");
+
+      // Build/clear shadow root on the host element
+      const shadow = deckHost!.shadowRoot ?? deckHost!.attachShadow({ mode: "open" });
+      shadow.innerHTML = "";
+
+      // Inject deck CSS + our frosted-glass overrides
+      const deckCSS = Array.from(ddoc.querySelectorAll("style"))
+        .map((s) => s.textContent).join("\n");
+      const st = document.createElement("style");
+      st.textContent = deckCSS + "\n" + FROST_CSS;
+      shadow.appendChild(st);
+
+      // Inject deck body HTML
+      const body = document.createElement("div");
+      body.style.cssText = "display:contents";
+      body.innerHTML = ddoc.body.innerHTML;
+      shadow.appendChild(body);
+
+      // Set initial theme on #deck before running the script
+      const deckEl = shadow.getElementById("deck");
+      deckEl?.setAttribute("data-theme", siteTheme());
+
+      // Patch the deck's inline script so DOM queries target the shadow root
+      const rawScript = Array.from(ddoc.querySelectorAll("script:not([src])"))
+        .map((s) => s.textContent).join("\n");
+
+      const patchedScript = rawScript
+        // scope getElementById / querySelectorAll / querySelector to shadow root
+        .replace(/\bdocument\.getElementById\(/g, "_R.getElementById(")
+        .replace(/\bdocument\.querySelectorAll\(/g, "_R.querySelectorAll(")
+        .replace(/\bdocument\.querySelector\(/g, "_R.querySelector(")
+        // replace hash writes with our sync callback
+        .replace(/location\.hash\s*=\s*'#'\s*\+\s*i\s*;?/g, "__sync(i);")
+        // set initial slide from caller instead of reading location.hash
+        .replace(
+          "show(location.hash?parseInt(location.hash.slice(1))||0:0)",
+          `show(${startSlide})`
+        )
+        // scope lucide.createIcons to the shadow tree
+        .replace(
+          "if(window.lucide)lucide.createIcons();",
+          'if(window.lucide)lucide.createIcons({node:_R.getElementById("deck")});'
+        );
+
+      // Run the patched script with _R = shadow root, __sync = our URL sync
+      try {
+        // eslint-disable-next-line no-new-func
+        new Function("_R", "__sync", patchedScript)(shadow, (slide: number) =>
+          sync(key, slide)
+        );
+      } catch (e) {
+        console.warn("[deck] script error", e);
+      }
+
+      // Wire theme button to toggle site theme (MutationObserver below mirrors it to deck)
+      const themeBtn = shadow.getElementById("theme");
+      if (themeBtn) {
+        themeBtn.onclick = () => {
+          const next = siteTheme() === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+        };
+      }
+
+      // Mirror site theme changes into the deck
+      new MutationObserver(() => {
+        shadow.getElementById("deck")?.setAttribute("data-theme", siteTheme());
+      }).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+
+      // Load Lucide icons (async; icon fallback CSS covers the gap)
+      withLucide(() => {
+        (window as any).lucide?.createIcons({
+          node: shadow.getElementById("deck"),
+        });
+      });
+    }
+
+    function closeDeck() {
+      if (overlay!.hidden) return;
       current = "";
-      overlay.hidden = true;
-      frame.src = "about:blank";
+      overlay!.hidden = true;
       document.body.style.overflow = "";
       history.replaceState(null, "", location.pathname + location.search);
-    };
-    frame.addEventListener("load", () => {
-      applyTheme();
-      try {
-        const w = frame.contentWindow!;
-        const doc = frame.contentDocument!;
-        if (doc && !doc.getElementById("bfe-frost")) {
-          const st = doc.createElement("style");
-          st.id = "bfe-frost";
-          // light mode only: clear hero/accent so the blurred website shows through glass slides
-          // dark mode: keep native dark slide backgrounds — glass on dark-over-dark looks bad
-          st.textContent =
-            'html,body,#deck,#viewport{background:transparent!important}' +
-            'html[data-theme="light"] .hero,html[data-theme="light"] .s-accent,html[data-theme="light"] .dark-hero{background:transparent!important}' +
-            'html[data-theme="light"] .slide{background:rgba(255,255,255,.65)!important}' +
-            'html[data-theme="light"] #bar{background:rgba(235,238,252,.92)!important;border-top:1px solid rgba(200,210,240,.4)!important}' +
-            '#bar{background:rgba(8,12,22,.88)!important;border-top:1px solid rgba(255,255,255,.07)!important}';
-          doc.head.appendChild(st);
-        }
-        // keep the page URL in sync with the slide as the user navigates inside the deck
-        w.addEventListener("hashchange", () => { if (current) sync(current, parseInt(w.location.hash.slice(1)) || 0); });
-        w.addEventListener("keydown", (e: KeyboardEvent) => { if (e.key === "Escape") closeDeck(); });
-      } catch (e) {}
-    });
+    }
+
     document.querySelectorAll<HTMLElement>(".bfe-card").forEach((card) => {
-      card.addEventListener("click", () => { const k = card.dataset.key; if (k) openDeck(k); });
+      card.addEventListener("click", () => {
+        const k = card.dataset.key;
+        if (k) openDeck(k);
+      });
     });
+
     closeBtn?.addEventListener("click", closeDeck);
-    window.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeDeck(); });
-    // re-theme the open deck whenever the site theme toggles
-    new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    // deep-link: #deck=<key>&slide=<n> opens that deck/slide on load or hash change
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !overlay.hidden) closeDeck();
+    });
+
+    // Deep-link: #deck=<key>&slide=<n>
     const route = () => {
       const p = new URLSearchParams(location.hash.replace(/^#/, ""));
       const k = p.get("deck");
-      if (k && k !== current) openDeck(k, parseInt(p.get("slide") || "0") || 0);
+      if (k && k !== current)
+        openDeck(k, parseInt(p.get("slide") || "0") || 0);
       else if (!k && !overlay.hidden) closeDeck();
     };
     route();
     window.addEventListener("hashchange", route);
   }
 
-  // ── auto-scroll marquee that pauses on hover and yields to wheel/drag ───────
+  // ── auto-scroll marquee ──────────────────────────────────────────────────────
   const strip = document.querySelector<HTMLElement>(".bfe-strip");
   const track = strip?.querySelector<HTMLElement>(".bfe-track");
   if (strip && track) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let overWrap = false, stepping = false, stepT: ReturnType<typeof setTimeout>;
-    const half = () => track.scrollWidth / 2; // cards are duplicated → loop at the midpoint
+    const half = () => track.scrollWidth / 2;
     const wrap = () => {
       const h = half();
       if (strip.scrollLeft >= h) strip.scrollLeft -= h;
@@ -185,14 +331,11 @@ const loop = [...decks, ...decks];
 
     strip.addEventListener("mouseenter", () => { overWrap = true; });
     strip.addEventListener("mouseleave", () => { overWrap = false; });
-
-    // mouse wheel (or trackpad) scrolls the strip horizontally while paused
     strip.addEventListener("wheel", (e: WheelEvent) => {
       const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
       if (d !== 0) { strip.scrollLeft += d; wrap(); e.preventDefault(); }
     }, { passive: false });
 
-    // click-and-drag to scroll
     let down = false, startX = 0, startLeft = 0, moved = 0;
     strip.addEventListener("pointerdown", (e: PointerEvent) => {
       down = true; moved = 0; startX = e.pageX; startLeft = strip.scrollLeft;
@@ -206,18 +349,21 @@ const loop = [...decks, ...decks];
     const endDrag = () => { down = false; strip.classList.remove("dragging"); };
     strip.addEventListener("pointerup", endDrag);
     strip.addEventListener("pointerleave", endDrag);
-    // suppress the click that follows a real drag (so it doesn't open a deck)
-    strip.addEventListener("click", (e) => { if (moved > 6) { e.stopPropagation(); e.preventDefault(); } }, true);
+    strip.addEventListener("click", (e) => {
+      if (moved > 6) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
 
-    // left / right arrows step by one card; hovering them pauses auto-scroll
-    const step = () => (track.querySelector<HTMLElement>(".bfe-card")?.offsetWidth ?? 248) + 16;
+    const step = () =>
+      (track.querySelector<HTMLElement>(".bfe-card")?.offsetWidth ?? 248) + 16;
     document.querySelectorAll<HTMLElement>(".bfe-arrow").forEach((btn) => {
       btn.addEventListener("mouseenter", () => { overWrap = true; });
       btn.addEventListener("mouseleave", () => { overWrap = false; });
       btn.addEventListener("click", () => {
-        wrap(); // normalize into [0, half) so the smooth scroll never hits a seam
+        wrap();
         const dir = btn.dataset.dir === "l" ? -1 : 1;
-        stepping = true; clearTimeout(stepT); stepT = setTimeout(() => { stepping = false; }, 550);
+        stepping = true;
+        clearTimeout(stepT);
+        stepT = setTimeout(() => { stepping = false; }, 550);
         strip.scrollBy({ left: dir * step(), behavior: "smooth" });
       });
     });

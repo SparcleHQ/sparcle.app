@@ -132,12 +132,14 @@ const loop = [...decks, ...decks];
         if (doc && !doc.getElementById("bfe-frost")) {
           const st = doc.createElement("style");
           st.id = "bfe-frost";
+          // light mode only: clear hero/accent so the blurred website shows through glass slides
+          // dark mode: keep native dark slide backgrounds — glass on dark-over-dark looks bad
           st.textContent =
-            'html,body,#deck,#viewport,.hero,.s-accent,.dark-hero{background:transparent!important}' +
-            '.slide{background:rgba(255,255,255,.65)!important}' +
-            'html[data-theme="dark"] .slide{background:rgba(10,14,26,.65)!important}' +
-            '#bar{background:rgba(8,12,22,.85)!important;border-top:1px solid rgba(255,255,255,.08)!important}' +
-            'html[data-theme="light"] #bar{background:rgba(235,238,252,.92)!important}';
+            'html,body,#deck,#viewport{background:transparent!important}' +
+            'html[data-theme="light"] .hero,html[data-theme="light"] .s-accent,html[data-theme="light"] .dark-hero{background:transparent!important}' +
+            'html[data-theme="light"] .slide{background:rgba(255,255,255,.65)!important}' +
+            'html[data-theme="light"] #bar{background:rgba(235,238,252,.92)!important;border-top:1px solid rgba(200,210,240,.4)!important}' +
+            '#bar{background:rgba(8,12,22,.88)!important;border-top:1px solid rgba(255,255,255,.07)!important}';
           doc.head.appendChild(st);
         }
         // keep the page URL in sync with the slide as the user navigates inside the deck

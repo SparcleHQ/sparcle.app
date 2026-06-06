@@ -40,14 +40,14 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .feat-top{width:100%;display:flex;justify-content:center}
 .feat-btm{width:100%;max-width:880px;text-align:center}
 .feat-btm .s-tag{margin-bottom:.6rem}
-.feat-btm .s-h{font-size:clamp(1.4rem,2.7vw,2.25rem);margin-bottom:.45rem}
+.feat-btm .s-h{font-size:clamp(1.45rem,1.3vw + 1.5vh,2.7rem);margin-bottom:.5rem}
 .feat-btm .s-sub{margin:0 auto}
 .feat-note{display:inline-flex;align-items:center;gap:.5rem;margin-top:.85rem;font-size:.92rem;color:var(--g);font-weight:600}
 .feat-note i{color:var(--g)}
 .feat-btm .badges{justify-content:center}
 /* ── .bolt-ui — faithful light replica of the live Bolt launcher (wide) ─────── */
 @keyframes bl{50%{opacity:0}}
-.bolt-ui{width:100%;max-width:1280px;background:#fbfcff;border:1px solid #d4ddee;border-radius:18px;padding:.55rem .7rem .7rem;box-shadow:0 30px 80px rgba(8,16,40,.5);color:#1a2233;font-size:1rem;text-align:left}
+.bolt-ui{width:100%;max-width:1280px;background:#fbfcff;border:1px solid #d4ddee;border-radius:18px;padding:.55rem .7rem .7rem;box-shadow:0 30px 80px rgba(8,16,40,.5);color:#1a2233;font-size:clamp(.85rem,.55vw + 1vh,1.12rem);text-align:left}
 .bsearch{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid #e3e8f2;border-radius:12px;padding:.72rem .85rem}
 .bmag{width:18px;height:18px;color:#8a97b0;flex:none}
 .bcv{width:14px;height:14px;color:#aab4c8;flex:none}
@@ -60,8 +60,8 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .butilchip>i:first-child{width:13px;height:13px;color:#3b5bdb}
 .butilchip i[data-lucide=x]{width:13px;height:13px;opacity:.5;margin-left:.05rem}
 .bq .ph2{color:#9aa6bd}
-.butils{display:flex;flex-wrap:wrap;gap:.3rem 1.15rem;padding:.6rem .55rem .45rem;font-size:.82rem;color:#5b6680}
-.buc{display:inline-flex;align-items:center;gap:.32rem}
+.butils{display:flex;flex-wrap:nowrap;overflow:hidden;gap:.3rem clamp(.4rem,1.5vw,1.1rem);padding:.6rem .55rem .45rem;font-size:clamp(.58rem,1.45vw,.82rem);color:#5b6680;white-space:nowrap}
+.buc{display:inline-flex;align-items:center;gap:.32rem;flex:none}
 .buc i{width:14px;height:14px;color:#7c89a3}
 .buc.plus{margin-left:auto;color:#aab4c8}
 .brecog{display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.84rem;color:#5b6680;padding:.5rem .55rem;border-top:1px solid #eef1f8;white-space:nowrap;overflow:hidden}
@@ -320,7 +320,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
   </div></div>
 <div class="slide feat" data-title="Set a watch once — it runs in the background"><div class="s-content feat-stack">
     <div class="feat-top"><div class="bolt-ui">
-    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq"><b>:</b>:cert sparcle.app</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq">:cert sparcle.app</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
     <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
     
     <div class="bresults"><div class="brow lead">

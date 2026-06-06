@@ -48,7 +48,7 @@ const loop = [...decks, ...decks];
 
 <div class="bfe-overlay" id="bfeOverlay" hidden>
   <button class="bfe-close" id="bfeClose" type="button" aria-label="Close deck (Esc)">&times;</button>
-  <iframe class="bfe-frame" id="bfeFrame" title="Bolt role deck" allow="fullscreen"></iframe>
+  <iframe class="bfe-frame" id="bfeFrame" title="Bolt role deck" allow="fullscreen" allowtransparency="true"></iframe>
 </div>
 
 <style>
@@ -88,10 +88,10 @@ const loop = [...decks, ...decks];
   .bfe-name { font-size: 1.1rem; font-weight: 700; line-height: 1.18; color: var(--text-heading); flex: 1; }
   .bfe-open { font-size: 0.8rem; font-weight: 600; color: var(--brand-primary); }
 
-  /* frosted, escapable overlay — the blurred site shows behind a centered deck panel */
-  .bfe-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: clamp(10px, 1.6vh, 22px); background: rgba(10, 16, 30, 0.38); -webkit-backdrop-filter: blur(18px) saturate(1.15); backdrop-filter: blur(18px) saturate(1.15); }
+  /* frosted overlay — dark scrim only; actual blur lives inside the iframe via backdrop-filter on body */
+  .bfe-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: clamp(10px, 1.6vh, 22px); background: rgba(5, 10, 20, 0.6); }
   .bfe-overlay[hidden] { display: none; }
-  .bfe-frame { width: 100%; height: 100%; border: 0; border-radius: 14px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5); background: transparent; }
+  .bfe-frame { width: 100%; height: 100%; border: 0; border-radius: 14px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5); background: transparent; color-scheme: normal; }
   .bfe-close { position: fixed; top: 14px; right: 18px; z-index: 10000; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(13, 20, 38, 0.85); color: #f1f5f9; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .bfe-close:hover { border-color: var(--brand-accent); color: var(--brand-accent); }
 
@@ -134,12 +134,16 @@ const loop = [...decks, ...decks];
         if (doc && !doc.getElementById("bfe-frost")) {
           const st = doc.createElement("style");
           st.id = "bfe-frost";
-          st.textContent =
-            'html,body{background:transparent!important}' +
-            'html[data-theme="light"]{background:rgba(245,248,252,.5)!important}' +
-            'html:not([data-theme="light"]){background:rgba(10,15,28,.4)!important}' +
-            '.hero,.s-accent,.dark-hero,.slide,#deck,#viewport,#bar{background:transparent!important}' +
-            '#bar{border-top-color:transparent!important}';
+          // backdrop-filter must live INSIDE the iframe — it can't bleed through the iframe
+          // compositing boundary from the parent overlay. body is the right anchor: it covers
+          // the full viewport and blurs the parent-page pixels visible through the transparent iframe.
+          st.textContent = [
+            'html{background:transparent!important}',
+            'body{background:rgba(10,14,26,.22)!important;-webkit-backdrop-filter:blur(20px) saturate(1.2);backdrop-filter:blur(20px) saturate(1.2)}',
+            'html[data-theme="light"] body{background:rgba(220,230,255,.28)!important}',
+            '#deck,#viewport,.hero,.s-accent,.dark-hero,.slide{background:transparent!important}',
+            '#bar{background:rgba(8,12,22,.72)!important;border-top:1px solid rgba(255,255,255,.07)!important}',
+          ].join('');
           doc.head.appendChild(st);
         }
         // keep the page URL in sync with the slide as the user navigates inside the deck

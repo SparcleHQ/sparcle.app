@@ -176,6 +176,22 @@ const loop = [...decks, ...decks];
       history.replaceState(null, "", `#deck=${key}&slide=${slide}`);
 
     let current = "";
+    // Navigation handle for the open deck, so the global keydown can drive it.
+    let deckNav: { next: () => void; prev: () => void; first: () => void; last: () => void } | null = null;
+
+    // Load the self-hosted lucide once (CSP allows /decks/lucide.min.js as 'self'),
+    // then run cb. Used to render deck content icons inside the shadow root.
+    const withLucide = (cb: () => void) => {
+      if ((window as any).lucide) { cb(); return; }
+      let s = document.getElementById("bfe-lucide") as HTMLScriptElement | null;
+      if (!s) {
+        s = document.createElement("script");
+        s.id = "bfe-lucide";
+        s.src = "/decks/lucide.min.js";
+        document.head.appendChild(s);
+      }
+      s.addEventListener("load", () => cb(), { once: true });
+    };
 
     async function openDeck(key: string, startSlide = 0) {
       current = key;
@@ -216,48 +232,38 @@ const loop = [...decks, ...decks];
       const deckEl = shadow.getElementById("deck");
       deckEl?.setAttribute("data-theme", siteTheme());
 
-      // Patch the deck's inline script so DOM queries target the shadow root
-      const rawScript = Array.from(ddoc.querySelectorAll("script:not([src])"))
-        .map((s) => s.textContent).join("\n");
+      // Native slide navigation. The deck ships an inline <script> that drives
+      // this, but production CSP forbids unsafe-eval — so we can't run it. The
+      // logic is identical across every deck, so we reimplement it here against
+      // the shadow root (CSP-safe: this code is bundled as 'self').
+      const slidesEls = shadow.querySelectorAll<HTMLElement>(".slide");
+      const total = slidesEls.length;
+      const counter = shadow.getElementById("counter");
+      let idx = startSlide;
+      const show = (n: number) => {
+        idx = Math.max(0, Math.min(total - 1, n));
+        slidesEls.forEach((s, k) => s.classList.toggle("active", k === idx));
+        if (counter) counter.textContent = `${idx + 1} / ${total}`;
+        sync(key, idx);
+      };
+      shadow.getElementById("next")?.addEventListener("click", () => show(idx + 1));
+      shadow.getElementById("prev")?.addEventListener("click", () => show(idx - 1));
+      deckNav = {
+        next: () => show(idx + 1),
+        prev: () => show(idx - 1),
+        first: () => show(0),
+        last: () => show(total - 1),
+      };
+      show(startSlide);
 
-      const patchedScript = rawScript
-        // scope getElementById / querySelectorAll / querySelector to shadow root
-        .replace(/\bdocument\.getElementById\(/g, "_R.getElementById(")
-        .replace(/\bdocument\.querySelectorAll\(/g, "_R.querySelectorAll(")
-        .replace(/\bdocument\.querySelector\(/g, "_R.querySelector(")
-        // replace hash writes with our sync callback
-        .replace(/location\.hash\s*=\s*'#'\s*\+\s*i\s*;?/g, "__sync(i);")
-        // set initial slide from caller instead of reading location.hash
-        .replace(
-          "show(location.hash?parseInt(location.hash.slice(1))||0:0)",
-          `show(${startSlide})`
-        )
-        // scope lucide.createIcons to the shadow tree
-        .replace(
-          "if(window.lucide)lucide.createIcons();",
-          'if(window.lucide)lucide.createIcons({node:_R.getElementById("deck")});'
-        );
-
-      // Run the patched script with _R = shadow root, __sync = our URL sync
-      try {
-        // eslint-disable-next-line no-new-func
-        new Function("_R", "__sync", patchedScript)(shadow, (slide: number) =>
-          sync(key, slide)
-        );
-      } catch (e) {
-        console.warn("[deck] script error", e);
-      }
-
-      // Wire theme button to toggle site theme (MutationObserver below mirrors it to deck)
+      // Theme button toggles the site theme; MutationObserver mirrors it back in.
       const themeBtn = shadow.getElementById("theme");
       if (themeBtn) {
-        themeBtn.onclick = () => {
+        themeBtn.addEventListener("click", () => {
           const next = siteTheme() === "dark" ? "light" : "dark";
           document.documentElement.setAttribute("data-theme", next);
-        };
+        });
       }
-
-      // Mirror site theme changes into the deck
       new MutationObserver(() => {
         shadow.getElementById("deck")?.setAttribute("data-theme", siteTheme());
       }).observe(document.documentElement, {
@@ -265,6 +271,13 @@ const loop = [...decks, ...decks];
         attributeFilter: ["data-theme"],
       });
 
+      // Render the deck's content icons via the self-hosted lucide (CSP 'self').
+      // Our inline SVGs already cover the nav icons; this fills in the rest.
+      withLucide(() => {
+        try {
+          (window as any).lucide?.createIcons({ node: shadow.getElementById("deck") });
+        } catch { /* non-fatal — inline nav SVGs still render */ }
+      });
     }
 
     function closeDeck() {
@@ -284,7 +297,13 @@ const loop = [...decks, ...decks];
 
     closeBtn?.addEventListener("click", closeDeck);
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !overlay.hidden) closeDeck();
+      if (overlay!.hidden) return;
+      if (e.key === "Escape") { closeDeck(); return; }
+      if (!deckNav) return;
+      if (e.key === "ArrowRight" || e.key === " ") { deckNav.next(); e.preventDefault(); }
+      else if (e.key === "ArrowLeft") { deckNav.prev(); }
+      else if (e.key === "Home") { deckNav.first(); }
+      else if (e.key === "End") { deckNav.last(); }
     });
 
     // Deep-link: #deck=<key>&slide=<n>

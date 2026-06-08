@@ -228,25 +228,25 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="badges"><span class="badge">tabs</span><span class="badge">clips</span><span class="badge">local</span></div>
     </div>
   </div></div>
-<div class="slide feat" data-title="Your secrets never reach the model"><div class="s-content feat-stack">
+<div class="slide feat" data-title="The identifiers in your prompt never reach the model"><div class="s-content feat-stack">
     <div class="feat-top"><div class="bolt-ui">
-    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq"><b>/</b>ai summarize this renewal for Acme Corp — contact jane@acme.com</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
+    <div class="bsearch"><i data-lucide="search" class="bmag"></i><i data-lucide="chevron-down" class="bcv"></i><span class="bq"><b>/</b>ai summarize this renewal — billing jane@acme.com, card 4242 4242 4242 4242</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
     <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
     
     <div class="bresults"><div class="brow lead">
     <span class="bind"></span><span class="bi"><i data-lucide="lock" style="width:18px;height:18px"></i></span>
-    <div class="bbody"><div class="bstat">MASKED</div><div class="btitle">Model sees: “summarize this renewal for «ORG» — «EMAIL»”</div><div class="bsub">names · emails · cards · keys · IDs tokenized before the prompt</div></div>
+    <div class="bbody"><div class="bstat">MASKED</div><div class="btitle">Model sees: “summarize this renewal — billing «EMAIL», card «CARD»”</div><div class="bsub">emails · card, bank &amp; account numbers · SSNs · phones · keys tokenized before the prompt</div></div>
     <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
   </div><div class="brow">
     <span class="bind"></span><span class="bi"><i data-lucide="shield-check" style="width:18px;height:18px"></i></span>
-    <div class="bbody"><div class="bstat">RESTORED</div><div class="btitle">You see: “summarize this renewal for Acme Corp — jane@acme.com”</div><div class="bsub">the answer is restored with the real values, locally</div></div>
+    <div class="bbody"><div class="bstat">RESTORED</div><div class="btitle">You see: “…billing jane@acme.com, card 4242 4242 4242 4242”</div><div class="bsub">the answer is restored with the real values, locally</div></div>
     <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
   </div></div>
   </div></div>
     <div class="feat-btm">
       <div class="s-tag t-llm">Governed AI</div>
-      <h2 class="s-h">Your secrets never reach the model</h2>
-      <p class="s-sub">Use AI on real work without leaking it. Sensitive values are masked before anything goes to the model and restored in the reply — automatically, every time.</p>
+      <h2 class="s-h">The identifiers in your prompt never reach the model</h2>
+      <p class="s-sub">Use AI on real work without leaking the identifiers in it. Emails, card and account numbers, SSNs, phone numbers and keys are masked before anything reaches the model and restored in the reply — and because it runs on your own LLM inside your boundary, the rest never leaves either.</p>
       <div class="feat-note"><i data-lucide="zap" style="width:18px;height:18px"></i><span>The tool sees the real value. The model never does.</span></div>
       <div class="badges"><span class="badge">privacy</span><span class="badge">governed</span><span class="badge">safe</span></div>
     </div>
@@ -277,7 +277,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 <button id="next" aria-label="next"><i data-lucide="chevron-right"></i></button></div></div>
 <script>
 const S=document.querySelectorAll('.slide'),N=S.length;let i=0;
-const idx=[{t:"One box for [[every tab]] you live in.",i:0},{t:"The crux",i:1},{t:"The PM tax: [[ten tabs and a context-switch]]",i:2},{t:"Connect [[anything]]. Reach it as [[you]]. Govern it [[once]].",i:3},{t:"Your Jira and your wiki, reached as [[you]]",i:4},{t:"Search your tabs, apps and clips — [[on-device]]",i:5},{t:"Your secrets never reach the model",i:6},{t:"Bring your [[systems]], your [[models]] and your [[tools]] — under one policy",i:7},{t:"Put it in [[every]] hand for free — keep [[every]] action under control",i:8},{t:"Ship more. [[Tab-hop less.]] Leak nothing.",i:9}];
+const idx=[{t:"One box for [[every tab]] you live in.",i:0},{t:"The crux",i:1},{t:"The PM tax: [[ten tabs and a context-switch]]",i:2},{t:"Connect [[anything]]. Reach it as [[you]]. Govern it [[once]].",i:3},{t:"Your Jira and your wiki, reached as [[you]]",i:4},{t:"Search your tabs, apps and clips — [[on-device]]",i:5},{t:"The identifiers in your prompt never reach the model",i:6},{t:"Bring your [[systems]], your [[models]] and your [[tools]] — under one policy",i:7},{t:"Put it in [[every]] hand for free — keep [[every]] action under control",i:8},{t:"Ship more. [[Tab-hop less.]] Leak nothing.",i:9}];
 function show(n){i=Math.max(0,Math.min(N-1,n));S.forEach((s,k)=>s.classList.toggle('active',k===i));document.getElementById('counter').textContent=(i+1)+' / '+N;location.hash='#'+i;}
 document.getElementById('next').onclick=()=>show(i+1);document.getElementById('prev').onclick=()=>show(i-1);
 document.getElementById('theme').onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';};

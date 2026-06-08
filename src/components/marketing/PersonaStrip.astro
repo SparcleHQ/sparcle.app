@@ -114,14 +114,6 @@ const loop = [...decks, ...decks];
 </style>
 
 <script>
-  // Inline SVGs — lucide.createIcons() can't scan shadow DOM
-  const SVG_ICONS: Record<string, string> = {
-    "chevron-left":  `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
-    "chevron-right": `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
-    "sun":  `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`,
-    "moon": `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>`,
-  };
-
   const FROST_CSS = `
     :host { display: block; width: 100%; height: 100%; font-family: 'Inter', system-ui, sans-serif; }
     /* deck fills the host — NOT 100vw/100dvh which would overflow the padded container */
@@ -179,19 +171,8 @@ const loop = [...decks, ...decks];
     // Navigation handle for the open deck, so the global keydown can drive it.
     let deckNav: { next: () => void; prev: () => void; first: () => void; last: () => void } | null = null;
 
-    // Load the self-hosted lucide once (CSP allows /decks/lucide.min.js as 'self'),
-    // then run cb. Used to render deck content icons inside the shadow root.
-    const withLucide = (cb: () => void) => {
-      if ((window as any).lucide) { cb(); return; }
-      let s = document.getElementById("bfe-lucide") as HTMLScriptElement | null;
-      if (!s) {
-        s = document.createElement("script");
-        s.id = "bfe-lucide";
-        s.src = "/decks/lucide.min.js";
-        document.head.appendChild(s);
-      }
-      s.addEventListener("load", () => cb(), { once: true });
-    };
+    // Parse each deck once — the CSS + body are identical on re-open / deep-link.
+    const deckCache = new Map<string, { css: string; body: string }>();
 
     async function openDeck(key: string, startSlide = 0) {
       current = key;
@@ -199,34 +180,33 @@ const loop = [...decks, ...decks];
       document.body.style.overflow = "hidden";
       sync(key, startSlide);
 
-      // Fetch + parse the deck HTML
-      const res  = await fetch(`/decks/persona-${key}.html`);
-      const html = await res.text();
-      const dp   = new DOMParser();
-      const ddoc = dp.parseFromString(html, "text/html");
+      // Fetch + parse the deck once; reuse on re-open / deep-link. Icons are
+      // baked into the HTML at build time, so no runtime icon rendering is needed.
+      let entry = deckCache.get(key);
+      if (!entry) {
+        const res = await fetch(`/decks/persona-${key}.html`);
+        const ddoc = new DOMParser().parseFromString(await res.text(), "text/html");
+        entry = {
+          css: Array.from(ddoc.querySelectorAll("style")).map((s) => s.textContent).join("\n"),
+          body: ddoc.body.innerHTML,
+        };
+        deckCache.set(key, entry);
+      }
 
       // Build/clear shadow root on the host element
       const shadow = deckHost!.shadowRoot ?? deckHost!.attachShadow({ mode: "open" });
       shadow.innerHTML = "";
 
       // Inject deck CSS + our frosted-glass overrides
-      const deckCSS = Array.from(ddoc.querySelectorAll("style"))
-        .map((s) => s.textContent).join("\n");
       const st = document.createElement("style");
-      st.textContent = deckCSS + "\n" + FROST_CSS;
+      st.textContent = entry.css + "\n" + FROST_CSS;
       shadow.appendChild(st);
 
       // Inject deck body HTML
       const body = document.createElement("div");
       body.style.cssText = "display:contents";
-      body.innerHTML = ddoc.body.innerHTML;
+      body.innerHTML = entry.body;
       shadow.appendChild(body);
-
-      // Replace [data-lucide] elements with inline SVG (createIcons can't see shadow DOM)
-      shadow.querySelectorAll<HTMLElement>("[data-lucide]").forEach((el) => {
-        const name = el.getAttribute("data-lucide") ?? "";
-        if (SVG_ICONS[name]) { el.innerHTML = SVG_ICONS[name]; el.removeAttribute("data-lucide"); }
-      });
 
       // Set initial theme on #deck before running the script
       const deckEl = shadow.getElementById("deck");
@@ -269,14 +249,6 @@ const loop = [...decks, ...decks];
       }).observe(document.documentElement, {
         attributes: true,
         attributeFilter: ["data-theme"],
-      });
-
-      // Render the deck's content icons via the self-hosted lucide (CSP 'self').
-      // Our inline SVGs already cover the nav icons; this fills in the rest.
-      withLucide(() => {
-        try {
-          (window as any).lucide?.createIcons({ node: shadow.getElementById("deck") });
-        } catch { /* non-fatal — inline nav SVGs still render */ }
       });
     }
 

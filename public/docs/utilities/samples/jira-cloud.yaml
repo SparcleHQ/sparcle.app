@@ -187,19 +187,19 @@ scopes:
                 | ($f.project // {}) as $pj
                 | ($f.parent // {}) as $par
                 | ($f.resolution // {}) as $res
-                # Latest comment + author + when. `comment` field returns
-                # {comments:[…], total:N} with comments in chronological
-                # order (oldest first), so `last` is the newest. Author
-                # field on the official Remote MCP is .author.displayName
-                # (or .publicName for the older Cloud variants).
-                | (($f.comment // {}).comments // []) as $allComments
-                | (($allComments | last) // {}) as $lcmt
-                | ((($lcmt.body // null) | adfText)
-                    | gsub("[ \t\n\r]+"; " ")
-                    | gsub("^ +| +$"; "")) as $lcmtText
-                | ($lcmt.author.displayName // $lcmt.author.publicName // "") as $lcmtAuthor
-                | ($lcmt.created // "") as $lcmtAt
-                | (($f.comment // {}).total // ($allComments | length)) as $cmtCount
+                # Latest comment extraction — temporarily reverted 2026-06-06.
+                # 1104c7d5 added jq logic to extract latest comment, but some
+                # response variant from Atlassian Remote MCP makes a downstream
+                # map/last/iterate see null and crash with "cannot use null as
+                # iterable", breaking the entire =jira-cloud flow. Setting
+                # placeholder values until we can re-add with bulletproof
+                # guards (likely wrap the whole block in `try`/`catch` so a
+                # single ticket's malformed comment field can't take the
+                # whole row down).
+                | "" as $lcmtText
+                | "" as $lcmtAuthor
+                | "" as $lcmtAt
+                | 0 as $cmtCount
                 | ($a.avatarUrls // {}) as $av
                 | ($f.votes // {}) as $vt
                 | ($f.watches // {}) as $wt
@@ -532,11 +532,10 @@ presentation:
         - { label: Created,       value: '{{row.created}}' }
         - { label: Updated,       value: '{{row.updated}}' }
         - { label: Watchers,      value: '{{row.watchers}}' }
-        # Latest comment + author + when. When there are no comments the
-        # transform emits latestCommentBody="" — the bind-time fallback
-        # surfaces "— No comments yet" so the row never appears blank.
-        - label: Latest comment
-          value: '{{row.latestCommentAuthor}} · {{row.latestCommentAt | date:''rel''}}: {{row.latestCommentBody | default:''No comments yet''}}'
+        # Latest-comment field temporarily removed 2026-06-06 — paired with
+        # the transform revert (see manifest body). Will be re-added with
+        # bulletproof guards (try/catch around the jq path so a single
+        # ticket's malformed comment field can't take the whole flow down).
         - { label: Description,   value: '{{row.description}}' }
       actions:
         - open

@@ -3,31 +3,36 @@
 <title>Bolt — the AI SuperAgent for Support &amp; CS · faster replies, fewer tabs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="/decks/lucide.min.js"></script>
-<style>:root{--bg:#050810;--s:#0d1426;--s2:#111827;--b:rgba(37,99,235,.18);--a:#60a5fa;--a2:#2563eb;--g:#22d3a0;--am:#f59e0b;--r:#f87171;--t:#f1f5f9;--t2:#94a3b8;--t3:#64748b}
-[data-theme="light"]{--bg:#eef3ff;--s:#fff;--s2:#f6f9ff;--b:rgba(37,99,235,.2);--a:#2563eb;--a2:#1d4ed8;--g:#166534;--am:#b45309;--r:#b91c1c;--t:#0b1220;--t2:#334155;--t3:#475569}
+<style>:root{--bg:#070b14;--s:#0e1626;--s2:#131c30;--b:rgba(148,163,184,.14);--ab:rgba(96,165,250,.22);--a:#7eb0ff;--a2:#3b82f6;--g:#34d399;--am:#fbbf24;--r:#f87171;--t:#f3f6fb;--t2:#aeb9cc;--t3:#6b7689;--hair:rgba(148,163,184,.13)}
+[data-theme="light"]{--bg:#f7f9fc;--s:#ffffff;--s2:#f2f5fa;--b:rgba(15,23,42,.09);--ab:rgba(37,99,235,.16);--a:#2563eb;--a2:#1d4ed8;--g:#0f9d6c;--am:#b45309;--r:#dc2626;--t:#101828;--t2:#475467;--t3:#667085;--hair:rgba(15,23,42,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);overflow:hidden}
+html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);overflow:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #deck{width:100vw;height:100dvh;display:flex;flex-direction:column;position:relative}
 #viewport{flex:1 1 0;position:relative;overflow:hidden}
 .slide{position:absolute;inset:0;display:none;padding:clamp(2rem,4.5vw,5rem) clamp(2rem,6vw,7rem);overflow:hidden;flex-direction:column;justify-content:center}
 .slide.active{display:flex}
-.grad{background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* editorial emphasis — one confident accent colour, never a rainbow clip */
+.grad{color:var(--a);-webkit-text-fill-color:currentColor;font-weight:inherit}
 .s-content{width:100%;max-width:1180px;margin:0 auto}
-.s-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a);background:var(--b);border:1px solid var(--b);padding:.32rem .7rem;border-radius:999px;margin-bottom:1rem}
-.s-tag.t-net{color:var(--a2);background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.25)}
-.s-tag.t-llm{color:var(--am);background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25)}
-.s-h{font-size:clamp(1.7rem,3.6vw,3rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;margin-bottom:.7rem}
-.s-h.big{font-size:clamp(2.4rem,5.5vw,4.4rem)}
-.s-sub{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--t2);max-width:60ch;line-height:1.5}
+/* eyebrow — a quiet label with a short leading rule, not a candy pill */
+.s-tag{display:inline-flex;align-items:center;gap:.55rem;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:1.05rem}
+.s-tag::before{content:"";width:1.6rem;height:1px;background:currentColor;opacity:.55;flex:none}
+.s-tag.t-net{color:var(--a2)}
+.s-tag.t-llm{color:var(--am)}
+.s-h{font-size:clamp(1.7rem,3.6vw,3rem);font-weight:700;line-height:1.1;letter-spacing:-.025em;margin-bottom:.8rem;color:var(--t)}
+.s-h.big{font-size:clamp(2.4rem,5.5vw,4.4rem);letter-spacing:-.03em}
+.s-sub{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--t2);max-width:62ch;line-height:1.55}
 /* hero */
 .hero{align-items:center;text-align:center;background:radial-gradient(110% 80% at 50% 0%,rgba(37,99,235,.10),transparent 55%),radial-gradient(120% 90% at 50% 120%,rgba(96,165,250,.10),transparent 55%),var(--bg)}
 .hero-in{max-width:1000px}
-.hero-h{font-size:clamp(2.6rem,7vw,5.6rem);font-weight:800;line-height:1.02;letter-spacing:-.03em;margin-bottom:1rem}
-.hero-sub{font-size:clamp(1.05rem,2vw,1.6rem);color:var(--t2);line-height:1.45;max-width:46ch;margin:0 auto}
-.hero-stats{display:flex;gap:clamp(1.5rem,4vw,4rem);justify-content:center;margin-top:2.5rem}
-.hstat{display:flex;flex-direction:column;gap:.2rem}
-.hn{font-size:clamp(1.8rem,4vw,3.2rem);font-weight:800;background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.hl{font-size:.8rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.hero-h{font-size:clamp(2.6rem,7vw,5.4rem);font-weight:800;line-height:1.04;letter-spacing:-.038em;margin-bottom:1.1rem}
+.hero-sub{font-size:clamp(1.05rem,2vw,1.55rem);color:var(--t2);line-height:1.5;max-width:48ch;margin:0 auto;font-weight:400}
+.hero-stats{display:flex;gap:clamp(1.5rem,4vw,4rem);justify-content:center;margin-top:2.6rem}
+.hstat{display:flex;flex-direction:column;gap:.25rem;position:relative;padding-left:clamp(1.5rem,4vw,4rem);text-align:left}
+.hstat:first-child{padding-left:0}
+.hstat:not(:first-child)::before{content:"";position:absolute;left:0;top:.1rem;bottom:.1rem;width:1px;background:var(--hair)}
+.hn{font-size:clamp(1.9rem,4vw,3.1rem);font-weight:800;color:var(--a);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.hl{font-size:.8rem;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;line-height:1.3}
 /* section divider */
 .s-accent{align-items:center;text-align:center;background:radial-gradient(100% 80% at 50% 30%,rgba(37,99,235,.08),transparent 60%),var(--bg)}
 .s-accent.t-net{background:radial-gradient(100% 80% at 50% 30%,rgba(96,165,250,.10),transparent 60%),var(--bg)}
@@ -103,10 +108,10 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .shot img{width:100%;max-width:1280px;border-radius:16px;border:1px solid var(--b);box-shadow:0 24px 60px rgba(0,0,0,.5)}
 /* cards / content */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.4rem}
-.card{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:1.2rem}
-.card .ci{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--b);border-radius:10px;color:var(--a);margin-bottom:.7rem}
-.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.35rem}
-.card p{font-size:.88rem;color:var(--t2);line-height:1.45}
+.card{background:var(--s);border:1px solid var(--hair);border-radius:14px;padding:1.3rem 1.25rem}
+.card .ci{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--ab);border-radius:10px;color:var(--a);margin-bottom:.8rem}
+.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem;letter-spacing:-.01em;color:var(--t)}
+.card p{font-size:.88rem;color:var(--t2);line-height:1.5}
 .badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem}
 .badge{font-size:.7rem;font-weight:600;color:var(--t2);background:var(--s2);border:1px solid var(--b);padding:.18rem .5rem;border-radius:6px}
 .badge.g{color:var(--g);background:rgba(34,211,160,.1);border-color:rgba(34,211,160,.22)}
@@ -124,9 +129,9 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .cover-role{margin-top:1.6rem;font-size:.9rem;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
 /* split: today vs with-bolt */
 .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.5vw,2rem);margin-top:1.6rem;text-align:left}
-.spanel{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:clamp(1.2rem,2.2vw,1.8rem)}
-.spanel.today{border-color:rgba(248,113,113,.25)}
-.spanel.bolt{border-color:rgba(37,99,235,.3);background:linear-gradient(180deg,rgba(37,99,235,.06),transparent)}
+.spanel{background:var(--s);border:1px solid var(--hair);border-radius:16px;padding:clamp(1.3rem,2.2vw,1.9rem)}
+.spanel.today{border-color:rgba(239,68,68,.22)}
+.spanel.bolt{border-color:var(--ab);background:var(--s)}
 .sp-tag{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.7rem}
 .spanel.today .sp-tag{color:var(--r)}
 .spanel.bolt .sp-tag{color:var(--a)}
@@ -138,7 +143,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 /* metric band — the change in numbers */
 .metric-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(1.5rem,4vw,3.5rem);margin-top:2rem}
 .mstat{display:flex;flex-direction:column;gap:.3rem;max-width:16rem}
-.mn{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1;background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.mn{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1;color:var(--a);letter-spacing:-.025em;font-variant-numeric:tabular-nums}
 .ml{font-size:1rem;font-weight:600;color:var(--t)}
 .md{font-size:.85rem;color:var(--t3);line-height:1.35}
 /* quote — the crux */
@@ -148,7 +153,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .q-by{margin-top:1.4rem;font-size:.85rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
 /* checklist — governance pillars */
 .check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1rem;margin-top:1.5rem;text-align:left}
-.check{display:flex;gap:.75rem;align-items:flex-start;background:var(--s);border:1px solid var(--b);border-radius:14px;padding:1.1rem}
+.check{display:flex;gap:.75rem;align-items:flex-start;background:var(--s);border:1px solid var(--hair);border-radius:14px;padding:1.2rem 1.15rem}
 .check .ck{width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(34,211,160,.12);border-radius:8px;color:var(--g)}
 .check h4{font-size:1rem;font-weight:700;margin-bottom:.25rem}
 .check p{font-size:.86rem;color:var(--t2);line-height:1.4}
@@ -169,7 +174,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="s-tag">Built for the AI age</div>
       <h2 class="s-h"><span class="grad">Empower</span>. <span class="grad">Govern</span>. <span class="grad">Audit</span>.</h2>
       <p class="s-sub">The three things an enterprise actually needs from AI at work — in one SuperAgent, not three products.</p>
-      <div class="grid"><div class="card"><div class="ci"><i data-lucide="zap" style="width:18px;height:18px"></i></div><h3>Empower</h3><p>Get work done in <span class="grad">one keystroke</span> — recognize, compute, search, ask, act across every system. ~95% answered on-device, at zero tokens.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>Govern</h3><p>PII masked at the model boundary, RBAC over systems and models, identity passthrough, and admin <span class="grad">kill-switches</span> on anything.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audit</h3><p>Every action recorded and offline-verifiable — answer “<span class="grad">what did AI touch?</span>” the instant you’re asked.</p></div></div>
+      <div class="grid"><div class="card"><div class="ci"><i data-lucide="zap" style="width:18px;height:18px"></i></div><h3>Empower</h3><p>Get work done in <span class="grad">one keystroke</span> — recognize, compute, search, ask, act across every system. Most everyday answers resolve on-device, at zero tokens.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>Govern</h3><p>PII masked at the model boundary, RBAC over systems and models, identity passthrough, and admin <span class="grad">kill-switches</span> on every connector, model and capability.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audit</h3><p>Every action recorded and offline-verifiable — answer “<span class="grad">what did AI touch?</span>” the instant you’re asked.</p></div></div>
     </div></div>
 <div class="slide" data-title="Ten tabs and retyping. Or [[one keystroke.]]"><div class="s-content">
       <div class="s-tag">The shift</div>
@@ -269,7 +274,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="badges"><span class="badge">search</span><span class="badge">connected-apps</span><span class="badge">read-only</span></div>
     </div>
   </div></div>
-<div class="slide feat" data-title="=ask gets a cited answer — [[the next rep gets it free]]"><div class="s-content feat-stack">
+<div class="slide feat" data-title="=ask gets a cited answer — [[sourced, not guessed]]"><div class="s-content feat-stack">
     <div class="feat-top"><div class="bolt-ui">
     <div class="bsearch"><span class="butilchip"><i data-lucide="sparkles" style="width:18px;height:18px"></i>=ask<i data-lucide="x"></i></span><span class="bq">what’s our refund window for annual plans cancelled mid-term?</span><span class="bcaret"></span><span class="bx"><i data-lucide="x" style="width:18px;height:18px"></i></span></div>
     <div class="butils"><span class="buc"><i data-lucide="sparkles" style="width:18px;height:18px"></i>AI</span><span class="buc"><i data-lucide="message-square" style="width:18px;height:18px"></i>Ask</span><span class="buc"><i data-lucide="clipboard" style="width:18px;height:18px"></i>Clips</span><span class="buc"><i data-lucide="calendar-days" style="width:18px;height:18px"></i>Date</span><span class="buc"><i data-lucide="globe" style="width:18px;height:18px"></i>TZ</span><span class="buc"><i data-lucide="map-pin" style="width:18px;height:18px"></i>Map</span><span class="buc"><i data-lucide="folder" style="width:18px;height:18px"></i>Apps</span><span class="buc"><i data-lucide="layers" style="width:18px;height:18px"></i>Tabs</span><span class="buc"><i data-lucide="calculator" style="width:18px;height:18px"></i>Calc</span><span class="buc"><i data-lucide="timer" style="width:18px;height:18px"></i>Timers</span><span class="buc"><i data-lucide="qr-code" style="width:18px;height:18px"></i>QR</span><span class="buc"><i data-lucide="key-round" style="width:18px;height:18px"></i>Pwd</span><span class="buc"><i data-lucide="folder-open" style="width:18px;height:18px"></i>Browse</span><span class="buc plus"><i data-lucide="plus" style="width:18px;height:18px"></i></span></div>
@@ -279,17 +284,17 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
     <div class="bbody"><div class="bstat">AI</div><div class="btitle">Answered with web search + citations [1][2] you can check</div><div class="bsub">a real question that earned a model call — sourced, not guessed</div></div>
     <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
   </div><div class="brow">
-    <span class="bind"></span><span class="bi"><i data-lucide="database" style="width:18px;height:18px"></i></span>
-    <div class="bbody"><div class="bstat">CACHED</div><div class="btitle">Next rep who asks the same thing: served from the shared cache</div><div class="bsub">cached=true · same cited answer · instant · $0 extra tokens</div></div>
+    <span class="bind"></span><span class="bi"><i data-lucide="lock" style="width:18px;height:18px"></i></span>
+    <div class="bbody"><div class="bstat">MASKED</div><div class="btitle">Customer details in your question stay local</div><div class="bsub">masked before the model · restored in the reply</div></div>
     <div class="benter"><span class="bek">Enter copy</span><span class="bcopy"><i data-lucide="clipboard" style="width:18px;height:18px"></i></span></div>
   </div></div>
   </div></div>
     <div class="feat-btm">
-      <div class="s-tag t-llm">Ask once, free for the team</div>
-      <h2 class="s-h">=ask gets a cited answer — <span class="grad">the next rep gets it free</span></h2>
-      <p class="s-sub">When you genuinely need to look something up, =ask answers with cited web results — and saves the answer to a cross-user cache. The next teammate who asks the same question gets it instantly, for free. Your team’s answers compound.</p>
-      <div class="feat-note"><i data-lucide="coins" style="width:18px;height:18px"></i><span>Cited so you can trust it · cached so the team never pays for the same answer twice.</span></div>
-      <div class="badges"><span class="badge">=ask</span><span class="badge">citations</span><span class="badge">shared-cache</span></div>
+      <div class="s-tag t-llm">A cited answer, sourced not guessed</div>
+      <h2 class="s-h">=ask gets a cited answer — <span class="grad">sourced, not guessed</span></h2>
+      <p class="s-sub">When you genuinely need to look something up, =ask answers with cited web results you can open and verify — without leaving the ticket. A real source beats a guessed answer in front of a customer.</p>
+      <div class="feat-note"><i data-lucide="coins" style="width:18px;height:18px"></i><span>Cited so you can trust it — and sensitive customer details are masked before any model sees them.</span></div>
+      <div class="badges"><span class="badge">=ask</span><span class="badge">citations</span><span class="badge">masked</span></div>
     </div>
   </div></div>
 <div class="slide feat" data-title="Time zones and currency, [[without the side-trip]]"><div class="s-content feat-stack">
@@ -393,7 +398,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 <button id="next" aria-label="next"><i data-lucide="chevron-right"></i></button></div></div>
 <script>
 const S=document.querySelectorAll('.slide'),N=S.length;let i=0;
-const idx=[{t:"Answer the customer [[before they refresh.]]",i:0},{t:"The crux",i:1},{t:"[[Empower]]. [[Govern]]. [[Audit]].",i:2},{t:"Ten tabs and retyping. Or [[one keystroke.]]",i:3},{t:"Fire a templated reply [[before you finish typing]]",i:4},{t:"Re-grab the order id you copied [[ten minutes ago]]",i:5},{t:"Paste the ticket — Bolt [[reads it for you]]",i:6},{t:"Find the answer [[across your apps]] — from one box",i:7},{t:"=ask gets a cited answer — [[the next rep gets it free]]",i:8},{t:"Time zones and currency, [[without the side-trip]]",i:9},{t:"Resume the last thing — [[hit ↑, it’s back]]",i:10},{t:"Faster first reply. [[Fewer tabs.]] Less retyping.",i:11},{t:"Your secrets never reach the model",i:12},{t:"Customer details stay [[yours]]",i:13},{t:"Put it in [[every]] hand for free — keep [[every]] action under control",i:14},{t:"Put the SuperAgent in every rep’s hands. [[Watch the queue move faster.]]",i:15}];
+const idx=[{t:"Answer the customer [[before they refresh.]]",i:0},{t:"The crux",i:1},{t:"[[Empower]]. [[Govern]]. [[Audit]].",i:2},{t:"Ten tabs and retyping. Or [[one keystroke.]]",i:3},{t:"Fire a templated reply [[before you finish typing]]",i:4},{t:"Re-grab the order id you copied [[ten minutes ago]]",i:5},{t:"Paste the ticket — Bolt [[reads it for you]]",i:6},{t:"Find the answer [[across your apps]] — from one box",i:7},{t:"=ask gets a cited answer — [[sourced, not guessed]]",i:8},{t:"Time zones and currency, [[without the side-trip]]",i:9},{t:"Resume the last thing — [[hit ↑, it’s back]]",i:10},{t:"Faster first reply. [[Fewer tabs.]] Less retyping.",i:11},{t:"Your secrets never reach the model",i:12},{t:"Customer details stay [[yours]]",i:13},{t:"Put it in [[every]] hand for free — keep [[every]] action under control",i:14},{t:"Put the SuperAgent in every rep’s hands. [[Watch the queue move faster.]]",i:15}];
 function show(n){i=Math.max(0,Math.min(N-1,n));S.forEach((s,k)=>s.classList.toggle('active',k===i));document.getElementById('counter').textContent=(i+1)+' / '+N;location.hash='#'+i;}
 document.getElementById('next').onclick=()=>show(i+1);document.getElementById('prev').onclick=()=>show(i-1);
 document.getElementById('theme').onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';};

@@ -3,31 +3,36 @@
 <title>Bolt for the DPO — the AI SuperAgent for work · Empower · Govern · Audit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="/decks/lucide.min.js"></script>
-<style>:root{--bg:#050810;--s:#0d1426;--s2:#111827;--b:rgba(37,99,235,.18);--a:#60a5fa;--a2:#2563eb;--g:#22d3a0;--am:#f59e0b;--r:#f87171;--t:#f1f5f9;--t2:#94a3b8;--t3:#64748b}
-[data-theme="light"]{--bg:#eef3ff;--s:#fff;--s2:#f6f9ff;--b:rgba(37,99,235,.2);--a:#2563eb;--a2:#1d4ed8;--g:#166534;--am:#b45309;--r:#b91c1c;--t:#0b1220;--t2:#334155;--t3:#475569}
+<style>:root{--bg:#070b14;--s:#0e1626;--s2:#131c30;--b:rgba(148,163,184,.14);--ab:rgba(96,165,250,.22);--a:#7eb0ff;--a2:#3b82f6;--g:#34d399;--am:#fbbf24;--r:#f87171;--t:#f3f6fb;--t2:#aeb9cc;--t3:#6b7689;--hair:rgba(148,163,184,.13)}
+[data-theme="light"]{--bg:#f7f9fc;--s:#ffffff;--s2:#f2f5fa;--b:rgba(15,23,42,.09);--ab:rgba(37,99,235,.16);--a:#2563eb;--a2:#1d4ed8;--g:#0f9d6c;--am:#b45309;--r:#dc2626;--t:#101828;--t2:#475467;--t3:#667085;--hair:rgba(15,23,42,.08)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);overflow:hidden}
+html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);overflow:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #deck{width:100vw;height:100dvh;display:flex;flex-direction:column;position:relative}
 #viewport{flex:1 1 0;position:relative;overflow:hidden}
 .slide{position:absolute;inset:0;display:none;padding:clamp(2rem,4.5vw,5rem) clamp(2rem,6vw,7rem);overflow:hidden;flex-direction:column;justify-content:center}
 .slide.active{display:flex}
-.grad{background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* editorial emphasis — one confident accent colour, never a rainbow clip */
+.grad{color:var(--a);-webkit-text-fill-color:currentColor;font-weight:inherit}
 .s-content{width:100%;max-width:1180px;margin:0 auto}
-.s-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a);background:var(--b);border:1px solid var(--b);padding:.32rem .7rem;border-radius:999px;margin-bottom:1rem}
-.s-tag.t-net{color:var(--a2);background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.25)}
-.s-tag.t-llm{color:var(--am);background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25)}
-.s-h{font-size:clamp(1.7rem,3.6vw,3rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;margin-bottom:.7rem}
-.s-h.big{font-size:clamp(2.4rem,5.5vw,4.4rem)}
-.s-sub{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--t2);max-width:60ch;line-height:1.5}
+/* eyebrow — a quiet label with a short leading rule, not a candy pill */
+.s-tag{display:inline-flex;align-items:center;gap:.55rem;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:1.05rem}
+.s-tag::before{content:"";width:1.6rem;height:1px;background:currentColor;opacity:.55;flex:none}
+.s-tag.t-net{color:var(--a2)}
+.s-tag.t-llm{color:var(--am)}
+.s-h{font-size:clamp(1.7rem,3.6vw,3rem);font-weight:700;line-height:1.1;letter-spacing:-.025em;margin-bottom:.8rem;color:var(--t)}
+.s-h.big{font-size:clamp(2.4rem,5.5vw,4.4rem);letter-spacing:-.03em}
+.s-sub{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--t2);max-width:62ch;line-height:1.55}
 /* hero */
 .hero{align-items:center;text-align:center;background:radial-gradient(110% 80% at 50% 0%,rgba(37,99,235,.10),transparent 55%),radial-gradient(120% 90% at 50% 120%,rgba(96,165,250,.10),transparent 55%),var(--bg)}
 .hero-in{max-width:1000px}
-.hero-h{font-size:clamp(2.6rem,7vw,5.6rem);font-weight:800;line-height:1.02;letter-spacing:-.03em;margin-bottom:1rem}
-.hero-sub{font-size:clamp(1.05rem,2vw,1.6rem);color:var(--t2);line-height:1.45;max-width:46ch;margin:0 auto}
-.hero-stats{display:flex;gap:clamp(1.5rem,4vw,4rem);justify-content:center;margin-top:2.5rem}
-.hstat{display:flex;flex-direction:column;gap:.2rem}
-.hn{font-size:clamp(1.8rem,4vw,3.2rem);font-weight:800;background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.hl{font-size:.8rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.hero-h{font-size:clamp(2.6rem,7vw,5.4rem);font-weight:800;line-height:1.04;letter-spacing:-.038em;margin-bottom:1.1rem}
+.hero-sub{font-size:clamp(1.05rem,2vw,1.55rem);color:var(--t2);line-height:1.5;max-width:48ch;margin:0 auto;font-weight:400}
+.hero-stats{display:flex;gap:clamp(1.5rem,4vw,4rem);justify-content:center;margin-top:2.6rem}
+.hstat{display:flex;flex-direction:column;gap:.25rem;position:relative;padding-left:clamp(1.5rem,4vw,4rem);text-align:left}
+.hstat:first-child{padding-left:0}
+.hstat:not(:first-child)::before{content:"";position:absolute;left:0;top:.1rem;bottom:.1rem;width:1px;background:var(--hair)}
+.hn{font-size:clamp(1.9rem,4vw,3.1rem);font-weight:800;color:var(--a);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.hl{font-size:.8rem;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;line-height:1.3}
 /* section divider */
 .s-accent{align-items:center;text-align:center;background:radial-gradient(100% 80% at 50% 30%,rgba(37,99,235,.08),transparent 60%),var(--bg)}
 .s-accent.t-net{background:radial-gradient(100% 80% at 50% 30%,rgba(96,165,250,.10),transparent 60%),var(--bg)}
@@ -103,10 +108,10 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .shot img{width:100%;max-width:1280px;border-radius:16px;border:1px solid var(--b);box-shadow:0 24px 60px rgba(0,0,0,.5)}
 /* cards / content */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.4rem}
-.card{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:1.2rem}
-.card .ci{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--b);border-radius:10px;color:var(--a);margin-bottom:.7rem}
-.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.35rem}
-.card p{font-size:.88rem;color:var(--t2);line-height:1.45}
+.card{background:var(--s);border:1px solid var(--hair);border-radius:14px;padding:1.3rem 1.25rem}
+.card .ci{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--ab);border-radius:10px;color:var(--a);margin-bottom:.8rem}
+.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem;letter-spacing:-.01em;color:var(--t)}
+.card p{font-size:.88rem;color:var(--t2);line-height:1.5}
 .badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem}
 .badge{font-size:.7rem;font-weight:600;color:var(--t2);background:var(--s2);border:1px solid var(--b);padding:.18rem .5rem;border-radius:6px}
 .badge.g{color:var(--g);background:rgba(34,211,160,.1);border-color:rgba(34,211,160,.22)}
@@ -124,9 +129,9 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .cover-role{margin-top:1.6rem;font-size:.9rem;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
 /* split: today vs with-bolt */
 .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.5vw,2rem);margin-top:1.6rem;text-align:left}
-.spanel{background:var(--s);border:1px solid var(--b);border-radius:16px;padding:clamp(1.2rem,2.2vw,1.8rem)}
-.spanel.today{border-color:rgba(248,113,113,.25)}
-.spanel.bolt{border-color:rgba(37,99,235,.3);background:linear-gradient(180deg,rgba(37,99,235,.06),transparent)}
+.spanel{background:var(--s);border:1px solid var(--hair);border-radius:16px;padding:clamp(1.3rem,2.2vw,1.9rem)}
+.spanel.today{border-color:rgba(239,68,68,.22)}
+.spanel.bolt{border-color:var(--ab);background:var(--s)}
 .sp-tag{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.7rem}
 .spanel.today .sp-tag{color:var(--r)}
 .spanel.bolt .sp-tag{color:var(--a)}
@@ -138,7 +143,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 /* metric band — the change in numbers */
 .metric-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(1.5rem,4vw,3.5rem);margin-top:2rem}
 .mstat{display:flex;flex-direction:column;gap:.3rem;max-width:16rem}
-.mn{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1;background:linear-gradient(120deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.mn{font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1;color:var(--a);letter-spacing:-.025em;font-variant-numeric:tabular-nums}
 .ml{font-size:1rem;font-weight:600;color:var(--t)}
 .md{font-size:.85rem;color:var(--t3);line-height:1.35}
 /* quote — the crux */
@@ -148,7 +153,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .q-by{margin-top:1.4rem;font-size:.85rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
 /* checklist — governance pillars */
 .check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1rem;margin-top:1.5rem;text-align:left}
-.check{display:flex;gap:.75rem;align-items:flex-start;background:var(--s);border:1px solid var(--b);border-radius:14px;padding:1.1rem}
+.check{display:flex;gap:.75rem;align-items:flex-start;background:var(--s);border:1px solid var(--hair);border-radius:14px;padding:1.2rem 1.15rem}
 .check .ck{width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(34,211,160,.12);border-radius:8px;color:var(--g)}
 .check h4{font-size:1rem;font-weight:700;margin-bottom:.25rem}
 .check p{font-size:.86rem;color:var(--t2);line-height:1.4}
@@ -169,7 +174,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="s-tag">Built for the AI age</div>
       <h2 class="s-h"><span class="grad">Empower</span>. <span class="grad">Govern</span>. <span class="grad">Audit</span>.</h2>
       <p class="s-sub">The three things an enterprise actually needs from AI at work — in one SuperAgent, not three products.</p>
-      <div class="grid"><div class="card"><div class="ci"><i data-lucide="zap" style="width:18px;height:18px"></i></div><h3>Empower</h3><p>Get work done in <span class="grad">one keystroke</span> — recognize, compute, search, ask, act across every system. ~95% answered on-device, at zero tokens.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>Govern</h3><p>PII masked at the model boundary, RBAC over systems and models, identity passthrough, and admin <span class="grad">kill-switches</span> on anything.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audit</h3><p>Every action recorded and offline-verifiable — answer “<span class="grad">what did AI touch?</span>” the instant you’re asked.</p></div></div>
+      <div class="grid"><div class="card"><div class="ci"><i data-lucide="zap" style="width:18px;height:18px"></i></div><h3>Empower</h3><p>Get work done in <span class="grad">one keystroke</span> — recognize, compute, search, ask, act across every system. Most everyday answers resolve on-device, at zero tokens.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>Govern</h3><p>PII masked at the model boundary, RBAC over systems and models, identity passthrough, and admin <span class="grad">kill-switches</span> on every connector, model and capability.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audit</h3><p>Every action recorded and offline-verifiable — answer “<span class="grad">what did AI touch?</span>” the instant you’re asked.</p></div></div>
     </div></div>
 <div class="slide" data-title="Shadow AI is a [[privacy incident waiting to happen]]"><div class="s-content">
       <div class="s-tag">The exposure you already carry</div>
@@ -204,20 +209,20 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="s-tag">The shift</div>
       <h2 class="s-h">The same work — but the <span class="grad">identifiers never leave</span></h2>
       
-      <div class="split-grid"><div class="spanel today"><div class="sp-tag">Consumer AI today</div><h3 class="sp-h">Ungoverned processing</h3><ul class="sp-list"><li><span>Real names, emails and IDs reach the model</span></li><li><span>Personal data leaves the device, retained who-knows-where</span></li><li><span>A shared bot reaches more than the user is allowed to see</span></li><li><span>No lawful-basis record, no transfer mechanism</span></li><li><span>No log to produce when you’re asked to account for it</span></li></ul></div><div class="spanel bolt"><div class="sp-tag">With Bolt</div><h3 class="sp-h">Masked, identity-aware, accountable</h3><ul class="sp-list"><li><span>PII tokenized before the model — it sees «EMAIL», not the person</span></li><li><span>~95% answered on-device — most work never leaves at all</span></li><li><span>Each system reached as the user, respecting that user’s access</span></li><li><span>Data stays in your infrastructure — residency is yours to set</span></li><li><span>Every action in a tamper-evident, offline-verifiable record</span></li></ul></div></div>
+      <div class="split-grid"><div class="spanel today"><div class="sp-tag">Consumer AI today</div><h3 class="sp-h">Ungoverned processing</h3><ul class="sp-list"><li><span>Real names, emails and IDs reach the model</span></li><li><span>Personal data leaves the device, retained who-knows-where</span></li><li><span>A shared bot reaches more than the user is allowed to see</span></li><li><span>No lawful-basis record, no transfer mechanism</span></li><li><span>No log to produce when you’re asked to account for it</span></li></ul></div><div class="spanel bolt"><div class="sp-tag">With Bolt</div><h3 class="sp-h">Masked, identity-aware, accountable</h3><ul class="sp-list"><li><span>PII tokenized before the model — it sees «EMAIL», not the person</span></li><li><span>Most work answered on-device — it never leaves at all</span></li><li><span>Each system reached as the user, respecting that user’s access</span></li><li><span>Data stays in your infrastructure — residency is yours to set</span></li><li><span>Every action in a tamper-evident, offline-verifiable record</span></li></ul></div></div>
     </div></div>
 <div class="slide s-accent " data-title="Connect everything — [[1st- and 3rd-party]] — into one governed surface">
       <div class="s-content sec-mid">
         <div class="s-tag">One SuperAgent, every system</div>
         <h2 class="s-h big">Connect everything — <span class="grad">1st- and 3rd-party</span> — into one governed surface</h2>
-        <p class="s-sub">Your apps, your models, your tools and agents — reached as <span class="grad">you</span>, governed by <span class="grad">IT</span>, audited for <span class="grad">everyone</span>.</p>
+        <p class="s-sub">Your apps, your models, your tools and agents — even the in-house app only <span class="grad">you</span> run — reached as <span class="grad">you</span>, governed by <span class="grad">IT</span>, audited for <span class="grad">everyone</span>.</p>
         <div class="sec-count">LLMs · MCP · Agents · Skills · Apps — connect · govern · distribute · audit</div>
       </div></div>
 <div class="slide" data-title="Bring your [[systems]], your [[models]] and your [[tools]] — under one policy"><div class="s-content">
       <div class="s-tag">The governed hub</div>
       <h2 class="s-h">Bring your <span class="grad">systems</span>, your <span class="grad">models</span> and your <span class="grad">tools</span> — under one policy</h2>
       
-      <div class="grid"><div class="card"><div class="ci"><i data-lucide="plug" style="width:18px;height:18px"></i></div><h3>Your systems — 1st &amp; 3rd party</h3><p>Email, docs, tickets, CRM, code, data — connected once and reached from one surface, instead of ten open tabs.</p></div><div class="card"><div class="ci"><i data-lucide="brain" style="width:18px;height:18px"></i></div><h3>The models you choose</h3><p>Bring your own LLMs and route by policy. The model is reached for <span class="grad">last</span> — on your terms, never by default.</p></div><div class="card"><div class="ci"><i data-lucide="blocks" style="width:18px;height:18px"></i></div><h3>MCP, agents, skills &amp; apps</h3><p>A hub of tools and agents your org extends — admins push the approved ones and kill-switch the rest.</p></div><div class="card"><div class="ci"><i data-lucide="fingerprint" style="width:18px;height:18px"></i></div><h3>Identity passthrough</h3><p>Bolt acts with <span class="grad">your</span> identity and respects <span class="grad">your</span> access — you see only what you’re allowed to, in every connected system.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>RBAC over everything</h3><p>Admins govern who can reach which system, model, tool and skill — by role, department and group.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audited &amp; distributed centrally</h3><p>Roll the hub out to the org, change it once, and keep a tamper-evident record of every action.</p></div></div>
+      <div class="grid"><div class="card"><div class="ci"><i data-lucide="plug" style="width:18px;height:18px"></i></div><h3>Any system — even your in-house apps</h3><p>Email, docs, tickets, CRM, code, data — and the internal app only <span class="grad">your</span> company runs — connected through <span class="grad">open MCP</span>, not a fixed catalog you wait on us to extend.</p></div><div class="card"><div class="ci"><i data-lucide="brain" style="width:18px;height:18px"></i></div><h3>The models you choose</h3><p>Bring your own LLMs and route by policy. The model is reached for <span class="grad">last</span> — on your terms, never by default.</p></div><div class="card"><div class="ci"><i data-lucide="blocks" style="width:18px;height:18px"></i></div><h3>MCP, agents, skills &amp; apps</h3><p>An <span class="grad">open</span> hub your org extends — connect any MCP server, push the approved tools and agents, and kill-switch the rest.</p></div><div class="card"><div class="ci"><i data-lucide="fingerprint" style="width:18px;height:18px"></i></div><h3>Identity passthrough</h3><p>Bolt acts with <span class="grad">your</span> identity and respects <span class="grad">your</span> access — you see only what you’re allowed to, in every connected system.</p></div><div class="card"><div class="ci"><i data-lucide="shield-check" style="width:18px;height:18px"></i></div><h3>RBAC over everything</h3><p>Admins govern who can reach which system, model, tool and skill — by role, department and group.</p></div><div class="card"><div class="ci"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></div><h3>Audited &amp; distributed centrally</h3><p>Roll the hub out to the org, change it once, and keep a tamper-evident record of every action.</p></div></div>
     </div></div>
 <div class="slide s-accent " data-title="You don’t trade [[control]] for speed — you get [[both]]">
       <div class="s-content sec-mid">
@@ -230,7 +235,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="s-tag">Governed by design</div>
       <h2 class="s-h">The six things that make it <span class="grad">deployable</span></h2>
       
-      <div class="check-grid"><div class="check"><span class="ck"><i data-lucide="shield-check" style="width:18px;height:18px"></i></span><div><h4>PII masked at the model boundary</h4><p>Names, card numbers, keys and IDs are tokenized before any model sees them and restored in the answer. The tool gets the real value; the model never does.</p></div></div><div class="check"><span class="ck"><i data-lucide="fingerprint" style="width:18px;height:18px"></i></span><div><h4>Identity passthrough</h4><p>Bolt acts with your identity and respects your access — every connected system shows you only what you’re permitted to see.</p></div></div><div class="check"><span class="ck"><i data-lucide="sliders-horizontal" style="width:18px;height:18px"></i></span><div><h4>RBAC over systems, models & tools</h4><p>Capabilities gated by role, department and group — with admin kill-switches (even proactive AI suggestions can be turned off org-wide).</p></div></div><div class="check"><span class="ck"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></span><div><h4>A tamper-evident audit trail</h4><p>Every action is recorded and exportable — a portable proof you can verify offline, built for the auditor in the room.</p></div></div><div class="check"><span class="ck"><i data-lucide="lock" style="width:18px;height:18px"></i></span><div><h4>Data never leaves your boundary</h4><p>No Sparcle server sits in the path. Deploy in your own infrastructure (Helm / Docker) or fully on-device.</p></div></div><div class="check"><span class="ck"><i data-lucide="gauge" style="width:18px;height:18px"></i></span><div><h4>The model is reached for last</h4><p>95%+ of answers come from on-device recognition at zero tokens. The LLM is the exception, not the default — less spend, less exposure.</p></div></div></div>
+      <div class="check-grid"><div class="check"><span class="ck"><i data-lucide="shield-check" style="width:18px;height:18px"></i></span><div><h4>PII masked at the model boundary</h4><p>Names, card numbers, keys and IDs are tokenized before any model sees them and restored in the answer. The tool gets the real value; the model never does.</p></div></div><div class="check"><span class="ck"><i data-lucide="fingerprint" style="width:18px;height:18px"></i></span><div><h4>Identity passthrough</h4><p>Bolt acts with your identity and respects your access — every connected system shows you only what you’re permitted to see.</p></div></div><div class="check"><span class="ck"><i data-lucide="sliders-horizontal" style="width:18px;height:18px"></i></span><div><h4>RBAC over systems, models & tools</h4><p>Capabilities gated by role, department and group — with admin kill-switches (even proactive AI suggestions can be turned off org-wide).</p></div></div><div class="check"><span class="ck"><i data-lucide="scroll-text" style="width:18px;height:18px"></i></span><div><h4>A tamper-evident audit trail</h4><p>Every action is recorded and exportable — a portable proof you can verify offline, built for the auditor in the room.</p></div></div><div class="check"><span class="ck"><i data-lucide="lock" style="width:18px;height:18px"></i></span><div><h4>Data never leaves your boundary</h4><p>No Sparcle server sits in the path. Deploy in your own infrastructure (Helm / Docker) or fully on-device.</p></div></div><div class="check"><span class="ck"><i data-lucide="gauge" style="width:18px;height:18px"></i></span><div><h4>The model is reached for last</h4><p>Most answers come from on-device recognition at zero tokens. The LLM is the exception, not the default — less spend, less exposure.</p></div></div></div>
       <div class="feat-note"><i data-lucide="shield-check" style="width:18px;height:18px"></i><span>Productivity teams want the speed. Security teams want the control. This is the slide where they agree.</span></div>
     </div></div>
 <div class="slide feat" data-title="Turn AI behaviours off [[org-wide]] — including proactive ones"><div class="s-content feat-stack">
@@ -306,13 +311,13 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
       <div class="s-tag">Where the data lives</div>
       <h2 class="s-h">Residency is <span class="grad">yours to control</span> — there’s no detour through us</h2>
       <p class="s-sub">You can’t govern a transfer you can’t see. Bolt removes the third party from the path entirely.</p>
-      <div class="grid"><div class="card"><div class="ci"><i data-lucide="server" style="width:18px;height:18px"></i></div><h3>In your infrastructure</h3><p>Deploy with Helm or Docker in <span class="grad">your own cloud or region</span>, or run fully on-device. You choose where processing happens.</p></div><div class="card"><div class="ci"><i data-lucide="lock" style="width:18px;height:18px"></i></div><h3>No Sparcle server in the path</h3><p>Data never reaches our servers in any shipping mode — so <span class="grad">there is no transfer to us to account for.</span></p></div><div class="card"><div class="ci"><i data-lucide="gauge" style="width:18px;height:18px"></i></div><h3>Most answers never reach a model at all</h3><p>~95% resolve on-device through local recognition — <span class="grad">data-minimisation by default</span>, not by policy alone.</p></div></div>
+      <div class="grid"><div class="card"><div class="ci"><i data-lucide="server" style="width:18px;height:18px"></i></div><h3>In your infrastructure</h3><p>Deploy with Helm or Docker in <span class="grad">your own cloud or region</span>, or run fully on-device. You choose where processing happens.</p></div><div class="card"><div class="ci"><i data-lucide="lock" style="width:18px;height:18px"></i></div><h3>No Sparcle server in the path</h3><p>Data never reaches our servers in any shipping mode — so <span class="grad">there is no transfer to us to account for.</span></p></div><div class="card"><div class="ci"><i data-lucide="gauge" style="width:18px;height:18px"></i></div><h3>Most answers never reach a model at all</h3><p>They resolve on-device through local recognition — <span class="grad">data-minimisation by default</span>, not by policy alone.</p></div></div>
     </div></div>
 <div class="slide s-accent" data-title="What your privacy program can put in writing"><div class="s-content sec-mid">
       <div class="s-tag">The posture you can attest to</div>
       <h2 class="s-h big">What your privacy program can put in writing</h2>
       
-      <div class="metric-grid"><div class="mstat"><span class="mn">100%</span><span class="ml">of AI prompts masked at the boundary</span><span class="md">identifiers tokenized before the model, restored after</span></div><div class="mstat"><span class="mn">~95%</span><span class="ml">of answers never reach a model</span><span class="md">on-device processing · data-minimisation by default</span></div><div class="mstat"><span class="mn">0</span><span class="ml">data sent to Sparcle servers</span><span class="md">residency stays in your boundary, your region</span></div></div>
+      <div class="metric-grid"><div class="mstat"><span class="mn">100%</span><span class="ml">of AI prompts masked at the boundary</span><span class="md">identifiers tokenized before the model, restored after</span></div><div class="mstat"><span class="mn">Most</span><span class="ml">answers never reach a model</span><span class="md">on-device processing · data-minimisation by default</span></div><div class="mstat"><span class="mn">0</span><span class="ml">data sent to Sparcle servers</span><span class="md">residency stays in your boundary, your region</span></div></div>
     </div></div>
 <div class="slide" data-title="Put it in [[every]] hand for free — keep [[every]] action under control"><div class="s-content">
       <div class="s-tag">Free, but governed</div>

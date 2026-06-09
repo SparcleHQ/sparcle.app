@@ -1,0 +1,401 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
+const youGet = [
+  "Deep access to the Bolt runtime, our engineering team, and shipping order priority.",
+  "Meaningful input on the roadmap. Design partners shape what ships in Q4 and Q1.",
+  "Direct escalation path to the founding team, plus a weekly working call.",
+  "A signed reference letter at the end of the program, if you're willing to give one. Optional.",
+];
+
+const youDont = [
+  "No reselling rights. We do not white-label.",
+  "No custom features that don't generalize. We will push back hard on bespoke work.",
+  "No unlimited pilot extensions. The program is time-boxed.",
+  "No free production deployment in perpetuity. The program transitions to standard pilot pricing on graduation.",
+];
+
+const fit = [
+  "CISO, CIO, Head of Architecture, or VP of Engineering at a bank, insurer, healthcare system, government agency, AmLaw 100 firm, or other regulated enterprise.",
+  "A real AI agent initiative that is past prototype and aiming for production this fiscal year. Not a research project.",
+  "A named executive sponsor with budget authority or a direct path to it.",
+  "An engineering team that can dedicate one or two engineers part-time for integration and feedback during the program.",
+  "Comfort with private feedback channels. Design partners hear about new features two to four weeks before public release.",
+];
+---
+
+<BaseLayout
+  title="Design Partner Program | Sparcle"
+  description="Five to seven slots open. Sparcle Design Partners get deep access to Bolt's runtime, our engineering team, and meaningful input on the roadmap. Closing applications end of July."
+  canonical="https://sparcle.app/design-partners"
+>
+  <main class="page-design-partners">
+    <Hero
+      eyebrow="Design Partner Program"
+      title="<strong>Five to seven slots</strong> open for regulated enterprises shipping AI agents this year."
+      lede="Real partners, not an early-access waitlist. We work together on integration, audit, and the parts of agentic AI that don't have textbook answers yet. Cohort closes end of July."
+    />
+
+    <PageSection stripe="b" width="content">
+      <div class="dp-split">
+        <div class="dp-copy">
+          <h2 class="dp-h2">What design partners get</h2>
+          <ul class="dp-bullets">
+            {youGet.map((line) => (<li>{line}</li>))}
+          </ul>
+
+          <h2 class="dp-h2 dp-h2-dont">What they don't get</h2>
+          <ul class="dp-bullets dp-bullets-dont">
+            {youDont.map((line) => (<li>{line}</li>))}
+          </ul>
+
+          <h2 class="dp-h2">Who fits</h2>
+          <ul class="dp-bullets">
+            {fit.map((line) => (<li>{line}</li>))}
+          </ul>
+
+          <p class="dp-note">
+            We're keeping the cohort small because we can't do real co-design work with more than seven partners, and because every design partner becomes a reference. A bad reference is worse than no reference. We'd rather say no to a good company than say yes to one we can't serve well.
+          </p>
+        </div>
+
+        <aside class="dp-form-card">
+          <h3 class="dp-form-card__title">Apply</h3>
+          <p class="dp-form-card__lede">
+            Eight questions, takes about ten minutes. We respond yes or no inside seven days, regardless of outcome.
+          </p>
+
+          <form id="dp-form" class="dp-form" novalidate>
+            <label class="dp-label">
+              <span>Name <span class="req">*</span></span>
+              <input type="text" name="name" required autocomplete="name" />
+            </label>
+            <label class="dp-label">
+              <span>Work email <span class="req">*</span></span>
+              <input type="email" name="email" required autocomplete="email" />
+            </label>
+            <label class="dp-label">
+              <span>Company <span class="req">*</span></span>
+              <input type="text" name="company" required autocomplete="organization" />
+            </label>
+            <label class="dp-label">
+              <span>Your role <span class="req">*</span></span>
+              <input type="text" name="role" required placeholder="e.g. CISO, Head of Architecture" />
+            </label>
+
+            <label class="dp-label">
+              <span>Sector <span class="req">*</span></span>
+              <select name="sector" required>
+                <option value="">Pick one</option>
+                <option value="Banking">Banking</option>
+                <option value="Insurance">Insurance</option>
+                <option value="Asset management">Asset management</option>
+                <option value="Healthcare provider">Healthcare provider</option>
+                <option value="Healthcare payer">Healthcare payer</option>
+                <option value="Legal">Legal</option>
+                <option value="Government / public sector">Government / public sector</option>
+                <option value="Other regulated">Other regulated</option>
+              </select>
+            </label>
+
+            <label class="dp-label">
+              <span>Company size <span class="req">*</span></span>
+              <select name="companySize" required>
+                <option value="">Pick one</option>
+                <option value="<100">Under 100 employees</option>
+                <option value="100-1k">100 to 1,000</option>
+                <option value="1k-10k">1,000 to 10,000</option>
+                <option value="10k+">10,000+</option>
+              </select>
+            </label>
+
+            <label class="dp-label">
+              <span>AI agent initiative stage <span class="req">*</span></span>
+              <select name="aiStage" required>
+                <option value="">Pick one</option>
+                <option value="Exploring">Exploring (no prototype yet)</option>
+                <option value="Prototype">Prototype on a hosted LLM provider</option>
+                <option value="Pilot pre-production">Pilot, pre-production</option>
+                <option value="Production target this year">Production target this fiscal year</option>
+                <option value="Already in production">Already in production, looking to swap stack</option>
+              </select>
+            </label>
+
+            <label class="dp-label">
+              <span>Pilot budget timeline <span class="req">*</span></span>
+              <select name="pilotBudgetTimeline" required>
+                <option value="">Pick one</option>
+                <option value="This quarter">This quarter</option>
+                <option value="This half">This half</option>
+                <option value="This year">This year</option>
+                <option value="Longer">Longer than this year</option>
+                <option value="No budget yet">No budget allocated yet</option>
+              </select>
+            </label>
+
+            <label class="dp-label">
+              <span>Engineering availability <span class="req">*</span></span>
+              <select name="engineeringAvailability" required>
+                <option value="">Pick one</option>
+                <option value="Yes, dedicated">Yes, one or two engineers can dedicate part-time</option>
+                <option value="Yes, shared">Yes, shared with other initiatives</option>
+                <option value="Not yet, but planning">Not yet, but allocating in next quarter</option>
+                <option value="No">No engineering capacity</option>
+              </select>
+            </label>
+
+            <label class="dp-label">
+              <span>Primary use case <span class="req">*</span></span>
+              <textarea name="primaryUseCase" required rows="3" placeholder="In two or three sentences, what is the AI agent supposed to do, and for whom?"></textarea>
+            </label>
+
+            <label class="dp-label">
+              <span>Why are you a good fit for the cohort?</span>
+              <textarea name="whyGoodFit" rows="3" placeholder="Optional. What would you bring that helps us, and what's the constraint we should know about up front?"></textarea>
+            </label>
+
+            {turnstileSiteKey && (
+              <div
+                class="cf-turnstile"
+                data-sitekey={turnstileSiteKey}
+                data-callback="onTurnstileDP"
+                data-error-callback="onTurnstileDPError"
+              />
+            )}
+
+            <button type="submit" class="btn btn-primary btn-lg" id="dp-submit">
+              Submit application
+            </button>
+
+            <p class="dp-form__legal">
+              We read every application. We respond yes or no within seven days. We do not share applications with anyone outside the founding team.
+            </p>
+          </form>
+
+          <div id="dp-success" class="dp-success" hidden>
+            <h4>Application received.</h4>
+            <p>
+              Thanks. We'll respond within seven days, regardless of outcome. If you have an executive sponsor we should know about, feel free to forward this thank-you note to them so they're on the loop.
+            </p>
+          </div>
+          <div id="dp-error" class="dp-error" hidden>
+            <p>
+              Something went wrong submitting the form. Email <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a> with the same content and we'll process it manually.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </PageSection>
+  </main>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+
+  <script is:inline>
+    (function () {
+      let turnstileToken = "";
+      window.onTurnstileDP = function (token) {
+        turnstileToken = token;
+      };
+      window.onTurnstileDPError = function () {
+        turnstileToken = "";
+      };
+
+      const form = document.getElementById("dp-form");
+      const submitBtn = document.getElementById("dp-submit");
+      const success = document.getElementById("dp-success");
+      const errorBox = document.getElementById("dp-error");
+      if (!form) return;
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        success.hidden = true;
+        errorBox.hidden = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        const fd = new FormData(form);
+        const payload = {
+          name: fd.get("name") || "",
+          email: fd.get("email") || "",
+          company: fd.get("company") || "",
+          role: fd.get("role") || "",
+          sector: fd.get("sector") || "",
+          companySize: fd.get("companySize") || "",
+          aiStage: fd.get("aiStage") || "",
+          primaryUseCase: fd.get("primaryUseCase") || "",
+          pilotBudgetTimeline: fd.get("pilotBudgetTimeline") || "",
+          engineeringAvailability: fd.get("engineeringAvailability") || "",
+          whyGoodFit: fd.get("whyGoodFit") || "",
+          turnstileToken: turnstileToken,
+        };
+
+        try {
+          const resp = await fetch("/api/design-partners", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await resp.json();
+          if (data && data.ok) {
+            form.hidden = true;
+            success.hidden = false;
+          } else {
+            errorBox.hidden = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit application";
+          }
+        } catch (err) {
+          errorBox.hidden = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit application";
+        }
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .page-design-partners .dp-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (max-width: 940px) {
+    .page-design-partners .dp-split {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .dp-h2 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-strong);
+  }
+  .dp-h2-dont {
+    color: var(--text-muted);
+  }
+  .dp-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .dp-bullets li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin: 0.55rem 0;
+    line-height: 1.5;
+    color: var(--text-default);
+  }
+  .dp-bullets li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: var(--brand-primary);
+  }
+  .dp-bullets-dont li::before {
+    content: "✕";
+    color: var(--text-muted);
+  }
+  .dp-note {
+    margin-top: 1.5rem;
+    padding: 0.85rem 1rem;
+    background: var(--bg-surface);
+    border-left: 3px solid var(--brand-primary);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .dp-form-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 2rem;
+  }
+  @media (max-width: 940px) {
+    .dp-form-card {
+      position: static;
+    }
+  }
+  .dp-form-card__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.35rem;
+    color: var(--text-strong);
+  }
+  .dp-form-card__lede {
+    margin: 0 0 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .dp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .dp-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--text-default);
+  }
+  .dp-label .req {
+    color: var(--brand-primary);
+  }
+  .dp-label input,
+  .dp-label select,
+  .dp-label textarea {
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font: inherit;
+    font-size: 0.92rem;
+  }
+  .dp-label textarea {
+    resize: vertical;
+    min-height: 4.5rem;
+  }
+  .dp-label input:focus,
+  .dp-label select:focus,
+  .dp-label textarea:focus {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 1px;
+  }
+  .dp-form__legal {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .dp-success,
+  .dp-error {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-sm);
+  }
+  .dp-success {
+    background: color-mix(in oklch, var(--brand-primary) 12%, transparent);
+    border: 1px solid color-mix(in oklch, var(--brand-primary) 35%, transparent);
+  }
+  .dp-error {
+    background: color-mix(in oklch, #d4554b 12%, transparent);
+    border: 1px solid color-mix(in oklch, #d4554b 35%, transparent);
+  }
+  .cf-turnstile {
+    min-height: 65px;
+  }
+</style>

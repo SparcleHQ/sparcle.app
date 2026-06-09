@@ -1,0 +1,263 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const categories = [
+  {
+    name: "Identity",
+    blurb: "Who or what acted, and is that identity stable enough to audit.",
+    questions: [
+      "Does every event carry a stable run_id that groups a full agent invocation end to end?",
+      "Does every event carry a typed actor (user, agent, automation, connector, peer), not a freeform string?",
+    ],
+  },
+  {
+    name: "Policy",
+    blurb: "What was permitted at the moment of action, and on what evidence.",
+    questions: [
+      "Are policy decisions logged with the inputs the policy saw, not just the verdict?",
+      "Are delegation grants (agent A acting on behalf of agent B) logged as first-class events, with explicit expiry?",
+    ],
+  },
+  {
+    name: "Audit",
+    blurb: "Can a third party reproduce the record and prove nothing has been tampered with.",
+    questions: [
+      "Is each event linked to its predecessor by a parent_event_hash over a documented canonical encoding?",
+      "Is the canonical encoding documented and protected by a ratchet test that fails CI on accidental change?",
+      "Can a replay verifier be run by someone outside the vendor, against raw events, with no proprietary dependency?",
+      "Are events bound to downstream vendor audit logs via external_audit_refs (Gmail msg id, Slack ts, Drive revision)?",
+      "Is there protection against insider tampering by an actor with primary-DB access (Merkle root published out of band, signed by a key the DBA cannot impersonate)?",
+    ],
+  },
+  {
+    name: "Privacy",
+    blurb: "What the LLM actually saw, and what survives a Right-to-Erasure request.",
+    questions: [
+      "Is PII masking applied at the LLM boundary, and are real values restored before tool dispatch?",
+      "Are PII values stored under per-subject keys that can be destroyed independently of the chain?",
+      "Is there a documented Right-to-Erasure procedure that preserves chain integrity (crypto-shred receipt or equivalent)?",
+    ],
+  },
+  {
+    name: "Reversibility",
+    blurb: "Refusals, retries, and the difference between a log and a system of record.",
+    questions: [
+      "Are refusals and refused alternatives recorded, not silently discarded?",
+      "Are retries recorded as their own events, with their own outcomes, linked to the original plan?",
+      "Is the chain a system of record for compliance, separate from the application telemetry pipeline (OpenTelemetry, Datadog, Splunk are sinks, not the chain)?",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="AI Agent Vendor Evaluation Checklist | Sparcle"
+  description="Fifteen yes-no questions any security or GRC team can use to evaluate an AI agent platform before a pilot. Five categories: identity, policy, audit, privacy, reversibility."
+  canonical="https://sparcle.app/docs/ai-vendor-checklist"
+>
+  <main class="page-checklist-doc">
+    <article class="checklist-doc">
+      <header class="checklist-doc__header">
+        <p class="checklist-doc__eyebrow">Resource</p>
+        <h1 class="checklist-doc__title">AI Agent Vendor Evaluation Checklist</h1>
+        <p class="checklist-doc__sub">
+          For security, GRC, and architecture teams evaluating any AI agent platform before a pilot in a regulated environment.
+        </p>
+        <p class="checklist-doc__source">By Sparcle. Distribute freely.</p>
+        <div class="checklist-doc__print">
+          <button type="button" onclick="window.print()" class="btn btn-secondary">Print or save as PDF</button>
+          <a href="/checklist" class="checklist-doc__back">&larr; Back to download page</a>
+        </div>
+      </header>
+
+      <section class="checklist-doc__intro">
+        <h2>How to use this</h2>
+        <p>
+          Fifteen yes-no questions. Take them into your next AI agent vendor evaluation and ask the vendor to answer each one with yes or no, plus one sentence of explanation. A "no" on any single question is a finding worth raising in design review. A "no" on any of the audit or privacy questions is hard to recover from at scale.
+        </p>
+        <p>
+          Vendor-neutral. Works for buy-vs-build decisions as well as vendor short-list reviews. Use it on yourself if you are building.
+        </p>
+      </section>
+
+      {categories.map((cat, ci) => {
+        let n = 0;
+        for (let i = 0; i < ci; i++) n += categories[i].questions.length;
+        return (
+          <section class="checklist-doc__category">
+            <h2 class="checklist-doc__cat-name">
+              <span class="checklist-doc__cat-num">{ci + 1}.</span> {cat.name}
+            </h2>
+            <p class="checklist-doc__cat-blurb">{cat.blurb}</p>
+            <ol class="checklist-doc__questions" start={n + 1}>
+              {cat.questions.map((q) => (
+                <li>
+                  <span class="checklist-doc__check" aria-hidden="true">☐</span>
+                  <span class="checklist-doc__q">{q}</span>
+                  <span class="checklist-doc__yn" aria-hidden="true">YES / NO</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        );
+      })}
+
+      <section class="checklist-doc__footer">
+        <h2>Next step</h2>
+        <p>
+          If you are running an evaluation now and want a second pair of eyes from the team that wrote this, reply to the email you received with the checklist link, or write to <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a>. We're happy to read vendor responses and tell you which questions are being answered honestly.
+        </p>
+        <p>
+          If you'd like to see how a deployment that clears all fifteen questions actually works in practice, the Sparcle Design Partner Program has a few slots open: <a href="/design-partners">sparcle.app/design-partners</a>.
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-checklist-doc {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+  .checklist-doc__header {
+    border-bottom: 1px solid var(--border-default);
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+  }
+  .checklist-doc__eyebrow {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-primary);
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+  .checklist-doc__title {
+    font-size: 2.1rem;
+    line-height: 1.2;
+    margin: 0 0 1rem;
+    color: var(--text-strong);
+  }
+  .checklist-doc__sub {
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: var(--text-default);
+    margin: 0 0 0.75rem;
+  }
+  .checklist-doc__source {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 0 1.5rem;
+  }
+  .checklist-doc__print {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .checklist-doc__back {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .checklist-doc__back:hover {
+    color: var(--brand-primary);
+  }
+
+  .checklist-doc__intro {
+    margin-bottom: 2.5rem;
+  }
+  .checklist-doc__intro h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-strong);
+  }
+  .checklist-doc__intro p {
+    line-height: 1.6;
+    color: var(--text-default);
+    margin: 0 0 0.75rem;
+  }
+
+  .checklist-doc__category {
+    margin-bottom: 2.5rem;
+    page-break-inside: avoid;
+  }
+  .checklist-doc__cat-name {
+    font-size: 1.3rem;
+    margin: 0 0 0.4rem;
+    color: var(--text-strong);
+  }
+  .checklist-doc__cat-num {
+    color: var(--brand-primary);
+    font-weight: 700;
+  }
+  .checklist-doc__cat-blurb {
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .checklist-doc__questions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: q;
+  }
+  .checklist-doc__questions li {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr auto;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.65rem 0;
+    border-bottom: 1px dashed var(--border-default);
+    line-height: 1.45;
+    color: var(--text-default);
+  }
+  .checklist-doc__check {
+    font-size: 1.15rem;
+    color: var(--brand-primary);
+    line-height: 1.3;
+  }
+  .checklist-doc__yn {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .checklist-doc__footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-default);
+  }
+  .checklist-doc__footer h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-strong);
+  }
+  .checklist-doc__footer p {
+    line-height: 1.6;
+    color: var(--text-default);
+    margin: 0 0 0.75rem;
+  }
+  .checklist-doc__footer a {
+    color: var(--brand-primary);
+    text-decoration: underline;
+  }
+
+  @media print {
+    .checklist-doc__print {
+      display: none;
+    }
+    .page-checklist-doc {
+      padding: 0;
+    }
+    .checklist-doc__yn {
+      font-weight: 600;
+    }
+  }
+</style>

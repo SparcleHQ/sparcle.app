@@ -1,0 +1,287 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+---
+
+<BaseLayout
+  title="AI Agent Vendor Evaluation Checklist | Sparcle"
+  description="Fifteen yes-no questions any security or GRC team can use to evaluate an AI agent platform before a pilot. Free download, plain language, no marketing."
+  canonical="https://sparcle.app/checklist"
+>
+  <main class="page-checklist">
+    <Hero
+      eyebrow="Free Resource"
+      title="Fifteen questions to ask any AI agent vendor <strong>before you ship to a regulated environment.</strong>"
+      lede="We wrote this after watching the same questions come up across our CISO conversations. Identity, policy, audit, privacy, reversibility. Print it, take it to your next RFP."
+    />
+
+    <PageSection stripe="b" width="content">
+      <div class="checklist-split">
+        <div class="checklist-split__copy">
+          <h2 class="checklist-h2">What's inside</h2>
+          <ul class="checklist-bullets">
+            <li>Fifteen yes-no questions grouped into five categories: identity, policy, audit, privacy, reversibility.</li>
+            <li>Plain language. Anyone on a security or GRC team can read and apply it.</li>
+            <li>Each question maps to a specific failure mode we've watched real platforms ship into production.</li>
+            <li>Vendor-neutral. It works whether you're buying or building.</li>
+            <li>One page printable. Brings clarity to a vendor call without slowing it down.</li>
+          </ul>
+
+          <p class="checklist-note">
+            This is a working document. If you read it and disagree with any of the questions, the wording, or the categories, reply to the email you'll receive. We update the list based on what comes back from people using it.
+          </p>
+        </div>
+
+        <aside class="checklist-form-card">
+          <h3 class="checklist-form-card__title">Get the checklist</h3>
+          <p class="checklist-form-card__lede">
+            Enter your email and we'll send the link. No newsletter sign-up gate, no follow-up calls unless you ask.
+          </p>
+
+          <form id="checklist-form" class="checklist-form" novalidate>
+            <label class="checklist-label">
+              <span>Name <span class="req">*</span></span>
+              <input type="text" name="name" required autocomplete="name" />
+            </label>
+            <label class="checklist-label">
+              <span>Work email <span class="req">*</span></span>
+              <input type="email" name="email" required autocomplete="email" />
+            </label>
+            <label class="checklist-label">
+              <span>Company</span>
+              <input type="text" name="company" autocomplete="organization" />
+            </label>
+            <label class="checklist-label">
+              <span>Role</span>
+              <input type="text" name="role" placeholder="e.g. CISO, Head of Architecture, AppSec Engineer" />
+            </label>
+            <label class="checklist-label">
+              <span>Sector</span>
+              <select name="sector">
+                <option value="">Pick one (optional)</option>
+                <option value="BFSI">Banking, financial services, insurance</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Legal">Legal</option>
+                <option value="Government">Government</option>
+                <option value="Technology">Technology</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+
+            {turnstileSiteKey && (
+              <div
+                class="cf-turnstile"
+                data-sitekey={turnstileSiteKey}
+                data-callback="onTurnstileChecklist"
+                data-error-callback="onTurnstileChecklistError"
+              />
+            )}
+
+            <button type="submit" class="btn btn-primary btn-lg" id="checklist-submit">
+              Send me the link
+            </button>
+
+            <p class="checklist-form__legal">
+              We use your email once to send the link, and to follow up if you ask. We don't resell it and we don't auto-add you to any newsletter.
+            </p>
+          </form>
+
+          <div id="checklist-success" class="checklist-success" hidden>
+            <h4>Check your inbox.</h4>
+            <p>
+              The link is on its way. While you wait, you can also open the checklist directly:
+              <a href="/docs/ai-vendor-checklist">View the checklist</a>.
+            </p>
+          </div>
+          <div id="checklist-error" class="checklist-error" hidden>
+            <p>
+              Something went wrong sending the link. Email
+              <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a> and we'll send it manually.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </PageSection>
+  </main>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+
+  <script is:inline>
+    (function () {
+      let turnstileToken = "";
+      window.onTurnstileChecklist = function (token) {
+        turnstileToken = token;
+      };
+      window.onTurnstileChecklistError = function () {
+        turnstileToken = "";
+      };
+
+      const form = document.getElementById("checklist-form");
+      const submitBtn = document.getElementById("checklist-submit");
+      const success = document.getElementById("checklist-success");
+      const errorBox = document.getElementById("checklist-error");
+      if (!form) return;
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        success.hidden = true;
+        errorBox.hidden = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        const fd = new FormData(form);
+        const payload = {
+          name: fd.get("name") || "",
+          email: fd.get("email") || "",
+          company: fd.get("company") || "",
+          role: fd.get("role") || "",
+          sector: fd.get("sector") || "",
+          turnstileToken: turnstileToken,
+        };
+
+        try {
+          const resp = await fetch("/api/checklist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await resp.json();
+          if (data && data.ok) {
+            form.hidden = true;
+            success.hidden = false;
+          } else {
+            errorBox.hidden = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send me the link";
+          }
+        } catch (err) {
+          errorBox.hidden = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Send me the link";
+        }
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .page-checklist .checklist-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .page-checklist .checklist-split {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .checklist-h2 {
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+    color: var(--text-strong);
+  }
+  .checklist-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+  }
+  .checklist-bullets li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin: 0.75rem 0;
+    color: var(--text-default);
+    line-height: 1.55;
+  }
+  .checklist-bullets li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--brand-primary);
+    font-weight: bold;
+  }
+  .checklist-note {
+    background: var(--bg-surface);
+    border-left: 3px solid var(--brand-primary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 1.25rem;
+  }
+
+  .checklist-form-card {
+    background: var(--bg-surface-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-md);
+  }
+  .checklist-form-card__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.35rem;
+    color: var(--text-strong);
+  }
+  .checklist-form-card__lede {
+    margin: 0 0 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .checklist-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .checklist-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--text-default);
+  }
+  .checklist-label .req {
+    color: var(--brand-primary);
+  }
+  .checklist-label input,
+  .checklist-label select {
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-strong);
+    font: inherit;
+  }
+  .checklist-label input:focus,
+  .checklist-label select:focus {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 1px;
+  }
+  .checklist-form__legal {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .checklist-success,
+  .checklist-error {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-sm);
+  }
+  .checklist-success {
+    background: color-mix(in oklch, var(--brand-primary) 12%, transparent);
+    border: 1px solid color-mix(in oklch, var(--brand-primary) 35%, transparent);
+  }
+  .checklist-error {
+    background: color-mix(in oklch, #d4554b 12%, transparent);
+    border: 1px solid color-mix(in oklch, #d4554b 35%, transparent);
+  }
+  .cf-turnstile {
+    min-height: 65px;
+  }
+</style>

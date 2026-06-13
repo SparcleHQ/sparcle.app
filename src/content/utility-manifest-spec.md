@@ -58,7 +58,7 @@ Adding to any of these lists is a spec version bump. Removing is a breaking chan
 | Action kinds | `url`, `tool`, `utility`, `composer`, `clipboard` |
 | Action `target` | `row`, `list` |
 | Widget types (list) | `list`, `table`, `cards`, `image_grid`, `detail` |
-| Right-widget kinds | `card`, `map`, `image`, `date`, `calc`, `color`, `entity`, `entity_preview`, `weather` |
+| Right-widget kinds | `card`, `map`, `image`, `date`, `calc`, `color`, `entity`, `entity_preview`, `weather`, `markdown` |
 | Right-widget modes | `selected_row`, `list_data` |
 | Canonical row types | `Person`, `Issue`, `Document`, `Event`, `File`, `Incident`, `Account`, `Place`, `Generic` |
 | Template filters | `date`, `upper`, `lower`, `default`, `join`, `truncate`, `jql_escape`, `sql_escape`, `url_escape`, `html_escape` |
@@ -459,7 +459,7 @@ presentation:
   row_key_field: key                      # used by idempotency keys; default 'id'
 
   right_widget:
-    kind: card                            # one of the 9 frozen right-widget kinds
+    kind: card                            # one of the 10 frozen right-widget kinds
     mode: selected_row                    # selected_row | list_data
     bind:
       title: "{{row.fields.summary}}"
@@ -477,7 +477,32 @@ presentation:
 
 The list widget reuses the existing launcher autocomplete dropdown. Each row is rendered with `title_field` as the primary text and `subtitle_field` underneath. `list_fields` populates a compact field strip on the right of each row.
 
-The right_widget reuses the existing right-rail panel; `kind` selects one of the 9 widget components; `bind` provides per-component template bindings. `entity_preview` is the wide detail pane (media + title/subtitle + label/value facts + icon footer) rendered through the shared `EntityPreviewPane`, bound from the selected row's fields with the footer drawn from the manifest's `actions`.
+The right_widget reuses the existing right-rail panel; `kind` selects one of the 10 widget components; `bind` provides per-component template bindings. `entity_preview` is the wide detail pane (media + title/subtitle + label/value facts + icon footer) rendered through the shared `EntityPreviewPane`, bound from the selected row's fields with the footer drawn from the manifest's `actions`.
+
+#### `markdown` — rich, scrollable, sanitized body
+
+`kind: markdown` renders a scrollable pane of **sanitized Markdown** (prose + syntax-highlighted code fences — one primitive covers both). It is available to admin **and** user/bridge utilities, for showing long or richly-formatted content (release notes, a rendered file, a diff, a report) that doesn't fit the fact-table shape of `card`/`entity_preview`.
+
+```yaml
+right_widget:
+  kind: markdown
+  mode: selected_row
+  bind:
+    title: "{{row.title}}"          # optional plain-text header
+    subtitle: "{{row.env}}"         # optional plain-text subheader
+    body: "{{row.release_notes}}"   # Markdown; ```lang fences auto-highlight
+    actions: [open, copy]           # references to actions[].id (footer chips)
+```
+
+`bind.body` is a template resolved against the selected row (`{{row.<field>}}`, `{{count}}`), then rendered through the launcher's `renderRichMarkdown` pipeline: `marked` (GFM) → **DOMPurify sanitize** → DOM post-pass. The contract guarantees:
+
+- The author supplies only a template string; the resolved string is **always sanitized** before injection. No raw HTML passthrough; script/event-handler attributes are stripped. Safe by construction.
+- Links open in the **system browser** (never navigate the launcher), restricted to `http(s)`/`mailto`, with `rel="noopener noreferrer"`.
+- **Remote images are blocked for user/bridge utilities** (replaced with an inert placeholder) to preserve the User-App "nothing leaves your machine" invariant; `data:` and loopback image sources are allowed. Admin utilities (which already egress) may render remote images.
+- Code fences get a per-block **copy** button; the body pane is focusable (`Tab`) and scrolls with the keyboard.
+- The body deliberately does **not** run entity annotation, so a User-App body never grafts onto the entity router.
+
+A natural authoring pairing is `parse: json` rows carrying a short `title` plus a Markdown `body` field (so the result row stays a clean label while the pane shows the rendered content); `parse: raw` with `body: "{{raw}}"` also works for a single-document preview.
 
 ### 9.2 `links_for_type` cross-utility composition
 
@@ -1024,9 +1049,9 @@ User Apps render through the **same** launcher dropdown and right-rail component
 
 - `widget`: `list`, `table`, `cards`, or `detail`. `image_grid` is **not** allowed in v1.
 - Supported presentation fields: `title_field`, `subtitle_field`, `searchable`, and `right_widget`. The richer admin fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) are not yet part of the user-tier `presentation`.
-- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, or `date`. `entity` and `entity_preview` are rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
+- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, or `markdown` (see §9.1 — the rich, scrollable, sanitized Markdown pane is fully available to User Apps, with remote images blocked for no-egress). `entity` and `entity_preview` are rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
 
-> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date] (entity kind is not allowed for user utilities)`
+> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date, markdown] (entity kind is not allowed for user utilities)`
 
 Letting a User App emit entity-bound right widgets would graft it onto the launcher's entity router and break the "User Apps stay out of the entity surface" invariant. See §19.15 for the planned direction here.
 
@@ -1128,6 +1153,10 @@ The runtime takes care of confirm-row dispatch, argv-only spawn (or the loopback
 ### 19.15 Parity roadmap (planned, not yet enforced)
 
 The design intent is that a User App should reach **the full admin presentation and format surface** (§9, §12) — the only enduring difference being *where the data comes from* (a local shell command or loopback HTTP, rather than an admin's MCP/HTTP flow). The strict subset in §19.10 reflects what the loader enforces *today*, not the target.
+
+Shipped so far:
+
+- **Rich Markdown pane (`right_widget.kind: markdown`).** Scrollable, DOMPurify-sanitized Markdown + syntax-highlighted code, available to admin and User Apps, with the no-egress remote-image block (see §9.1). This is the first piece of presentation parity to land.
 
 Planned additions, each additive and gated behind the same load-time validator:
 

@@ -1049,11 +1049,11 @@ User Apps render through the **same** launcher dropdown and right-rail component
 
 - `widget`: `list`, `table`, `cards`, or `detail`. `image_grid` is **not** allowed in v1.
 - Supported presentation fields: `title_field`, `subtitle_field`, `searchable`, and `right_widget`. The richer admin fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) are not yet part of the user-tier `presentation`.
-- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, or `markdown` (see §9.1 — the rich, scrollable, sanitized Markdown pane is fully available to User Apps, with remote images blocked for no-egress). `entity` and `entity_preview` are rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
+- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, `markdown` (see §9.1), or `entity_preview` (the wide rich-detail pane — media + title/subtitle + label/value facts + an optional rendered-Markdown `body`; remote images in the body are blocked for no-egress). Only `entity` is rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
 
-> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date, markdown] (entity kind is not allowed for user utilities)`
+> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date, markdown, entity_preview] (entity kind is not allowed for user utilities)`
 
-Letting a User App emit entity-bound right widgets would graft it onto the launcher's entity router and break the "User Apps stay out of the entity surface" invariant. See §19.15 for the planned direction here.
+`entity_preview` is presentation-only — it renders through the shared `EntityPreviewPane` and does **not** bind to the launcher's entity router. The router-binding `entity` kind (and `links_for_type`) remain excluded so a User App can't graft itself onto the entity graph or grant itself governed verbs. See §19.15.
 
 - `actions[].kind`: `url`, `composer`, or `utility`. `tool` (server-side MCP invocation) and `clipboard` are not available to User Apps in v1. A `url` action requires `url_template`; `composer` requires `insert`; `utility` requires `target_chip` (with optional `query_template`) and rejects `url_template`/`insert`.
 
@@ -1156,12 +1156,13 @@ The design intent is that a User App should reach **the full admin presentation 
 
 Shipped so far:
 
-- **Rich Markdown pane (`right_widget.kind: markdown`).** Scrollable, DOMPurify-sanitized Markdown + syntax-highlighted code, available to admin and User Apps, with the no-egress remote-image block (see §9.1). This is the first piece of presentation parity to land.
+- **Rich Markdown pane (`right_widget.kind: markdown`).** Scrollable, DOMPurify-sanitized Markdown + syntax-highlighted code, available to admin and User Apps, with the no-egress remote-image block (see §9.1).
+- **`entity_preview` for User Apps + optional Markdown `body`.** The wide rich-detail pane (facts + a rendered Markdown body) is now available to User Apps; the `entity_preview` pane also gained an optional `body` for admin utilities, so a card can show facts AND a rendered description. Only the router-binding `entity` kind + `links_for_type` remain excluded for User Apps.
 
 Planned additions, each additive and gated behind the same load-time validator:
 
 - **Full presentation parity.** Admit the remaining `presentation` fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) and the `image_grid` widget. These are pure client-side rendering with no security surface — the PWA already renders them on the admin path, so this is a contract relaxation plus matching user-tier types.
 - **`clipboard` actions.** Client-side only (copy a templated value); safe to admit alongside `url`/`composer`/`utility`.
-- **Entity surface.** Admit `entity` / `entity_preview` right widgets and `links_for_type` cross-utility links so User Apps can present rich entity detail and participate in the cross-utility "Related" section. This reverses the current §19.10 exclusion; it requires the entity-router to treat `source: "user_bridge"` rows as first-class without letting a user manifest grant itself governed verbs (the forbidden-field and forced-field gates in §19.2–§19.3 continue to hold).
+- **Entity router surface (remaining).** `entity_preview` already landed for User Apps (above). Still planned: the router-binding `entity` kind and `links_for_type` cross-utility links, so User Apps can participate in the entity router and the cross-utility "Related" section. That step requires the router to treat `source: "user_bridge"` rows as first-class without letting a manifest grant itself governed verbs (the §19.2–§19.3 gates continue to hold).
 
 What stays out of scope for User Apps regardless of presentation parity: the admin **data plane** — `auth_profile_ref`, `requires`, MCP/HTTP flow DAGs, `kind: tool` actions, server-side execution, and credential-bearing transports. A User App presents like an admin utility; it does not acquire an admin utility's authority.

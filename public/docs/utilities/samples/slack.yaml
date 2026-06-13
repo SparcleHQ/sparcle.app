@@ -57,7 +57,10 @@ presentation:
         - { label: When, value: '{{row.ts | date:''rel''}}' }
       actions: [open]
 
-enabled: true
+# Disabled by default 2026-06-13 -- drifted/unverified MCP contract (utilities audit):
+#   team=no such MCP, figma=invented tool, jira=use =jira-cloud, outlook/slack=wrong args.
+# Manifest kept as a template; re-enable after the tool+arg contract is verified live.
+enabled: false
 provisioning_mode: public
 departments: []
 roles: []

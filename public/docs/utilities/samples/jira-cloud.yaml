@@ -247,6 +247,13 @@ scopes:
                     description: ((if ($f.description | type) == "string" then $f.description else "" end)
                                   | if length > 280 then (.[0:277] + "…") else . end
                                   | if . == "" then "No description" else . end),
+                    # Full, untruncated description for the right_widget Markdown
+                    # body (renders as rich text, scrollable). ADF-aware: a string
+                    # passes through (preserving any newlines/markdown the MCP
+                    # sent); an ADF doc is flattened to text via adfText. Empty
+                    # when the issue has no description → the body section is
+                    # simply not rendered (no "No description" placeholder).
+                    descriptionFull: (($f.description // "") | adfText),
                     # Latest-comment slot for the right_widget Activity row.
                     # Empty string when no comments — UI shows "— No comments yet"
                     # via the bind default. Body capped at 200 chars to keep
@@ -536,7 +543,11 @@ presentation:
         # the transform revert (see manifest body). Will be re-added with
         # bulletproof guards (try/catch around the jq path so a single
         # ticket's malformed comment field can't take the whole flow down).
-        - { label: Description,   value: '{{row.description}}' }
+      # Full description rendered as Markdown under the fact list (scrollable;
+      # sanitized; links open externally). Replaces the old truncated
+      # "Description" fact line — the card now shows the real description
+      # instead of "No description"/a 280-char snippet.
+      body: '{{row.descriptionFull}}'
       actions:
         - open
         - assign_me

@@ -20,8 +20,8 @@ A utility is a single launcher chip (e.g. `=jira`, `=team`, `=incidents`) that:
 2. Runs a **declarative flow** of MCP tool calls and HTTP calls to fetch data.
 3. Emits rows of a known **canonical type** (`Person`, `Issue`, `Document`, ...).
 4. Renders the rows in the **launcher autocomplete dropdown** (the existing one — no new component).
-5. Optionally binds the selected row into a **right-rail widget** (the existing one — `card`/`map`/`image`/`date`/`calc`/`color`/`entity`/`weather`).
-6. Exposes typed **actions** on rows (`url`, `tool`, `utility`, `composer`).
+5. Optionally binds the selected row into a **right-rail widget** (the existing one — `card`/`map`/`image`/`date`/`calc`/`color`/`entity`/`entity_preview`/`weather`).
+6. Exposes typed **actions** on rows (`url`, `tool`, `utility`, `composer`, `clipboard`).
 
 Authoring is no-code first: bundled manifests ship with Bolt; admins enable them via the Gallery; custom manifests are authored via a wizard or YAML side panel. The wizard introspects MCP servers and binds tools by point-and-click.
 
@@ -55,10 +55,10 @@ Adding to any of these lists is a spec version bump. Removing is a breaking chan
 | Call kinds | `mcp` (default), `http` |
 | Filter kinds | `enum`, `text`, `date_range` |
 | Filter `apply` modes | `pre` (mutates flow args), `post` (filters emitted rows) |
-| Action kinds | `url`, `tool`, `utility`, `composer` |
+| Action kinds | `url`, `tool`, `utility`, `composer`, `clipboard` |
 | Action `target` | `row`, `list` |
 | Widget types (list) | `list`, `table`, `cards`, `image_grid`, `detail` |
-| Right-widget kinds | `card`, `map`, `image`, `date`, `calc`, `color`, `entity`, `weather` |
+| Right-widget kinds | `card`, `map`, `image`, `date`, `calc`, `color`, `entity`, `entity_preview`, `weather` |
 | Right-widget modes | `selected_row`, `list_data` |
 | Canonical row types | `Person`, `Issue`, `Document`, `Event`, `File`, `Incident`, `Account`, `Place`, `Generic` |
 | Template filters | `date`, `upper`, `lower`, `default`, `join`, `truncate`, `jql_escape`, `sql_escape`, `url_escape`, `html_escape` |
@@ -399,7 +399,16 @@ actions:
     kind: composer
     label: "Create issue"
     insert: "=jira create "
+
+  # clipboard: copy a templated value to the OS clipboard (client-side only)
+  - id: copy_key
+    target: row
+    kind: clipboard
+    label: "Copy key"
+    value: "{{row.key}}"
 ```
+
+`kind: clipboard` requires a `value:` template and runs entirely client-side — it never touches an MCP server or HTTP, so it carries none of the confirm/idempotency/audit machinery of `kind: tool`.
 
 ### 8.2 Confirmations
 
@@ -450,7 +459,7 @@ presentation:
   row_key_field: key                      # used by idempotency keys; default 'id'
 
   right_widget:
-    kind: card                            # one of the 8 frozen widget kinds
+    kind: card                            # one of the 9 frozen right-widget kinds
     mode: selected_row                    # selected_row | list_data
     bind:
       title: "{{row.fields.summary}}"
@@ -468,7 +477,7 @@ presentation:
 
 The list widget reuses the existing launcher autocomplete dropdown. Each row is rendered with `title_field` as the primary text and `subtitle_field` underneath. `list_fields` populates a compact field strip on the right of each row.
 
-The right_widget reuses the existing right-rail panel; `kind` selects one of the 8 widget components; `bind` provides per-component template bindings.
+The right_widget reuses the existing right-rail panel; `kind` selects one of the 9 widget components; `bind` provides per-component template bindings. `entity_preview` is the wide detail pane (media + title/subtitle + label/value facts + icon footer) rendered through the shared `EntityPreviewPane`, bound from the selected row's fields with the footer drawn from the manifest's `actions`.
 
 ### 9.2 `links_for_type` cross-utility composition
 
@@ -848,51 +857,56 @@ Documented here so that no one re-asks:
 
 ## 19. Bridge runtime (User Apps)
 
-The same manifest schema supports a second runtime for User Apps. An author opts in by setting `runtime: bridge` at the top level. The runtime is the strict subset of the admin shape that can run safely on an end user's machine under their own OS identity: no admin-controlled fields, no flow DAG, no MCP wiring, no auth profile. Just a templated shell command, an output parser, a presentation block, and a small set of declared actions.
+The same manifest schema supports a family of **local runtimes** for User Apps. An author opts in by setting `runtime:` at the top level to one of the user-authorable transports. As of this version there are two: `bridge` (argv-only shell command) and `http_local` (a single read against a loopback service). Both run on the end user's machine under their own OS identity, with no admin-controlled fields, no flow DAG, no MCP wiring, and no auth profile — just a data source, an output parser, a presentation block, and a small set of declared actions.
 
-Customer-facing name: **User App**. Codename in code and YAML: `utility` / `runtime: bridge`.
+Customer-facing name: **User App**. Codename in code and YAML: `utility` / `runtime: bridge` (or `runtime: http_local`).
+
+> **Why two runtimes.** Shell (`bridge`) covers pre-authenticated CLIs (`git`, `gh`, `kubectl`, `aws`). Loopback HTTP (`http_local`) covers local daemons that speak HTTP but have no CLI worth shelling out to — Docker, Ollama, a dev server, a browser's CDP endpoint. Both are local-only by construction.
 
 ### 19.1 Discriminator
 
 ```yaml
-runtime: bridge
+runtime: bridge        # or: http_local
 ```
 
-Required and the only allowed value when the bridge runtime is active. Reserved so future runtimes (`wasm`, `subprocess`, etc.) can be added without breaking parsers.
+`runtime` is required and must be one of the values in `ALLOWED_RUNTIME` — currently `bridge` or `http_local`. The set is reserved so future transports (`wasm`, `subprocess`, `sql`, `osa`, …) can be added without breaking parsers; a runtime not in the set is rejected at load.
+
+Other top-level rules the loader enforces for user manifests:
+- `schema_version` must equal `1`.
+- `id` and `chip` must each match `^[a-z0-9][a-z0-9-]{0,63}$` (lowercase-kebab). Unlike admin manifests (§4), the User App `chip` is a **bare key with no `=` prefix** — the launcher adds the leading `=` when it surfaces the chip.
+- `emits` must be one of the canonical types (§12) or `Generic`.
+- Exactly one transport block must be present and must match the declared runtime: `runtime: bridge` requires a `bridge:` block and rejects an `http:` block; `runtime: http_local` requires an `http:` block and rejects a `bridge:` block.
 
 ### 19.2 Forbidden fields
 
-The bridge runtime rejects every admin-only field at load time. Presence is the rejection; the loader does not silently ignore. A manifest that sets any of the following fails to load and the user sees a per-file error in Settings:
+The runtime rejects every admin-only field at load time. Presence is the rejection; the loader does not silently ignore. A manifest that sets any of the following fails to load and the user sees a per-file error in Settings:
 
 - `auth_profile_ref`
 - `requires`
-- `scopes` (use a `match:` branch in the future if needed; v1 has a single implicit scope)
+- `scopes` (v1 User Apps have a single implicit scope)
 - `filters`
 - `cache_ttl_seconds`
 - `provisioning_mode`, `departments`, `roles`, `groups`
 - `actions[].kind` other than `url`, `composer`, or `utility`
 - `actions[].flow`, `actions[].confirm` (these are admin tool-action fields)
-- `bridge.command.<os>` containing unquoted `;`, `&&`, `||`, `|`, backtick, or `$(...)`. Multi-statement shell is rejected at validate time, before the manifest ever loads.
-- `bridge.env.<KEY>` with an inline literal. Values must match exactly `^\$\{env:[A-Z_][A-Z0-9_]*\}$`; secrets come from the real process env or a future secrets broker.
+- `bridge.command.<os>` (and `detect.auth_check.<os>`) containing `;`, `&&`, `||`, `|`, backtick, or `$(...)` outside a `{{…}}` placeholder. Multi-statement shell is rejected at validate time, before the manifest ever loads.
+- `bridge.env.<KEY>` with an inline literal. Keys must match `^[A-Z_][A-Z0-9_]*$` and values must match exactly `^\$\{env:[A-Z_][A-Z0-9_]*\}$`; secrets come from the real process env, never the manifest.
 
-Forbidden field errors include the offending field name so authors can fix without grepping the spec.
+Forbidden-field errors include the offending field name so authors can fix without grepping the spec.
 
 ### 19.3 Forced fields
 
-The loader / parser stamps these on every emitted row regardless of what the YAML asks for:
+The loader / parser stamps these on every emitted row regardless of what the YAML (or the command's own JSON output) asks for. They are write-once by the runtime; an author who emits `canEscalateAi: true` from a `parse: json` command sees it forced back to `false`:
 
 - `canEscalateAi: false`
 - `aiSuggestedQuery: null`
 - `quickQaActionQuery: null`
 - `escalationPrompt: null`
-- `source: "user_bridge"`
-- `pii_boundary: "enforce"`
+- `source: "user_bridge"` — the lineage tag the PWA and audit log key on
 
-Bridge utilities are also forced to `dispatch.mode: confirm`. Authors can customize `dispatch.confirm_label` and `confirm_hint` text but cannot turn confirm off. Shell exec on incremental input is not a thing the runtime ships.
+User Apps are also forced to `dispatch.mode: confirm` (§19.7). Authors can customize the confirm label/hint text but cannot turn confirm off. Shell exec on incremental keystrokes is not a thing the runtime ships.
 
-### 19.4 The `bridge:` block
-
-The new top-level field that admin manifests do not carry:
+### 19.4 The `bridge:` block (`runtime: bridge`)
 
 ```yaml
 bridge:
@@ -907,26 +921,118 @@ bridge:
 ```
 
 Fields:
-- `command.<os>`: templated command for that OS. At least one of `macos`, `linux`, `windows` required. Templating supports `{{var}}` and `{{var | default: X}}`.
-- `parse`: `lines` (one row per non-empty stdout line, fields `{line, idx}`), `json` (expects array or `{rows: [...]}`), or `raw` (one row total, field `{raw}`).
-- `timeout_seconds`: clamped to `1..=60`, default `10`. On timeout the child is killed and reaped.
+- `command.<os>`: templated command for that OS. At least one of `macos`, `linux`, `windows` required. Templating supports `{{var}}` and `{{var | default: X}}`. Each present command must be argv-splittable and free of the forbidden shell metacharacters (§19.2).
+- `parse`: `lines` (one row per non-empty stdout line, fields `{line, idx}`), `json` (expects a top-level array or `{rows: [...]}`), or `raw` (one row total, field `{raw}`).
+- `timeout_seconds`: optional, clamped to `1..=60`, default `10`. On timeout the child is killed and reaped.
 - `env`: optional env-var refs that must already be set in the user's process. `${env:VARNAME}` form only; the loader rejects inline literals.
 
-### 19.5 argv-only execution
+### 19.5 The `http:` block (`runtime: http_local`)
 
-The command template is expanded with the args block, then tokenized into argv via POSIX shell-words and spawned directly. There is no `/bin/sh -c`. The shell-metacharacter rejection at validate time means an argv-split is always unambiguous; ambiguity is a reject.
+A single read request to a service listening on the loopback interface. The loopback-host gate is the load-bearing rule: it makes "this utility cannot egress off-box" a property an auditor can confirm from the manifest alone, not a promise.
 
-This is the runtime mechanism behind the "Bolt does not multiply the user's authority" claim. The command can only do what a single binary invocation could do. The user's terminal has the same constraint when the user types the command directly.
+```yaml
+runtime: http_local
+http:
+  port: 11434                  # loopback TCP port the local service listens on
+  host: 127.0.0.1              # optional; one of 127.0.0.1 | ::1 | localhost (default 127.0.0.1)
+  request:
+    method: GET                # GET (default) or POST — read-first v1
+    path: "/api/tags"          # must start with '/'; templated, values percent-encoded
+  parse: json                  # json | lines | raw (same row shapes as the bridge parser)
+  rows_path: models            # optional dotted path to the row array inside a JSON object
+  timeout_seconds: 5           # optional, clamped to 1..=60
+  headers:
+    Authorization: "${env:OLLAMA_TOKEN}"   # ${env:VAR} ref or a plain literal
+```
 
-### 19.6 Presentation: right_widget kinds
+Fields:
+- `port`: required, non-zero loopback port.
+- `host`: optional, restricted to `127.0.0.1`, `::1`, or `localhost` (default `127.0.0.1`). Any other host is rejected at load — there is intentionally no way to point this transport off-box.
+- `request.method`: `GET` (default) or `POST`. Mutating verbs are out of scope for this read-first version.
+- `request.path`: required, must start with `/`. Templated with `{{var}}`; values are **percent-encoded** at expand time (never shell-quoted) so a query term cannot break out of the path or inject extra parameters.
+- `parse`: same `json` / `lines` / `raw` modes and row shapes as `bridge.parse`.
+- `rows_path`: optional dotted path to the row array inside a JSON object response (e.g. `models` for Ollama's `{ "models": [...] }`). Absent ⇒ the body must be a top-level array or `{ rows: [...] }`.
+- `timeout_seconds`: optional, clamped to `1..=60`.
+- `headers`: optional static request headers. Keys match `[A-Za-z0-9-]+`; values accept a `${env:VAR}` ref or a plain literal (a local service often wants a static token).
 
-The bridge runtime allows the same widgets as the admin runtime with one exclusion: `kind: entity` is rejected. The validator names the rejection so authors do not assume a typo:
+### 19.6 The `args:` block
+
+Both runtimes can declare named arguments derived from the user's query, referenced as `{{name}}` inside `command.<os>` / `request.path`, in action templates, and in `dispatch.choices[].args`.
+
+```yaml
+args:
+  - { name: repo,  from: "query.word(0)" }
+  - { name: limit, from: "query.word(1)", default: 20 }
+```
+
+- `name`: non-empty identifier.
+- `from`: how to source the value. Only `query.word(N)` (zero-indexed whitespace token of the post-chip query) is supported in v1; anything else is rejected.
+- `default`: optional fallback when the query word is absent.
+
+### 19.7 The `dispatch:` block
+
+User Apps fire on intentional Enter, not on every keystroke. `dispatch.mode` is forced to `confirm`; declaring `auto` is rejected. The block is optional — absent ⇒ a single confirm row with default label/hint.
+
+```yaml
+dispatch:
+  mode: confirm                          # only allowed value; default if block omitted
+  confirm_label: "Search Jira for \"{{query}}\""
+  confirm_hint: "Press Enter or Tab to run"
+```
+
+Or, for a multi-verb chip, a chooser of synthetic rows:
+
+```yaml
+dispatch:
+  mode: confirm
+  choices:
+    - { id: save,   label: "Save \"{{query}}\"",   args: { verb: save } }
+    - { id: search, label: "Search \"{{query}}\"", args: { verb: search } }
+```
+
+Rules:
+- `confirm_label` / `confirm_hint` customize the single confirm row's text.
+- `choices[]` renders one synthetic row per entry instead of a single confirm row. Each choice has a unique `id`, a templated `label`, an optional `hint`, and an `args` map merged onto the query-derived args when the row activates. Every `args` key must reference a declared `args[].name` — a chooser cannot smuggle arbitrary template vars.
+- `choices` and `confirm_label`/`confirm_hint` are **mutually exclusive**: pick one chooser pattern per chip.
+
+### 19.8 The `detect:` block (device probe)
+
+Optional. When present, the launcher only surfaces the chip after confirming the backing binary is installed, new enough, and (optionally) authenticated — so a `gh`/`kubectl`/`aws` chip stays hidden on machines where it can't actually run. Absent ⇒ the chip is always available (legacy behaviour). Purely additive.
+
+```yaml
+detect:
+  binary: gh                       # bare program name resolved on PATH (never an absolute path)
+  version_min: "2.40.0"            # optional; loose semver compare against `<binary> --version`
+  auth_check:                      # optional per-OS auth-status command (exit 0 ⇒ authenticated)
+    macos:  "gh auth status"
+    linux:  "gh auth status"
+  config_hint: ["~/.config/gh"]    # optional; presence boosts detection confidence, never required
+  refresh: on_focus                # on_boot | on_focus | manual (default on_focus)
+```
+
+`binary` must be a bare name (PATH lookup), never a path. `auth_check` commands go through the **same argv-only, no-shell-metacharacter gate** as `bridge.command`, and by review of the curated pack are restricted to read-only status verbs. This is the user-tier shape: the admin curated pack carries the same block plus capability bindings, but capabilities/ACL stay admin-only — a user-authored `detect` can light a chip but cannot grant itself governed verbs.
+
+### 19.9 argv-only execution
+
+For `runtime: bridge`, the command template is expanded with the args block, every interpolated value is shell-quoted, and the result is tokenized into argv via POSIX shell-words and spawned directly. There is no `/bin/sh -c`. The shell-metacharacter rejection at validate time means the argv-split is always unambiguous; ambiguity is a reject. The child runs with the user's `$HOME` as its working directory, stdin closed, and stdout/stderr captured separately.
+
+This is the runtime mechanism behind the "Bolt does not multiply the user's authority" claim. The command can only do what a single binary invocation could do — the same constraint the user's terminal has when they type the command themselves. For `runtime: http_local`, the equivalent guarantee is the loopback-host pin: the request can only reach a process already listening on the user's own machine.
+
+### 19.10 Presentation: current restrictions
+
+User Apps render through the **same** launcher dropdown and right-rail components as admin utilities (the PWA does not branch on runtime). Today the user-tier `presentation` block is a deliberate subset of the admin shape (§9):
+
+- `widget`: `list`, `table`, `cards`, or `detail`. `image_grid` is **not** allowed in v1.
+- Supported presentation fields: `title_field`, `subtitle_field`, `searchable`, and `right_widget`. The richer admin fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) are not yet part of the user-tier `presentation`.
+- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, or `date`. `entity` and `entity_preview` are rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
 
 > `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date] (entity kind is not allowed for user utilities)`
 
-Letting a User App emit entity-bound right widgets would graft it onto the launcher's entity router and break the "User Apps stay out of the entity surface" invariant. Authors who want richer entity views go through an admin utility instead.
+Letting a User App emit entity-bound right widgets would graft it onto the launcher's entity router and break the "User Apps stay out of the entity surface" invariant. See §19.15 for the planned direction here.
 
-### 19.7 Install model
+- `actions[].kind`: `url`, `composer`, or `utility`. `tool` (server-side MCP invocation) and `clipboard` are not available to User Apps in v1. A `url` action requires `url_template`; `composer` requires `insert`; `utility` requires `target_chip` (with optional `query_template`) and rejects `url_template`/`insert`.
+
+### 19.11 Install model
 
 Drop a `.yaml` into the user-apps folder and click Reload in Settings. There is no file picker, no consent modal, no two-step handshake. The act of copying the file into the folder IS the consent. Removing the App via Settings deletes the file from disk.
 
@@ -935,7 +1041,7 @@ Per-OS folder paths (resolved via Tauri's app-data dir):
 - Linux: `~/.local/share/<bundle>/user-utils/`
 - Windows: `%APPDATA%/<bundle>/user-utils/`
 
-### 19.8 Org / device policy
+### 19.12 Org / device policy
 
 Admins on managed devices can disable the entire User App tier with a single toggle. When off:
 - The chip list returned to the launcher is empty.
@@ -945,11 +1051,13 @@ Admins on managed devices can disable the entire User App tier with a single tog
 
 Storage: `<app_data>/user-apps-policy.json` with `{ "enabled": bool }`. Admins managing an OS image (MDM, JAMF, Intune) can pre-write the file to `{ "enabled": false }` before the user ever opens Bolt. An org-pushed policy that propagates the gate from the admin tenant down to managed devices is a follow-up.
 
-### 19.9 Audit shape
+### 19.13 Audit shape
 
 User App invocations produce an optional audit ping when the device is configured to send one. The payload is metadata only: `{utility_id, ts, ok, duration_ms}`. No query, no arguments, no output, no stdout, no stderr. The Bolt service is not in the request path, and Sparcle servers are not in the data path.
 
-### 19.10 Example: a complete User App
+### 19.14 Examples
+
+A complete `runtime: bridge` User App, with an optional `detect` gate so the chip only appears when `git` is installed:
 
 ```yaml
 schema_version: 1
@@ -961,6 +1069,11 @@ icon: git-branch
 description: Show recent commits in a local git repo under ~/dev
 placeholder_examples: ["my-app", "infra 30"]
 emits: Generic
+
+detect:
+  binary: git
+  version_min: "2.30.0"
+  refresh: on_focus
 
 bridge:
   command:
@@ -983,4 +1096,43 @@ actions:
   - { id: copy, kind: composer, target: row, label: Copy SHA, insert: "{{line}}" }
 ```
 
-That is the entire manifest. The runtime takes care of confirm-row dispatch, argv-only spawn, output parsing, row construction, forced-field stamping, and rendering. The author writes 25 lines of YAML.
+A complete `runtime: http_local` User App reading the local Ollama daemon's model list:
+
+```yaml
+schema_version: 1
+runtime: http_local
+id: ollama-models
+chip: ollama-models
+title: Local Ollama models
+icon: cpu
+description: List models pulled into the local Ollama daemon
+emits: Generic
+
+http:
+  port: 11434
+  request:
+    method: GET
+    path: "/api/tags"
+  parse: json
+  rows_path: models
+  timeout_seconds: 5
+
+presentation:
+  widget: list
+  title_field: name
+  subtitle_field: details.parameter_size
+```
+
+The runtime takes care of confirm-row dispatch, argv-only spawn (or the loopback read), output parsing, row construction, forced-field stamping, and rendering. The author writes ~25 lines of YAML and no code.
+
+### 19.15 Parity roadmap (planned, not yet enforced)
+
+The design intent is that a User App should reach **the full admin presentation and format surface** (§9, §12) — the only enduring difference being *where the data comes from* (a local shell command or loopback HTTP, rather than an admin's MCP/HTTP flow). The strict subset in §19.10 reflects what the loader enforces *today*, not the target.
+
+Planned additions, each additive and gated behind the same load-time validator:
+
+- **Full presentation parity.** Admit the remaining `presentation` fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) and the `image_grid` widget. These are pure client-side rendering with no security surface — the PWA already renders them on the admin path, so this is a contract relaxation plus matching user-tier types.
+- **`clipboard` actions.** Client-side only (copy a templated value); safe to admit alongside `url`/`composer`/`utility`.
+- **Entity surface.** Admit `entity` / `entity_preview` right widgets and `links_for_type` cross-utility links so User Apps can present rich entity detail and participate in the cross-utility "Related" section. This reverses the current §19.10 exclusion; it requires the entity-router to treat `source: "user_bridge"` rows as first-class without letting a user manifest grant itself governed verbs (the forbidden-field and forced-field gates in §19.2–§19.3 continue to hold).
+
+What stays out of scope for User Apps regardless of presentation parity: the admin **data plane** — `auth_profile_ref`, `requires`, MCP/HTTP flow DAGs, `kind: tool` actions, server-side execution, and credential-bearing transports. A User App presents like an admin utility; it does not acquire an admin utility's authority.

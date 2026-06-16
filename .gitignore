@@ -24,3 +24,9 @@ pnpm-debug.log*
 .idea/
 DOMAINS.md
 .claude/
+
+# stealth / unpublished event decks — must NOT ship to the public site
+# (canonical copy lives in the private Sparcle-LLC repo)
+public/decks/sovereign-ai-intro.html
+public/decks/event-*.html
+public/decks/*stealth*

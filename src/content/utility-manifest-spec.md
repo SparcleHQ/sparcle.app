@@ -58,7 +58,7 @@ Adding to any of these lists is a spec version bump. Removing is a breaking chan
 | Action kinds | `url`, `tool`, `utility`, `composer`, `clipboard` |
 | Action `target` | `row`, `list` |
 | Widget types (list) | `list`, `table`, `cards`, `image_grid`, `detail` |
-| Right-widget kinds | `card`, `map`, `image`, `date`, `calc`, `color`, `entity`, `entity_preview`, `weather`, `markdown` |
+| Right-widget kinds | `card`, `map`, `image`, `date`, `calc`, `color`, `entity`, `entity_preview`, `weather`, `markdown`, `chart`, `table`, `cards`, `detail`, `json_tree`, `diff`, `image_grid` |
 | Right-widget modes | `selected_row`, `list_data` |
 | Canonical row types | `Person`, `Issue`, `Document`, `Event`, `File`, `Incident`, `Account`, `Place`, `Generic` |
 | Template filters | `date`, `upper`, `lower`, `default`, `join`, `truncate`, `jql_escape`, `sql_escape`, `url_escape`, `html_escape` |
@@ -67,6 +67,7 @@ Adding to any of these lists is a spec version bump. Removing is a breaking chan
 Notes:
 - Auth types `oauth2_client_credentials`, `bearer_token` (shared), `basic`, `mtls`, `signed_jwt_assertion`, `session_passthrough` from previous designs are **removed** in v1. Per-user OAuth only.
 - The `public` auth type permits unauthenticated HTTP calls and is restricted to manifests where every `call:` is `kind: http` against an allowlisted public-API host.
+- `table`, `cards`, `detail`, and `image_grid` also appear in the "Widget types (list)" row, but are currently rendered as **right-widget panes** via `presentation.right_widget.kind` (see §9.6); full-width main-presentation rendering of those is on the roadmap.
 
 ---
 
@@ -560,6 +561,39 @@ Filter chains are left-to-right: `{{x | upper | truncate:20 | default:'?'}}`.
 
 There are no other filters in v1. There are no expressions, no arithmetic, no comparisons, no conditionals, no function calls beyond this list.
 
+### 9.6 Rich data-viz right-widgets
+
+These render the parsed `rows` (plus a declarative `bind`) in the right rail; none bind to the entity graph (the router-binding `entity` kind stays separate, see §9.1). Multi-row widgets use `mode: list_data`; per-record widgets use `mode: selected_row`.
+
+| `kind` | Renders | `bind` schema | mode |
+|---|---|---|---|
+| `chart` | SVG line/bar/sparkline chart | `{ type: line\|bar\|sparkline (default line), x?: <field>, y: <numeric field> }` OR `{ values?: <field holding a number[]>, label?: <field>, unit?: <string>, color?: <string> }` | `list_data` (one point per row) |
+| `table` | scrollable data table | `{ columns?: [ { field, label?, align?: left\|right\|center } ] }`; omit `columns` to auto-infer from row keys | `list_data` |
+| `cards` | responsive grid of tiles, one per row | `{ title, subtitle?, badge?, image?, footer? }` (all `{{row.x}}` templates) | `list_data` |
+| `detail` | single-record key/value pane for the selected row | `{ title?, subtitle?, fields?: [ { label, value (template), copy?: bool } ] }`; omit `fields` to auto-derive from the row's keys (humanized) | `selected_row` |
+| `json_tree` | collapsible recursive JSON tree | `{ source?: <field whose value is the object, or a JSON string to parse> }`; omit `source` to show the whole selected row | `selected_row` |
+| `diff` | red/green LCS line diff | `{ left (template), right (template), leftLabel?, rightLabel? }`; with no bind and exactly two rows it falls back to `rows[0]` vs `rows[1]` | `selected_row` |
+| `image_grid` | thumbnail grid, one image per row | `{ src (template → image URL or self-contained data: URL per row), caption?, alt?, columns?: <number> }` | `list_data` |
+
+Per-kind details:
+
+- `chart` — `list_data` maps one point per row.
+- `table` — omit `columns` to auto-infer from row keys.
+- `cards` — `badge` auto-colors: **green** (ok/healthy/up/success/active), **amber** (warn/degraded/pending), **red** (error/down/fail/critical).
+- `detail` — omit `fields` to auto-derive from the row's keys (humanized).
+- `json_tree` — the top two levels expand by default; click any node/leaf to copy; depth is capped at ~6.
+- `diff` — capped at 1500 lines per side.
+- `image_grid` — remote and `data:` URLs are both allowed here (unlike `markdown`, which blocks remote images for User Apps, §9.1). Click opens `src`.
+
+```yaml
+presentation:
+  widget: list
+  right_widget:
+    kind: chart
+    mode: list_data
+    bind: { type: bar, x: mount, y: pct_num, unit: "%" }
+```
+
 ---
 
 ## 10. Auth profiles
@@ -994,6 +1028,48 @@ args:
 - `from`: how to source the value. Only `query.word(N)` (zero-indexed whitespace token of the post-chip query) is supported in v1; anything else is rejected.
 - `default`: optional fallback when the query word is absent.
 
+### 19.6.1 Input forms (`inputs:`)
+
+A `runtime: bridge` or `runtime: http_local` User App may declare an `inputs:` block to collect typed values via a rendered form **before** running, instead of parsing the query string. When `inputs` is non-empty the launcher shows a typed form; on submit each field value is passed as an invoke arg and binds as `{{<name>}}` in the command/templates (caller args take precedence over query-derived args). It is purely declarative — there is intentionally no `show_if` / computed / validation-expression surface (logic belongs in the script). All values are strings (`toggle` = `"true"`/`"false"`).
+
+Frozen field types (adding one is a spec version bump): `text`, `number`, `date`, `select`, `toggle`, `secret`.
+
+```yaml
+inputs:
+  - name: <matches ^[a-z][a-z0-9_]*$, unique within the form>
+    type: text | number | date | select | toggle | secret
+    label: <non-empty>
+    required: <bool, default false>
+    default: <value; for date, "today" resolves to the local date>
+    placeholder: <string>             # text | number | secret
+    options: [<string>, ...]          # select only — REQUIRED for select
+    min: <number>  max: <number>  step: <number>   # number constraints
+    max_length: <int>                 # text constraint
+submit:
+  label: <submit button label, default "Run">
+  confirm: <bool, default false>
+```
+
+Validation (save-time): each `name` matches the regex and is unique; `type` is in the frozen set; `label` is non-empty; a `select` must declare non-empty `options`.
+
+Example (`=expense`):
+
+```yaml
+inputs:
+  - { name: amount, type: number, label: Amount, required: true, min: 0, step: 0.01 }
+  - { name: category, type: select, label: Category, default: Meals, options: [Meals, Travel, Software, Office, Other] }
+  - { name: date, type: date, label: Date, default: today }
+  - { name: description, type: text, label: Description, max_length: 120 }
+  - { name: billable, type: toggle, label: Billable, default: true }
+submit: { label: Log expense }
+bridge:
+  command:
+    macos: "bash {{scripts_dir}}/bolt-expense.sh {{amount}} {{category}} {{date}} {{description}} {{billable}}"
+  parse: json
+```
+
+The bundled `=demo-chart`, `=demo-table`, `=demo-cards`, `=demo-detail`, `=demo-tree`, and `=demo-diff` sample apps showcase every right-widget (§9.6) with zero setup.
+
 ### 19.7 The `dispatch:` block
 
 User Apps fire on intentional Enter, not on every keystroke. `dispatch.mode` is forced to `confirm`; declaring `auto` is rejected. The block is optional — absent ⇒ a single confirm row with default label/hint.
@@ -1049,9 +1125,9 @@ User Apps render through the **same** launcher dropdown and right-rail component
 
 - `widget`: `list`, `table`, `cards`, or `detail`. `image_grid` is **not** allowed in v1.
 - Supported presentation fields: `title_field`, `subtitle_field`, `searchable`, and `right_widget`. The richer admin fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) are not yet part of the user-tier `presentation`.
-- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, `markdown` (see §9.1), or `entity_preview` (the wide rich-detail pane — media + title/subtitle + label/value facts + an optional rendered-Markdown `body`; remote images in the body are blocked for no-egress). Only `entity` is rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
+- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, `markdown` (see §9.1), `entity_preview` (the wide rich-detail pane — media + title/subtitle + label/value facts + an optional rendered-Markdown `body`; remote images in the body are blocked for no-egress), or the rich data-viz panes `chart`, `table`, `cards`, `detail`, `json_tree`, `diff`, `image_grid` (see §9.6 — these render the parsed `rows` and do not bind to the entity graph). Only `entity` is rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
 
-> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date, markdown, entity_preview] (entity kind is not allowed for user utilities)`
+> `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date, markdown, entity_preview, chart, table, cards, detail, json_tree, diff, image_grid] (entity kind is not allowed for user utilities)`
 
 `entity_preview` is presentation-only — it renders through the shared `EntityPreviewPane` and does **not** bind to the launcher's entity router. The router-binding `entity` kind (and `links_for_type`) remain excluded so a User App can't graft itself onto the entity graph or grant itself governed verbs. See §19.15.
 
@@ -1158,10 +1234,12 @@ Shipped so far:
 
 - **Rich Markdown pane (`right_widget.kind: markdown`).** Scrollable, DOMPurify-sanitized Markdown + syntax-highlighted code, available to admin and User Apps, with the no-egress remote-image block (see §9.1).
 - **`entity_preview` for User Apps + optional Markdown `body`.** The wide rich-detail pane (facts + a rendered Markdown body) is now available to User Apps; the `entity_preview` pane also gained an optional `body` for admin utilities, so a card can show facts AND a rendered description. Only the router-binding `entity` kind + `links_for_type` remain excluded for User Apps.
+- **Rich data-viz right-widgets (`chart`, `table`, `cards`, `detail`, `json_tree`, `diff`, `image_grid`).** Available to admin and User Apps via `right_widget.kind`; they render the parsed `rows` (plus a declarative `bind`) and do not bind to the entity graph (see §9.6). The bundled `=demo-*` sample apps showcase each.
+- **Input forms (`inputs:`).** A declarative typed form (`text`/`number`/`date`/`select`/`toggle`/`secret`) that collects values before a User App runs and binds them as invoke args (see §19.6.1).
 
 Planned additions, each additive and gated behind the same load-time validator:
 
-- **Full presentation parity.** Admit the remaining `presentation` fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) and the `image_grid` widget. These are pure client-side rendering with no security surface — the PWA already renders them on the admin path, so this is a contract relaxation plus matching user-tier types.
+- **Full presentation parity.** Admit the remaining `presentation` fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) and the full-width main-presentation `image_grid`/`table`/`cards`/`detail` widgets (these ship today only as right-widget panes, §3, §9.6). These are pure client-side rendering with no security surface — the PWA already renders them on the admin path, so this is a contract relaxation plus matching user-tier types.
 - **`clipboard` actions.** Client-side only (copy a templated value); safe to admit alongside `url`/`composer`/`utility`.
 - **Entity router surface (remaining).** `entity_preview` already landed for User Apps (above). Still planned: the router-binding `entity` kind and `links_for_type` cross-utility links, so User Apps can participate in the entity router and the cross-utility "Related" section. That step requires the router to treat `source: "user_bridge"` rows as first-class without letting a manifest grant itself governed verbs (the §19.2–§19.3 gates continue to hold).
 

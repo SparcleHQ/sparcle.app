@@ -267,22 +267,26 @@ presentation:
   row_key_field: key
   searchable: true
   filterable: true
+  # Right pane: entity_preview (shared with GitLab MRs for one consistent
+  # PR/MR look). Identity (kind · repo#num) lives in the subtitle ONCE — it is
+  # NOT repeated as facts. State renders as a colored status pill; labels as
+  # discrete chips; the body renders as Markdown. Every fact answers a distinct
+  # question ("is it open? who? how active? what does it do?") rather than
+  # echoing the row you already clicked.
   right_widget:
-    kind: card
+    kind: entity_preview
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.repo}}#{{row.number}} · {{row.state}}'
+      subtitle: '{{row.kind}} · {{row.repo}}#{{row.number}}'
       image_url: '{{row.authorAvatar}}'
       fields:
-        - { label: Type,    value: '{{row.kind}}' }
-        - { label: State,   value: '{{row.state}}' }
-        - { label: Author,  value: '{{row.authorLogin}}' }
-        - { label: Repo,    value: '{{row.repo}}' }
-        - { label: Labels,  value: '{{row.labels}}' }
+        - { label: State,    value: '{{row.state}}', kind: badge }
+        - { label: Author,   value: '@{{row.authorLogin}}' }
         - { label: Comments, value: '{{row.comments}}' }
-        - { label: Updated, value: '{{row.updated | date:''rel''}}' }
-        - { label: Body,    value: '{{row.body}}' }
+        - { label: Updated,  value: '{{row.updated | date:''rel''}}' }
+        - { label: Labels,   value: '{{row.labels}}', kind: chips }
+      body: '{{row.body}}'
       actions: [open, comment]
 
 enabled: true

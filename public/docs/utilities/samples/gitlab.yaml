@@ -291,24 +291,26 @@ presentation:
   row_key_field: id
   searchable: true
   filterable: true
+  # Right pane shared with GitHub PRs for one consistent PR/MR look. Identity
+  # (key !iid) lives in the subtitle ONCE. State + merge status render as
+  # colored pills; source→target as a single branch-flow line; labels as chips;
+  # the description renders as Markdown. No field echoes the subtitle.
   right_widget:
     kind: entity_preview
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.key}} · {{row.state}}'
+      subtitle: '{{row.key}}'
       image_url: '{{row.authorAvatar}}'
       fields:
-        - { label: State,        value: '{{row.state}}' }
-        - { label: Merge status, value: '{{row.mergeStatus}}' }
-        - { label: Author,       value: '{{row.authorName}}' }
-        - { label: Assignees,    value: '{{row.assignees}}' }
-        - { label: Source,       value: '{{row.sourceBranch}}' }
-        - { label: Target,       value: '{{row.targetBranch}}' }
-        - { label: Labels,       value: '{{row.labels}}' }
-        - { label: Created,      value: '{{row.created}}' }
-        - { label: Updated,      value: '{{row.updated}}' }
-        - { label: Description,  value: '{{row.description}}' }
+        - { label: State,     value: '{{row.state}}', kind: badge }
+        - { label: Merge,     value: '{{row.mergeStatus}}', kind: badge }
+        - { label: Branch,    value: '⎇ {{row.sourceBranch}} → {{row.targetBranch}}', kind: branch }
+        - { label: Author,    value: '{{row.authorName}}' }
+        - { label: Assignees, value: '{{row.assignees}}' }
+        - { label: Updated,   value: '{{row.updated | date:''rel''}}' }
+        - { label: Labels,    value: '{{row.labels}}', kind: chips }
+      body: '{{row.description}}'
       actions:
         - open
 

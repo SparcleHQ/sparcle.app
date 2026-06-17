@@ -147,10 +147,13 @@ const tierRows = [
           secrets management, and privacy-preserving context handling. The pipeline is
           patent-pending; specific layer implementations are reviewed under NDA.
         </Card>
-        <Card title="Bring your own LLM">
-          OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model.
-          Hot-swappable. With your own keys (BYOK), there's zero token markup — you burn down
-          your existing cloud commits while keeping data inside your perimeter.
+        <Card title="Bring your own models">
+          Your LLM (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own
+          fine-tune) — and your own embedding and reranking models too — all hot-swappable by
+          config, and local in air-gap. With your own keys (BYOK) there's zero token markup.
+          And keyword search plus the ACL pre-filter run with no model at all, so the base
+          deploys CPU-only and fully offline; you add the semantic and LLM lanes only where you
+          want them.
         </Card>
         <Card title="Durable agent lifecycle">
           Long-running agents survive process restarts, suspend on webhooks or timers, resume
@@ -419,7 +422,7 @@ const tierRows = [
     <PageSection
       eyebrow="Tech stack"
       title="What ships under the hood."
-      lede="The runtime is Rust end-to-end. The search substrate is Postgres FTS + pgvector. The audit chain is Ed25519-signed Merkle epochs. The full list below — every layer is swappable; reference impls ship in the box."
+      lede="The runtime is Rust end-to-end. The search substrate is pluggable — keyword on Postgres FTS or Quickwit, vector on pgvector or Qdrant — selected by config, not code. The audit chain is Ed25519-signed Merkle epochs. The full list below — every layer is swappable; reference impls ship in the box."
       stripe="b"
     >
       <div class="tech-stack-grid">
@@ -438,7 +441,8 @@ const tierRows = [
         <div class="tech-stack-col">
           <h3 class="tech-stack-col__title">Search &amp; ranking</h3>
           <dl class="tech-stack-list">
-            <div><dt>Search</dt><dd>Postgres FTS + pgvector</dd></div>
+            <div><dt>Keyword</dt><dd>Postgres FTS &middot; Quickwit</dd></div>
+            <div><dt>Vector</dt><dd>pgvector &middot; Qdrant</dd></div>
             <div><dt>Fusion</dt><dd>RRF (weighted)</dd></div>
             <div><dt>Policy</dt><dd>Authority Policy SDK</dd></div>
             <div><dt>ReBAC</dt><dd>OpenFGA <em>pilot</em></dd></div>

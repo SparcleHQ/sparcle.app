@@ -613,6 +613,12 @@ esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
 
+# Every install location (app, CLI symlink, embedded Postgres, caches) is
+# derived from $HOME. If it's unset or not a writable directory, fail early
+# with a clear message instead of scattering files at /.local/bin etc.
+[ -n "${HOME:-}" ] && [ -d "$HOME" ] || fail "\$HOME is not set to a valid directory. Set HOME and re-run."
+[ -w "$HOME" ] || fail "\$HOME (${HOME}) is not writable by the current user. Re-run as the user that owns it."
+
 # The installer is meant to run as a normal user; it escalates with sudo only
 # where it needs to (e.g. copying into /Applications). Running the whole thing
 # as root leaves root-owned state in your home dir and trips PostgreSQL's
@@ -627,6 +633,15 @@ if [ "$(id -u)" = "0" ]; then
     warn "No unprivileged user found, so the embedded database step will be skipped. Re-run without sudo to enable it."
   fi
 fi
+
+# Best-effort low-disk warning. The app (~200MB unpacked) + embedded Postgres
+# runtime + download cache need headroom; a full disk otherwise fails mid-copy
+# with confusing errors. Warn (don't block) since df parsing varies by FS.
+avail_kb=$(df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {print $4}')
+case "$avail_kb" in
+  ''|*[!0-9]*) ;;  # couldn't parse — skip silently
+  *) [ "$avail_kb" -lt 1048576 ] && warn "Low free disk space (~$((avail_kb / 1024))MB on $HOME). Install needs ~500MB+; it may fail if the disk fills." ;;
+esac
 
 configure_pg_runtime_sources
 
@@ -725,6 +740,16 @@ find_latest_release_with_asset() {
 
 # ── Detect architecture ─────────────────────────────────────────────────────
 ARCH=$(uname -m)
+# On Apple Silicon, a shell running under Rosetta 2 (x86 Homebrew, an Intel
+# terminal, `arch -x86_64`) reports uname -m as x86_64. Installing the Intel
+# build on an arm64 Mac works but is slower and ships a reduced feature set.
+# Trust the hardware: if the process is translated, the real arch is arm64.
+if [ "$PLATFORM" = "macos" ] && [ "$ARCH" = "x86_64" ]; then
+  if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
+    warn "Detected Rosetta (x86 shell on Apple Silicon) — installing the native arm64 build."
+    ARCH="arm64"
+  fi
+fi
 case "$PLATFORM-$ARCH" in
   macos-arm64)   RUST_TRIPLE="aarch64-apple-darwin" ; EXT="dmg" ;;
   macos-x86_64)  RUST_TRIPLE="x86_64-apple-darwin" ; EXT="dmg" ;;
@@ -886,8 +911,17 @@ install_macos() {
   MOUNT_POINT="${TMPDIR_MOUNT}"
 
   info "Installing ${APP_NAME}..."
-  hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
-    || fail "Failed to mount DMG. The download may be corrupted — try again."
+  # A cached DMG that matches the remote size+ETag but is internally corrupt
+  # (truncated mid-flight by a proxy, bad disk write) would fail to mount on
+  # every run, since the freshness check can't see inside it. On the first
+  # mount failure, purge the cache entry and re-download once before giving up.
+  if ! hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null; then
+    warn "DMG failed to mount — the cached download may be corrupt. Re-downloading..."
+    rm -f "${DL_PATH}" "${DL_PATH}.meta" 2>/dev/null || true
+    download_for_platform || fail "Failed to re-download ${APP_NAME}. Check your connection and try again."
+    hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
+      || fail "Failed to mount DMG even after re-downloading. The release artifact may be corrupted — report this at https://sparcle.app/download"
+  fi
 
   SOURCE_APP=$(find "${MOUNT_POINT}" -maxdepth 1 -name "*.app" | head -1)
   [ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }

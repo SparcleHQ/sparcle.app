@@ -47,6 +47,21 @@ ok()    { printf '\033[1;32m ✓ \033[0m %s\n' "$1"; }
 warn()  { printf '\033[1;33m ⚠ \033[0m %s\n' "$1"; }
 fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
 
+# Run a command with root privileges. Already root → run directly. Otherwise
+# prefer sudo with a real tty for the password prompt; when no tty is available
+# (piped `curl | sh` with stdin not a terminal, CI) fall back to non-interactive
+# sudo, which only succeeds if sudo is passwordless. Returns the command's exit
+# status so callers can react to failure.
+run_root() {
+  if [ "$(id -u)" = "0" ]; then
+    "$@"
+  elif [ -r /dev/tty ]; then
+    sudo "$@" < /dev/tty
+  else
+    sudo -n "$@"
+  fi
+}
+
 wait_for_api_readiness() {
   timeout_seconds="${1:-90}"
   port_base="${BOLT_API_PORT_BASE:-$DEFAULT_BOLT_API_PORT_BASE}"
@@ -1028,9 +1043,28 @@ install_linux_deb() {
   rm -f "${CACHE_BASE}/hsts-storage.sqlite" 2>/dev/null || true
   rm -f "${CACHE_BASE}/.last-build-id" 2>/dev/null || true
 
-  sudo dpkg -i "${DL_PATH}" < /dev/tty \
-    || { sudo apt-get install -f -y < /dev/tty 2>/dev/null || true; sudo dpkg -i "${DL_PATH}" < /dev/tty; } \
-    || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"
+  # Installing a .deb needs root. If we're not root and have no tty to prompt
+  # for a sudo password (piped install with no terminal), say so plainly rather
+  # than dying on a `/dev/tty: No such device` redirect error.
+  if [ "$(id -u)" != "0" ] && [ ! -r /dev/tty ] && ! sudo -n true 2>/dev/null; then
+    fail "Installing the .deb needs root, but no terminal is available for a password prompt.\n  Re-run in an interactive shell, or: sudo dpkg -i ${DL_PATH}"
+  fi
+
+  if ! run_root dpkg -i "${DL_PATH}"; then
+    # dpkg failures are usually missing dependencies; let apt resolve them and
+    # retry. If it still fails, the cached .deb may be corrupt (right size but
+    # bad bytes, which the freshness check can't detect) — purge and re-download
+    # once before giving up.
+    run_root apt-get install -f -y >/dev/null 2>&1 || true
+    if ! run_root dpkg -i "${DL_PATH}"; then
+      warn "dpkg install failed — re-downloading in case the cached package is corrupt..."
+      rm -f "${DL_PATH}" "${DL_PATH}.meta" 2>/dev/null || true
+      download_for_platform || fail "Failed to re-download the .deb package. Check your connection and try again."
+      run_root dpkg -i "${DL_PATH}" \
+        || { run_root apt-get install -f -y >/dev/null 2>&1 || true; run_root dpkg -i "${DL_PATH}"; } \
+        || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"
+    fi
+  fi
   ok "Installed ${APP_NAME} via dpkg"
 
   # Find and launch the installed binary
@@ -1065,18 +1099,18 @@ install_linux_appimage() {
     warn "FUSE not found — AppImage needs it to run."
     if command -v apt-get >/dev/null 2>&1; then
       info "Detected Ubuntu/Debian — installing libfuse2..."
-      sudo apt-get update -qq < /dev/tty || true
-      sudo apt-get install -y -qq libfuse2 < /dev/tty \
+      run_root apt-get update -qq >/dev/null 2>&1 || true
+      run_root apt-get install -y -qq libfuse2 \
         && ok "libfuse2 installed" \
         || warn "Could not install libfuse2. You may need to run: sudo apt install libfuse2"
     elif command -v dnf >/dev/null 2>&1; then
       info "Detected Fedora/RHEL — installing fuse-libs..."
-      sudo dnf install -y -q fuse-libs < /dev/tty \
+      run_root dnf install -y -q fuse-libs \
         && ok "fuse-libs installed" \
         || warn "Could not install fuse-libs. You may need to run: sudo dnf install fuse-libs"
     elif command -v pacman >/dev/null 2>&1; then
       info "Detected Arch — installing fuse2..."
-      sudo pacman -S --noconfirm fuse2 < /dev/tty \
+      run_root pacman -S --noconfirm fuse2 \
         && ok "fuse2 installed" \
         || warn "Could not install fuse2. You may need to run: sudo pacman -S fuse2"
     else

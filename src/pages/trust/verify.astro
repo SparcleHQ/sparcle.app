@@ -15,7 +15,7 @@ const procedure = [
   ],
   [
     "3. Run the verifier",
-    "sparcle-verify-chain --chain chain.ndjson --key operator-root.pub. The verifier (a single statically-linked Rust binary) checks: leaf-hash → epoch-root membership; epoch-root signature under the operator-root key; chain continuity across epochs; absence of orphan epochs. No network calls, no Sparcle dependencies — runs offline on air-gapped hardware.",
+    "sparcle-verify-chain --chain chain.ndjson --key operator-root.pub. The verifier (a single statically-linked Rust binary) checks: leaf-hash → epoch-root membership; epoch-root signature under the operator-root key; chain continuity across epochs; absence of orphan epochs. No network calls, no Sparcle dependencies; runs offline on air-gapped hardware.",
   ],
   [
     "4. Inspect the result",
@@ -26,7 +26,7 @@ const procedure = [
 const properties = [
   [
     "Sparcle is not in the verification loop",
-    "The verifier runs entirely inside your perimeter. No outbound calls. The operator-root key is the only Sparcle artifact you need, and it's a public key — there's nothing for an attacker to extract.",
+    "The verifier runs entirely inside your perimeter. No outbound calls. The operator-root key is the only Sparcle artifact you need, and it's a public key; there's nothing for an attacker to extract.",
   ],
   [
     "Bit-stable across versions",
@@ -34,7 +34,7 @@ const properties = [
   ],
   [
     "Tamper-evident, not tamper-proof",
-    "The chain cannot be silently modified — every tampered byte invalidates downstream signatures. It can, in principle, be deleted, which is why retention is contractually specified and the storage substrate (WORM or audit-replicated Postgres) is the customer's choice, not Sparcle's.",
+    "The chain cannot be silently modified; every tampered byte invalidates downstream signatures. It can, in principle, be deleted, which is why retention is contractually specified and the storage substrate (WORM or audit-replicated Postgres) is the customer's choice, not Sparcle's.",
   ],
   [
     "Post-erasure verification still works",
@@ -62,7 +62,7 @@ const availability = [
 ];
 
 const limits = [
-  "The verifier confirms chain integrity. It does not confirm that the events recorded are complete. Detecting a missing event requires comparing chain content against a complementary signal — typically the customer's SIEM or their own access logs.",
+  "The verifier confirms chain integrity. It does not confirm that the events recorded are complete. Detecting a missing event requires comparing chain content against a complementary signal, typically the customer's SIEM or their own access logs.",
   "The verifier does not validate the operator-root key's chain-of-custody. That is a separate trust decision the customer makes when they accept the key bundle.",
   "Verifying a chain that spans multiple operator-root key rotations requires the verifier to be given the full operator-root key history. The rotation manifest is included in the release-signing bundle for that reason.",
   "Quantum-resistance for Ed25519 signatures is not in scope today. A migration path to post-quantum signature schemes is on the roadmap; the verifier is signature-scheme-agnostic by design.",
@@ -70,7 +70,7 @@ const limits = [
 ---
 <BaseLayout
   title="Verify Our Claims: Standalone Audit-Chain Verifier | Sparcle Trust"
-  description="Bolt's audit chain is independently verifiable. Your auditor runs a single statically-linked binary against an exported chain — no network calls, no Sparcle dependencies, no inspection path Sparcle controls. The verifier model, the procedure, and how to get the binary."
+  description="Bolt's audit chain is independently verifiable. Your auditor runs a single statically-linked binary against an exported chain, with no network calls, no Sparcle dependencies, no inspection path Sparcle controls. The verifier model, the procedure, and how to get the binary."
   canonical="https://sparcle.app/trust/verify"
 >
   <main class="page-verify">
@@ -119,7 +119,7 @@ const limits = [
         <pre class="verify-command__pre"><code><span class="hl-comment"># export the chain you want to verify</span>
 <span class="hl-cmd">bolt</span> <span class="hl-sub">audit export</span> <span class="hl-flag">--from</span> <span class="hl-val">2026-01-01</span> <span class="hl-flag">--to</span> <span class="hl-val">2026-01-31</span> <span class="hl-flag">--out</span> <span class="hl-val">chain.ndjson</span>
 
-<span class="hl-comment"># run the standalone verifier — no network calls, no Sparcle deps</span>
+<span class="hl-comment"># run the standalone verifier: no network calls, no Sparcle deps</span>
 <span class="hl-cmd">sparcle-verify-chain</span> <span class="hl-cont">\</span>
   <span class="hl-flag">--chain</span> <span class="hl-val">chain.ndjson</span> <span class="hl-cont">\</span>
   <span class="hl-flag">--key</span> <span class="hl-val">operator-root.pub</span> <span class="hl-cont">\</span>

@@ -27,7 +27,7 @@ const categories = [
   {
     name: "Productivity & Collaboration",
     icon: "layers",
-    blurb: "Email, calendar, docs, and team chat — read and act with consent.",
+    blurb: "Email, calendar, docs, and team chat, read and act with consent.",
     items: [
       { name: "Microsoft 365 (Outlook + Calendar)" }, { name: "Microsoft Teams" },
       { name: "Microsoft OneDrive" }, { name: "Microsoft SharePoint" },
@@ -42,7 +42,7 @@ const categories = [
   {
     name: "Engineering & DevOps",
     icon: "code",
-    blurb: "Source, builds, issues, and ops — connected at the service level.",
+    blurb: "Source, builds, issues, and ops, connected at the service level.",
     items: [
       { name: "GitHub" }, { name: "GitLab" }, { name: "Bitbucket" },
       { name: "Jira (Atlassian)" }, { name: "Linear" }, { name: "Asana" },
@@ -64,7 +64,7 @@ const categories = [
   {
     name: "ITSM & Support",
     icon: "scale",
-    blurb: "Tickets, incidents, and customer support — read and respond with policy controls.",
+    blurb: "Tickets, incidents, and customer support, read and respond with policy controls.",
     items: [
       { name: "ServiceNow" }, { name: "Zendesk" }, { name: "Freshdesk" },
       { name: "Intercom" }, { name: "Jira Service Management" },
@@ -95,7 +95,7 @@ const categories = [
   {
     name: "Storage & Files",
     icon: "monitor",
-    blurb: "Document stores and file systems — local + cloud.",
+    blurb: "Document stores and file systems, local + cloud.",
     items: [
       { name: "Box" }, { name: "Dropbox" }, { name: "AWS S3" },
       { name: "Azure Blob Storage" }, { name: "Google Cloud Storage" },
@@ -128,7 +128,7 @@ const iconPaths: Record<string, string> = {
 };
 ---
 <BaseLayout
-  title="Integrations — 100+ Enterprise Systems via Open MCP Protocol | Sparcle"
+  title="Integrations: 100+ Enterprise Systems via Open MCP Protocol | Sparcle"
   description="Bolt connects to identity (Okta, Entra, Workspace, Zoho), productivity, engineering, sales, ITSM, knowledge, data warehouse, and LLM providers via the Model Context Protocol. BYO MCP servers welcome."
   canonical="https://sparcle.app/integrations"
 >
@@ -254,7 +254,7 @@ const iconPaths: Record<string, string> = {
           <text class="i-annotation" x="265" y="360">no proprietary APIs</text>
           <text class="i-annotation" x="265" y="375">customer-owned credentials</text>
 
-          <text class="i-annotation" x="455" y="490">LLM endpoint is the only attachment that may sit outside the perimeter — see /trust/where-the-model-runs</text>
+          <text class="i-annotation" x="455" y="490">LLM endpoint is the only attachment that may sit outside the perimeter; see /trust/where-the-model-runs</text>
         </svg>
       </div>
     </PageSection>
@@ -294,13 +294,13 @@ const iconPaths: Record<string, string> = {
       <Prose align="center">
         <p>
           The Model Context Protocol is open. Any MCP-compliant server slots in alongside Bolt's
-          built-in integrations — including custom-built connectors for your internal systems.
+          built-in integrations, including custom-built connectors for your internal systems.
           Sparcle ships connector SDKs in TypeScript and Python; the protocol itself is
           language-agnostic.
         </p>
         <p>
           For enterprise contracts, we offer <strong>custom MCP connector development</strong> as
-          a professional service — typically 1–3 weeks per system depending on auth complexity
+          a professional service, typically 1–3 weeks per system depending on auth complexity
           and the surface area you need exposed.
         </p>
       </Prose>
@@ -309,7 +309,7 @@ const iconPaths: Record<string, string> = {
     <CTAStrip
       variant="band"
       title="Ready to connect your stack?"
-      lede="Schedule a 30-minute walkthrough — we'll cover which integrations are most relevant for your environment and what custom development (if any) you'd want during pilot."
+      lede="Schedule a 30-minute walkthrough. We'll cover which integrations are most relevant for your environment and what custom development (if any) you'd want during pilot."
     >
       <a href="#" onclick="openContactModal('Architecture Review'); return false;" class="btn btn-primary btn-lg">
         Schedule Architecture Review

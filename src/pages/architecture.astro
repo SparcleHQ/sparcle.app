@@ -15,7 +15,7 @@ const tierRows = [
 ];
 ---
 <BaseLayout
-  title="Architecture — Sovereign Enterprise AI Runtime + ACL-Aware Data Plane | Sparcle"
+  title="Architecture: Sovereign Enterprise AI Runtime + ACL-Aware Data Plane | Sparcle"
   description="How Bolt's enterprise AI agent runtime and Aeira's governance-grade data plane fit together. Patent-pending priority engine, multi-layer security pipeline, Authority Policy SDK. Built for any enterprise; deployable for the most regulated. NDA briefs available."
   canonical="https://sparcle.app/architecture"
 >
@@ -130,7 +130,7 @@ const tierRows = [
     </PageSection>
 
     <PageSection
-      eyebrow="Bolt — Enterprise Agent Platform"
+      eyebrow="Bolt: Enterprise Agent Platform"
       title="An agent runtime built for durability and trust."
       stripe="b"
     >
@@ -149,7 +149,7 @@ const tierRows = [
         </Card>
         <Card title="Bring your own models">
           Your LLM (OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own
-          fine-tune) — and your own embedding and reranking models too — all hot-swappable by
+          fine-tune), and your own embedding and reranking models too, all hot-swappable by
           config, and local in air-gap. With your own keys (BYOK) there's zero token markup.
           And keyword search plus the ACL pre-filter run with no model at all, so the base
           deploys CPU-only and fully offline; you add the semantic and LLM lanes only where you
@@ -239,19 +239,19 @@ const tierRows = [
     </PageSection>
 
     <PageSection
-      eyebrow="Aeira — Compliance-Grade Data Plane"
+      eyebrow="Aeira: Compliance-Grade Data Plane"
       title="The data plane your auditor signs off on."
       stripe="a"
     >
       <CardGrid cols={2}>
         <Card title="Identity-bound access">
-          Every query is automatically filtered to what the calling user is entitled to see —
-          region, department, sensitivity clearance, role — derived from your existing IdP.
+          Every query is automatically filtered to what the calling user is entitled to see
+          (region, department, sensitivity clearance, role), derived from your existing IdP.
           Your AI agents and your auditors see the same answer. No bypass mode for callers.
         </Card>
         <Card title="Provable erasure">
           When a tenant invokes the Right to be Forgotten under GDPR, or you need HIPAA-aligned
-          erasure of restricted records, Aeira gives you cryptographic proof — not just a deleted
+          erasure of restricted records, Aeira gives you cryptographic proof, not just a deleted
           row. Auditor-acceptable, independently verifiable. The specific KMS posture and
           key-management semantics are shared under NDA.
         </Card>
@@ -262,7 +262,7 @@ const tierRows = [
         </Card>
         <Card title="Air-gap-ready by default">
           Deploy in your VPC, on-prem, or fully air-gapped. All indexing, search, and retrieval
-          run inside your security perimeter — no outbound calls, no telemetry, no third-party
+          run inside your security perimeter: no outbound calls, no telemetry, no third-party
           model API calls. Federated tier supports multi-region with offline-validated licensing
           for environments with no inbound or outbound connectivity.
         </Card>
@@ -270,24 +270,24 @@ const tierRows = [
     </PageSection>
 
     <PageSection
-      eyebrow="Authority Policy SDK — Customer-Extensible Layer"
+      eyebrow="Authority Policy SDK: Customer-Extensible Layer"
       title="Your search. Your policy. Your code."
-      lede="Every regulated vertical has its own honest definition of authoritative. The Authority Policy trait lets customers write theirs — in Rust, or in YAML config that wraps the reference packs — without forking the product. ACL handles authorization. Authority Policy handles ranking. Separate concerns, separate trait surfaces. Three reference packs ship in the box; vertical and customer-specific packs ship on engagement."
+      lede="Every regulated vertical has its own honest definition of authoritative. The Authority Policy trait lets customers write theirs (in Rust, or in YAML config that wraps the reference packs) without forking the product. ACL handles authorization. Authority Policy handles ranking. Separate concerns, separate trait surfaces. Three reference packs ship in the box; vertical and customer-specific packs ship on engagement."
       stripe="b"
     >
       <CardGrid cols={2}>
         <Card title="Default pack">
-          Universal signals every install benefits from — freshness, authority tier, approval
+          Universal signals every install benefits from: freshness, authority tier, approval
           lifecycle, audience targeting. Sensible defaults for any organization, regardless of
           vertical. Customers tune weights or swap in a vertical pack as needs evolve.
         </Card>
         <Card title="Regulated pack">
-          Regulated-industry baseline — tighter freshness cadence, hard penalty on deprecated
+          Regulated-industry baseline: tighter freshness cadence, hard penalty on deprecated
           and archived records, emphasis on authority-tier sourcing. Compliance teams cite the
           right document, not the most recent draft of the wrong one.
         </Card>
         <Card title="Healthcare pack">
-          Clinical-evidence ladder layered on the Regulated pack — clinical guidelines outrank
+          Clinical-evidence ladder layered on the Regulated pack: clinical guidelines outrank
           clinical notes, expired-CME demotion, configurable per-customer evidence taxonomies.
           A starting point for customer-specific clinical ontology work.
         </Card>
@@ -299,8 +299,8 @@ const tierRows = [
       </CardGrid>
       <div class="arch-diagram" style="margin-top: 2.5rem;" data-expandable tabindex="0" role="button" aria-label="Expand Authority Policy L4.5 placement diagram">
         <svg viewBox="0 0 720 600" class="arch-l45-svg" role="img" aria-labelledby="arch-l45-title arch-l45-desc">
-          <title id="arch-l45-title">Authority Policy SDK — L4.5 placement</title>
-          <desc id="arch-l45-desc">The retrieval pipeline as a vertical stack. Source systems feed Aeira indices. The ACL pre-filter drops rows the caller cannot see. Retrieval produces a candidate set. The Authority Policy SDK sits at L4.5, between retrieval and the final rank merge — this is the customer-extensible layer. RRF rank merge then produces the final ordering, and the result plus its receipt are returned to the agent or LLM.</desc>
+          <title id="arch-l45-title">Authority Policy SDK: L4.5 placement</title>
+          <desc id="arch-l45-desc">The retrieval pipeline as a vertical stack. Source systems feed Aeira indices. The ACL pre-filter drops rows the caller cannot see. Retrieval produces a candidate set. The Authority Policy SDK sits at L4.5, between retrieval and the final rank merge. This is the customer-extensible layer. RRF rank merge then produces the final ordering, and the result plus its receipt are returned to the agent or LLM.</desc>
 
           <defs>
             <marker id="l-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -383,7 +383,7 @@ const tierRows = [
     <PageSection
       eyebrow="The full architectural view"
       title="Every component that ships, in one diagram."
-      lede="The print-quality architecture poster, embedded below. Bolt's client surfaces on top; Aeira's three internal layers (search pipeline, storage and cryptography, ingest spine and cache); the connector catalog grouped by category; the three external integrations (your IdP, your LLM, your KMS) outside the perimeter. The Authority Policy SDK is the customer-extensible wedge — highlighted in the search pipeline."
+      lede="The print-quality architecture poster, embedded below. Bolt's client surfaces on top; Aeira's three internal layers (search pipeline, storage and cryptography, ingest spine and cache); the connector catalog grouped by category; the three external integrations (your IdP, your LLM, your KMS) outside the perimeter. The Authority Policy SDK is the customer-extensible wedge, highlighted in the search pipeline."
       stripe="a"
     >
       <p class="arch-pdf-fallback-link">
@@ -422,7 +422,7 @@ const tierRows = [
     <PageSection
       eyebrow="Tech stack"
       title="What ships under the hood."
-      lede="The runtime is Rust end-to-end. The search substrate is pluggable — keyword on Postgres FTS or Quickwit, vector on pgvector or Qdrant — selected by config, not code. The audit chain is Ed25519-signed Merkle epochs. The full list below — every layer is swappable; reference impls ship in the box."
+      lede="The runtime is Rust end-to-end. The search substrate is pluggable (keyword on Postgres FTS or Quickwit, vector on pgvector or Qdrant) selected by config, not code. The audit chain is Ed25519-signed Merkle epochs. The full list below: every layer is swappable; reference impls ship in the box."
       stripe="b"
     >
       <div class="tech-stack-grid">
@@ -516,7 +516,7 @@ const tierRows = [
     <PageSection
       eyebrow="Deployment"
       title="Two operating models. Same platform."
-      lede="Bolt and Aeira always self-host the data plane and hosting in your own perimeter — Sparcle never hosts your data. The only choice is who runs the AI inference: bring your own LLM, or opt into a Sparcle-managed zero-retention gateway."
+      lede="Bolt and Aeira always self-host the data plane and hosting in your own perimeter. Sparcle never hosts your data. The only choice is who runs the AI inference: bring your own LLM, or opt into a Sparcle-managed zero-retention gateway."
       stripe="b"
     >
       <div class="data-table data-table--cols3">

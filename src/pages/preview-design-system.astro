@@ -55,14 +55,14 @@ const faqItems = [
     width="page"
   >
     <div class="ds-width-stack">
-      <div class="ds-width-bar w-prose"><span>w-prose (720px) — headers, ledes, FAQ, CTA copy</span></div>
-      <div class="ds-width-bar w-content"><span>w-content (1120px) — card grids, tables, default section width</span></div>
-      <div class="ds-width-bar w-page"><span>w-page (1280px) — nav, footer, hero band, full-bleed media</span></div>
+      <div class="ds-width-bar w-prose"><span>w-prose (720px): headers, ledes, FAQ, CTA copy</span></div>
+      <div class="ds-width-bar w-content"><span>w-content (1120px): card grids, tables, default section width</span></div>
+      <div class="ds-width-bar w-page"><span>w-page (1280px): nav, footer, hero band, full-bleed media</span></div>
     </div>
   </PageSection>
 
   <PageSection
-    eyebrow="Card — default variant"
+    eyebrow="Card: default variant"
     title="One card. One padding. One radius. Everywhere."
     lede="Replaces .pillar, .arch-pillar, .sec-pillar, .sec-deploy, .feature-card, .info-card."
     stripe="a"
@@ -75,13 +75,13 @@ const faqItems = [
         OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, or your own fine-tuned model. Hot-swappable. With BYOK there is zero token markup.
       </Card>
       <Card icon={iconLock} title="Identity-bound access">
-        Every query is automatically filtered to what the calling user is entitled to see — region, department, sensitivity clearance, role.
+        Every query is automatically filtered to what the calling user is entitled to see: region, department, sensitivity clearance, role.
       </Card>
     </CardGrid>
   </PageSection>
 
   <PageSection
-    eyebrow="Card — 2-up"
+    eyebrow="Card: 2-up"
     title="Same primitive, different column count."
     stripe="b"
   >
@@ -96,7 +96,7 @@ const faqItems = [
   </PageSection>
 
   <PageSection
-    eyebrow="Card — 4-up + stat variant"
+    eyebrow="Card: 4-up + stat variant"
     title="The stat variant. Metric-forward."
     stripe="a"
   >
@@ -117,18 +117,18 @@ const faqItems = [
   </PageSection>
 
   <PageSection
-    eyebrow="Card — proof variant + accent stripes"
+    eyebrow="Card: proof variant + accent stripes"
     title="Status communication via left border."
     stripe="b"
   >
     <CardGrid cols={3}>
-      <Card variant="default" accent="success" title="HIPAA — deployable">
+      <Card variant="default" accent="success" title="HIPAA: deployable">
         Self-hosted variants meet HIPAA technical safeguards. BAAs available on enterprise contracts during pilot evaluation.
       </Card>
-      <Card variant="default" accent="warning" title="SOC 2 Type II — roadmap">
+      <Card variant="default" accent="warning" title="SOC 2 Type II: roadmap">
         Audit engagement planned. Honest framing: no formal certification yet. Aligned controls implemented; gap analysis under NDA.
       </Card>
-      <Card variant="default" accent="danger" title="Public LLM exposure — never">
+      <Card variant="default" accent="danger" title="Public LLM exposure: never">
         Zero-retention contracts upstream where managed inference applies. Self-hosted variants never call out at all.
       </Card>
     </CardGrid>
@@ -167,7 +167,7 @@ const faqItems = [
         Bolt is the enterprise AI agent for regulated organizations that cannot send data
         to third-party clouds. Unlike Copilot 365 or Gemini, Bolt deploys inside your own
         perimeter under your own compliance framework. It works seamlessly with your
-        existing identity stack — Microsoft 365, Google Workspace, Zoho, or any OIDC
+        existing identity stack: Microsoft 365, Google Workspace, Zoho, or any OIDC
         provider.
       </p>
       <h3>Why regulated buyers start with self-hosted</h3>
@@ -197,7 +197,7 @@ const faqItems = [
   <FAQ items={faqItems} stripe="a" />
 
   <PageSection
-    eyebrow="CTAStrip — inline variant"
+    eyebrow="CTAStrip: inline variant"
     title="A small in-section CTA."
     stripe="b"
     width="prose"
@@ -223,7 +223,7 @@ const faqItems = [
     <a href="#" class="btn btn-primary btn-lg">Schedule Architecture Review</a>
     <a href="#" class="btn btn-secondary btn-lg">Security posture &rarr;</a>
     <Fragment slot="note">
-      Or download <a href="/download">Bolt Enterprise — free, bring your own API key</a>
+      Or download <a href="/download">Bolt Enterprise: free, bring your own API key</a>
     </Fragment>
   </CTAStrip>
 </BaseLayout>

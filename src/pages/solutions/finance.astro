@@ -10,14 +10,14 @@ const frameworks = [
   ["SOX (Sarbanes-Oxley, Sections 302 / 404)", "ICFR-relevant records must be retained, attestable, and tamper-evident. Bolt's Ed25519-signed Merkle audit chain is designed to satisfy the integrity requirement; the standalone verifier is the artifact your auditor runs against the chain."],
   ["SEC Rule 17a-4 + FINRA 4511", "Broker-dealer record-keeping. Records must be retained in WORM or equivalent non-rewritable, non-erasable format. Aeira's WORM-eligible storage path plus the cryptographic-disposal construction is designed to support both retention AND erasure obligations via the same primitive."],
   ["GLBA + NYDFS Part 500", "Customer financial information protection. Bolt's PII masking at the LLM boundary, identity-bound retrieval, and audit-trail responses are the building blocks GLBA and NYDFS require for AI-touching workflows."],
-  ["GDPR Art. 17 / 28 (when EU customer data is present)", "Cryptographic erasure is designed to satisfy Right-to-be-Forgotten obligations while preserving SEC and FINRA retention duties. Erasure-with-retention via the same primitive — detailed at /trust/cryptographic-erasure."],
+  ["GDPR Art. 17 / 28 (when EU customer data is present)", "Cryptographic erasure is designed to satisfy Right-to-be-Forgotten obligations while preserving SEC and FINRA retention duties. Erasure-with-retention via the same primitive, detailed at /trust/cryptographic-erasure."],
 ];
 
 const residency = [
   ["WORM-eligible audit chain", "Aeira's audit chain pairs with S3 Object Lock, Azure Immutable Blob, or any object-lock-supporting storage. The chain is byte-stable; replay produces identical bytes."],
   ["Customer-held KMS", "Vault Transit, AWS KMS, Azure Key Vault, or PKCS#11 HSM. The crypto-shred construction means Sparcle cannot read tenant data without the customer-held CMK."],
   ["Erasure-with-retention via one primitive", "Cryptographic disposal of the per-tenant CMK destroys readability; WORM ciphertext remains on the shelf. SOX/SEC retention auditor sees the record; GDPR auditor sees the disposal receipt. Both verifiable."],
-  ["Trading-floor and ops latency", "p95 retrieval target ≤ 200ms on 100M-doc tenants — the first published benchmark ships during pilot. Aeira's keyword + vector + graph fusion is sharded for desk-side response latencies."],
+  ["Trading-floor and ops latency", "p95 retrieval target ≤ 200ms on 100M-doc tenants. The first published benchmark ships during pilot. Aeira's keyword + vector + graph fusion is sharded for desk-side response latencies."],
 ];
 
 const workflows = [
@@ -87,7 +87,7 @@ const trustDossier = [
       <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand finance vertical brief">
         <iframe
           src="/docs/pdfs/vertical-finance.pdf#view=FitH"
-          title="Sparcle for Finance — 1-page brief"
+          title="Sparcle for Finance: 1-page brief"
           loading="lazy"
         ></iframe>
       </div>

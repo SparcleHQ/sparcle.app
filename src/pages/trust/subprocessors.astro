@@ -65,12 +65,12 @@ const notDoes = [
     <PageSection
       eyebrow="At a glance"
       title="The asymmetric topology, visualized."
-      lede="Customer data is processed by sub-processors the customer configures, inside the customer's perimeter. Sparcle's own sub-processors handle software delivery, not customer data. The two sets do not touch — and the only flow that crosses the boundary is from Sparcle outward, in the form of container images, Helm charts, and advisories."
+      lede="Customer data is processed by sub-processors the customer configures, inside the customer's perimeter. Sparcle's own sub-processors handle software delivery, not customer data. The two sets do not touch, and the only flow that crosses the boundary is from Sparcle outward, in the form of container images, Helm charts, and advisories."
       stripe="a"
     >
       <div class="subproc-diagram" data-expandable tabindex="0" role="button" aria-label="Expand sub-processor topology diagram">
         <svg viewBox="0 0 940 500" class="subproc-topology-svg" role="img" aria-labelledby="subproc-topology-title subproc-topology-desc">
-          <title id="subproc-topology-title">Sub-processor topology — Sparcle is not in the customer data path</title>
+          <title id="subproc-topology-title">Sub-processor topology: Sparcle is not in the customer data path</title>
           <desc id="subproc-topology-desc">The customer perimeter contains every sub-processor that touches customer data: identity provider, cloud compute, managed Postgres and Redis, object storage, LLM provider, KMS, MCP integrations, and SIEM. Sparcle sits outside the perimeter as a software vendor with its own sub-processors that handle source delivery and corporate operations only. The only flow that crosses the boundary is one-way from Sparcle to the customer perimeter: container images, Helm charts, and security advisories. Customer data never flows back to Sparcle.</desc>
 
           <defs>
@@ -154,7 +154,7 @@ const notDoes = [
           </text>
 
           <rect class="sp-vendor-box" x="640" y="80" width="280" height="260" rx="14" />
-          <text class="sp-vendor-label" x="656" y="68">SPARCLE — SOFTWARE VENDOR</text>
+          <text class="sp-vendor-label" x="656" y="68">SPARCLE: SOFTWARE VENDOR</text>
           <text class="sp-vendor-sub" x="656" y="105">Sparcle's own sub-processors:</text>
 
           <rect class="sp-chip" x="660" y="120" width="240" height="46" rx="6" />

@@ -2,7 +2,7 @@
   synced from bolt-api/docs/UTILITY_MANIFEST.md by scripts/sync-docs.sh
   do not edit by hand — edits will be overwritten on next build
 -->
-# Bolt Utility Manifest Spec — v1
+# Bolt Utility Manifest Spec (v1)
 
 **Status:** Frozen for v1. Future spec versions ship under a new `schema_version` and are additive at the parser, never breaking.
 
@@ -19,8 +19,8 @@ A utility is a single launcher chip (e.g. `=jira`, `=team`, `=incidents`) that:
 1. Exposes one or more **scopes** (sub-commands the user can pick after typing `=`).
 2. Runs a **declarative flow** of MCP tool calls and HTTP calls to fetch data.
 3. Emits rows of a known **canonical type** (`Person`, `Issue`, `Document`, ...).
-4. Renders the rows in the **launcher autocomplete dropdown** (the existing one — no new component).
-5. Optionally binds the selected row into a **right-rail widget** (the existing one — `card`/`map`/`image`/`date`/`calc`/`color`/`entity`/`entity_preview`/`weather`).
+4. Renders the rows in the **launcher autocomplete dropdown** (the existing one, no new component).
+5. Optionally binds the selected row into a **right-rail widget** (the existing one: `card`/`map`/`image`/`date`/`calc`/`color`/`entity`/`entity_preview`/`weather`).
 6. Exposes typed **actions** on rows (`url`, `tool`, `utility`, `composer`, `clipboard`).
 
 Authoring is no-code first: bundled manifests ship with Bolt; admins enable them via the Gallery; custom manifests are authored via a wizard or YAML side panel. The wizard introspects MCP servers and binds tools by point-and-click.
@@ -36,10 +36,10 @@ A manifest has three strictly-separated layers:
 | Layer | Contents | Logic allowed |
 |---|---|---|
 | **Identity** | `id`, `chip`, `title`, `icon`, `description`, `emits`, `auth_profile_ref`, `requires` | none |
-| **Flow** | `scopes[]`, `filters[]`, `actions[]` — a small DAG of MCP/HTTP calls | declarative DAG only |
+| **Flow** | `scopes[]`, `filters[]`, `actions[]`, a small DAG of MCP/HTTP calls | declarative DAG only |
 | **Presentation** | `presentation` (widget, fields, right_widget bindings) | template substitution only |
 
-The flow DAG has exactly **five node types**: `call`, `parallel`, `merge`, `transform`, `emit`. There are no conditionals, no loops, no `when:` predicates, no expression language. If a use case can't be expressed with these primitives, the answer is "write a custom MCP tool" — not "extend the manifest."
+The flow DAG has exactly **five node types**: `call`, `parallel`, `merge`, `transform`, `emit`. There are no conditionals, no loops, no `when:` predicates, no expression language. If a use case can't be expressed with these primitives, the answer is "write a custom MCP tool," not "extend the manifest."
 
 The escape hatch for data shaping is `transform: jq '...'`, executed inside a sandboxed `jaq` interpreter with hard CPU/memory/output budgets. JQ has no I/O.
 
@@ -101,7 +101,7 @@ presentation: { ... }              # required
 
 ### 4.2 Validation
 
-All validation is **save-time**, not runtime. A manifest that passes the linter is guaranteed to load and dispatch (it may still fail at the MCP layer at runtime — that is a separate failure class with a separate UX).
+All validation is **save-time**, not runtime. A manifest that passes the linter is guaranteed to load and dispatch (it may still fail at the MCP layer at runtime; that is a separate failure class with a separate UX).
 
 See §11 for the complete linter rule list.
 
@@ -135,8 +135,8 @@ scopes:
 
 When a scope has `match:`, each entry is tried in declared order. First match wins. The two pattern keys are:
 
-- `regex: '...'` — matched against the user query (post-chip). Validated for ReDoS at save time using the same probe set as `bare.patterns` in the legacy spec. The full match is exposed as `{{match}}`; named groups via `(?P<name>...)` are exposed as `{{groups.name}}`. Bindings declared in `bind:` populate the template context.
-- `text: '{{query}}'` — matches whenever query text is non-empty. Use as the catch-all last entry.
+- `regex: '...'`, matched against the user query (post-chip). Validated for ReDoS at save time using the same probe set as `bare.patterns` in the legacy spec. The full match is exposed as `{{match}}`; named groups via `(?P<name>...)` are exposed as `{{groups.name}}`. Bindings declared in `bind:` populate the template context.
+- `text: '{{query}}'`, matches whenever query text is non-empty. Use as the catch-all last entry.
 
 If no entry matches, the scope returns an empty result set.
 
@@ -161,7 +161,7 @@ Nodes execute in declared order. Each node may declare a named output via `out: 
 
 A flow must contain exactly one `emit:` node, and it must be the last node.
 
-### 6.1 `call:` — invoke one tool
+### 6.1 `call:` invoke one tool
 
 ```yaml
 - call:
@@ -208,7 +208,7 @@ Each templated arg's intended type is inferred from the response schema (when pr
 
 The escape filters are documented in §9.5.
 
-### 6.2 `parallel:` — run nested flows concurrently
+### 6.2 `parallel:` run nested flows concurrently
 
 ```yaml
 - parallel:
@@ -234,7 +234,7 @@ Each child node must declare `out:`. All children's outputs are added to the tem
 - Each branch's completion triggers an SSE event to the client carrying `{branch_name, rows}`.
 - Client renders rows incrementally. When all branches complete (or fail), a final event signals end-of-stream.
 
-### 6.3 `merge:` — combine arrays into a unified row set
+### 6.3 `merge:` combine arrays into a unified row set
 
 ```yaml
 - merge:
@@ -260,7 +260,7 @@ If a source row lacks a path, the unified field is `null` for that row.
 
 `dedupe_by` accepts a list of field names; rows with identical values across all listed fields are deduplicated, keeping the first.
 
-### 6.4 `transform:` — jq one-liner over the template context
+### 6.4 `transform:` jq one-liner over the template context
 
 ```yaml
 - transform: '.r.reports | map(select(.email != $user_email))'
@@ -279,7 +279,7 @@ Exceeding any limit aborts the transform with a runtime error. The linter reject
 
 The jq program runs against an object whose keys are all named outputs from prior steps plus `$user`, `$org`, `$query`, `$limit`. It cannot read environment variables, files, network, or system clock.
 
-### 6.5 `emit:` — produce the final row set
+### 6.5 `emit:` produce the final row set
 
 ```yaml
 - emit: r                      # name of the output to emit (must be an array or single object)
@@ -330,7 +330,7 @@ filters:
     maps_to: jql.duedate
 ```
 
-### 7.1 `pre` filters — `maps_to` semantics
+### 7.1 `pre` filters: `maps_to` semantics
 
 `maps_to` is a dotted path interpreted by the runtime to inject the filter value into a `call:` arg. The first dotted segment names the arg; subsequent segments compose with the existing value.
 
@@ -409,7 +409,7 @@ actions:
     value: "{{row.key}}"
 ```
 
-`kind: clipboard` requires a `value:` template and runs entirely client-side — it never touches an MCP server or HTTP, so it carries none of the confirm/idempotency/audit machinery of `kind: tool`.
+`kind: clipboard` requires a `value:` template and runs entirely client-side; it never touches an MCP server or HTTP, so it carries none of the confirm/idempotency/audit machinery of `kind: tool`.
 
 ### 8.2 Confirmations
 
@@ -480,9 +480,9 @@ The list widget reuses the existing launcher autocomplete dropdown. Each row is 
 
 The right_widget reuses the existing right-rail panel; `kind` selects one of the 10 widget components; `bind` provides per-component template bindings. `entity_preview` is the wide detail pane (media + title/subtitle + label/value facts + icon footer) rendered through the shared `EntityPreviewPane`, bound from the selected row's fields with the footer drawn from the manifest's `actions`.
 
-#### `markdown` — rich, scrollable, sanitized body
+#### `markdown`: rich, scrollable, sanitized body
 
-`kind: markdown` renders a scrollable pane of **sanitized Markdown** (prose + syntax-highlighted code fences — one primitive covers both). It is available to admin **and** user/bridge utilities, for showing long or richly-formatted content (release notes, a rendered file, a diff, a report) that doesn't fit the fact-table shape of `card`/`entity_preview`.
+`kind: markdown` renders a scrollable pane of **sanitized Markdown** (prose + syntax-highlighted code fences, one primitive covers both). It is available to admin **and** user/bridge utilities, for showing long or richly-formatted content (release notes, a rendered file, a diff, a report) that doesn't fit the fact-table shape of `card`/`entity_preview`.
 
 ```yaml
 right_widget:
@@ -577,13 +577,13 @@ These render the parsed `rows` (plus a declarative `bind`) in the right rail; no
 
 Per-kind details:
 
-- `chart` — `list_data` maps one point per row.
-- `table` — omit `columns` to auto-infer from row keys.
-- `cards` — `badge` auto-colors: **green** (ok/healthy/up/success/active), **amber** (warn/degraded/pending), **red** (error/down/fail/critical).
-- `detail` — omit `fields` to auto-derive from the row's keys (humanized).
-- `json_tree` — the top two levels expand by default; click any node/leaf to copy; depth is capped at ~6.
-- `diff` — capped at 1500 lines per side.
-- `image_grid` — remote and `data:` URLs are both allowed here (unlike `markdown`, which blocks remote images for User Apps, §9.1). Click opens `src`.
+- `chart`: `list_data` maps one point per row.
+- `table`: omit `columns` to auto-infer from row keys.
+- `cards`: `badge` auto-colors: **green** (ok/healthy/up/success/active), **amber** (warn/degraded/pending), **red** (error/down/fail/critical).
+- `detail`: omit `fields` to auto-derive from the row's keys (humanized).
+- `json_tree`: the top two levels expand by default; click any node/leaf to copy; depth is capped at ~6.
+- `diff`: capped at 1500 lines per side.
+- `image_grid`: remote and `data:` URLs are both allowed here (unlike `markdown`, which blocks remote images for User Apps, §9.1). Click opens `src`.
 
 ```yaml
 presentation:
@@ -916,11 +916,11 @@ Documented here so that no one re-asks:
 
 ## 19. Bridge runtime (User Apps)
 
-The same manifest schema supports a family of **local runtimes** for User Apps. An author opts in by setting `runtime:` at the top level to one of the user-authorable transports. As of this version there are two: `bridge` (argv-only shell command) and `http_local` (a single read against a loopback service). Both run on the end user's machine under their own OS identity, with no admin-controlled fields, no flow DAG, no MCP wiring, and no auth profile — just a data source, an output parser, a presentation block, and a small set of declared actions.
+The same manifest schema supports a family of **local runtimes** for User Apps. An author opts in by setting `runtime:` at the top level to one of the user-authorable transports. As of this version there are two: `bridge` (argv-only shell command) and `http_local` (a single read against a loopback service). Both run on the end user's machine under their own OS identity, with no admin-controlled fields, no flow DAG, no MCP wiring, and no auth profile: just a data source, an output parser, a presentation block, and a small set of declared actions.
 
 Customer-facing name: **User App**. Codename in code and YAML: `utility` / `runtime: bridge` (or `runtime: http_local`).
 
-> **Why two runtimes.** Shell (`bridge`) covers pre-authenticated CLIs (`git`, `gh`, `kubectl`, `aws`). Loopback HTTP (`http_local`) covers local daemons that speak HTTP but have no CLI worth shelling out to — Docker, Ollama, a dev server, a browser's CDP endpoint. Both are local-only by construction.
+> **Why two runtimes.** Shell (`bridge`) covers pre-authenticated CLIs (`git`, `gh`, `kubectl`, `aws`). Loopback HTTP (`http_local`) covers local daemons that speak HTTP but have no CLI worth shelling out to: Docker, Ollama, a dev server, a browser's CDP endpoint. Both are local-only by construction.
 
 ### 19.1 Discriminator
 
@@ -928,11 +928,11 @@ Customer-facing name: **User App**. Codename in code and YAML: `utility` / `runt
 runtime: bridge        # or: http_local
 ```
 
-`runtime` is required and must be one of the values in `ALLOWED_RUNTIME` — currently `bridge` or `http_local`. The set is reserved so future transports (`wasm`, `subprocess`, `sql`, `osa`, …) can be added without breaking parsers; a runtime not in the set is rejected at load.
+`runtime` is required and must be one of the values in `ALLOWED_RUNTIME`, currently `bridge` or `http_local`. The set is reserved so future transports (`wasm`, `subprocess`, `sql`, `osa`, …) can be added without breaking parsers; a runtime not in the set is rejected at load.
 
 Other top-level rules the loader enforces for user manifests:
 - `schema_version` must equal `1`.
-- `id` and `chip` must each match `^[a-z0-9][a-z0-9-]{0,63}$` (lowercase-kebab). Unlike admin manifests (§4), the User App `chip` is a **bare key with no `=` prefix** — the launcher adds the leading `=` when it surfaces the chip.
+- `id` and `chip` must each match `^[a-z0-9][a-z0-9-]{0,63}$` (lowercase-kebab). Unlike admin manifests (§4), the User App `chip` is a **bare key with no `=` prefix**: the launcher adds the leading `=` when it surfaces the chip.
 - `emits` must be one of the canonical types (§12) or `Generic`.
 - Exactly one transport block must be present and must match the declared runtime: `runtime: bridge` requires a `bridge:` block and rejects an `http:` block; `runtime: http_local` requires an `http:` block and rejects a `bridge:` block.
 
@@ -961,7 +961,7 @@ The loader / parser stamps these on every emitted row regardless of what the YAM
 - `aiSuggestedQuery: null`
 - `quickQaActionQuery: null`
 - `escalationPrompt: null`
-- `source: "user_bridge"` — the lineage tag the PWA and audit log key on
+- `source: "user_bridge"`, the lineage tag the PWA and audit log key on
 
 User Apps are also forced to `dispatch.mode: confirm` (§19.7). Authors can customize the confirm label/hint text but cannot turn confirm off. Shell exec on incremental keystrokes is not a thing the runtime ships.
 
@@ -1006,7 +1006,7 @@ http:
 
 Fields:
 - `port`: required, non-zero loopback port.
-- `host`: optional, restricted to `127.0.0.1`, `::1`, or `localhost` (default `127.0.0.1`). Any other host is rejected at load — there is intentionally no way to point this transport off-box.
+- `host`: optional, restricted to `127.0.0.1`, `::1`, or `localhost` (default `127.0.0.1`). Any other host is rejected at load; there is intentionally no way to point this transport off-box.
 - `request.method`: `GET` (default) or `POST`. Mutating verbs are out of scope for this read-first version.
 - `request.path`: required, must start with `/`. Templated with `{{var}}`; values are **percent-encoded** at expand time (never shell-quoted) so a query term cannot break out of the path or inject extra parameters.
 - `parse`: same `json` / `lines` / `raw` modes and row shapes as `bridge.parse`.
@@ -1030,7 +1030,7 @@ args:
 
 ### 19.6.1 Input forms (`inputs:`)
 
-A `runtime: bridge` or `runtime: http_local` User App may declare an `inputs:` block to collect typed values via a rendered form **before** running, instead of parsing the query string. When `inputs` is non-empty the launcher shows a typed form; on submit each field value is passed as an invoke arg and binds as `{{<name>}}` in the command/templates (caller args take precedence over query-derived args). It is purely declarative — there is intentionally no `show_if` / computed / validation-expression surface (logic belongs in the script). All values are strings (`toggle` = `"true"`/`"false"`).
+A `runtime: bridge` or `runtime: http_local` User App may declare an `inputs:` block to collect typed values via a rendered form **before** running, instead of parsing the query string. When `inputs` is non-empty the launcher shows a typed form; on submit each field value is passed as an invoke arg and binds as `{{<name>}}` in the command/templates (caller args take precedence over query-derived args). It is purely declarative; there is intentionally no `show_if` / computed / validation-expression surface (logic belongs in the script). All values are strings (`toggle` = `"true"`/`"false"`).
 
 Frozen field types (adding one is a spec version bump): `text`, `number`, `date`, `select`, `toggle`, `secret`.
 
@@ -1072,7 +1072,7 @@ The bundled `=demo-chart`, `=demo-table`, `=demo-cards`, `=demo-detail`, `=demo-
 
 ### 19.7 The `dispatch:` block
 
-User Apps fire on intentional Enter, not on every keystroke. `dispatch.mode` is forced to `confirm`; declaring `auto` is rejected. The block is optional — absent ⇒ a single confirm row with default label/hint.
+User Apps fire on intentional Enter, not on every keystroke. `dispatch.mode` is forced to `confirm`; declaring `auto` is rejected. The block is optional; absent ⇒ a single confirm row with default label/hint.
 
 ```yaml
 dispatch:
@@ -1093,12 +1093,12 @@ dispatch:
 
 Rules:
 - `confirm_label` / `confirm_hint` customize the single confirm row's text.
-- `choices[]` renders one synthetic row per entry instead of a single confirm row. Each choice has a unique `id`, a templated `label`, an optional `hint`, and an `args` map merged onto the query-derived args when the row activates. Every `args` key must reference a declared `args[].name` — a chooser cannot smuggle arbitrary template vars.
+- `choices[]` renders one synthetic row per entry instead of a single confirm row. Each choice has a unique `id`, a templated `label`, an optional `hint`, and an `args` map merged onto the query-derived args when the row activates. Every `args` key must reference a declared `args[].name`; a chooser cannot smuggle arbitrary template vars.
 - `choices` and `confirm_label`/`confirm_hint` are **mutually exclusive**: pick one chooser pattern per chip.
 
 ### 19.8 The `detect:` block (device probe)
 
-Optional. When present, the launcher only surfaces the chip after confirming the backing binary is installed, new enough, and (optionally) authenticated — so a `gh`/`kubectl`/`aws` chip stays hidden on machines where it can't actually run. Absent ⇒ the chip is always available (legacy behaviour). Purely additive.
+Optional. When present, the launcher only surfaces the chip after confirming the backing binary is installed, new enough, and (optionally) authenticated, so a `gh`/`kubectl`/`aws` chip stays hidden on machines where it can't actually run. Absent ⇒ the chip is always available (legacy behaviour). Purely additive.
 
 ```yaml
 detect:
@@ -1111,13 +1111,13 @@ detect:
   refresh: on_focus                # on_boot | on_focus | manual (default on_focus)
 ```
 
-`binary` must be a bare name (PATH lookup), never a path. `auth_check` commands go through the **same argv-only, no-shell-metacharacter gate** as `bridge.command`, and by review of the curated pack are restricted to read-only status verbs. This is the user-tier shape: the admin curated pack carries the same block plus capability bindings, but capabilities/ACL stay admin-only — a user-authored `detect` can light a chip but cannot grant itself governed verbs.
+`binary` must be a bare name (PATH lookup), never a path. `auth_check` commands go through the **same argv-only, no-shell-metacharacter gate** as `bridge.command`, and by review of the curated pack are restricted to read-only status verbs. This is the user-tier shape: the admin curated pack carries the same block plus capability bindings, but capabilities/ACL stay admin-only: a user-authored `detect` can light a chip but cannot grant itself governed verbs.
 
 ### 19.9 argv-only execution
 
 For `runtime: bridge`, the command template is expanded with the args block, every interpolated value is shell-quoted, and the result is tokenized into argv via POSIX shell-words and spawned directly. There is no `/bin/sh -c`. The shell-metacharacter rejection at validate time means the argv-split is always unambiguous; ambiguity is a reject. The child runs with the user's `$HOME` as its working directory, stdin closed, and stdout/stderr captured separately.
 
-This is the runtime mechanism behind the "Bolt does not multiply the user's authority" claim. The command can only do what a single binary invocation could do — the same constraint the user's terminal has when they type the command themselves. For `runtime: http_local`, the equivalent guarantee is the loopback-host pin: the request can only reach a process already listening on the user's own machine.
+This is the runtime mechanism behind the "Bolt does not multiply the user's authority" claim. The command can only do what a single binary invocation could do, the same constraint the user's terminal has when they type the command themselves. For `runtime: http_local`, the equivalent guarantee is the loopback-host pin: the request can only reach a process already listening on the user's own machine.
 
 ### 19.10 Presentation: current restrictions
 
@@ -1125,11 +1125,11 @@ User Apps render through the **same** launcher dropdown and right-rail component
 
 - `widget`: `list`, `table`, `cards`, or `detail`. `image_grid` is **not** allowed in v1.
 - Supported presentation fields: `title_field`, `subtitle_field`, `searchable`, and `right_widget`. The richer admin fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) are not yet part of the user-tier `presentation`.
-- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, `markdown` (see §9.1), `entity_preview` (the wide rich-detail pane — media + title/subtitle + label/value facts + an optional rendered-Markdown `body`; remote images in the body are blocked for no-egress), or the rich data-viz panes `chart`, `table`, `cards`, `detail`, `json_tree`, `diff`, `image_grid` (see §9.6 — these render the parsed `rows` and do not bind to the entity graph). Only `entity` is rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
+- `right_widget.kind`: `card`, `map`, `image`, `calc`, `color`, `weather`, `date`, `markdown` (see §9.1), `entity_preview` (the wide rich-detail pane: media + title/subtitle + label/value facts + an optional rendered-Markdown `body`; remote images in the body are blocked for no-egress), or the rich data-viz panes `chart`, `table`, `cards`, `detail`, `json_tree`, `diff`, `image_grid` (see §9.6, these render the parsed `rows` and do not bind to the entity graph). Only `entity` is rejected, and `links_for_type` is unavailable. The validator names the rejection so authors don't assume a typo:
 
 > `presentation.right_widget.kind 'entity' not in [card, map, image, calc, color, weather, date, markdown, entity_preview, chart, table, cards, detail, json_tree, diff, image_grid] (entity kind is not allowed for user utilities)`
 
-`entity_preview` is presentation-only — it renders through the shared `EntityPreviewPane` and does **not** bind to the launcher's entity router. The router-binding `entity` kind (and `links_for_type`) remain excluded so a User App can't graft itself onto the entity graph or grant itself governed verbs. See §19.15.
+`entity_preview` is presentation-only; it renders through the shared `EntityPreviewPane` and does **not** bind to the launcher's entity router. The router-binding `entity` kind (and `links_for_type`) remain excluded so a User App can't graft itself onto the entity graph or grant itself governed verbs. See §19.15.
 
 - `actions[].kind`: `url`, `composer`, or `utility`. `tool` (server-side MCP invocation) and `clipboard` are not available to User Apps in v1. A `url` action requires `url_template`; `composer` requires `insert`; `utility` requires `target_chip` (with optional `query_template`) and rejects `url_template`/`insert`.
 
@@ -1228,7 +1228,7 @@ The runtime takes care of confirm-row dispatch, argv-only spawn (or the loopback
 
 ### 19.15 Parity roadmap (planned, not yet enforced)
 
-The design intent is that a User App should reach **the full admin presentation and format surface** (§9, §12) — the only enduring difference being *where the data comes from* (a local shell command or loopback HTTP, rather than an admin's MCP/HTTP flow). The strict subset in §19.10 reflects what the loader enforces *today*, not the target.
+The design intent is that a User App should reach **the full admin presentation and format surface** (§9, §12), the only enduring difference being *where the data comes from* (a local shell command or loopback HTTP, rather than an admin's MCP/HTTP flow). The strict subset in §19.10 reflects what the loader enforces *today*, not the target.
 
 Shipped so far:
 
@@ -1239,8 +1239,8 @@ Shipped so far:
 
 Planned additions, each additive and gated behind the same load-time validator:
 
-- **Full presentation parity.** Admit the remaining `presentation` fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) and the full-width main-presentation `image_grid`/`table`/`cards`/`detail` widgets (these ship today only as right-widget panes, §3, §9.6). These are pure client-side rendering with no security surface — the PWA already renders them on the admin path, so this is a contract relaxation plus matching user-tier types.
+- **Full presentation parity.** Admit the remaining `presentation` fields (`list_fields`, `table_columns`, `image_field`, `primary_value_field`, `search_fields`, `filter_fields`, `sort_field`/`sort_order`, `row_key_field`, `filterable`) and the full-width main-presentation `image_grid`/`table`/`cards`/`detail` widgets (these ship today only as right-widget panes, §3, §9.6). These are pure client-side rendering with no security surface; the PWA already renders them on the admin path, so this is a contract relaxation plus matching user-tier types.
 - **`clipboard` actions.** Client-side only (copy a templated value); safe to admit alongside `url`/`composer`/`utility`.
 - **Entity router surface (remaining).** `entity_preview` already landed for User Apps (above). Still planned: the router-binding `entity` kind and `links_for_type` cross-utility links, so User Apps can participate in the entity router and the cross-utility "Related" section. That step requires the router to treat `source: "user_bridge"` rows as first-class without letting a manifest grant itself governed verbs (the §19.2–§19.3 gates continue to hold).
 
-What stays out of scope for User Apps regardless of presentation parity: the admin **data plane** — `auth_profile_ref`, `requires`, MCP/HTTP flow DAGs, `kind: tool` actions, server-side execution, and credential-bearing transports. A User App presents like an admin utility; it does not acquire an admin utility's authority.
+What stays out of scope for User Apps regardless of presentation parity: the admin **data plane**, namely `auth_profile_ref`, `requires`, MCP/HTTP flow DAGs, `kind: tool` actions, server-side execution, and credential-bearing transports. A User App presents like an admin utility; it does not acquire an admin utility's authority.

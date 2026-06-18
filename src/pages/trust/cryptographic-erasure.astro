@@ -7,7 +7,7 @@ import CTAStrip from "../../components/ui/CTAStrip.astro";
 const mechanismSteps = [
   [
     "1. Per-tenant Customer Master Key",
-    "Every tenant's data — index entries, embeddings, audit chain payloads, PII vault — is encrypted at rest with a tenant-specific Customer Master Key (CMK) wrapped by your KMS. The CMK never leaves the KMS; the wrapped data-encryption keys live alongside the ciphertext.",
+    "Every tenant's data (index entries, embeddings, audit chain payloads, PII vault) is encrypted at rest with a tenant-specific Customer Master Key (CMK) wrapped by your KMS. The CMK never leaves the KMS; the wrapped data-encryption keys live alongside the ciphertext.",
   ],
   [
     "2. WORM ciphertext retention",
@@ -15,11 +15,11 @@ const mechanismSteps = [
   ],
   [
     "3. Cryptographic disposal of the CMK",
-    "When a subject erasure request is approved, the tenant CMK is destroyed inside the KMS. Every wrapped data-encryption key that depended on it becomes mathematically unrecoverable. The ciphertext is now indistinguishable from random noise to every party — including Sparcle, the operator, and any future court order.",
+    "When a subject erasure request is approved, the tenant CMK is destroyed inside the KMS. Every wrapped data-encryption key that depended on it becomes mathematically unrecoverable. The ciphertext is now indistinguishable from random noise to every party, including Sparcle, the operator, and any future court order.",
   ],
   [
     "4. Tamper-evident audit receipt",
-    "The disposal event is recorded as a signed receipt under the operator-root key — a key distinct from the disposed tenant CMK. The receipt is verifiable after the tenant key is gone. The receipt is appended to the BoltAuditSink Merkle chain so it cannot be removed or backdated.",
+    "The disposal event is recorded as a signed receipt under the operator-root key, a key distinct from the disposed tenant CMK. The receipt is verifiable after the tenant key is gone. The receipt is appended to the BoltAuditSink Merkle chain so it cannot be removed or backdated.",
   ],
 ];
 
@@ -30,7 +30,7 @@ const whyItWorks = [
   ],
   [
     "Retention duty preserved",
-    "SOX, SEC Rule 17a-4, FINRA 4511, HIPAA record-retention, and equivalent obligations require that records persist for defined windows. The encrypted bytes remain. The retention auditor sees the artifact; only the readability has been revoked. This is the construction's central design point — both obligations satisfied by the same primitive.",
+    "SOX, SEC Rule 17a-4, FINRA 4511, HIPAA record-retention, and equivalent obligations require that records persist for defined windows. The encrypted bytes remain. The retention auditor sees the artifact; only the readability has been revoked. This is the construction's central design point: both obligations satisfied by the same primitive.",
   ],
   [
     "Receipt independently verifiable",
@@ -66,7 +66,7 @@ const honestLimits = [
     <Hero
       eyebrow="Cryptographic Erasure"
       title="Disposal you can prove. Retention you can keep."
-      lede="GDPR Art. 17, HIPAA Right to be Forgotten, and CCPA erasure rights pull in one direction. SOX, SEC Rule 17a-4, FINRA 4511, and HIPAA record-retention pull in the other. Bolt and Aeira use a single cryptographic construction that satisfies both — by destroying the only key that can read the data while preserving the ciphertext and an independently verifiable receipt."
+      lede="GDPR Art. 17, HIPAA Right to be Forgotten, and CCPA erasure rights pull in one direction. SOX, SEC Rule 17a-4, FINRA 4511, and HIPAA record-retention pull in the other. Bolt and Aeira use a single cryptographic construction that satisfies both, by destroying the only key that can read the data while preserving the ciphertext and an independently verifiable receipt."
     >
       <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Request the architecture brief</a>
       <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
@@ -103,7 +103,7 @@ const honestLimits = [
             .ce-arrow-head { fill: var(--brand-primary); }
           </style>
 
-          <text class="ce-section-label" x="30" y="40">BEFORE ERASURE — NORMAL OPERATION</text>
+          <text class="ce-section-label" x="30" y="40">BEFORE ERASURE: NORMAL OPERATION</text>
 
           <rect class="ce-box" x="30" y="60" width="180" height="80" rx="8" />
           <text class="ce-badge" x="120" y="82">1</text>
@@ -150,7 +150,7 @@ const honestLimits = [
           <text class="ce-box-label" x="710" y="380">BoltAuditSink Merkle chain</text>
           <text class="ce-box-sub" x="710" y="398">receipt appended at signed position</text>
 
-          <text class="ce-annotation" x="430" y="440">Operator-root key is distinct from the destroyed tenant CMK — receipt remains verifiable after disposal.</text>
+          <text class="ce-annotation" x="430" y="440">Operator-root key is distinct from the destroyed tenant CMK; receipt remains verifiable after disposal.</text>
         </svg>
       </div>
 
@@ -250,17 +250,17 @@ const honestLimits = [
         cover the surrounding pieces:
       </p>
       <ul class="related-list">
-        <li><a href="/trust/controls">Controls evidence map</a> — where this primitive maps in SOC&nbsp;2, HIPAA, GDPR, and ISO&nbsp;27001 control matrices.</li>
-        <li><a href="/trust/where-the-model-runs">Where the model runs</a> — how PII never reaches the LLM in plaintext, so the erasure surface stays small.</li>
-        <li><a href="/trust/subprocessors">Sub-processor disclosure</a> — why the customer's KMS, not Sparcle, holds the keys this construction destroys.</li>
-        <li><a href="/trust/questionnaire">Security questionnaire</a> — pre-filled answers covering encryption posture, key custody, and audit chain integrity.</li>
+        <li><a href="/trust/controls">Controls evidence map</a>: where this primitive maps in SOC&nbsp;2, HIPAA, GDPR, and ISO&nbsp;27001 control matrices.</li>
+        <li><a href="/trust/where-the-model-runs">Where the model runs</a>: how PII never reaches the LLM in plaintext, so the erasure surface stays small.</li>
+        <li><a href="/trust/subprocessors">Sub-processor disclosure</a>: why the customer's KMS, not Sparcle, holds the keys this construction destroys.</li>
+        <li><a href="/trust/questionnaire">Security questionnaire</a>: pre-filled answers covering encryption posture, key custody, and audit chain integrity.</li>
       </ul>
     </PageSection>
 
     <CTAStrip
       variant="band"
       title="Want the threat model and the formal write-up?"
-      lede="The full construction document — threat model, formal definitions, KMS-backend conformance test, and integration test report — is available under a mutual NDA during pilot evaluation."
+      lede="The full construction document (threat model, formal definitions, KMS-backend conformance test, and integration test report) is available under a mutual NDA during pilot evaluation."
     >
       <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">security@sparcle.app</a>
       <a href="/trust" class="btn btn-secondary btn-lg">Browse the Trust Center</a>

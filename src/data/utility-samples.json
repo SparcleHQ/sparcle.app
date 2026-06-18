@@ -20,7 +20,7 @@
   {"id": "jira", "title": "Jira Work", "chip": "=jira", "description": "Search Jira issues, browse sprints, and look up tickets by key.", "emits": "Issue", "filename": "jira.yaml"},
   {"id": "jira-cloud", "title": "Jira Work (Cloud)", "chip": "=jira-cloud", "description": "Search Jira issues, browse sprints, and look up tickets by key (Atlassian Cloud).", "emits": "Issue", "filename": "jira-cloud.yaml"},
   {"id": "linear", "title": "Linear", "chip": "=linear", "description": "Search Linear issues across your teams, and look up issues by identifier.", "emits": "Issue", "filename": "linear.yaml"},
-  {"id": "monday", "title": "Monday", "chip": "=monday", "description": "Items from a monday.com board — search, look up by board id, browse.", "emits": "Issue", "filename": "monday.yaml"},
+  {"id": "monday", "title": "Monday", "chip": "=monday", "description": "Items from a monday.com board: search, look up by board id, browse.", "emits": "Issue", "filename": "monday.yaml"},
   {"id": "newrelic", "title": "New Relic", "chip": "=newrelic", "description": "Run an NRQL query against your New Relic account, or ask in plain English.", "emits": "Generic", "filename": "newrelic.yaml"},
   {"id": "notion", "title": "Notion", "chip": "=notion", "description": "Search Notion pages and databases across your workspace.", "emits": "Document", "filename": "notion.yaml"},
   {"id": "onedrive", "title": "OneDrive", "chip": "=onedrive", "description": "Browse and search files in your OneDrive (Microsoft Graph).", "emits": "File", "filename": "onedrive.yaml"},

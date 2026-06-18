@@ -7,8 +7,8 @@ import Card from "../../components/ui/Card.astro";
 import CTAStrip from "../../components/ui/CTAStrip.astro";
 
 const frameworks = [
-  ["ITAR", "International Traffic in Arms Regulations — controlled technical data cannot leave the US persons boundary, full stop. Bolt's BYO-LLM mandate and on-prem inference mode keep the prompt inside that boundary regardless of which model is configured."],
-  ["CMMC L3 / L5", "Cybersecurity Maturity Model Certification — Sparcle's controls evidence map walks every CMMC practice to a concrete implementation. The cryptographic audit chain is an artifact a C3PAO can review during assessment."],
+  ["ITAR", "International Traffic in Arms Regulations: controlled technical data cannot leave the US persons boundary, full stop. Bolt's BYO-LLM mandate and on-prem inference mode keep the prompt inside that boundary regardless of which model is configured."],
+  ["CMMC L3 / L5", "Cybersecurity Maturity Model Certification: Sparcle's controls evidence map walks every CMMC practice to a concrete implementation. The cryptographic audit chain is an artifact a C3PAO can review during assessment."],
   ["IL4 / IL5", "DOD Impact Level requirements for controlled unclassified information and mission-critical workloads. Air-gap deployment is the default, not the upsell."],
   ["NIST 800-171 / 800-172", "CUI and Enhanced-CUI control families. The Authority Policy SDK lets you encode classification-tier ranking floors that mechanically prevent over-cleared retrieval."],
 ];
@@ -44,7 +44,7 @@ const trustDossier = [
     <Hero
       eyebrow="Sparcle for Defense"
       title="ITAR-bounded. CMMC-ready. Air-gap by default."
-      lede="Defense and defense-industrial-base workloads have non-negotiable boundaries: ITAR-controlled technical data, CMMC-assessed cybersecurity practices, IL4/IL5 mission criticality. Bolt and Aeira ship for those boundaries — on-prem inference, customer-held keys, and an audit chain your sponsor's C3PAO can verify offline."
+      lede="Defense and defense-industrial-base workloads have non-negotiable boundaries: ITAR-controlled technical data, CMMC-assessed cybersecurity practices, IL4/IL5 mission criticality. Bolt and Aeira ship for those boundaries: on-prem inference, customer-held keys, and an audit chain your sponsor's C3PAO can verify offline."
     >
       <a href="#" onclick="openContactModal('Defense Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule defense review</a>
       <a href="/docs/pdfs/vertical-defense.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
@@ -87,7 +87,7 @@ const trustDossier = [
       <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand defense vertical brief">
         <iframe
           src="/docs/pdfs/vertical-defense.pdf#view=FitH"
-          title="Sparcle for Defense — 1-page brief"
+          title="Sparcle for Defense: 1-page brief"
           loading="lazy"
         ></iframe>
       </div>

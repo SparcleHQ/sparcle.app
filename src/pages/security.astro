@@ -30,7 +30,7 @@ const ndaItems = [
 ];
 ---
 <BaseLayout
-  title="Security & Compliance — Enterprise AI Any CISO Can Sign Off | Sparcle"
+  title="Security & Compliance: Enterprise AI Any CISO Can Sign Off | Sparcle"
   description="Sovereign AI for any enterprise that takes governance seriously. Self-hosted or fully air-gapped. Per-tenant KMS, provable cryptographic erasure, identity-bound queries. Deployable for HIPAA, GDPR, DPDPA, SOX, ITAR."
   canonical="https://sparcle.app/security"
 >
@@ -39,7 +39,7 @@ const ndaItems = [
     <Hero
       eyebrow="Security & Compliance"
       title="Built for the work your CISO has to defend."
-      lede="Bolt and Aeira are built to the security bar regulated industries demand — which means they work for any enterprise that takes governance seriously, not just the ones a regulator forces to. This page covers our architectural posture, the compliance regimes the platform is deployable for today, and our roadmap. Detailed security briefs, threat models, and pen-test results are shared under NDA."
+      lede="Bolt and Aeira are built to the security bar regulated industries demand, which means they work for any enterprise that takes governance seriously, not just the ones a regulator forces to. This page covers our architectural posture, the compliance regimes the platform is deployable for today, and our roadmap. Detailed security briefs, threat models, and pen-test results are shared under NDA."
     >
       <a href="#" onclick="openContactModal('Security Brief Request'); return false;" class="btn btn-primary btn-lg">
         Request Security Brief (NDA)
@@ -74,7 +74,7 @@ const ndaItems = [
       <CardGrid cols={2}>
         <Card title="Your data. Your perimeter.">
           Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Every Bolt tier and Aeira
-          Federated keep your data plane in your perimeter — Sparcle never hosts your data. If you
+          Federated keep your data plane in your perimeter; Sparcle never hosts your data. If you
           opt into Managed AI, only LLM inference routes through a Sparcle-managed gateway under
           MSA + DPA with zero-retention guarantees from upstream providers; your data stays put.
         </Card>
@@ -85,7 +85,7 @@ const ndaItems = [
         </Card>
         <Card title="Encrypted & auditable">
           KMS-enveloped storage with per-tenant key isolation. Provable cryptographic erasure for
-          GDPR &amp; HIPAA obligations. Audit trail on every query — including which results were
+          GDPR &amp; HIPAA obligations. Audit trail on every query, including which results were
           filtered and why. Specific KMS posture and crypto choices reviewed under NDA.
         </Card>
         <Card title="Patent-pending architecture">
@@ -94,11 +94,11 @@ const ndaItems = [
         </Card>
         <Card title="Tamper-evident audit you can verify yourself">
           Every privileged action is sealed into an Ed25519-signed Merkle chain. Export a
-          self-contained proof bundle and an auditor verifies it completely offline — no database,
+          self-contained proof bundle and an auditor verifies it completely offline, with no database,
           and nothing from Sparcle, in the verification loop.
         </Card>
         <Card title="Streams to your SIEM out of the box">
-          Audit events forward to your SIEM — Splunk, Microsoft Sentinel, or syslog — with no extra
+          Audit events forward to your SIEM (Splunk, Microsoft Sentinel, or syslog) with no extra
           tooling. Your security team watches Bolt activity in the same place it watches everything else.
         </Card>
       </CardGrid>
@@ -163,7 +163,7 @@ const ndaItems = [
       <ul class="nda-list">
         {ndaItems.map(([t, body]) => (
           <li>
-            <strong>{t}</strong> — {body}
+            <strong>{t}</strong>: {body}
           </li>
         ))}
       </ul>

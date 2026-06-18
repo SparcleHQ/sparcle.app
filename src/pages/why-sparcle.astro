@@ -10,10 +10,10 @@ import BlockQuote from "../components/marketing/BlockQuote.astro";
 
 const proofs = [
   { metric: "8",          label: "Security Pipeline Layers",     body: "Identity validation, PII masking at the LLM boundary, policy guardrails, and audit logging. Plus, in self-hosted-inference mode your prompts never leave your private Azure / AWS network." },
-  { metric: "100+",       label: "Enterprise Integrations",       body: "Microsoft 365, Google Workspace, Zoho, Slack, GitHub, Jira, Salesforce, Confluence, ServiceNow — via open MCP, not proprietary APIs. Auth works with any OIDC IdP. No migration. No lock-in." },
-  { metric: "Your IP.",   label: "Always Protected",              body: "Your data, your employees' information, and your organization's IP — protected at every layer of Bolt's architecture, regardless of which AI model you use." },
-  { metric: "Same-day",   label: "Time to Deploy",                body: "Connect your IdP, configure your MCP servers, and deploy Bolt — no migration, no retraining. Production-ready architecture for fast onboarding." },
-  { metric: "Any LLM",    label: "Model-Agnostic by Design",      body: "Switch providers anytime — OpenAI, Anthropic, Ollama, or your own fine-tuned model. Employees see no change. Data posture doesn't move." },
+  { metric: "100+",       label: "Enterprise Integrations",       body: "Microsoft 365, Google Workspace, Zoho, Slack, GitHub, Jira, Salesforce, Confluence, ServiceNow, via open MCP, not proprietary APIs. Auth works with any OIDC IdP. No migration. No lock-in." },
+  { metric: "Your IP.",   label: "Always Protected",              body: "Your data, your employees' information, and your organization's IP, protected at every layer of Bolt's architecture, regardless of which AI model you use." },
+  { metric: "Same-day",   label: "Time to Deploy",                body: "Connect your IdP, configure your MCP servers, and deploy Bolt with no migration, no retraining. Production-ready architecture for fast onboarding." },
+  { metric: "Any LLM",    label: "Model-Agnostic by Design",      body: "Switch providers anytime: OpenAI, Anthropic, Ollama, or your own fine-tuned model. Employees see no change. Data posture doesn't move." },
   { metric: "BYOK",       label: "Zero Token Markup",             body: "Bring your own API keys; burn down your existing cloud compute commits without per-token surcharge. Eliminate context-switching across your stack and reclaim productive time." },
 ];
 
@@ -27,6 +27,7 @@ const governance = [
   { num: "01", title: "Who sees what.",                 body: "Per-role data access enforced at the database, not the answer. Identity reads first; documents read second." },
   { num: "02", title: "Which LLM each role uses.",      body: "Local for sensitive workloads, hosted for the rest. Switch any time. Your model, your boundary." },
   { num: "03", title: "Which MCP tools are allowed.",   body: "Allowlist per role, per integration. Engineering can call GitHub; Finance cannot. Finance can call NetSuite; Engineering cannot." },
+
   { num: "04", title: "Which agents can run.",          body: "Sub-agent gating per role and per scope. SOC triage stays inside Security. Forecast stays inside Finance." },
   { num: "05", title: "Which sources are in bounds.",   body: "Source-level allowlisting per audience. Contractors see project corpus, not HR comp data." },
   { num: "06", title: "Every change recorded.",         body: "Policy updates land in the same tamper-evident audit chain. The auditor sees who changed what and when." },
@@ -42,8 +43,8 @@ const outcomes = [
 ];
 ---
 <BaseLayout
-  title="Why Sparcle — Data Sovereignty as Foundation, Not Add-On"
-  description="Sparcle exists to give every enterprise freedom to use AI on their own terms — without vendor lock-in, without surrendering IP, without compromising data privacy. Sovereign AI, BYO LLM, built-in AI governance. Essential for regulated industries; valuable for any IT org."
+  title="Why Sparcle: Data Sovereignty as Foundation, Not Add-On"
+  description="Sparcle exists to give every enterprise freedom to use AI on their own terms, without vendor lock-in, without surrendering IP, without compromising data privacy. Sovereign AI, BYO LLM, built-in AI governance. Essential for regulated industries; valuable for any IT org."
   canonical="https://sparcle.app/why-sparcle"
 >
   <link slot="head" rel="stylesheet" href="/css/trust-callout.css" />
@@ -51,7 +52,7 @@ const outcomes = [
     <Hero
       eyebrow="Our Mission"
       title="Reclaim time. Unlock potential."
-      lede="Sparcle exists for one reason: to give every organization the freedom to use AI on their own terms — without vendor lock-in, without compromising data privacy, and without surrendering control of their intellectual property."
+      lede="Sparcle exists for one reason: to give every organization the freedom to use AI on their own terms, without vendor lock-in, without compromising data privacy, and without surrendering control of their intellectual property."
     >
       <video
         slot="media"
@@ -87,7 +88,7 @@ const outcomes = [
     <PageSection stripe="b" width="content">
       <BlockQuote
         quote="Your workforce burns <strong>~5 weeks per year</strong> reorienting after interruptions."
-        citation="Gloria Mark, UC Irvine — Attention Span: A Groundbreaking Way to Restore Balance, Happiness and Productivity"
+        citation="Gloria Mark, UC Irvine: Attention Span: A Groundbreaking Way to Restore Balance, Happiness and Productivity"
         href="/research.html"
       />
 
@@ -95,26 +96,26 @@ const outcomes = [
         <p>
           Knowledge workers today juggle dozens of applications, losing hours every day to
           context switching and tool hopping. The same shape of risk hits every enterprise
-          that takes IP seriously — competitive intelligence, proprietary research, customer
-          data, internal strategy. It hits hardest in regulated industries — healthcare,
-          financial services, defense, legal — where sending data to external clouds isn't
+          that takes IP seriously: competitive intelligence, proprietary research, customer
+          data, internal strategy. It hits hardest in regulated industries (healthcare,
+          financial services, defense, legal) where sending data to external clouds isn't
           just a preference. So we built for the hardest case, and the solution fits both.
         </p>
         <p>
           We believe AI governance, data sovereignty, and employee data privacy are not optional
-          features — they are the foundation. We built <strong>Bolt</strong>, an enterprise AI
+          features. They are the foundation. We built <strong>Bolt</strong>, an enterprise AI
           operating system, and <strong>Aeira</strong>, an ACL-aware enterprise index, so every
-          enterprise — from the $10 trillion regulated economy to any organization that takes
-          IP and data seriously — can adopt AI fully, keep compliance in their own hands, and change
-          their underlying model at any time — without their employees noticing, and without
+          enterprise (from the $10 trillion regulated economy to any organization that takes
+          IP and data seriously) can adopt AI fully, keep compliance in their own hands, and change
+          their underlying model at any time, without their employees noticing, and without
           their data moving.
         </p>
         <p>
-          We also believe every regulated vertical has its own honest definition of authoritative
-          — and every competitor forces them to use the vendor's definition. So we built the
+          We also believe every regulated vertical has its own honest definition of authoritative,
+          and every competitor forces them to use the vendor's definition. So we built the
           <strong>Authority Policy SDK</strong>: customer-extensible trust scoring that sits on
           top of the ACL, runs inside your perimeter, and ships in Rust or YAML config. Default,
-          Regulated, and Healthcare reference packs in the box. Customers write their own — or
+          Regulated, and Healthcare reference packs in the box. Customers write their own, or
           stack on top.
           <strong><em>Your search. Your policy. Your code.</em></strong>
         </p>
@@ -196,7 +197,7 @@ const outcomes = [
     <CTAStrip
       variant="band"
       title="See Bolt run inside your perimeter on your data."
-      lede="Schedule a 30-minute technical walkthrough with our team. We'll show you how Bolt and Aeira work with your existing systems — no slides, just a live demo."
+      lede="Schedule a 30-minute technical walkthrough with our team. We'll show you how Bolt and Aeira work with your existing systems, with no slides, just a live demo."
     >
       <a href="#" onclick="openContactModal('Enterprise Pilot Inquiry'); return false;" class="btn btn-primary btn-xl">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

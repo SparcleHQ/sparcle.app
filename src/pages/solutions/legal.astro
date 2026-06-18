@@ -7,17 +7,17 @@ import Card from "../../components/ui/Card.astro";
 import CTAStrip from "../../components/ui/CTAStrip.astro";
 
 const frameworks = [
-  ["Attorney-client privilege + work product", "Privilege protection is non-negotiable. Bolt's per-matter ACL enforcement, identity-bound retrieval, and audit-trail responses ensure privileged material doesn't leak across matters — and the audit chain records every retrieval for partner-in-charge review."],
+  ["Attorney-client privilege + work product", "Privilege protection is non-negotiable. Bolt's per-matter ACL enforcement, identity-bound retrieval, and audit-trail responses ensure privileged material doesn't leak across matters, and the audit chain records every retrieval for partner-in-charge review."],
   ["Conflicts of interest", "The Authority Policy SDK lets the conflicts team encode firm-specific conflict walls at the retrieval layer. Conflicts are enforced before retrieval, not after the fact. Conflict-wall enforcement is exercised by the test suite, not left to hope."],
   ["ABA Model Rule 1.6 + state analogs", "Confidentiality of client information across electronic systems. Bolt's PII masking at the LLM boundary keeps confidential client material out of any vendor cloud; the BYO-LLM mandate gives the firm direct control over the inference endpoint."],
-  ["State bar AI-disclosure rules (2024+)", "California, Florida, New Jersey, and others now require disclosure when AI is used in legal work. The audit chain is the artifact the firm produces — every AI invocation has a record, and the standalone verifier confirms integrity."],
+  ["State bar AI-disclosure rules (2024+)", "California, Florida, New Jersey, and others now require disclosure when AI is used in legal work. The audit chain is the artifact the firm produces: every AI invocation has a record, and the standalone verifier confirms integrity."],
 ];
 
 const residency = [
   ["Per-matter ACL enforcement", "Aeira's 4-axis ACL pre-filter enforces matter membership at the index, not at the application layer. A user not assigned to the matter cannot retrieve from it &mdash; the rows do not enter the candidate set."],
   ["BYO LLM + on-prem inference path", "Bolt runs against your LLM endpoint &mdash; on-prem Llama, Mistral, Qwen, or Azure OpenAI inside the firm's tenant. Privileged content does not leave the firm's network in the supported postures."],
   ["Customer-held KMS", "Vault Transit, AWS KMS, Azure Key Vault, or PKCS#11 HSM. The firm holds tenant master keys; Sparcle does not. The crypto-shred construction supports matter-specific erasure obligations."],
-  ["Audit chain the partner-in-charge can read end-to-end", "Every retrieval, every action, every tool invocation. The audit chain is the partner-in-charge's view of what happened on a matter — without requiring the firm to take Sparcle's word for it."],
+  ["Audit chain the partner-in-charge can read end-to-end", "Every retrieval, every action, every tool invocation. The audit chain is the partner-in-charge's view of what happened on a matter, without requiring the firm to take Sparcle's word for it."],
 ];
 
 const workflows = [

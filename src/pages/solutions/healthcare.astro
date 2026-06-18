@@ -16,7 +16,7 @@ const frameworks = [
 const residency = [
   ["PHI is masked before any LLM call and does not transit Sparcle infrastructure.", "Bolt's runtime, the agent loop, the prompt assembly, the PII masking, and the audit log all live inside your perimeter in every shipping topology."],
   ["BAA-ready architecture", "Sparcle's sub-processor disclosure is asymmetric by design. Customer-configured sub-processors (your IdP, your cloud, your KMS, your LLM provider) hold customer data; Sparcle's own sub-processors handle software delivery."],
-  ["Customer-held KMS", "Vault Transit, AWS KMS, Azure Key Vault, or PKCS#11 HSM. Provable cryptographic erasure for HIPAA Right-to-be-Forgotten — Sparcle cannot read tenant data without the customer-held CMK."],
+  ["Customer-held KMS", "Vault Transit, AWS KMS, Azure Key Vault, or PKCS#11 HSM. Provable cryptographic erasure for HIPAA Right-to-be-Forgotten. Sparcle cannot read tenant data without the customer-held CMK."],
   ["Audit-trail responses your compliance team can sign off on", "Every result carries the why-filtered context regulators ask for during HHS-OCR reviews. What was shown, what was suppressed, why. The artifact a compliance officer points to during audit."],
 ];
 
@@ -87,7 +87,7 @@ const trustDossier = [
       <div class="vertical-pdf-embed" data-expandable tabindex="0" role="button" aria-label="Expand healthcare vertical brief">
         <iframe
           src="/docs/pdfs/vertical-healthcare.pdf#view=FitH"
-          title="Sparcle for Healthcare — 1-page brief"
+          title="Sparcle for Healthcare: 1-page brief"
           loading="lazy"
         ></iframe>
       </div>

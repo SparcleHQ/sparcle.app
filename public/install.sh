@@ -492,6 +492,22 @@ add_to_path() {
   fi
 }
 
+# Resolve the unprivileged user that should own the embedded PostgreSQL cluster
+# when the installer is (mis)run as root. Prefers SUDO_USER, falls back to the
+# owner of $HOME. Prints nothing if no suitable non-root user is found.
+resolve_unprivileged_user() {
+  if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
+    printf '%s' "$SUDO_USER"
+    return 0
+  fi
+  _u=$(stat -f '%Su' "$HOME" 2>/dev/null || stat -c '%U' "$HOME" 2>/dev/null || true)
+  if [ -n "$_u" ] && [ "$_u" != "root" ]; then
+    printf '%s' "$_u"
+    return 0
+  fi
+  printf ''
+}
+
 prewarm_embedded_postgres() {
   app_bin="$1"
   app_identifier="$2"
@@ -508,11 +524,35 @@ prewarm_embedded_postgres() {
     return 0
   }
 
+  # PostgreSQL's initdb refuses to run as root. If the installer was started as
+  # root (sudo, or a root login shell), run the prewarm as the unprivileged user
+  # that owns $HOME and hand them ownership of any embedded-postgres assets we
+  # may have seeded as root, so the cluster is created with the right owner.
+  prewarm_runner=""
+  if [ "$(id -u)" = "0" ]; then
+    pg_user=$(resolve_unprivileged_user)
+    if [ -z "$pg_user" ]; then
+      warn "PostgreSQL prewarm skipped: running as root and no unprivileged user could be determined."
+      warn "Re-run the installer as a normal user (without sudo) to enable the embedded database."
+      return 0
+    fi
+    info "Running PostgreSQL prewarm as '${pg_user}' (initdb cannot run as root)"
+    case "$PLATFORM" in
+      macos) pg_base_dir="${HOME}/Library/Application Support/${app_identifier}/embedded-postgres" ;;
+      linux) pg_base_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}/embedded-postgres" ;;
+      *)     pg_base_dir="" ;;
+    esac
+    if [ -n "$pg_base_dir" ] && [ -d "$pg_base_dir" ]; then
+      chown -R "$pg_user" "$pg_base_dir" 2>/dev/null || true
+    fi
+    prewarm_runner="sudo -u ${pg_user} -H"
+  fi
+
   info "Prewarming embedded PostgreSQL (user-space, one-time setup)..."
   prewarm_log=$(mktemp)
 
   if [ "${PLATFORM}" = "linux" ] && echo "$app_bin" | grep -q '\.AppImage$'; then
-    if BOLT_APP_IDENTIFIER="$app_identifier" APPIMAGE_EXTRACT_AND_RUN=1 "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
+    if $prewarm_runner env BOLT_APP_IDENTIFIER="$app_identifier" APPIMAGE_EXTRACT_AND_RUN=1 "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
       ok "Embedded PostgreSQL prewarm complete"
     else
       if [ "$prewarm_required" = "1" ] || [ "$prewarm_required" = "true" ] || [ "$prewarm_required" = "TRUE" ] || [ "$prewarm_required" = "yes" ] || [ "$prewarm_required" = "YES" ]; then
@@ -525,7 +565,7 @@ prewarm_embedded_postgres() {
       sed 's/^/   /' "$prewarm_log" | tail -20
     fi
   else
-    if BOLT_APP_IDENTIFIER="$app_identifier" "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
+    if $prewarm_runner env BOLT_APP_IDENTIFIER="$app_identifier" "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
       ok "Embedded PostgreSQL prewarm complete"
     else
       if [ "$prewarm_required" = "1" ] || [ "$prewarm_required" = "true" ] || [ "$prewarm_required" = "TRUE" ] || [ "$prewarm_required" = "yes" ] || [ "$prewarm_required" = "YES" ]; then
@@ -572,6 +612,22 @@ case "$OS" in
 esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
+
+# The installer is meant to run as a normal user; it escalates with sudo only
+# where it needs to (e.g. copying into /Applications). Running the whole thing
+# as root leaves root-owned state in your home dir and trips PostgreSQL's
+# initdb root guard. Warn early, but keep going: the prewarm step drops back to
+# an unprivileged user when possible.
+if [ "$(id -u)" = "0" ]; then
+  warn "Running as root. Bolt is best installed as a normal user (no sudo)."
+  _pg_owner=$(resolve_unprivileged_user)
+  if [ -n "$_pg_owner" ]; then
+    warn "The embedded database will be set up as '${_pg_owner}' since initdb cannot run as root."
+  else
+    warn "No unprivileged user found, so the embedded database step will be skipped. Re-run without sudo to enable it."
+  fi
+fi
+
 configure_pg_runtime_sources
 
 # ── Cleanup trap ─────────────────────────────────────────────────────────────

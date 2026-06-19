@@ -47,21 +47,6 @@ ok()    { printf '\033[1;32m ✓ \033[0m %s\n' "$1"; }
 warn()  { printf '\033[1;33m ⚠ \033[0m %s\n' "$1"; }
 fail()  { printf '\033[1;31m ✗ \033[0m %s\n' "$1" >&2; exit 1; }
 
-# Run a command with root privileges. Already root → run directly. Otherwise
-# prefer sudo with a real tty for the password prompt; when no tty is available
-# (piped `curl | sh` with stdin not a terminal, CI) fall back to non-interactive
-# sudo, which only succeeds if sudo is passwordless. Returns the command's exit
-# status so callers can react to failure.
-run_root() {
-  if [ "$(id -u)" = "0" ]; then
-    "$@"
-  elif [ -r /dev/tty ]; then
-    sudo "$@" < /dev/tty
-  else
-    sudo -n "$@"
-  fi
-}
-
 wait_for_api_readiness() {
   timeout_seconds="${1:-90}"
   port_base="${BOLT_API_PORT_BASE:-$DEFAULT_BOLT_API_PORT_BASE}"
@@ -507,22 +492,6 @@ add_to_path() {
   fi
 }
 
-# Resolve the unprivileged user that should own the embedded PostgreSQL cluster
-# when the installer is (mis)run as root. Prefers SUDO_USER, falls back to the
-# owner of $HOME. Prints nothing if no suitable non-root user is found.
-resolve_unprivileged_user() {
-  if [ -n "${SUDO_USER:-}" ] && [ "${SUDO_USER}" != "root" ]; then
-    printf '%s' "$SUDO_USER"
-    return 0
-  fi
-  _u=$(stat -f '%Su' "$HOME" 2>/dev/null || stat -c '%U' "$HOME" 2>/dev/null || true)
-  if [ -n "$_u" ] && [ "$_u" != "root" ]; then
-    printf '%s' "$_u"
-    return 0
-  fi
-  printf ''
-}
-
 prewarm_embedded_postgres() {
   app_bin="$1"
   app_identifier="$2"
@@ -539,35 +508,11 @@ prewarm_embedded_postgres() {
     return 0
   }
 
-  # PostgreSQL's initdb refuses to run as root. If the installer was started as
-  # root (sudo, or a root login shell), run the prewarm as the unprivileged user
-  # that owns $HOME and hand them ownership of any embedded-postgres assets we
-  # may have seeded as root, so the cluster is created with the right owner.
-  prewarm_runner=""
-  if [ "$(id -u)" = "0" ]; then
-    pg_user=$(resolve_unprivileged_user)
-    if [ -z "$pg_user" ]; then
-      warn "PostgreSQL prewarm skipped: running as root and no unprivileged user could be determined."
-      warn "Re-run the installer as a normal user (without sudo) to enable the embedded database."
-      return 0
-    fi
-    info "Running PostgreSQL prewarm as '${pg_user}' (initdb cannot run as root)"
-    case "$PLATFORM" in
-      macos) pg_base_dir="${HOME}/Library/Application Support/${app_identifier}/embedded-postgres" ;;
-      linux) pg_base_dir="${XDG_DATA_HOME:-${HOME}/.local/share}/${app_identifier}/embedded-postgres" ;;
-      *)     pg_base_dir="" ;;
-    esac
-    if [ -n "$pg_base_dir" ] && [ -d "$pg_base_dir" ]; then
-      chown -R "$pg_user" "$pg_base_dir" 2>/dev/null || true
-    fi
-    prewarm_runner="sudo -u ${pg_user} -H"
-  fi
-
   info "Prewarming embedded PostgreSQL (user-space, one-time setup)..."
   prewarm_log=$(mktemp)
 
   if [ "${PLATFORM}" = "linux" ] && echo "$app_bin" | grep -q '\.AppImage$'; then
-    if $prewarm_runner env BOLT_APP_IDENTIFIER="$app_identifier" APPIMAGE_EXTRACT_AND_RUN=1 "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
+    if BOLT_APP_IDENTIFIER="$app_identifier" APPIMAGE_EXTRACT_AND_RUN=1 "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
       ok "Embedded PostgreSQL prewarm complete"
     else
       if [ "$prewarm_required" = "1" ] || [ "$prewarm_required" = "true" ] || [ "$prewarm_required" = "TRUE" ] || [ "$prewarm_required" = "yes" ] || [ "$prewarm_required" = "YES" ]; then
@@ -580,7 +525,7 @@ prewarm_embedded_postgres() {
       sed 's/^/   /' "$prewarm_log" | tail -20
     fi
   else
-    if $prewarm_runner env BOLT_APP_IDENTIFIER="$app_identifier" "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
+    if BOLT_APP_IDENTIFIER="$app_identifier" "$app_bin" prewarm-postgres >"$prewarm_log" 2>&1; then
       ok "Embedded PostgreSQL prewarm complete"
     else
       if [ "$prewarm_required" = "1" ] || [ "$prewarm_required" = "true" ] || [ "$prewarm_required" = "TRUE" ] || [ "$prewarm_required" = "yes" ] || [ "$prewarm_required" = "YES" ]; then
@@ -627,37 +572,6 @@ case "$OS" in
 esac
 
 command -v curl >/dev/null 2>&1 || fail "curl is required but not found."
-
-# Every install location (app, CLI symlink, embedded Postgres, caches) is
-# derived from $HOME. If it's unset or not a writable directory, fail early
-# with a clear message instead of scattering files at /.local/bin etc.
-[ -n "${HOME:-}" ] && [ -d "$HOME" ] || fail "\$HOME is not set to a valid directory. Set HOME and re-run."
-[ -w "$HOME" ] || fail "\$HOME (${HOME}) is not writable by the current user. Re-run as the user that owns it."
-
-# The installer is meant to run as a normal user; it escalates with sudo only
-# where it needs to (e.g. copying into /Applications). Running the whole thing
-# as root leaves root-owned state in your home dir and trips PostgreSQL's
-# initdb root guard. Warn early, but keep going: the prewarm step drops back to
-# an unprivileged user when possible.
-if [ "$(id -u)" = "0" ]; then
-  warn "Running as root. Bolt is best installed as a normal user (no sudo)."
-  _pg_owner=$(resolve_unprivileged_user)
-  if [ -n "$_pg_owner" ]; then
-    warn "The embedded database will be set up as '${_pg_owner}' since initdb cannot run as root."
-  else
-    warn "No unprivileged user found, so the embedded database step will be skipped. Re-run without sudo to enable it."
-  fi
-fi
-
-# Best-effort low-disk warning. The app (~200MB unpacked) + embedded Postgres
-# runtime + download cache need headroom; a full disk otherwise fails mid-copy
-# with confusing errors. Warn (don't block) since df parsing varies by FS.
-avail_kb=$(df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {print $4}')
-case "$avail_kb" in
-  ''|*[!0-9]*) ;;  # couldn't parse — skip silently
-  *) [ "$avail_kb" -lt 1048576 ] && warn "Low free disk space (~$((avail_kb / 1024))MB on $HOME). Install needs ~500MB+; it may fail if the disk fills." ;;
-esac
-
 configure_pg_runtime_sources
 
 # ── Cleanup trap ─────────────────────────────────────────────────────────────
@@ -755,16 +669,6 @@ find_latest_release_with_asset() {
 
 # ── Detect architecture ─────────────────────────────────────────────────────
 ARCH=$(uname -m)
-# On Apple Silicon, a shell running under Rosetta 2 (x86 Homebrew, an Intel
-# terminal, `arch -x86_64`) reports uname -m as x86_64. Installing the Intel
-# build on an arm64 Mac works but is slower and ships a reduced feature set.
-# Trust the hardware: if the process is translated, the real arch is arm64.
-if [ "$PLATFORM" = "macos" ] && [ "$ARCH" = "x86_64" ]; then
-  if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
-    warn "Detected Rosetta (x86 shell on Apple Silicon) — installing the native arm64 build."
-    ARCH="arm64"
-  fi
-fi
 case "$PLATFORM-$ARCH" in
   macos-arm64)   RUST_TRIPLE="aarch64-apple-darwin" ; EXT="dmg" ;;
   macos-x86_64)  RUST_TRIPLE="x86_64-apple-darwin" ; EXT="dmg" ;;
@@ -926,17 +830,8 @@ install_macos() {
   MOUNT_POINT="${TMPDIR_MOUNT}"
 
   info "Installing ${APP_NAME}..."
-  # A cached DMG that matches the remote size+ETag but is internally corrupt
-  # (truncated mid-flight by a proxy, bad disk write) would fail to mount on
-  # every run, since the freshness check can't see inside it. On the first
-  # mount failure, purge the cache entry and re-download once before giving up.
-  if ! hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null; then
-    warn "DMG failed to mount — the cached download may be corrupt. Re-downloading..."
-    rm -f "${DL_PATH}" "${DL_PATH}.meta" 2>/dev/null || true
-    download_for_platform || fail "Failed to re-download ${APP_NAME}. Check your connection and try again."
-    hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
-      || fail "Failed to mount DMG even after re-downloading. The release artifact may be corrupted — report this at https://sparcle.app/download"
-  fi
+  hdiutil attach "${DL_PATH}" -quiet -nobrowse -mountpoint "${MOUNT_POINT}" 2>/dev/null \
+    || fail "Failed to mount DMG. The download may be corrupted — try again."
 
   SOURCE_APP=$(find "${MOUNT_POINT}" -maxdepth 1 -name "*.app" | head -1)
   [ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }
@@ -1043,28 +938,9 @@ install_linux_deb() {
   rm -f "${CACHE_BASE}/hsts-storage.sqlite" 2>/dev/null || true
   rm -f "${CACHE_BASE}/.last-build-id" 2>/dev/null || true
 
-  # Installing a .deb needs root. If we're not root and have no tty to prompt
-  # for a sudo password (piped install with no terminal), say so plainly rather
-  # than dying on a `/dev/tty: No such device` redirect error.
-  if [ "$(id -u)" != "0" ] && [ ! -r /dev/tty ] && ! sudo -n true 2>/dev/null; then
-    fail "Installing the .deb needs root, but no terminal is available for a password prompt.\n  Re-run in an interactive shell, or: sudo dpkg -i ${DL_PATH}"
-  fi
-
-  if ! run_root dpkg -i "${DL_PATH}"; then
-    # dpkg failures are usually missing dependencies; let apt resolve them and
-    # retry. If it still fails, the cached .deb may be corrupt (right size but
-    # bad bytes, which the freshness check can't detect) — purge and re-download
-    # once before giving up.
-    run_root apt-get install -f -y >/dev/null 2>&1 || true
-    if ! run_root dpkg -i "${DL_PATH}"; then
-      warn "dpkg install failed — re-downloading in case the cached package is corrupt..."
-      rm -f "${DL_PATH}" "${DL_PATH}.meta" 2>/dev/null || true
-      download_for_platform || fail "Failed to re-download the .deb package. Check your connection and try again."
-      run_root dpkg -i "${DL_PATH}" \
-        || { run_root apt-get install -f -y >/dev/null 2>&1 || true; run_root dpkg -i "${DL_PATH}"; } \
-        || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"
-    fi
-  fi
+  sudo dpkg -i "${DL_PATH}" < /dev/tty \
+    || { sudo apt-get install -f -y < /dev/tty 2>/dev/null || true; sudo dpkg -i "${DL_PATH}" < /dev/tty; } \
+    || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"
   ok "Installed ${APP_NAME} via dpkg"
 
   # Find and launch the installed binary
@@ -1099,18 +975,18 @@ install_linux_appimage() {
     warn "FUSE not found — AppImage needs it to run."
     if command -v apt-get >/dev/null 2>&1; then
       info "Detected Ubuntu/Debian — installing libfuse2..."
-      run_root apt-get update -qq >/dev/null 2>&1 || true
-      run_root apt-get install -y -qq libfuse2 \
+      sudo apt-get update -qq < /dev/tty || true
+      sudo apt-get install -y -qq libfuse2 < /dev/tty \
         && ok "libfuse2 installed" \
         || warn "Could not install libfuse2. You may need to run: sudo apt install libfuse2"
     elif command -v dnf >/dev/null 2>&1; then
       info "Detected Fedora/RHEL — installing fuse-libs..."
-      run_root dnf install -y -q fuse-libs \
+      sudo dnf install -y -q fuse-libs < /dev/tty \
         && ok "fuse-libs installed" \
         || warn "Could not install fuse-libs. You may need to run: sudo dnf install fuse-libs"
     elif command -v pacman >/dev/null 2>&1; then
       info "Detected Arch — installing fuse2..."
-      run_root pacman -S --noconfirm fuse2 \
+      sudo pacman -S --noconfirm fuse2 < /dev/tty \
         && ok "fuse2 installed" \
         || warn "Could not install fuse2. You may need to run: sudo pacman -S fuse2"
     else

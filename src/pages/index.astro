@@ -69,9 +69,9 @@ const proofs = [
             <!-- Hero video: Bolt + Aeira combined story (1:30). Bigger than the
                  two-tile row below to signal "start here." -->
             <div class="hero-video-hero" id="heroVideoHero">
-              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-aeira-90s.mp4?v=20260613a" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
+              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-aeira-90s.mp4?v=20260621a" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
                 <video class="hero-preview-video" muted playsinline preload="metadata" loop autoplay>
-                  <source src="media/bolt-aeira-90s.mp4?v=20260613a" type="video/mp4">
+                  <source src="media/bolt-aeira-90s.mp4?v=20260621a" type="video/mp4">
                 </video>
                 <div class="video-controls-overlay video-preview-overlay">
                   <div class="video-play-btn" title="Click to watch with audio">
@@ -178,6 +178,14 @@ const proofs = [
           <div id="heroVideoModal" class="hero-video-modal">
             <button type="button" id="heroModalClose" class="hero-modal-close" aria-label="Close">&times;</button>
             <video id="heroModalVideo" controls playsinline class="hero-modal-video"></video>
+            <div class="hero-modal-speed" role="group" aria-label="Playback speed">
+              <span class="hero-modal-speed__label">Speed</span>
+              <button type="button" class="hero-modal-speed__btn" data-rate="0.5">0.5&times;</button>
+              <button type="button" class="hero-modal-speed__btn" data-rate="0.75">0.75&times;</button>
+              <button type="button" class="hero-modal-speed__btn is-active" data-rate="1">1&times;</button>
+              <button type="button" class="hero-modal-speed__btn" data-rate="1.25">1.25&times;</button>
+              <button type="button" class="hero-modal-speed__btn" data-rate="1.5">1.5&times;</button>
+            </div>
           </div>
         </div>
       </div>
@@ -468,7 +476,22 @@ const proofs = [
       var modal = document.getElementById('heroVideoModal');
       var modalVideo = document.getElementById('heroModalVideo');
       var closeBtn = document.getElementById('heroModalClose');
+      var speedBtns = modal ? modal.querySelectorAll('.hero-modal-speed__btn') : [];
       if (!cards.length || !modal || !modalVideo) return;
+
+      function setPlaybackRate(rate) {
+        modalVideo.playbackRate = rate;
+        for (var i = 0; i < speedBtns.length; i++) {
+          var active = parseFloat(speedBtns[i].getAttribute('data-rate')) === rate;
+          speedBtns[i].classList.toggle('is-active', active);
+        }
+      }
+      for (var s = 0; s < speedBtns.length; s++) {
+        speedBtns[s].addEventListener('click', function (e) {
+          e.stopPropagation();
+          setPlaybackRate(parseFloat(this.getAttribute('data-rate')));
+        });
+      }
 
       function playLeftPreview() {
         if (!leftCard) return;
@@ -542,6 +565,7 @@ const proofs = [
         modalVideo.src = src;
         modalVideo.muted = false;
         modalVideo.currentTime = 0;
+        setPlaybackRate(1);
         modalVideo.play().catch(function () {});
       }
 

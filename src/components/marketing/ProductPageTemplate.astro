@@ -102,7 +102,7 @@ const faqSchema = {
 
           {content.videoUrl && (
             <div class="product-video-wrap" style="margin-bottom: 2rem;">
-              <video controls playsinline preload="metadata">
+              <video class="js-speed" controls playsinline preload="metadata">
                 <source src={content.videoUrl} type="video/mp4" />
                 Your browser does not support the video element.
               </video>
@@ -224,7 +224,7 @@ const faqSchema = {
 
             {secondContent.videoUrl && (
               <div class="product-video-wrap" style="margin-bottom: 2rem;">
-                <video controls playsinline preload="metadata">
+                <video class="js-speed" controls playsinline preload="metadata">
                   <source src={secondContent.videoUrl} type="video/mp4" />
                   Your browser does not support the video element.
                 </video>

@@ -527,6 +527,11 @@ presentation:
       subtitle: '{{row.key}} · {{row.statusName}}'
       image_url: '{{row.assigneeAvatar}}'
       fields:
+        # Ticket key as its own field — the key also rides in the subtitle, but
+        # the subtitle is one interpolated string, so any code path where
+        # {{row.key}} fails to resolve drops the number silently. A dedicated
+        # field guarantees the ticket number always shows.
+        - { label: Key,           value: '{{row.key}}' }
         - { label: Status,        value: '{{row.statusName}} · {{row.statusCategory}}' }
         - { label: Type,          value: '{{row.type}}' }
         - { label: Priority,      value: '{{row.priorityName}}' }

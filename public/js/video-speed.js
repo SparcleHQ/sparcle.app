@@ -11,7 +11,7 @@
  * across every browser.
  */
 (function () {
-  var RATES = [0.5, 0.75, 1, 1.25, 1.5];
+  var RATES = [0.75, 1, 1.25];
   var DEFAULT_RATE = 1;
 
   function fmt(rate) {

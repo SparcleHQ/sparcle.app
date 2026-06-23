@@ -9,7 +9,7 @@ id: gitstatus
 chip: gitstatus
 title: Git status
 icon: git-branch
-description: Short git status of a repo (branch, changed files) — by name or path
+description: Short git status of a repo (branch, changed files), by name or path
 placeholder_examples: ["bolt-pwa", "bolt-api", "."]
 emits: Generic
 

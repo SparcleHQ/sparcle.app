@@ -5,7 +5,7 @@ id: demo-diff
 chip: demo-diff
 title: "Demo · Diff"
 icon: file-diff
-description: "Sample config drift (prod vs staging) as a line diff — canned data, zero setup."
+description: "Sample config drift (prod vs staging) as a line diff, canned data, zero setup."
 placeholder_examples: ["Enter to load the demo diff"]
 emits: Generic
 bridge:

@@ -1,4 +1,4 @@
-# =vendor-csv-cleanup — a PURE TRANSFORM pack (runtime: transform).
+# =vendor-csv-cleanup - a PURE TRANSFORM pack (runtime: transform).
 #
 # Drops a junk "TOTAL" summary row from a pasted CSV and re-emits the data rows
 # as JSON objects. Proves the typed pipe has NO round-trip loss: the header
@@ -9,12 +9,12 @@ id: vendor-csv-cleanup
 chip: vendor-csv-cleanup
 title: Clean vendor CSV
 icon: table-2
-description: Strip the TOTAL summary row from a pasted CSV and emit data rows as JSON — pure, on-device
+description: Strip the TOTAL summary row from a pasted CSV and emit data rows as JSON (pure, on-device)
 placeholder_examples: ["name,amount\\nAlice,100\\nTOTAL,999"]
 emits: Generic
 
 recognize:
-  # JS-dialect regex (the launcher compiles with `new RegExp`) — NO `(?i)` inline
+  # JS-dialect regex (the launcher compiles with `new RegExp`) - NO `(?i)` inline
   # flags (Rust's regex accepts them, JS rejects them); use the `flags` field.
   patterns:
     - regex: 'name\s*,\s*amount'

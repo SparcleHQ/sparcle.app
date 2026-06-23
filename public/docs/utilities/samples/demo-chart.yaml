@@ -5,7 +5,7 @@ id: demo-chart
 chip: demo-chart
 title: "Demo · Chart"
 icon: chart-column
-description: "Sample bar chart of deploys/day — canned data, zero setup."
+description: "Sample bar chart of deploys/day, canned data, zero setup."
 placeholder_examples: ["Enter to load the demo chart"]
 emits: Generic
 bridge:

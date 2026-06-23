@@ -5,7 +5,7 @@ id: demo-detail
 chip: demo-detail
 title: "Demo · Detail"
 icon: list-tree
-description: "Sample single-record detail pane — canned data, zero setup."
+description: "Sample single-record detail pane, canned data, zero setup."
 placeholder_examples: ["Enter to load the demo detail"]
 emits: Generic
 bridge:

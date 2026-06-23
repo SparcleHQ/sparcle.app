@@ -5,7 +5,7 @@ id: demo-table
 chip: demo-table
 title: "Demo · Table"
 icon: table
-description: "Sample services table — canned data, zero setup."
+description: "Sample services table, canned data, zero setup."
 placeholder_examples: ["Enter to load the demo table"]
 emits: Generic
 bridge:

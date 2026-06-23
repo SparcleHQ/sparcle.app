@@ -8,7 +8,7 @@ id: git-log
 chip: git-log
 title: Recent commits
 icon: git-commit
-description: Recent commits of a repo (sha · subject · author · date) — by name or path
+description: Recent commits of a repo (sha · subject · author · date), by name or path
 placeholder_examples: ["bolt-pwa", "bolt-api 40", "."]
 emits: Generic
 

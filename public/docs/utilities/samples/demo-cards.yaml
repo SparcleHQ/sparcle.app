@@ -5,7 +5,7 @@ id: demo-cards
 chip: demo-cards
 title: "Demo · Cards"
 icon: layout-grid
-description: "Sample service tiles with status badges — canned data, zero setup."
+description: "Sample service tiles with status badges, canned data, zero setup."
 placeholder_examples: ["Enter to load the demo cards"]
 emits: Generic
 bridge:

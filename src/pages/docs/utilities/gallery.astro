@@ -3,7 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import Pill from "../../../components/ui/Pill.astro";
 import samplesRaw from "../../../data/utility-samples.json";
 
-// Sample utility gallery — one card per bundled manifest.
+// Sample utility gallery: one card per bundled manifest.
 // Sort alphabetically by id so the grid is stable across edits to the
 // upstream JSON.
 type Sample = {
@@ -61,7 +61,7 @@ function runtimeVariant(runtime?: string): "brand" | "neutral" | "success" | "wa
         <p class="gallery-eyebrow"><a href="/docs/utilities">&larr; Apps</a></p>
         <h1>Sample integrations.</h1>
         <p class="gallery-lede">
-          {sampleCount} App manifests, bundled with Bolt &mdash; {connectors.length}
+          {sampleCount} App manifests, bundled with Bolt: {connectors.length}
           admin <strong>connectors</strong> (OAuth/MCP) and {userApps.length}
           <strong>User Apps</strong> that run entirely on your machine: a local
           command, a loopback read, or a pure on-device <code>transform</code>
@@ -81,7 +81,7 @@ function runtimeVariant(runtime?: string): "brand" | "neutral" | "success" | "wa
           Connectors <span class="gallery-group-count">{connectors.length}</span>
         </h2>
         <p class="gallery-group-lede">
-          Admin-enabled integrations. Most enable in one step &mdash; pick one in
+          Admin-enabled integrations. Most enable in one step: pick one in
           the Gallery, connect over OAuth, and the chip is live; a few need an
           admin to connect a server or fill in a host first.
         </p>
@@ -111,7 +111,7 @@ function runtimeVariant(runtime?: string): "brand" | "neutral" | "success" | "wa
           User Apps <span class="gallery-group-count">{userApps.length}</span>
         </h2>
         <p class="gallery-group-lede">
-          Run entirely on your machine &mdash; a local shell command
+          Run entirely on your machine: a local shell command
           (<code>bridge</code>), a loopback HTTP read (<code>http_local</code>),
           or a pure on-device <code>transform</code> pipe (no command, no
           network, no auth). Drop the YAML into your user-apps folder; no server,

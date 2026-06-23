@@ -19,7 +19,7 @@ id: sys
 chip: sys
 title: System overview
 icon: activity
-description: "Local system at a glance — disk, ports, network, security, cpu, memory, battery in one fan-out"
+description: "Local system at a glance: disk, ports, network, security, cpu, memory, battery in one fan-out"
 placeholder_examples: ["", "disk", "ports", "net", "security", "devices"]
 emits: Generic
 

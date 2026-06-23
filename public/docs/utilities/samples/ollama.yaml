@@ -12,7 +12,7 @@ id: ollama
 chip: ollama
 title: Ollama models
 icon: box
-description: "Models installed in your local Ollama. Reads 127.0.0.1:11434 — never leaves your machine."
+description: "Models installed in your local Ollama. Reads 127.0.0.1:11434; never leaves your machine."
 placeholder_examples:
   - "Enter to list local models"
 emits: Generic

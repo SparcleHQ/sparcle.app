@@ -5,7 +5,7 @@ id: demo-tree
 chip: demo-tree
 title: "Demo · JSON tree"
 icon: braces
-description: "Sample API response as a collapsible JSON tree — canned data, zero setup."
+description: "Sample API response as a collapsible JSON tree, canned data, zero setup."
 placeholder_examples: ["Enter to load the demo JSON tree"]
 emits: Generic
 bridge:

@@ -54,7 +54,7 @@ mkdir -p "${DST_SAMPLES_DIR}"
 {
   printf '%s\n' '<!--'
   printf '%s\n' '  synced from bolt-api/docs/UTILITY_MANIFEST.md by scripts/sync-docs.sh'
-  printf '%s\n' '  do not edit by hand — edits will be overwritten on next build'
+  printf '%s\n' '  do not edit by hand; edits will be overwritten on next build'
   printf '%s\n' '-->'
   sed -E \
     -e 's#\(examples/utility-([a-z0-9-]+)\.yaml\)#(/docs/utilities/samples/\1.yaml)#g' \

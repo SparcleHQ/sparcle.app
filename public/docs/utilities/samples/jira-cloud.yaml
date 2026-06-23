@@ -182,6 +182,8 @@ scopes:
                 | ($f.creator // {}) as $cr
                 | ($f.status // {}) as $st
                 | ($st.statusCategory // {}) as $sc
+                | ($st.name // "—") as $stName
+                | ($sc.name // "—") as $scName
                 | ($f.priority // {}) as $pr
                 | ($f.issuetype // {}) as $it
                 | ($f.project // {}) as $pj
@@ -221,8 +223,12 @@ scopes:
                     subline: $subline,
                     type: ($it.name // "—"),
                     typeIcon: ($it.iconUrl // ""),
-                    statusName: ($st.name // "—"),
-                    statusCategory: ($sc.name // "—"),
+                    statusName: $stName,
+                    statusCategory: $scName,
+                    # Card status string: the name alone when it equals its
+                    # category (avoids "In Progress · In Progress"); name ·
+                    # category when they differ (e.g. "Open · To Do").
+                    statusDisplay: (if $stName == $scName then $stName else ($stName + " · " + $scName) end),
                     statusColor: ($sc.colorName // ""),
                     priorityName: ($pr.name // "—"),
                     priorityIcon: ($pr.iconUrl // ""),
@@ -524,15 +530,14 @@ presentation:
     mode: selected_row
     bind:
       title: '{{row.summary}}'
-      subtitle: '{{row.key}} · {{row.statusName}}'
       image_url: '{{row.assigneeAvatar}}'
       fields:
-        # Ticket key as its own field — the key also rides in the subtitle, but
-        # the subtitle is one interpolated string, so any code path where
-        # {{row.key}} fails to resolve drops the number silently. A dedicated
-        # field guarantees the ticket number always shows.
-        - { label: Key,           value: '{{row.key}}' }
-        - { label: Status,        value: '{{row.statusName}} · {{row.statusCategory}}' }
+        # Ticket key as the leading "ID" field. It no longer rides in a subtitle
+        # above the divider (that key · status line was removed so the header is
+        # just the summary + assignee avatar) — the key lives only here, below
+        # the line.
+        - { label: ID,            value: '{{row.key}}' }
+        - { label: Status,        value: '{{row.statusDisplay}}' }
         - { label: Type,          value: '{{row.type}}' }
         - { label: Priority,      value: '{{row.priorityName}}' }
         - { label: Assignee,      value: '{{row.assigneeName}}' }

@@ -1,0 +1,47 @@
+# =ollama — local Ollama models, read from the loopback API (no egress).
+# Demonstrates runtime: http_local. Ollama listens on 127.0.0.1:11434 by
+# default; GET /api/tags returns { "models": [ { name, size, ... } ] }.
+#
+# NOTE: the wide pane binds only top-level model fields. The richer detail
+# (details.parameter_size / family / quantization) is NESTED, and the
+# {{row.x}} binder is single-segment today — see the dotted-path binding
+# proposal in the rich-widgets plan to unlock those without a helper script.
+schema_version: 1
+runtime: http_local
+id: ollama
+chip: ollama
+title: Ollama models
+icon: box
+description: "Models installed in your local Ollama. Reads 127.0.0.1:11434 — never leaves your machine."
+placeholder_examples:
+  - "Enter to list local models"
+emits: Generic
+
+http:
+  port: 11434
+  request:
+    method: GET
+    path: "/api/tags"
+  parse: json
+  rows_path: models          # body is { "models": [...] }
+  timeout_seconds: 5
+
+presentation:
+  widget: list
+  title_field: name
+  subtitle_field: model
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.name}}"
+      subtitle: "{{row.model}}"
+      fields:
+        - { label: Model, value: "{{row.model}}" }
+        - { label: Modified, value: "{{row.modified_at}}" }
+        - { label: Digest, value: "{{row.digest}}" }
+      body: "Local Ollama model **{{row.name}}**.\n\nModified: {{row.modified_at}}\n\n```bash\nollama show {{row.name}}\nollama run {{row.name}}\n```\n"
+      actions: [copy-name]
+
+actions:
+  - { id: copy-name, kind: composer, target: row, label: Copy name, insert: "{{name}}" }

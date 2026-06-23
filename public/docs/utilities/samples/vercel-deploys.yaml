@@ -1,0 +1,55 @@
+# =vercel — structured rows + wide detail pane (via bolt-vercel.sh). CLI-gated.
+# NOTE: rewritten to the CLI's JSON output (live-unverified against every CLI
+# version); the helper falls back to line rows if the shape is unexpected.
+schema_version: 1
+runtime: bridge
+id: vercel
+chip: vercel
+title: Vercel Projects
+icon: triangle
+description: "List via the `vercel` CLI. Enter to load, then filter the results."
+placeholder_examples: ["Enter to load — then filter the results"]
+emits: Generic
+
+detect:
+  binary: vercel
+  auth_check:
+    macos: "vercel whoami"
+    linux: "vercel whoami"
+    windows: "vercel whoami"
+  config_hint: ["~/.local/share/com.vercel.cli"]
+  refresh: on_focus
+
+args:
+  - { name: filter, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: "List your Vercel projects"
+  confirm_hint: "Press ↵ to load · filter the results as you type"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-vercel.py {{filter}}"
+    linux: "python3 {{scripts_dir}}/bolt-vercel.py {{filter}}"
+    windows: "python {{scripts_dir}}/bolt-vercel.py {{filter}}"
+  parse: json
+  timeout_seconds: 15
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Project, value: "{{row.project}}" }
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

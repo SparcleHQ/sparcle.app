@@ -1,0 +1,39 @@
+# =demo-detail — widget gallery: record DETAIL key/value (canned data, no setup).
+schema_version: 1
+runtime: bridge
+id: demo-detail
+chip: demo-detail
+title: "Demo · Detail"
+icon: list-tree
+description: "Sample single-record detail pane — canned data, zero setup."
+placeholder_examples: ["Enter to load the demo detail"]
+emits: Generic
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-demo.py detail"
+    linux: "python3 {{scripts_dir}}/bolt-demo.py detail"
+    windows: "python {{scripts_dir}}/bolt-demo.py detail"
+  parse: json
+  timeout_seconds: 5
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  right_widget:
+    kind: detail
+    mode: selected_row
+    bind:
+      title: "{{row.service}}"
+      subtitle: "{{row.version}} · {{row.region}}"
+      fields:
+        - { label: Status, value: "{{row.status}}" }
+        - { label: Version, value: "{{row.version}}", copy: true }
+        - { label: Region, value: "{{row.region}}" }
+        - { label: Replicas, value: "{{row.replicas}}" }
+        - { label: Uptime, value: "{{row.uptime}}" }
+        - { label: CPU, value: "{{row.cpu}}" }
+        - { label: Memory, value: "{{row.memory}}" }
+        - { label: Endpoint, value: "{{row.endpoint}}", copy: true }
+        - { label: Owner, value: "{{row.owner}}" }
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

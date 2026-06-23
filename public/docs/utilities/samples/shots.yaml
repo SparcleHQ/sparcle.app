@@ -1,0 +1,38 @@
+# =shots [query] — today's screenshots from ~/Desktop as a thumbnail GRID.
+# Each row is a structured screenshot record { name, size, age, src, title,
+# subtitle } where `src` is a self-contained data:image/jpeg;base64 thumbnail
+# (so it renders inside the embedded webview). The right pane is an image_grid
+# showing all of today's shots; optional query filters by name.
+schema_version: 1
+runtime: bridge
+id: shots
+chip: shots
+title: Today's screenshots
+icon: image
+description: Screenshots from today on ~/Desktop; optional query filters by name
+placeholder_examples: ["", "bolt", "settings"]
+emits: File
+
+bridge:
+  command:
+    macos:   "python3 {{scripts_dir}}/bolt-shots.py {{query}}"
+    linux:   "python3 {{scripts_dir}}/bolt-shots.py {{query}}"
+  parse: json
+  timeout_seconds: 12
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: image_grid
+    mode: list_data
+    bind:
+      src: "{{row.src}}"
+      caption: "{{row.name}}"
+      columns: 3
+
+actions:
+  - { id: copy-name, kind: composer, target: row, label: Copy name, insert: "{{name}}" }
+  - { id: copy-path, kind: composer, target: row, label: Copy path, insert: "{{path}}" }

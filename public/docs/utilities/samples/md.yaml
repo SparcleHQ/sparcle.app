@@ -1,0 +1,41 @@
+# =md — render a local Markdown file in the rich preview pane.
+#
+# Type a path (under ~ or absolute). The file's Markdown renders on the right:
+# sanitized, scrollable, with syntax-highlighted code fences and a per-block
+# copy button. Read-only, local-only — remote images in the file are blocked
+# (no-egress), links open in your browser. A demo of `right_widget.kind:
+# markdown` for User Apps that need to show long / rich formatted content.
+schema_version: 1
+runtime: bridge
+id: md
+chip: md
+title: Markdown preview
+icon: file-text
+description: Render a local Markdown file in the right pane (sanitized, scrollable)
+placeholder_examples: ["README.md", "~/notes/spec.md"]
+emits: Document
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-md.py {{path}}"
+    linux: "python3 {{scripts_dir}}/bolt-md.py {{path}}"
+    windows: "python {{scripts_dir}}/bolt-md.py {{path}}"
+  parse: json
+  timeout_seconds: 5
+
+args:
+  - { name: path, from: "query.word(0)", default: README.md }
+
+presentation:
+  widget: list
+  title_field: title
+  right_widget:
+    kind: markdown
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy Markdown, insert: "{{body}}" }

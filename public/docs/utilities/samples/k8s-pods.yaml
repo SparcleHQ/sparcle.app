@@ -1,0 +1,58 @@
+# =k8s-pods — structured rows + wide detail pane (via bolt-k8s-pods.sh). CLI-gated.
+# NOTE: rewritten to the CLI's JSON output (live-unverified against every CLI
+# version); the helper falls back to line rows if the shape is unexpected.
+schema_version: 1
+runtime: bridge
+id: k8s-pods
+chip: k8s-pods
+title: Pods
+icon: box
+description: "List via the `kubectl` CLI. Enter to load, then filter the results."
+placeholder_examples: ["Enter to load — then filter the results"]
+emits: Incident
+
+detect:
+  binary: kubectl
+  auth_check:
+    macos: "kubectl config current-context"
+    linux: "kubectl config current-context"
+    windows: "kubectl config current-context"
+  config_hint: ["~/.kube/config"]
+  refresh: on_focus
+
+args:
+  - { name: filter, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: "List pods (all namespaces)"
+  confirm_hint: "Press ↵ to load · filter the results as you type"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-k8s-pods.py {{filter}}"
+    linux: "python3 {{scripts_dir}}/bolt-k8s-pods.py {{filter}}"
+    windows: "python {{scripts_dir}}/bolt-k8s-pods.py {{filter}}"
+  parse: json
+  timeout_seconds: 15
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Namespace, value: "{{row.namespace}}" }
+        - { label: Phase, value: "{{row.phase}}" }
+        - { label: Restarts, value: "{{row.restarts}}" }
+        - { label: Node, value: "{{row.node}}" }
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

@@ -1,0 +1,55 @@
+# =sys — everything essential about the local system, at a glance, instantly.
+# A fan-out aggregator: probes identity / ports / disk / cpu / mem / net /
+# security CONCURRENTLY in one read-only script (bolt-sys.py), merges into a
+# snapshot, runs a deterministic zero-token insight ruleset, and renders a
+# terminal-style ASCII readout (Unicode bars, neofetch aesthetic).
+# Cross-platform: one Python engine with per-OS probe branches (mac/linux/win);
+# the interpreter is invoked directly so no bash/ps1 wrapper is needed.
+#   =sys          → full dashboard (probes run in PARALLEL)
+#   =sys disk     → every mounted volume (size / used / free / %) + usage bars
+#   =sys ports    → every listening TCP socket (process / PID / address)
+#   =sys seq      → same dashboard, probes run SEQUENTIALLY (timing comparison)
+#   =sys net      → filter to a category (net / security / cpu)
+#   =sys devices  → list LAN devices seen on this network (ARP cache, no scan)
+# The full `query` is passed through so a sub-mode can carry a narrowing filter
+# (e.g. `=sys ports node`, `=sys disk data`); the script splits mode + filter.
+schema_version: 1
+runtime: bridge
+id: sys
+chip: sys
+title: System overview
+icon: activity
+description: "Local system at a glance — disk, ports, network, security, cpu, memory, battery in one fan-out"
+placeholder_examples: ["", "disk", "ports", "net", "security", "devices"]
+emits: Generic
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-sys.py {{query}}"
+    linux: "python3 {{scripts_dir}}/bolt-sys.py {{query}}"
+    windows: "python {{scripts_dir}}/bolt-sys.py {{query}}"
+  parse: json
+  timeout_seconds: 12
+
+dispatch:
+  confirm_label: "Scan system"
+  confirm_hint: "↵ to fan out probes"
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}} · {{subtitle}}" }
+  # Tap-to-enrich: re-invokes =sys net+ (the only step that leaves the machine).
+  - { id: check_internet, kind: utility, target_chip: sys, query_template: "net+", label: "Check internet" }

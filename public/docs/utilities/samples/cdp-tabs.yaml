@@ -1,0 +1,45 @@
+# =cdp-tabs — list open browser tabs via the Chrome DevTools Protocol.
+#
+# Showcases the `http_local` runtime: a single read against a loopback service,
+# structurally incapable of egressing off-box (the validator pins the host to
+# the loopback set). No CLI, no auth, no AI in the path.
+#
+# Right pane: a `json_tree` widget (mode: selected_row) that renders the full
+# raw CDP target object for the selected tab — title, url, type, id,
+# webSocketDebuggerUrl and any other fields — so you can inspect every field
+# the DevTools endpoint returned without leaving the launcher.
+#
+# Requires a Chromium browser launched with the debugging port open, e.g.:
+#   google-chrome --remote-debugging-port=9222
+#   open -a "Google Chrome" --args --remote-debugging-port=9222   # macOS
+# Host is `localhost` (not 127.0.0.1) because Chromium's DevTools HTTP endpoint
+# rejects requests whose Host header isn't `localhost` (DNS-rebinding guard).
+# If no CDP endpoint is running, the chip reports a clear HTTP/connection error.
+schema_version: 1
+runtime: http_local
+id: cdp-tabs
+chip: cdp-tabs
+title: Browser tabs
+icon: globe
+description: Open tabs from a Chromium started with --remote-debugging-port=9222 (loopback)
+placeholder_examples: [""]
+emits: Document
+
+http:
+  host: localhost
+  port: 9222
+  request: { method: GET, path: "/json" }
+  parse: json
+  timeout_seconds: 5
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: url
+  right_widget:
+    kind: json_tree
+    mode: selected_row
+
+actions:
+  - { id: open, kind: url, target: row, label: Open, url_template: "{{url}}" }
+  - { id: copy, kind: composer, target: row, label: Copy URL, insert: "{{url}}" }

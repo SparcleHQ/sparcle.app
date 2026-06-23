@@ -1,0 +1,56 @@
+# =aws-s3 — structured rows + wide detail pane (via bolt-aws-s3.sh). CLI-gated.
+# NOTE: rewritten to the CLI's JSON output (live-unverified against every CLI
+# version); the helper falls back to line rows if the shape is unexpected.
+schema_version: 1
+runtime: bridge
+id: aws-s3
+chip: aws-s3
+title: S3 Buckets
+icon: database
+description: "List via the `aws` CLI. Enter to load, then filter the results."
+placeholder_examples: ["Enter to load — then filter the results"]
+emits: Generic
+
+detect:
+  binary: aws
+  auth_check:
+    macos: "aws sts get-caller-identity"
+    linux: "aws sts get-caller-identity"
+    windows: "aws sts get-caller-identity"
+  config_hint: ["~/.aws"]
+  refresh: on_focus
+
+args:
+  - { name: filter, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: "List your S3 buckets"
+  confirm_hint: "Press ↵ to load · filter the results as you type"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-aws-s3.py {{filter}}"
+    linux: "python3 {{scripts_dir}}/bolt-aws-s3.py {{filter}}"
+    windows: "python {{scripts_dir}}/bolt-aws-s3.py {{filter}}"
+  parse: json
+  timeout_seconds: 15
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Bucket, value: "{{row.name}}" }
+        - { label: Created, value: "{{row.created}}" }
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

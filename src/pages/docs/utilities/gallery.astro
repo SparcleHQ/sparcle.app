@@ -13,11 +13,17 @@ type Sample = {
   description: string;
   emits: string;
   filename: string;
+  tier?: string;
+  runtime?: string;
 };
-const samples: Sample[] = [...(samplesRaw as Sample[])].sort((a, b) =>
+const all: Sample[] = [...(samplesRaw as Sample[])].sort((a, b) =>
   a.id.localeCompare(b.id)
 );
-const sampleCount = samples.length;
+// Two tiers: admin connectors (OAuth/MCP) and User Apps that run on-device
+// (runtime: bridge | http_local | transform). The index tags each entry.
+const connectors = all.filter((s) => s.tier !== "user");
+const userApps = all.filter((s) => s.tier === "user");
+const sampleCount = all.length;
 
 // Map emit types to pill variants so the grid is glanceable.
 function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" {
@@ -34,6 +40,15 @@ function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" 
     default:         return "neutral";
   }
 }
+// User-App cards lead with their runtime (more telling than emits=Generic).
+function runtimeVariant(runtime?: string): "brand" | "neutral" | "success" | "warning" {
+  switch (runtime) {
+    case "transform":  return "brand";
+    case "http_local": return "success";
+    case "bridge":     return "neutral";
+    default:           return "neutral";
+  }
+}
 ---
 <BaseLayout
   title={`Sample integrations: ${sampleCount} bundled App manifests | Sparcle`}
@@ -46,11 +61,11 @@ function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" 
         <p class="gallery-eyebrow"><a href="/docs/utilities">&larr; Apps</a></p>
         <h1>Sample integrations.</h1>
         <p class="gallery-lede">
-          {sampleCount} App manifests, bundled with Bolt. Most enable in one
-          step &mdash; pick one in the Gallery, connect over OAuth, and the chip
-          is live in your launcher; a few need an admin to connect a server or
-          fill in a workspace or host first. Each manifest is plain YAML you can
-          read, fork, or extend.
+          {sampleCount} App manifests, bundled with Bolt &mdash; {connectors.length}
+          admin <strong>connectors</strong> (OAuth/MCP) and {userApps.length}
+          <strong>User Apps</strong> that run entirely on your machine: a local
+          command, a loopback read, or a pure on-device <code>transform</code>
+          pipe. Each manifest is plain YAML you can read, fork, or extend.
         </p>
         <ul class="gallery-pills">
           <li><a href="/docs/utilities/quickstart">Write your own &rarr;</a></li>
@@ -62,8 +77,16 @@ function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" 
 
     <section class="gallery-section">
       <div class="container">
+        <h2 class="gallery-group-title">
+          Connectors <span class="gallery-group-count">{connectors.length}</span>
+        </h2>
+        <p class="gallery-group-lede">
+          Admin-enabled integrations. Most enable in one step &mdash; pick one in
+          the Gallery, connect over OAuth, and the chip is live; a few need an
+          admin to connect a server or fill in a host first.
+        </p>
         <div class="gallery-grid">
-          {samples.map((s) => (
+          {connectors.map((s) => (
             <article class="util-card">
               <header class="util-card__head">
                 <code class="util-card__chip">{s.chip}</code>
@@ -72,11 +95,39 @@ function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" 
               <h3 class="util-card__title">{s.title}</h3>
               <p class="util-card__desc">{s.description}</p>
               <div class="util-card__actions">
-                <a
-                  href={`/docs/utilities/samples/${s.filename}`}
-                  download={s.filename}
-                  class="util-card__btn"
-                >
+                <a href={`/docs/utilities/samples/${s.filename}`} download={s.filename} class="util-card__btn">
+                  Download YAML
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery-section">
+      <div class="container">
+        <h2 class="gallery-group-title">
+          User Apps <span class="gallery-group-count">{userApps.length}</span>
+        </h2>
+        <p class="gallery-group-lede">
+          Run entirely on your machine &mdash; a local shell command
+          (<code>bridge</code>), a loopback HTTP read (<code>http_local</code>),
+          or a pure on-device <code>transform</code> pipe (no command, no
+          network, no auth). Drop the YAML into your user-apps folder; no server,
+          no OAuth. <a href="/docs/utilities/spec">Manifest spec &sect;19 &rarr;</a>
+        </p>
+        <div class="gallery-grid">
+          {userApps.map((s) => (
+            <article class="util-card">
+              <header class="util-card__head">
+                <code class="util-card__chip">{s.chip}</code>
+                <Pill variant={runtimeVariant(s.runtime)} size="sm">{s.runtime || s.emits}</Pill>
+              </header>
+              <h3 class="util-card__title">{s.title}</h3>
+              <p class="util-card__desc">{s.description}</p>
+              <div class="util-card__actions">
+                <a href={`/docs/utilities/samples/${s.filename}`} download={s.filename} class="util-card__btn">
                   Download YAML
                 </a>
               </div>
@@ -178,6 +229,39 @@ function variantFor(emits: string): "brand" | "neutral" | "success" | "warning" 
     text-decoration: none;
   }
   .gallery-footnote a:hover { text-decoration: underline; }
+
+  .gallery-group-title {
+    font-size: 1.5rem;
+    color: var(--text-heading);
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.01em;
+  }
+  .gallery-group-count {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: 0.35rem;
+  }
+  .gallery-group-lede {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text-body);
+    margin: 0 0 1.5rem;
+    max-width: 70ch;
+  }
+  .gallery-group-lede code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    background: var(--bg-elevated);
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.3rem;
+  }
+  .gallery-group-lede a {
+    color: var(--brand-accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .gallery-group-lede a:hover { text-decoration: underline; }
 
   .gallery-grid {
     display: grid;

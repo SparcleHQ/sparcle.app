@@ -1,0 +1,80 @@
+# =gl-mrs — your GitLab merge requests, via the `glab` CLI.
+#
+# CLI-backed: the chip only appears once `glab` is installed AND you're signed
+# in. Type a search term to filter by title/description; bare Enter lists your
+# recent merge requests. Structured rows + a wide detail pane.
+#
+# Mirrors =gh-prs. Uses `glab api` against the instance-wide /merge_requests
+# REST endpoint (scope=created_by_me) so it works with NO local git repo
+# context — exactly like `gh search prs --author=@me` does for GitHub.
+schema_version: 1
+runtime: bridge
+id: gl-mrs
+chip: gl-mrs
+title: My Merge Requests
+icon: git-merge
+description: "Search your GitLab MRs. Enter = recent; add a term to filter by title/description."
+placeholder_examples:
+  - "Enter for recent MRs — or type to filter"
+  - "flaky test"
+  - "release"
+emits: Document
+
+detect:
+  binary: glab
+  version_min: "1.0"
+  auth_check:
+    macos: "glab auth status"
+    linux: "glab auth status"
+    windows: "glab auth status"
+  config_hint: ["~/.config/glab-cli"]
+  refresh: on_focus
+
+args:
+  - { name: q, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: 'Search your MRs: {{query}}'
+  confirm_hint: "Press ↵ to run · empty lists your recent MRs"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-gl-mrs.py {{q}}"
+    linux: "python3 {{scripts_dir}}/bolt-gl-mrs.py {{q}}"
+    windows: "python {{scripts_dir}}/bolt-gl-mrs.py {{q}}"
+  parse: json
+  # Higher than gh-prs: the top rows each make 2 extra enrichment calls
+  # (MR detail + approvals) for the CI/files/approvals status row.
+  timeout_seconds: 30
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  # Right pane: identity (group/project!iid) lives in the subtitle ONCE — not
+  # repeated as facts. The left list keeps its richer `{{row.subtitle}}` for
+  # scanning; the pane shows identity + state/merge pills + branch flow + label
+  # chips + the MR's own description.
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.repo}}!{{row.number}}"
+      fields:
+        - { label: State, value: "{{row.state}}", kind: badge }
+        - { label: Merge, value: "{{row.merge}}", kind: badge }
+        - { label: Checks, value: "{{row.checks}}", kind: badge }
+        - { label: Review, value: "{{row.review}}", kind: badge }
+        - { label: Diff, value: "{{row.diff}}", kind: diff }
+        - { label: Branch, value: "{{row.branch}}", kind: branch }
+        - { label: Author, value: "@{{row.author}}" }
+        - { label: Updated, value: "{{row.updated | date:'rel'}}" }
+        - { label: Labels, value: "{{row.labels}}", kind: chips }
+      body: "{{row.body}}"
+      actions: [open, copy]
+
+actions:
+  - { id: open, kind: url, target: row, label: Open, url_template: "{{row.url}}" }
+  - { id: copy, kind: composer, target: row, label: Copy title, insert: "{{title}}" }

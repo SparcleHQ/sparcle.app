@@ -1,0 +1,35 @@
+# =parse-app-logs — a PURE TRANSFORM pack (runtime: transform).
+#
+# No command, no network, no auth — the data source IS the input. The typed pipe
+# reshapes a pasted app-log block: keep ERROR lines, pull (time, component, msg)
+# out of each, render as a table. Runs entirely on-device in the PWA.
+#
+# Reachable two ways:
+#   • type  =parse-app-logs <paste>  → single-shot result row (Enter copies)
+#   • paste a log block into /clips   → auto-surfaced (recognize matches ERROR)
+#     and chains with the built-in clip transforms (dedupecol, sortcol, csv…).
+schema_version: 1
+runtime: transform
+id: parse-app-logs
+chip: parse-app-logs
+title: Parse app logs
+icon: scroll-text
+description: Keep ERROR lines from a log block and shape (time · component · message) into a table — pure, on-device
+placeholder_examples: ["[09:14:02] ERROR auth: token expired"]
+emits: Generic
+
+recognize:
+  patterns:
+    - regex: '\bERROR\b'
+  confidence: ambient
+
+transform:
+  pipe:
+    - lines
+    - filter: { contains: "ERROR" }
+    - replace: { from: '\[(.*?)\]\s+ERROR\s+(\S+?):\s+(.*)', to: '$1,$2,$3' }
+    - table
+
+presentation:
+  widget: list
+  title_field: line

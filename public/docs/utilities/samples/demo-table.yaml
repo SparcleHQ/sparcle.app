@@ -1,0 +1,33 @@
+# =demo-table — widget gallery: data TABLE (canned data, no setup).
+schema_version: 1
+runtime: bridge
+id: demo-table
+chip: demo-table
+title: "Demo · Table"
+icon: table
+description: "Sample services table — canned data, zero setup."
+placeholder_examples: ["Enter to load the demo table"]
+emits: Generic
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-demo.py table"
+    linux: "python3 {{scripts_dir}}/bolt-demo.py table"
+    windows: "python {{scripts_dir}}/bolt-demo.py table"
+  parse: json
+  timeout_seconds: 5
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  right_widget:
+    kind: table
+    mode: list_data
+    bind:
+      columns:
+        - { field: service, label: Service }
+        - { field: lang, label: Lang }
+        - { field: status, label: Status }
+        - { field: commits, label: Commits, align: right }
+        - { field: open_prs, label: "PRs", align: right }
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

@@ -1,0 +1,48 @@
+# =gitdiff — a file's HEAD version vs its current working-tree version,
+# rendered as a red/green line diff in the right pane.
+#
+# CLI-backed: the chip only appears once `git` is installed. Type a tracked
+# file path (or a directory → its first changed tracked file). bolt-gitdiff.py
+# resolves the repo, reads the HEAD blob + the working-tree content, and emits
+# ONE parse:json row { file, title, subtitle, left, right } that the diff
+# widget renders as a unified HEAD → working-tree diff.
+schema_version: 1
+runtime: bridge
+id: gitdiff
+chip: gitdiff
+title: Working diff
+icon: git-compare
+description: Compare a file's committed HEAD version against your current working-tree edits (red/green line diff)
+placeholder_examples: ["src/main.rs", "path/to/changed/file"]
+emits: Generic
+
+detect:
+  binary: git
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-gitdiff.py {{target}}"
+    linux: "python3 {{scripts_dir}}/bolt-gitdiff.py {{target}}"
+    windows: "python {{scripts_dir}}/bolt-gitdiff.py {{target}}"
+  parse: json
+  timeout_seconds: 5
+
+args:
+  - { name: target, from: "query.word(0)", default: "" }
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: diff
+    mode: selected_row
+    bind:
+      left: "{{row.left}}"
+      right: "{{row.right}}"
+      leftLabel: "HEAD"
+      rightLabel: "Working tree"
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy path, insert: "{{subtitle}}" }

@@ -1,0 +1,31 @@
+# =demo-diff — widget gallery: red/green line DIFF (canned data, no setup).
+schema_version: 1
+runtime: bridge
+id: demo-diff
+chip: demo-diff
+title: "Demo · Diff"
+icon: file-diff
+description: "Sample config drift (prod vs staging) as a line diff — canned data, zero setup."
+placeholder_examples: ["Enter to load the demo diff"]
+emits: Generic
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-demo.py diff"
+    linux: "python3 {{scripts_dir}}/bolt-demo.py diff"
+    windows: "python {{scripts_dir}}/bolt-demo.py diff"
+  parse: json
+  timeout_seconds: 5
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  right_widget:
+    kind: diff
+    mode: selected_row
+    bind:
+      left: "{{row.left}}"
+      right: "{{row.right}}"
+      leftLabel: "prod"
+      rightLabel: "staging"
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

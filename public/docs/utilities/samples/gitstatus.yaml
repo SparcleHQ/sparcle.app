@@ -1,0 +1,60 @@
+# =gitstatus — short git status of a repo as structured rows + a detail pane.
+# Type a repo NAME (resolved under ~/dev, ~/src, ~/Projects, ~) or a path.
+# Upgraded from raw `git status --short` lines to parsed rows (a summary row +
+# one row per changed file, each with diff/checkout commands in the pane).
+# Keeps the kind:utility pivot to =git-log.
+schema_version: 1
+runtime: bridge
+id: gitstatus
+chip: gitstatus
+title: Git status
+icon: git-branch
+description: Short git status of a repo (branch, changed files) — by name or path
+placeholder_examples: ["bolt-pwa", "bolt-api", "."]
+emits: Generic
+
+detect:
+  binary: git
+  refresh: on_focus
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-gitstatus.py {{repo}}"
+    linux: "python3 {{scripts_dir}}/bolt-gitstatus.py {{repo}}"
+    windows: "python {{scripts_dir}}/bolt-gitstatus.py {{repo}}"
+  parse: json
+  timeout_seconds: 6
+
+args:
+  - { name: repo, from: "query.word(0)", default: "." }
+
+dispatch:
+  confirm_label: 'git status — {{query}}'
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.state}}"
+      fields:
+        - { label: State, value: "{{row.state}}" }
+        - { label: Path, value: "{{row.path}}" }
+        - { label: Code, value: "{{row.code}}" }
+      body: "{{row.body}}"
+      actions: [copy, jump-to-log]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy path, insert: "{{path}}" }
+  # Pivot to the bundled =git-log chip for the same repo — "what changed" → history.
+  - id: jump-to-log
+    kind: utility
+    target: list
+    label: Recent commits
+    target_chip: git-log
+    query_template: "{{query}}"

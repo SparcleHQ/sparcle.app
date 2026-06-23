@@ -1,0 +1,54 @@
+# =service — a "service war room". Type a service name; Bolt fans out across
+# CI runs, deploys, k8s pods and open incidents and merges them into one status
+# list. Select a row → the right pane renders that item's rich Markdown detail
+# (runbook steps, release notes, a CI matrix, log commands).
+#
+# Demoable with NO connected systems: seeded fixtures by default. Set
+# BOLT_SERVICE_LIVE=1 to flip the same script to real gh/kubectl/aws (CLIs you
+# already authed — no OAuth app registration). BOLT_SERVICE_SLOW=1 makes it slow
+# so you can show the "Still searching… ✕" cancel + supersede.
+#
+# Showcases, in one chip: multi-system fan-out, a rich scrollable Markdown pane,
+# and the in-flight request lifecycle — all local, no AI in the path.
+schema_version: 1
+runtime: bridge
+id: service
+chip: service
+title: Service war room
+icon: server
+description: Fan out CI · deploys · pods · incidents for a service; rich detail on the right
+placeholder_examples: ["checkout-api", "payments", "search"]
+emits: Generic
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-service.py {{name}}"
+    linux: "python3 {{scripts_dir}}/bolt-service.py {{name}}"
+    windows: "python {{scripts_dir}}/bolt-service.py {{name}}"
+  parse: json
+  timeout_seconds: 12
+
+args:
+  - { name: name, from: "query.word(0)", default: checkout-api }
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  # Wide rich-detail pane (entity_preview) rather than the narrow card column:
+  # a couple of fact rows + the full Markdown body (CI matrix, runbook, etc.).
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Source, value: "{{row.source}}" }
+        - { label: Status, value: "{{row.status}}" }
+      body: "{{row.body}}"
+      actions: [open, copy]
+
+actions:
+  - { id: open, kind: url, target: row, label: Open, url_template: "{{row.url}}" }
+  - { id: copy, kind: composer, target: row, label: Copy detail, insert: "{{body}}" }

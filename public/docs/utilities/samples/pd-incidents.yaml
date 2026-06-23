@@ -1,0 +1,57 @@
+# =pd — structured rows + wide detail pane (via bolt-pd.sh). CLI-gated.
+# NOTE: rewritten to the CLI's JSON output (live-unverified against every CLI
+# version); the helper falls back to line rows if the shape is unexpected.
+schema_version: 1
+runtime: bridge
+id: pd
+chip: pd
+title: PagerDuty Incidents
+icon: bell
+description: "List via the `pd` CLI. Enter to load, then filter the results."
+placeholder_examples: ["Enter to load — then filter the results"]
+emits: Incident
+
+detect:
+  binary: pd
+  auth_check:
+    macos: "pd auth:get"
+    linux: "pd auth:get"
+    windows: "pd auth:get"
+  config_hint: ["~/.pd"]
+  refresh: on_focus
+
+args:
+  - { name: filter, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: "List PagerDuty incidents"
+  confirm_hint: "Press ↵ to load · filter the results as you type"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-pd.py {{filter}}"
+    linux: "python3 {{scripts_dir}}/bolt-pd.py {{filter}}"
+    windows: "python {{scripts_dir}}/bolt-pd.py {{filter}}"
+  parse: json
+  timeout_seconds: 20
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Status, value: "{{row.status}}" }
+        - { label: Urgency, value: "{{row.urgency}}" }
+        - { label: Service, value: "{{row.service}}" }
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

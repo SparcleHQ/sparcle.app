@@ -1,0 +1,51 @@
+# =git-log — recent commits of a repo as structured rows + a wide detail pane.
+# Type a repo NAME (resolved under ~/dev|src|Projects|~) or a path, optionally
+# a count: "bolt-pwa 40". Upgraded from raw `git log --oneline` lines to parsed
+# rows (sha/subject/author/date) with the full commit message in the pane.
+schema_version: 1
+runtime: bridge
+id: git-log
+chip: git-log
+title: Recent commits
+icon: git-commit
+description: Recent commits of a repo (sha · subject · author · date) — by name or path
+placeholder_examples: ["bolt-pwa", "bolt-api 40", "."]
+emits: Generic
+
+detect:
+  binary: git
+  refresh: on_focus
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-gitlog.py {{repo}} {{limit}}"
+    linux: "python3 {{scripts_dir}}/bolt-gitlog.py {{repo}} {{limit}}"
+    windows: "python {{scripts_dir}}/bolt-gitlog.py {{repo}} {{limit}}"
+  parse: json
+  timeout_seconds: 8
+
+args:
+  - { name: repo, from: "query.word(0)", default: "." }
+  - { name: limit, from: "query.word(1)", default: 25 }
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.subject}}"
+      subtitle: "{{row.short}} · {{row.rel}}"
+      fields:
+        - { label: Commit, value: "{{row.short}}" }
+        - { label: Author, value: "{{row.author}}" }
+        - { label: When, value: "{{row.rel}}" }
+      body: "{{row.body}}"
+      actions: [copy-sha, copy-subject]
+
+actions:
+  - { id: copy-sha, kind: composer, target: row, label: Copy SHA, insert: "{{sha}}" }
+  - { id: copy-subject, kind: composer, target: row, label: Copy subject, insert: "{{subject}}" }

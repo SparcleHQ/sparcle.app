@@ -1,0 +1,37 @@
+# =recent — recently modified files across ~/Downloads, ~/Documents, ~/Desktop
+#
+# Empty query lists newest first. Files are emitted as one row each
+# with "<name>  <folder> · <size> · <age>" formatting. Right-pane card
+# shows the active row's name with actions to open in Finder or copy
+# the absolute path.
+schema_version: 1
+runtime: bridge
+id: recent
+chip: recent
+title: Recent files
+icon: clock
+description: Recently modified files across ~/Downloads, ~/Documents, ~/Desktop
+placeholder_examples: [""]
+emits: File
+
+bridge:
+  command:
+    macos:   "python3 {{scripts_dir}}/bolt-recent.py"
+    linux:   "python3 {{scripts_dir}}/bolt-recent.py"
+    windows: "python {{scripts_dir}}/bolt-recent.py"
+  parse: lines
+  timeout_seconds: 8
+
+presentation:
+  widget: list
+  title_field: line
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: "FILE"
+      subtitle: "{{row.line}}"
+      actions: [copy-line]
+
+actions:
+  - { id: copy-line, kind: composer, target: row, label: Copy row, insert: "{{line}}" }

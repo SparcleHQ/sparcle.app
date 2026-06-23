@@ -132,7 +132,7 @@ while IFS= read -r dir; do
     continue
   fi
 
-  index_entries+=("$(printf '  {"id": "%s", "title": "%s", "chip": "%s", "description": "%s", "emits": "%s", "filename": "%s.yaml"}' \
+  index_entries+=("$(printf '  {"id": "%s", "title": "%s", "chip": "%s", "description": "%s", "emits": "%s", "tier": "admin", "filename": "%s.yaml"}' \
     "$(json_escape "${id}")" \
     "$(json_escape "${title}")" \
     "$(json_escape "${chip}")" \
@@ -141,6 +141,46 @@ while IFS= read -r dir; do
     "$(json_escape "${name}")")")
   samples_copied=$((samples_copied + 1))
 done < <(find "${SRC_MANIFESTS_DIR}" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort)
+
+# --- 2b. user-app samples (bolt-native) ---------------------------------------
+# User Apps (runtime: bridge | http_local | transform) live in bolt-native's
+# sample-user-utils dir as flat YAML files — not in bolt-api's builtin tree — so
+# pull them too. This surfaces the user-authorable tier (including the pure
+# `transform` packs) in the gallery next to the admin connectors. Each entry is
+# tagged `tier: user` (+ its `runtime`) so the gallery can group them.
+SRC_USER_SAMPLES_DIR="/Users/rajendrapatil/dev/bolt-native/src-tauri/resources/sample-user-utils"
+user_samples_copied=0
+if [[ -d "${SRC_USER_SAMPLES_DIR}" ]]; then
+  while IFS= read -r manifest; do
+    name="$(basename "${manifest}" .yaml)"
+    # Never clobber an admin sample of the same basename (admin wins).
+    if [[ -f "${DST_SAMPLES_DIR}/${name}.yaml" ]]; then
+      parse_failures+=("${name} (user-app name collides with an admin sample — skipped)")
+      continue
+    fi
+    id="$(extract_field "${manifest}" id)"
+    title="$(extract_field "${manifest}" title)"
+    chip="$(extract_field "${manifest}" chip)"
+    description="$(extract_field "${manifest}" description)"
+    emits="$(extract_field "${manifest}" emits)"
+    runtime="$(extract_field "${manifest}" runtime)"
+    if [[ -z "${id}" || -z "${title}" || -z "${chip}" ]]; then
+      parse_failures+=("${name} (missing one of id/title/chip)")
+      continue
+    fi
+    cp "${manifest}" "${DST_SAMPLES_DIR}/${name}.yaml"
+    # User-App chips are bare keys; show them with the launcher's leading '='.
+    index_entries+=("$(printf '  {"id": "%s", "title": "%s", "chip": "=%s", "description": "%s", "emits": "%s", "runtime": "%s", "tier": "user", "filename": "%s.yaml"}' \
+      "$(json_escape "${id}")" \
+      "$(json_escape "${title}")" \
+      "$(json_escape "${chip}")" \
+      "$(json_escape "${description}")" \
+      "$(json_escape "${emits}")" \
+      "$(json_escape "${runtime}")" \
+      "$(json_escape "${name}")")")
+    user_samples_copied=$((user_samples_copied + 1))
+  done < <(find "${SRC_USER_SAMPLES_DIR}" -maxdepth 1 -name '*.yaml' | LC_ALL=C sort)
+fi
 
 # --- 3. samples index JSON -----------------------------------------------------
 {
@@ -164,4 +204,4 @@ if [[ "${#parse_failures[@]}" -gt 0 ]]; then
   for f in "${parse_failures[@]}"; do echo "  - ${f}" >&2; done
 fi
 
-echo "synced 1 spec + ${samples_copied} samples"
+echo "synced 1 spec + ${samples_copied} admin + ${user_samples_copied:-0} user-app samples"

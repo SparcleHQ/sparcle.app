@@ -1,0 +1,31 @@
+# =demo-chart — widget gallery: bar/line CHART (canned data, no setup).
+schema_version: 1
+runtime: bridge
+id: demo-chart
+chip: demo-chart
+title: "Demo · Chart"
+icon: chart-column
+description: "Sample bar chart of deploys/day — canned data, zero setup."
+placeholder_examples: ["Enter to load the demo chart"]
+emits: Generic
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-demo.py chart"
+    linux: "python3 {{scripts_dir}}/bolt-demo.py chart"
+    windows: "python {{scripts_dir}}/bolt-demo.py chart"
+  parse: json
+  timeout_seconds: 5
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  right_widget:
+    kind: chart
+    mode: list_data
+    bind:
+      type: bar
+      x: label
+      y: value
+      label: label
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

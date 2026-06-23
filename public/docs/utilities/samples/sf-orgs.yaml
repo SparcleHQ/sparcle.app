@@ -1,0 +1,57 @@
+# =sf-orgs — structured rows + wide detail pane (via bolt-sf-orgs.sh). CLI-gated.
+# NOTE: rewritten to the CLI's JSON output (live-unverified against every CLI
+# version); the helper falls back to line rows if the shape is unexpected.
+schema_version: 1
+runtime: bridge
+id: sf-orgs
+chip: sf-orgs
+title: Salesforce Orgs
+icon: cloud
+description: "List via the `sf` CLI. Enter to load, then filter the results."
+placeholder_examples: ["Enter to load — then filter the results"]
+emits: Account
+
+detect:
+  binary: sf
+  auth_check:
+    macos: "sf org list"
+    linux: "sf org list"
+    windows: "sf org list"
+  config_hint: ["~/.sfdx"]
+  refresh: on_focus
+
+args:
+  - { name: filter, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: "List your Salesforce orgs"
+  confirm_hint: "Press ↵ to load · filter the results as you type"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-sf-orgs.py {{filter}}"
+    linux: "python3 {{scripts_dir}}/bolt-sf-orgs.py {{filter}}"
+    windows: "python {{scripts_dir}}/bolt-sf-orgs.py {{filter}}"
+  parse: json
+  timeout_seconds: 15
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Username, value: "{{row.username}}" }
+        - { label: Status, value: "{{row.status}}" }
+        - { label: Instance, value: "{{row.url}}" }
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

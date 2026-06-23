@@ -1,0 +1,50 @@
+# =whois <domain> — registrar, expiry, status, name servers, as a rich card.
+# Network call, no auth. Uses the system whois binary (pre-installed on mac +
+# most linux). The wrapper parses the common fields into ONE structured row
+# with a wide entity_preview pane.
+schema_version: 1
+runtime: bridge
+id: whois
+chip: whois
+title: Whois lookup
+icon: globe
+description: Registrar, expiry, status, and name servers for a domain
+placeholder_examples: ["sparcle.app", "github.com"]
+emits: Generic
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-whois.py {{domain}}"
+    linux: "python3 {{scripts_dir}}/bolt-whois.py {{domain}}"
+  parse: json
+  timeout_seconds: 10
+
+args:
+  - { name: domain, from: "query.word(0)" }
+
+dispatch:
+  confirm_label: 'Look up "{{query}}"'
+  confirm_hint: "Press Enter to query whois"
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.domain}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Registrar, value: "{{row.registrar}}" }
+        - { label: Created, value: "{{row.created}}" }
+        - { label: Expires, value: "{{row.expires}}" }
+        - { label: Status, value: "{{row.status}}" }
+        - { label: Name servers, value: "{{row.nameservers}}" }
+      body: "{{row.body}}"
+      actions: [open-web, copy]
+
+actions:
+  - { id: open-web, kind: url, target: row, label: Open in browser, url_template: "https://{{row.domain}}" }
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{domain}}" }

@@ -1,0 +1,56 @@
+# =expense — log an expense via a declarative INPUT FORM, then see recent ones.
+#
+# This is the reference sample for the `inputs:` form surface. Typing `=expense`
+# opens a typed form (amount/category/date/description/billable) instead of a
+# confirm row; on submit the launcher fires the bridge script with each field
+# value bound as {{name}}. The script appends the entry to ~/.bolt/expenses.jsonl
+# and prints the recent log back as JSON rows, rendered in the `table` pane.
+schema_version: 1
+runtime: bridge
+id: expense
+chip: expense
+title: Log expense
+icon: receipt
+description: "Record an expense to ~/.bolt/expenses.jsonl and review recent ones."
+placeholder_examples: ["Fill the form and press Log expense"]
+emits: Generic
+
+# Declarative form. Each field's submitted value binds as {{name}} in the
+# bridge command below. Values arrive as strings (toggles as "true"/"false").
+inputs:
+  - { name: amount,      type: number, label: Amount,      required: true, min: 0, step: 0.01, placeholder: "42.50" }
+  - { name: category,    type: select, label: Category,    default: Meals, options: [Meals, Travel, Software, Office, Other] }
+  - { name: date,        type: date,   label: Date,        default: today }
+  - { name: description, type: text,   label: Description, placeholder: "Client lunch — Acme deal", max_length: 120 }
+  - { name: billable,    type: toggle, label: Billable,    default: true }
+
+submit:
+  label: Log expense
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-expense.py {{amount}} {{category}} {{date}} {{description}} {{billable}}"
+    linux: "python3 {{scripts_dir}}/bolt-expense.py {{amount}} {{category}} {{date}} {{description}} {{billable}}"
+    windows: "python {{scripts_dir}}/bolt-expense.py {{amount}} {{category}} {{date}} {{description}} {{billable}}"
+  parse: json
+  timeout_seconds: 5
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  # Rich data-viz pane: the recent expense log as a sortable table.
+  right_widget:
+    kind: table
+    mode: list_data
+    bind:
+      columns:
+        - { field: date,        label: Date }
+        - { field: amount,      label: Amount,   align: right }
+        - { field: category,    label: Category }
+        - { field: description, label: Note }
+        - { field: billable,    label: Billable }
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

@@ -1,0 +1,31 @@
+# =scrub-pii — a PURE TRANSFORM pack (runtime: transform).
+#
+# Masks PII in a pasted block on-device before you share it: SSNs and emails are
+# rewritten, then hidden/odd characters are stripped. Pure + local — the text
+# never leaves the machine (this is on-device scrubbing, NOT the LLM-boundary
+# mask/unmask; that is a separate governed path).
+schema_version: 1
+runtime: transform
+id: scrub-pii
+chip: scrub-pii
+title: Scrub PII
+icon: shield-off
+description: Mask SSNs and emails in a pasted block, then strip hidden characters — pure, on-device
+placeholder_examples: ["SSN 123-45-6789 email a@b.com"]
+emits: Generic
+
+recognize:
+  patterns:
+    - regex: '\b\d{3}-\d{2}-\d{4}\b'
+    - regex: '[\w.+-]+@[\w-]+\.[\w.-]+'
+  confidence: ambient
+
+transform:
+  pipe:
+    - replace: { from: '\b\d{3}-\d{2}-\d{4}\b', to: '[SSN]' }
+    - replace: { from: '[\w.+-]+@[\w-]+\.[\w.-]+', to: '[email]' }
+    - sanitize
+
+presentation:
+  widget: list
+  title_field: line

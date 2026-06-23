@@ -1,0 +1,56 @@
+# =twilio — structured rows + wide detail pane (via bolt-twilio.sh). CLI-gated.
+# NOTE: rewritten to the CLI's JSON output (live-unverified against every CLI
+# version); the helper falls back to line rows if the shape is unexpected.
+schema_version: 1
+runtime: bridge
+id: twilio
+chip: twilio
+title: Twilio Numbers
+icon: phone
+description: "List via the `twilio` CLI. Enter to load, then filter the results."
+placeholder_examples: ["Enter to load — then filter the results"]
+emits: Generic
+
+detect:
+  binary: twilio
+  auth_check:
+    macos: "twilio profiles:list"
+    linux: "twilio profiles:list"
+    windows: "twilio profiles:list"
+  config_hint: ["~/.twilio-cli"]
+  refresh: on_focus
+
+args:
+  - { name: filter, from: "query.word(0)", default: "" }
+
+dispatch:
+  confirm_label: "List your Twilio numbers"
+  confirm_hint: "Press ↵ to load · filter the results as you type"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-twilio.py {{filter}}"
+    linux: "python3 {{scripts_dir}}/bolt-twilio.py {{filter}}"
+    windows: "python {{scripts_dir}}/bolt-twilio.py {{filter}}"
+  parse: json
+  timeout_seconds: 20
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.subtitle}}"
+      fields:
+        - { label: Number, value: "{{row.number}}" }
+        - { label: Name, value: "{{row.name}}" }
+      body: "{{row.body}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy, insert: "{{title}}" }

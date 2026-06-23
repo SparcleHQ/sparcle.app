@@ -1,0 +1,79 @@
+# =gh-prs — your GitHub pull requests, via the `gh` CLI.
+#
+# CLI-backed: the chip only appears once `gh` is installed AND you're signed in.
+# Type a search term / qualifier (repo:bolt-api, is:open, label:bug) to filter;
+# bare Enter lists your recent PRs. Structured rows + a wide detail pane.
+schema_version: 1
+runtime: bridge
+id: gh-prs
+chip: gh-prs
+title: My Pull Requests
+icon: git-pull-request
+description: "Search your GitHub PRs. Enter = recent; add a term or qualifier (repo:…, is:open, label:…) to filter."
+placeholder_examples:
+  - "Enter for recent PRs — or type to filter"
+  - "is:open"
+  - "repo:bolt-api"
+emits: Document
+
+detect:
+  binary: gh
+  version_min: "2.0"
+  auth_check:
+    macos: "gh auth status"
+    linux: "gh auth status"
+    windows: "gh auth status"
+  config_hint: ["~/.config/gh"]
+  refresh: on_focus
+
+args:
+  - { name: q, from: "query.word(0)", default: "archived:false" }
+
+dispatch:
+  confirm_label: 'Search your PRs: {{query}}'
+  confirm_hint: "Press ↵ to run · empty lists your recent PRs"
+
+bridge:
+  command:
+    macos: "python3 {{scripts_dir}}/bolt-gh-prs.py {{q}}"
+    linux: "python3 {{scripts_dir}}/bolt-gh-prs.py {{q}}"
+    windows: "python {{scripts_dir}}/bolt-gh-prs.py {{q}}"
+  parse: json
+  timeout_seconds: 15
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subtitle
+  searchable: true
+  # Right pane: identity (repo#number) lives in the subtitle ONCE — it is NOT
+  # repeated as facts. The left list keeps its richer `{{row.subtitle}}`
+  # (repo#num · STATE · @author) for at-a-glance scanning; the pane shows
+  # identity + a colored state pill + label chips + the PR's own description.
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: "{{row.title}}"
+      subtitle: "{{row.repo}}#{{row.number}}"
+      fields:
+        - { label: State, value: "{{row.state}}", kind: badge }
+        - { label: Checks, value: "{{row.checks}}", kind: badge }
+        - { label: Review, value: "{{row.review}}", kind: badge }
+        - { label: Merge, value: "{{row.merge}}", kind: badge }
+        - { label: Diff, value: "{{row.diff}}", kind: diff }
+        - { label: Author, value: "@{{row.author}}" }
+        - { label: Comments, value: "{{row.comments}}" }
+        - { label: Updated, value: "{{row.updated | date:'rel'}}" }
+        - { label: Labels, value: "{{row.labels}}", kind: chips }
+      body: "{{row.body}}"
+      actions: [open, copy, copy-url]
+
+# Opt-in row action menu (2026-06-18): `open` is the Enter primary; the rest
+# (copy title / copy URL) fold into the Tab/⋯ action menu. Marking exactly one
+# action `primary: true` is the whole opt-in — remove it and the row reverts to
+# the legacy single-act behaviour. composer actions copy their templated value.
+actions:
+  - { id: open, kind: url, target: row, label: Open, url_template: "{{row.url}}", primary: true }
+  - { id: copy, kind: composer, target: row, label: Copy title, insert: "{{title}}" }
+  - { id: copy-url, kind: composer, target: row, label: Copy URL, insert: "{{row.url}}" }

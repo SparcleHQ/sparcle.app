@@ -1,0 +1,44 @@
+# =incident — the CENTERPIECE: capabilities are ORTHOGONAL.
+#
+# One pure-transform pack carries recognize + transform + actions(route) + reps
+# together. `runtime: transform` forbids ONLY a command transport (bridge/http) —
+# it does NOT forbid route; that orthogonality is the whole point (and a
+# regression test in contract.rs: accepts_transform_with_recognize_route_reps).
+#
+#   recognize → claim a pasted incident JSON payload
+#   transform → pure typed pipe: json → pick the fields → table
+#   actions   → act on it (declarative, runs with the USER's own authz — never
+#               raises scope, just brings the capability into Bolt)
+#   reps      → copy-format switcher beside the result
+schema_version: 1
+runtime: transform
+id: incident
+chip: incident
+title: Incident payload
+icon: siren
+description: Reshape a pasted incident JSON into a table, with a runbook action + Slack/Jira copy formats — pure, on-device
+placeholder_examples: ['{"incident_id":"INC-4021","service":"checkout"}']
+emits: Generic
+
+recognize:
+  patterns:
+    - regex: '"incident_id"\s*:\s*"INC'
+  confidence: ambient
+  reps:
+    - { label: Copy ID, template: "{value}" }
+
+transform:
+  pipe:
+    - json
+    - pick: [incident_id, service, severity, runbook_url]
+    - table
+
+presentation:
+  widget: list
+  title_field: line
+
+# Route is ALLOWED on a transform pack (declarative, user-authz'd). This validates
+# alongside transform — binding the action to the transform's structured output is
+# the next wiring step; today {{query}} (the raw input) is the bound context.
+actions:
+  - { id: runbook, kind: url, label: Open runbooks, url_template: "https://runbooks.example.com/search?q={{query}}" }

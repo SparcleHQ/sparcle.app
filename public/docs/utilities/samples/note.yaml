@@ -1,0 +1,53 @@
+# =note — capture a thought to ~/notes/today.md OR search existing notes
+#
+# Two-choice confirm row: the user types a query and picks Save or
+# Search. Same script handles both via the `mode` arg passed by the
+# chip's dispatch.choices. Adds a timestamped line to today.md on
+# save; greps across all *.md in ~/notes on search.
+schema_version: 1
+runtime: bridge
+id: note
+chip: note
+title: Quick note
+icon: pencil
+description: Save a thought to today.md, or search your notes
+placeholder_examples: ["follow up with Alex", "investor question"]
+emits: Generic
+
+bridge:
+  command:
+    macos:   "python3 {{scripts_dir}}/bolt-note.py {{mode}} {{query}}"
+    linux:   "python3 {{scripts_dir}}/bolt-note.py {{mode}} {{query}}"
+    windows: "python {{scripts_dir}}/bolt-note.py {{mode}} {{query}}"
+  parse: lines
+  timeout_seconds: 3
+
+args:
+  - { name: mode, from: "query.word(0)", default: search }
+
+dispatch:
+  choices:
+    - id: save
+      label: 'Save as new note'
+      hint:  '"{{query}}" → today.md'
+      args:
+        mode: add
+    - id: search
+      label: 'Search notes for "{{query}}"'
+      hint:  'Match across all notes in ~/notes'
+      args:
+        mode: search
+
+presentation:
+  widget: list
+  title_field: line
+  right_widget:
+    kind: card
+    mode: selected_row
+    bind:
+      title: "NOTE"
+      subtitle: "{{row.line}}"
+      actions: [copy]
+
+actions:
+  - { id: copy, kind: composer, target: row, label: Copy text, insert: "{{line}}" }

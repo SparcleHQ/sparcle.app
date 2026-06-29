@@ -772,31 +772,33 @@ download_for_platform() {
 }
 
 if ! download_for_platform; then
-  # On Linux: a release without Linux artifacts (e.g. v0.1.21, v0.1.20) is a
-  # real pattern in our shipping history. Auto-fall-back to the most recent
-  # release that actually ships Linux binaries — unless the user pinned a
-  # specific version explicitly, in which case respect their choice and fail
-  # loudly.
-  # Per-platform walk-back: if the current VERSION's release is missing this
-  # platform's artifact (partial ship in flight, or a single-file upload that
-  # silently 502'd from GitHub), find the most recent release that does ship
-  # the right artifact for THIS platform/arch. Skipped when the user pinned an
-  # explicit version (BOLT_VERSION / positional arg) — pinned means pinned.
+  # Per-platform walk-back: if the requested VERSION's release is missing this
+  # platform's artifact (a partial ship still in flight, a single-file upload
+  # that silently 502'd from GitHub, or a version that simply never shipped this
+  # arch), install the most recent release that DOES ship the right artifact for
+  # THIS platform/arch. This applies EVEN to an explicitly pinned version: a
+  # pinned version with no build for the user's arch degrades to the newest
+  # version that has one rather than hard-failing, so the install still works
+  # (with a clear notice). Only when NO recent release has a build for this arch
+  # do we fail.
+  requested_version="$VERSION"
   fallback_version=""
-  if [ "$VERSION_PINNED" -eq 0 ]; then
-    case "$PLATFORM" in
-      linux)
-        fallback_version=$(find_latest_release_with_asset '-x86_64-unknown-linux-gnu\\.(deb|AppImage)' 2>/dev/null || true)
-        ;;
-      macos)
-        # RUST_TRIPLE is already aarch64-apple-darwin or x86_64-apple-darwin.
-        fallback_version=$(find_latest_release_with_asset '-'"${RUST_TRIPLE}"'\\.dmg' 2>/dev/null || true)
-        ;;
-    esac
-  fi
+  case "$PLATFORM" in
+    linux)
+      fallback_version=$(find_latest_release_with_asset '-x86_64-unknown-linux-gnu\\.(deb|AppImage)' 2>/dev/null || true)
+      ;;
+    macos)
+      # RUST_TRIPLE is already aarch64-apple-darwin or x86_64-apple-darwin.
+      fallback_version=$(find_latest_release_with_asset '-'"${RUST_TRIPLE}"'\\.dmg' 2>/dev/null || true)
+      ;;
+  esac
 
   if [ -n "$fallback_version" ] && [ "$fallback_version" != "$VERSION" ]; then
-    warn "v${VERSION} has no ${PLATFORM} ${ARCH} artifacts for ${APP_NAME} — falling back to v${fallback_version}"
+    if [ "$VERSION_PINNED" -eq 1 ]; then
+      warn "v${requested_version} of ${APP_NAME} has no ${PLATFORM} ${ARCH} build — installing v${fallback_version} (newest release with a ${ARCH} build) instead."
+    else
+      warn "v${VERSION} has no ${PLATFORM} ${ARCH} artifacts for ${APP_NAME} — falling back to v${fallback_version}"
+    fi
     VERSION="$fallback_version"
     BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"
     if [ "$PLATFORM" = "linux" ]; then
@@ -809,11 +811,7 @@ if ! download_for_platform; then
       fail "Download failed: no working ${PLATFORM} ${ARCH} build of ${APP_NAME} found in recent releases.\n  Check https://sparcle.app/download for supported platforms."
     fi
   else
-    if [ "$VERSION_PINNED" -eq 1 ]; then
-      fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE:-?}).\n  v${VERSION} of ${APP_NAME} doesn't ship a ${PLATFORM} ${ARCH} build.\n  Try a different version (BOLT_VERSION=<x.y.z>) or omit BOLT_VERSION to use the latest."
-    else
-      fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE:-?}).\n  ${APP_NAME} may not be available for ${PLATFORM} ${ARCH} yet.\n  Check https://sparcle.app/download for supported platforms."
-    fi
+    fail "Download failed: ${FILE_NAME} not found (HTTP ${HTTP_CODE:-?}).\n  ${APP_NAME} has no ${PLATFORM} ${ARCH} build in any recent release yet.\n  Check https://sparcle.app/download for supported platforms."
   fi
 fi
 

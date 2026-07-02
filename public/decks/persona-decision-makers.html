@@ -1,0 +1,407 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bolt and Aeira — the exposure you already have, closed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>:root{--bg:#080a14;--s:#11182a;--s2:#161f36;--b:rgba(148,163,184,.14);--ab:rgba(92,156,255,.18);--a:#5c9cff;--a2:#4285f4;--g:#34d399;--am:#fbbf24;--r:#f87171;--t:#f4f7fc;--t2:#a9b4cc;--t3:#7885a0;--hair:rgba(148,163,184,.14);
+--blue:#3b82f6;--blue2:#60a5fa;--violet:#8b5cf6;--violet2:#a78bfa;--amber:#f59e0b;--amber2:#fbbf24;--emerald:#10b981;--emerald2:#34d399;--rose:#f43f5e;--rose2:#fb7185}
+[data-theme="light"]{--bg:#f6f8fc;--s:#ffffff;--s2:#f1f5fb;--b:rgba(15,23,42,.09);--ab:rgba(66,133,244,.12);--a:#1d6ff2;--a2:#4285f4;--g:#0f9d6c;--am:#b45309;--r:#dc2626;--t:#0c1424;--t2:#46506a;--t3:#6b7689;--hair:rgba(15,23,42,.08);
+--blue:#2563eb;--blue2:#1d4ed8;--violet:#6d28d9;--violet2:#6d28d9;--amber:#b45309;--amber2:#92400e;--emerald:#047857;--emerald2:#047857;--rose:#be123c;--rose2:#9f1239}
+*{box-sizing:border-box;margin:0;padding:0}
+i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;line-height:0;vertical-align:middle}
+i[data-lucide]>svg{width:100%;height:100%;display:block}
+html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);overflow:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+#deck{width:100vw;height:100dvh;display:flex;flex-direction:column;position:relative}
+#viewport{flex:1 1 0;position:relative;overflow:hidden}
+/* rich, colorful mesh — always present behind every slide, not just the hero */
+#viewport::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(48% 42% at 12% 8%, rgba(59,130,246,.20), transparent 60%),
+  radial-gradient(46% 40% at 92% 6%, rgba(139,92,246,.16), transparent 60%),
+  radial-gradient(50% 46% at 78% 96%, rgba(245,158,11,.10), transparent 60%),
+  radial-gradient(40% 40% at 6% 92%, rgba(16,185,129,.10), transparent 60%)}
+[data-theme="light"] #viewport::before{opacity:.5}
+.slide{position:absolute;inset:0;z-index:1;display:none;padding:clamp(2rem,4.5vw,5rem) clamp(2rem,6vw,7rem);overflow:hidden;flex-direction:column;justify-content:center}
+.slide.active{display:flex}
+/* editorial emphasis — one confident accent colour by default, never a rainbow clip */
+.grad{color:var(--blue2);font-weight:inherit}
+.grad.v{color:var(--violet2)}
+.grad.am{color:var(--amber2)}
+.s-content{width:100%;max-width:1180px;margin:0 auto}
+.s-tag{display:inline-flex;align-items:center;gap:.55rem;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:1.05rem}
+.s-tag::before{content:"";width:1.6rem;height:2px;border-radius:2px;background:var(--blue2);flex:none}
+.s-h{font-size:clamp(1.7rem,3.6vw,3rem);font-weight:700;line-height:1.1;letter-spacing:-.025em;margin-bottom:.8rem;color:var(--t);text-wrap:balance}
+.s-h.big{font-size:clamp(2.4rem,5.5vw,4.4rem);letter-spacing:-.03em}
+.s-sub{font-size:clamp(.95rem,1.5vw,1.25rem);color:var(--t2);max-width:68ch;line-height:1.55}
+.scenario{margin-top:1rem;padding:.9rem 1.1rem;background:var(--s2);border-left:3px solid var(--blue2);border-radius:0 12px 12px 0;font-size:clamp(.85rem,1.2vw,1rem);color:var(--t2);line-height:1.5;max-width:66ch;box-shadow:0 10px 30px -18px rgba(0,0,0,.6)}
+.scenario b{color:var(--t);font-weight:700}
+/* hero */
+.hero{align-items:center;text-align:center;background:radial-gradient(120% 85% at 50% -6%,rgba(59,130,246,.20),transparent 58%),radial-gradient(100% 80% at 96% 108%,rgba(139,92,246,.16),transparent 58%),radial-gradient(70% 60% at 4% 100%,rgba(245,158,11,.10),transparent 60%),var(--bg)}
+.hero-in{max-width:min(1040px,92vw)}
+.hero-h{font-size:clamp(2rem,4.8vw,4rem);font-weight:800;line-height:1.06;letter-spacing:-.035em;margin-bottom:1.1rem;text-wrap:balance;overflow-wrap:break-word}
+.hero-sub{font-size:clamp(1.05rem,2vw,1.5rem);color:var(--t2);line-height:1.5;max-width:58ch;margin:0 auto;font-weight:400}
+.cover-role{margin-top:1.6rem;font-size:.85rem;color:var(--t3);letter-spacing:.05em;text-transform:uppercase}
+.hero-stats{display:flex;gap:clamp(1.5rem,4vw,4rem);justify-content:center;margin-top:2.4rem;flex-wrap:wrap}
+.hstat{display:flex;flex-direction:column;gap:.25rem;position:relative;padding-left:clamp(1.5rem,4vw,4rem);text-align:left}
+.hstat:first-child{padding-left:0}
+.hstat:not(:first-child)::before{content:"";position:absolute;left:0;top:.1rem;bottom:.1rem;width:1px;background:var(--hair)}
+.hn{font-size:clamp(1.7rem,4vw,2.9rem);font-weight:800;color:var(--blue2);letter-spacing:-.02em;line-height:1}
+.hl{font-size:.78rem;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;line-height:1.3}
+.s-accent{align-items:center;text-align:center;background:radial-gradient(100% 80% at 50% 20%,rgba(59,130,246,.14),transparent 62%),radial-gradient(80% 70% at 90% 90%,rgba(245,158,11,.10),transparent 62%),var(--bg)}
+.sec-mid{max-width:940px}
+.quote-slide .hero-in{max-width:1020px}
+.q-mark{font-size:5rem;line-height:.4;color:var(--blue2);opacity:.5;font-family:Georgia,serif}
+.q-text{font-size:clamp(1.4rem,3.1vw,2.5rem);font-weight:700;line-height:1.3;letter-spacing:-.01em;margin-top:.8rem}
+.q-by{margin-top:1.3rem;font-size:.82rem;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+/* auto-fit + minmax: tracks compute a SAFE minimum and reflow continuously
+   with the available width, instead of a fixed column count whose 1fr
+   tracks refuse to shrink below their content's intrinsic size (the cause
+   of the right-edge clipping) */
+/* flexbox, not grid: a dangling last-row item GROWS to fill the row instead
+   of leaving empty tracks beside it (the "empty box space" grid produces
+   whenever the item count isn't a multiple of the column count) */
+.grid{display:flex;flex-wrap:wrap;gap:1.1rem;margin-top:1.4rem;width:100%}
+.grid>*{flex:1 1 230px;min-width:0}
+.grid.cols4>*{flex-basis:210px}
+.grid.cols2>*{flex-basis:260px}
+.card{position:relative;min-width:0;background:var(--s);border:1px solid var(--hair);border-radius:16px;padding:1.3rem 1.25rem;box-shadow:0 14px 34px -22px rgba(0,0,0,.7);overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--blue);opacity:.9}
+.card.tone-rose::before{background:var(--rose)}
+.card.tone-emerald::before{background:var(--emerald)}
+.card.tone-violet::before{background:var(--violet)}
+.card.tone-amber::before{background:var(--amber)}
+.card .ci{width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:12px;margin-bottom:.85rem;color:#fff;
+  background:var(--blue);box-shadow:0 8px 20px -8px rgba(59,130,246,.65)}
+.card .ci svg{width:21px;height:21px}
+.card.tone-rose .ci{background:var(--rose);box-shadow:0 8px 20px -8px rgba(244,63,94,.65)}
+.card.tone-emerald .ci{background:var(--emerald);box-shadow:0 8px 20px -8px rgba(16,185,129,.65)}
+.card.tone-violet .ci{background:var(--violet);box-shadow:0 8px 20px -8px rgba(139,92,246,.65)}
+.card.tone-amber .ci{background:var(--amber);box-shadow:0 8px 20px -8px rgba(245,158,11,.65)}
+.card h3{font-size:1.02rem;font-weight:700;margin-bottom:.35rem;letter-spacing:-.01em;color:var(--t)}
+.card p{font-size:.86rem;color:var(--t2);line-height:1.45}
+/* brand lockup */
+.brandlock{display:flex;justify-content:center;align-items:center;gap:.9rem;margin-bottom:1.1rem;flex-wrap:wrap}
+.blogo{flex:none;filter:drop-shadow(0 10px 26px rgba(66,133,244,.45))}
+.brandlock .mk{width:2.9rem;height:2.9rem}
+.brandlock .wm{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;color:var(--t)}
+.bolt-mark path{fill:var(--blue2)}
+.brandlock .plus{color:var(--t3);font-size:1.3rem;font-weight:300}
+.brandlock .wm2{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;color:var(--violet2)}
+#deckname .dlogo{vertical-align:-2px;margin-right:.4rem}
+/* split: today vs with-bolt */
+.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.5vw,2rem);margin-top:1.5rem;text-align:left}
+@media(max-width:820px){.split-grid{grid-template-columns:1fr}}
+.spanel{position:relative;border-radius:18px;padding:clamp(1.2rem,2.2vw,1.8rem);overflow:hidden;box-shadow:0 18px 40px -26px rgba(0,0,0,.75)}
+.spanel.today{background:var(--s);border:1px solid rgba(244,63,94,.3)}
+.spanel.bolt{background:var(--s);border:1px solid rgba(96,165,250,.35)}
+.sp-tag{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.7rem}
+.spanel.today .sp-tag{color:var(--rose2)}
+.spanel.bolt .sp-tag{color:var(--blue2)}
+.sp-list{list-style:none;display:flex;flex-direction:column;gap:.65rem}
+.sp-list li{display:flex;align-items:flex-start;gap:.55rem;font-size:clamp(.83rem,1.15vw,.96rem);color:var(--t2);line-height:1.42}
+.spanel.today .sp-list li::before{content:"\00d7";color:var(--rose2);font-weight:800;flex:none}
+.spanel.bolt .sp-list li::before{content:"\2713";color:var(--blue2);font-weight:800;flex:none}
+/* check-grid — governance / pillar pattern */
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;margin-top:1.5rem;text-align:left}
+.check-grid.cols4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1100px){.check-grid.cols4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.check-grid,.check-grid.cols4{grid-template-columns:1fr}}
+.check{position:relative;display:flex;gap:.8rem;align-items:flex-start;background:var(--s);border:1px solid var(--hair);border-radius:16px;padding:1.15rem 1.15rem;box-shadow:0 14px 34px -24px rgba(0,0,0,.7)}
+.check .ck{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#fff;
+  background:var(--blue);box-shadow:0 8px 18px -8px rgba(59,130,246,.6)}
+.check.tone-violet .ck{background:var(--violet);box-shadow:0 8px 18px -8px rgba(139,92,246,.6)}
+.check.tone-emerald .ck{background:var(--emerald);box-shadow:0 8px 18px -8px rgba(16,185,129,.6)}
+.check h4{font-size:.98rem;font-weight:700;margin-bottom:.2rem}
+.check p{font-size:.84rem;color:var(--t2);line-height:1.4}
+/* metric */
+.metric-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(1.5rem,4vw,3.5rem);margin-top:2rem}
+.mstat{display:flex;flex-direction:column;gap:.3rem;max-width:16rem}
+.mn{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1;color:var(--blue2);letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.ml{font-size:1rem;font-weight:600;color:var(--t)}
+.md{font-size:.84rem;color:var(--t3);line-height:1.35}
+/* ── pipeline diagram — connected glowing nodes ─────────────────────────── */
+.pipeline{display:flex;align-items:flex-start;justify-content:center;flex-wrap:wrap;gap:.4rem 0;margin-top:1.6rem;background:var(--s);border:1px solid var(--hair);border-radius:20px;padding:1.6rem 1.2rem 1.3rem;box-shadow:0 20px 48px -30px rgba(0,0,0,.8)}
+.pipeline .node{display:flex;flex-direction:column;align-items:center;gap:.55rem;text-align:center;width:9.5rem}
+.pipeline .badge{width:58px;height:58px;border-radius:17px;display:flex;align-items:center;justify-content:center;color:#fff}
+.pipeline .badge svg{width:27px;height:27px}
+.pipeline .lbl{font-size:.82rem;font-weight:700;color:var(--t);line-height:1.25}
+.pipeline .sub{font-size:.68rem;color:var(--t3);line-height:1.3}
+.pipeline .arrow{flex:none;width:2.2rem;display:flex;align-items:center;justify-content:center;color:var(--t3);margin-top:1.5rem}
+.pipeline .arrow svg{width:20px;height:20px}
+@media(max-width:760px){.pipeline{flex-direction:column}.pipeline .arrow{transform:rotate(90deg);margin:.1rem 0}}
+/* scoped to .badge only — these must never match .card/.check/.rgrp, which
+   reuse the same tone-* names to tint just their icon + accent bar */
+.badge.tone-blue{background:var(--blue);box-shadow:0 10px 26px -8px rgba(59,130,246,.6)}
+.badge.tone-violet{background:var(--violet);box-shadow:0 10px 26px -8px rgba(139,92,246,.6)}
+.badge.tone-amber{background:var(--amber);box-shadow:0 10px 26px -8px rgba(245,158,11,.6)}
+.badge.tone-emerald{background:var(--emerald);box-shadow:0 10px 26px -8px rgba(16,185,129,.6)}
+.badge.tone-rose{background:var(--rose);box-shadow:0 10px 26px -8px rgba(244,63,94,.6)}
+/* ── stack strip — Bolt beside Aeira (compact, no vertical stack: the earlier
+   two-layer version pushed this slide's content taller than the viewport) */
+.stack{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:1.5rem}
+.stack .layer{flex:1 1 220px;min-width:0;border-radius:14px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.7rem;box-shadow:0 14px 30px -20px rgba(0,0,0,.7);color:#fff}
+.stack .layer.bolt{background:var(--blue)}
+.stack .layer.aeira{background:var(--violet)}
+.stack .layer .lk{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none}
+.stack .layer .lk svg{width:17px;height:17px}
+.stack .layer b{display:block;font-size:.94rem;font-weight:800}
+.stack .layer span{display:block;font-size:.74rem;opacity:.9}
+.stack .base{width:100%;text-align:center;margin-top:.3rem;font-size:.7rem;color:var(--t3);letter-spacing:.06em;text-transform:uppercase}
+/* reference chip clouds — compliance framework mapping */
+.rwrap{margin-top:1.2rem;columns:2;column-gap:1.6rem}
+@media(max-width:820px){.rwrap{columns:1}}
+.rgrp{break-inside:avoid;margin-bottom:1.1rem;position:relative;background:var(--s);border:1px solid var(--hair);border-radius:14px;padding:1rem 1.1rem;overflow:hidden;box-shadow:0 14px 30px -22px rgba(0,0,0,.7)}
+.rgrp::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--blue)}
+.rgrp.tone-emerald::before{background:var(--emerald)}
+.rgrp.tone-amber::before{background:var(--amber)}
+.rlbl{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:800;color:var(--blue2);margin-bottom:.4rem}
+.rgrp.tone-emerald .rlbl{color:var(--emerald2)}
+.rgrp.tone-amber .rlbl{color:var(--amber2)}
+.rgrp p{font-size:.83rem;color:var(--t2);line-height:1.48}
+/* control bar */
+#bar{height:50px;flex:none;position:relative;z-index:2;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;background:var(--s);border-top:1px solid var(--b)}
+#bar button{display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:transparent;border:1px solid var(--b);border-radius:8px;color:var(--t2);cursor:pointer}
+#bar button:hover{color:var(--blue2);border-color:var(--blue2)}
+#bar button i{width:18px;height:18px}
+#counter{font-size:.82rem;font-weight:700;color:var(--t)}
+#deckname{flex:1;font-size:.78rem;color:var(--t3);text-align:center;letter-spacing:.04em}
+</style></head>
+<body><div id="deck"><div id="viewport">
+
+<div class="slide hero cover active" data-title="The exposure you already have, closed">
+  <div class="hero-in">
+    <div class="brandlock"><svg class="blogo bolt-mark mk" viewBox="0 0 512 512" fill="none"><circle cx="256" cy="256" r="240" fill="#0e1424"/><path d="M320 64L128 288H240L192 448L384 224H272L320 64Z" fill="#4285F4" stroke="#8fbcff" stroke-width="8" stroke-linejoin="round"/><path d="M320 64L128 288H240L192 448L384 224H272L320 64Z" fill="url(#boltglow)" opacity="0.35"/><defs><linearGradient id="boltglow" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.5"/><stop offset="100%" style="stop-color:#4285F4;stop-opacity:0"/></linearGradient></defs></svg><span class="wm">Bolt</span><span class="plus">+</span><span class="wm2">Aeira</span></div>
+    <div class="s-tag persona">Read this before the next AI rollout meeting</div>
+    <h1 class="hero-h">Every tool your team logged into this morning is a decision <span class="grad">someone will have to defend later.</span></h1>
+    <p class="hero-sub">Bolt is the governed AI surface your workforce touches every day. Aeira is the search engine underneath it for the questions that can never afford to guess wrong. Together they give your organization instant answers, provable governance, and a boundary you define.</p>
+    <div class="cover-role">A decision-maker briefing &middot; by Sparcle</div>
+  </div></div>
+
+<div class="slide quote-slide hero" data-title="The crux"><div class="hero-in">
+  <div class="q-mark">&#8220;</div>
+  <h2 class="q-text">When someone finally asks <span class="grad">"prove it,"</span> most AI tools have no honest answer. Bolt and Aeira are built so that answer <span class="grad v">already exists</span> before anyone has to ask.</h2>
+</div></div>
+
+<div class="slide" data-title="Three problems. One root cause."><div class="s-content">
+  <div class="s-tag">Where budget, risk and time actually collide</div>
+  <h2 class="s-h">Three problems. <span class="grad">One root cause.</span></h2>
+  <p class="s-sub">Every AI strategy conversation eventually collapses into the same three problems. They are not hypothetical. They are the reason procurement stalls, the reason legal blocks rollouts, and the reason the best tool in the building never gets adopted company wide.</p>
+  <div class="grid">
+    <div class="card tone-rose"><div class="ci"><i data-lucide="shield-alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5.2 3.6 9.4 9 10 5.4-.6 9-4.8 9-10V6z"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.5" r=".6" fill="currentColor"/></svg></i></div><h3>Exposure and lawsuits</h3><p>Sensitive data crosses a boundary nobody controlled, and when it surfaces later there is no clean record of what happened or who touched it.</p></div>
+    <div class="card tone-amber"><div class="ci"><i data-lucide="clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></i></div><h3>The AI bill nobody approved</h3><p>Every trivial question gets routed through a model that costs money and adds latency, because the tool has no cheaper tier to fall back to.</p></div>
+    <div class="card tone-violet"><div class="ci"><i data-lucide="layout-grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></i></div><h3>Twenty tabs, zero memory</h3><p>The answer lives in Gmail, the context in Jira, the file in Drive — and finding it costs more time than using it will.</p></div>
+  </div>
+  <div class="scenario">A sales rep pastes a customer's account number into a public chatbot to draft a follow-up email. A support engineer runs the same trivial timestamp conversion through a paid model forty times a day. A new hire spends their first morning hunting across seven tools for a benefits PDF someone mentioned in a Slack thread three months ago. None of this makes the news. All of it is the actual, everyday cost.</div>
+  </div></div>
+
+<div class="slide" data-title="The same day, two ways"><div class="s-content">
+  <div class="s-tag">Not a hypothetical — this morning, twice</div>
+  <h2 class="s-h">The same day, <span class="grad">two ways.</span></h2>
+  <div class="split-grid">
+    <div class="spanel today"><div class="sp-tag">Today</div><ul class="sp-list">
+      <li><span>Sensitive data pasted into whatever model happened to be open, with no record of what left the building.</span></li>
+      <li><span>Every trivial lookup burns a paid model call, on a bill nobody sized in advance.</span></li>
+      <li><span>The answer is in one of twenty tools, and finding it costs more time than using it will.</span></li>
+      <li><span>When something goes wrong, the record is a support ticket — if it exists at all.</span></li>
+    </ul></div>
+    <div class="spanel bolt"><div class="sp-tag">With Bolt and Aeira</div><ul class="sp-list">
+      <li><span>PII and PHI pseudonymized before any model, public or private, ever sees it.</span></li>
+      <li><span>Hundreds of instant answers with zero network call and zero model call, before AI is even considered.</span></li>
+      <li><span>One search surface across everything you already run, permission-filtered before it ranks.</span></li>
+      <li><span>A cryptographically sealed, independently verifiable audit trail, by default.</span></li>
+    </ul></div>
+  </div></div></div>
+
+<div class="slide" data-title="When someone asks to see the record"><div class="s-content">
+  <div class="s-tag">On exposure and legal risk</div>
+  <h2 class="s-h">When someone asks "prove it," <span class="grad">you have an answer instead of a shrug.</span></h2>
+  <p class="s-sub">A regulator, a plaintiff's attorney, or your own board will eventually ask where the data went, who saw it, and whether the record could have been altered. Most AI tools have no honest answer. Bolt does.</p>
+  <div class="check-grid">
+    <div class="check"><span class="ck"><i data-lucide="server"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg></i></span><div><h4>You define the boundary</h4><p>Trial on a single laptop, or deployed inside your own infrastructure. Where the data lives is never Sparcle's decision to make.</p></div></div>
+    <div class="check tone-violet"><span class="ck"><i data-lucide="key-round"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></i></span><div><h4>Your model, your terms</h4><p>Bring your own LLM and your own key, including a fully local model on your own hardware. Sparcle never sees the traffic.</p></div></div>
+    <div class="check tone-violet"><span class="ck"><i data-lucide="eye-off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg></i></span><div><h4>Never reaches the model as itself</h4><p>Names, identifiers, financial and health values are pseudonymized at the moment they would cross into a prompt, even on a public model.</p></div></div>
+    <div class="check tone-emerald"><span class="ck"><i data-lucide="scroll-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></i></span><div><h4>The record cannot be quietly edited</h4><p>Every audited action is hashed, sealed into a signed chain on a fixed schedule, and independently verifiable offline by an outside auditor.</p></div></div>
+  </div>
+  <div class="pipeline">
+    <div class="node"><div class="badge tone-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="lbl">Every action</span><span class="sub">hashed on the way out</span></div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="node"><div class="badge tone-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg></div><span class="lbl">Sealed into a chain</span><span class="sub">tamper-evident by construction</span></div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="node"><div class="badge tone-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg></div><span class="lbl">Signed by your key</span><span class="sub">your KMS, not Sparcle's</span></div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="node"><div class="badge tone-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><span class="lbl">Verified offline</span><span class="sub">by an auditor, no login needed</span></div>
+  </div>
+  <div class="scenario">A healthcare analyst pastes a patient chart into a public model to summarize it, not realizing protected health information just left the building. Under HIPAA, that is a reportable incident with no clean answer to "what exactly left, and who saw it." With Bolt, the same summary happens with the identifying fields pseudonymized before the request ever leaves the device — and a sealed record of the action either way.</div>
+  </div></div>
+
+<div class="slide" data-title="The tokens you never spend"><div class="s-content">
+  <div class="s-tag">On the AI bill</div>
+  <h2 class="s-h">The tokens you never spend <span class="grad">are the ones that never leak.</span></h2>
+  <p class="s-sub">Most of what people ask a chat assistant does not need a model at all. A currency conversion, a timestamp, a regex, a lookup against a known table: these have exact answers. Sending them to an LLM burns money, adds latency, and hands the model text it never needed to see.</p>
+  <div class="pipeline">
+    <div class="node"><div class="badge tone-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></div><span class="lbl">Type it</span><span class="sub">no network yet</span></div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="node"><div class="badge tone-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></div><span class="lbl">Instant, on-device</span><span class="sub">zero cost, zero exposure</span></div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="node"><div class="badge tone-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div><span class="lbl">Search your apps</span><span class="sub">still no model call</span></div>
+    <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="node"><div class="badge tone-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg></div><span class="lbl">Escalate to AI</span><span class="sub">only when it's genuinely needed</span></div>
+  </div>
+  <div class="grid" style="margin-top:1.3rem">
+    <div class="card tone-emerald"><div class="ci"><i data-lucide="zap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></i></div><h3>Cheapest path first</h3><p>Every request tries the free tiers before it ever reaches a model: on-device recognizers, then your own connected data, then cache.</p></div>
+    <div class="card tone-blue"><div class="ci"><i data-lucide="cpu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg></i></div><h3>Any model, including your own</h3><p>Point Bolt at a hosted provider, or a model already running on your own machine or GPU cluster. Marginal cost drops to what your hardware costs.</p></div>
+    <div class="card tone-violet"><div class="ci"><i data-lucide="grid-3x3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg></i></div><h3>Hundreds of free answers</h3><p>Hundreds of instant operations across thousands of recognized reference values resolve with no network call and no AI call at all.</p></div>
+  </div>
+  <div class="scenario">A support team of forty runs roughly six hundred queries a day: currency conversions, timestamp math, ID lookups, unit conversions. Priced at full model rates, that is real budget spent answering questions with exactly one correct answer. Routed through Bolt's instant layer first, the same six hundred queries cost nothing and complete before a network call would have finished.</div>
+  </div></div>
+
+<div class="slide" data-title="Twenty systems in, one safe search box out"><div class="s-content">
+  <div class="s-tag">On tool sprawl</div>
+  <h2 class="s-h">Twenty systems in, <span class="grad">one safe search box out.</span></h2>
+  <p class="s-sub">Email, calendar, files, tasks, people, chat, code, tools you have not even connected yet. Bolt gives every one of them the same front door, the same boundary, and the same audit trail — reachable from the browser or the desktop launcher wherever your infrastructure already runs.</p>
+  <div class="grid cols4">
+    <div class="card tone-blue"><h3>First-party, deep</h3><p>Native integrations into the productivity suites most companies already run, pulling live, not cached.</p></div>
+    <div class="card tone-violet"><h3>Third-party, broad</h3><p>A wide, growing catalog of connected tools on a common open protocol — adding one is configuration, not a project.</p></div>
+    <div class="card tone-amber"><h3>Works both directions</h3><p>Bolt exposes its own capabilities the same way, so tools you already use elsewhere can call into it too.</p></div>
+    <div class="card tone-emerald"><h3>Swappable, not welded</h3><p>Every connector, every model, every identity provider is a module you can replace. Nothing is a dead end.</p></div>
+  </div>
+  <div class="scenario">A new account manager's first week: seven logins, three permission requests still pending, and a running list of "ask someone where that lives." With one governed search box in front of everything they are already entitled to see, week one becomes day one.</div>
+  </div></div>
+
+<div class="slide" data-title="Everything you can reach, in one result list"><div class="s-content">
+  <div class="s-tag">Not just the obvious sources</div>
+  <h2 class="s-h">Everything you can reach, <span class="grad">in one result list.</span></h2>
+  <p class="s-sub">The search box reaches further than email and files. Clipboard history, notes, and installed apps are searched on-device, encrypted at rest, the same box, the same governance, no separate tool to open.</p>
+  <div class="grid cols4">
+    <div class="card tone-blue"><div class="ci"><i data-lucide="clipboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></i></div><h3>Clipboard history</h3><p>Every copy, text and image, encrypted at rest and full-text searchable. Screenshots are OCR'd, so you can find one by the words inside it.</p></div>
+    <div class="card tone-violet"><div class="ci"><i data-lucide="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></i></div><h3>Notes</h3><p>Encrypted at rest, device-local, auditable and crypto-shreddable on request — searchable the same way as everything else.</p></div>
+    <div class="card tone-amber"><div class="ci"><i data-lucide="layout-grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></i></div><h3>Installed apps</h3><p>Find and launch what's on the machine without hunting through a dock or a start menu.</p></div>
+    <div class="card tone-emerald"><div class="ci"><i data-lucide="folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></i></div><h3>Files &amp; drives</h3><p>Local machine, network drives and the cloud you signed into with your own identity.</p></div>
+    <div class="card tone-blue"><div class="ci"><i data-lucide="scan-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></i></div><h3>Annotate &amp; export</h3><p>Mark up, redact or crop an image from the clipboard, then hand it off through your own share sheet — nothing routes through Sparcle to get there.</p></div>
+    <div class="card tone-violet"><div class="ci"><i data-lucide="mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></i></div><h3>Email</h3><p>Threads and attachments, live against your provider.</p></div>
+    <div class="card tone-amber"><div class="ci"><i data-lucide="calendar-days"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></i></div><h3>Calendar</h3><p>Meetings and attendees, current, not a nightly sync.</p></div>
+    <div class="card tone-emerald"><div class="ci"><i data-lucide="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></i></div><h3>People &amp; contacts</h3><p>Your directory and org graph, permission-filtered per person.</p></div>
+  </div>
+  <p class="s-sub" style="margin-top:1.1rem;font-size:.85rem;color:var(--t3)">Worth being precise about: clipboard, notes and file search are on-device today. Image similarity search — finding a screenshot by what it visually shows rather than the text inside it — exists as working code but is not switched on in the shipping build yet; OCR-text search on images is live now.</p>
+  </div></div>
+
+<div class="slide" data-title="Provisioned like the rest of your stack"><div class="s-content">
+  <div class="s-tag">Integrations, apps and identity</div>
+  <h2 class="s-h">Provisioned like <span class="grad">the rest of your stack</span> — not a shadow IT problem.</h2>
+  <p class="s-sub">Connecting a new tool to Bolt is an IT decision with an audit trail, not an individual's browser extension nobody signed off on.</p>
+  <div class="grid">
+    <div class="card tone-blue"><div class="ci"><i data-lucide="shield-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></i></div><h3>Admin-provisioned &amp; blessed</h3><p>IT publishes a catalog of approved integrations with central auth and policy. People pick from what is already approved.</p></div>
+    <div class="card tone-violet"><div class="ci"><i data-lucide="plug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M15 8V2"/><path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z"/><path d="M9 8V2"/></svg></i></div><h3>Any API becomes a governed tool</h3><p>Point it at a REST or OpenAPI endpoint and it is wrapped as a policy-gated action automatically — no SDK, no bespoke integration project.</p></div>
+    <div class="card tone-amber"><div class="ci"><i data-lucide="link-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg></i></div><h3>Bolt works both directions</h3><p>The same tools Bolt calls out to, it can also expose inward, so agents you already use elsewhere can call into Bolt too.</p></div>
+    <div class="card tone-emerald"><div class="ci"><i data-lucide="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></i></div><h3>Identity provisioning, not a side door</h3><p>Users are provisioned and deprovisioned the way the rest of your enterprise stack already works — the day someone leaves, their access leaves with them.</p></div>
+  </div>
+  <div class="scenario">IT already has a process for approving a new SaaS tool. Bolt fits into that process instead of routing around it: an admin approves a connector once, and every person's access still respects their own role — nobody is one browser extension away from a shadow-IT incident.</div>
+  </div></div>
+
+<div class="slide" data-title="Two engines, one company"><div class="s-content">
+  <div class="s-tag">Two engines, one company</div>
+  <h2 class="s-h">Bolt is the surface your workforce touches. <span class="grad v">Aeira is what regulated search stands on.</span></h2>
+  <p class="s-sub">For teams where "good enough" retrieval is not good enough, Aeira is Sparcle's air-gapped hybrid search engine, purpose-built for defense, finance, healthcare and federal environments — wrapped in the same audit backbone Bolt uses everywhere else. Bolt gives people speed; Aeira gives the organization certainty that speed never outran permission.</p>
+  <div class="stack">
+    <div class="layer bolt"><span class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></span><div><b>Bolt</b><span>the surface your workforce touches</span></div></div>
+    <div class="layer aeira"><span class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span><div><b>Aeira</b><span>the engine underneath regulated search</span></div></div>
+    <div class="base">One boundary &middot; one audit trail &middot; one company</div>
+  </div>
+  <div class="check-grid cols4" style="margin-top:1.2rem">
+    <div class="check tone-violet"><span class="ck"><i data-lucide="filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></i></span><div><h4>Access control is a pre-filter</h4><p>Documents are excluded before ranking ever runs, so what a searcher sees is never a matter of the ranker guessing correctly.</p></div></div>
+    <div class="check tone-violet"><span class="ck"><i data-lucide="layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/></svg></i></span><div><h4>Hybrid retrieval, not one trick</h4><p>Multiple search signals combine so recall does not collapse to whichever technique happens to be fashionable.</p></div></div>
+    <div class="check"><span class="ck"><i data-lucide="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></i></span><div><h4>Deployable fully air-gapped</h4><p>Built to run with no outbound connection at all when that is the requirement, not a flag bolted on later.</p></div></div>
+    <div class="check"><span class="ck"><i data-lucide="link-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg></i></span><div><h4>One shared foundation</h4><p>The same audit and pseudonymization layer that seals Bolt's action trail seals Aeira's search trail too.</p></div></div>
+  </div>
+  <div class="scenario">A defense contractor cannot run any tool that phones home, not even for a routine health check. A hospital cannot let a search index infer a patient's diagnosis from who searched for what. Aeira is built for exactly this: retrieval that filters by clearance before it ranks, and that can run with zero outbound connections when the mission requires it.</div>
+  </div></div>
+
+<div class="slide" data-title="Paste anything. It becomes a workbench."><div class="s-content">
+  <div class="s-tag">For the people who build things</div>
+  <h2 class="s-h">Paste anything. It becomes <span class="grad">a workbench, not a wall of text.</span></h2>
+  <p class="s-sub">A table becomes rows you can sort, chart and export — a mini spreadsheet with no spreadsheet app required. A log becomes a level breakdown and a top error. A curl command becomes Python. And it chains: pipe one transform into the next like a formula bar for anything you paste.</p>
+  <div class="grid cols4">
+    <div class="card tone-blue"><h3>Paste a table</h3><p>sorted, charted, exported to CSV or SQL</p></div>
+    <div class="card tone-violet"><h3>Pipe to transform</h3><p><span class="rc" style="font-family:ui-monospace,'SF Mono',monospace;background:var(--s2);border:1px solid var(--hair);border-radius:6px;padding:.15rem .4rem">255 | hex</span> &rarr; 0xFF</p></div>
+    <div class="card tone-amber"><h3>Chain transforms</h3><p><span class="rc" style="font-family:ui-monospace,'SF Mono',monospace;background:var(--s2);border:1px solid var(--hair);border-radius:6px;padding:.15rem .4rem">text | slug | upper</span></p></div>
+    <div class="card tone-emerald"><h3>Paste a stack trace</h3><p>top frame isolated automatically</p></div>
+  </div>
+  <div class="scenario">A finance analyst pastes a CSV of vendor payments an hour before a review and needs a sorted, charted summary in the next two minutes, not a trip to Excel and a new tab. The paste is the workbench — no separate app to open, nothing to export first.</div>
+  </div></div>
+
+<div class="slide" data-title="Trigger it on a schedule, an event, or before the room"><div class="s-content">
+  <div class="s-tag">What happens while you are not looking</div>
+  <h2 class="s-h">Trigger it on a schedule, on an event, <span class="grad">or before you walk into the room.</span></h2>
+  <p class="s-sub">The same governed agent that answers a typed question can be scheduled. Point it at your connected apps and it gathers what it can reach, under the same masking and the same audit trail as everything else. You compose the workflow — Bolt never pretends to write your emails for you.</p>
+  <div class="grid">
+    <div class="card tone-blue"><div class="ci"><i data-lucide="clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></i></div><h3>Time and interval</h3><p>Cron-style and interval triggers, so recurring prep happens without anyone remembering to ask.</p></div>
+    <div class="card tone-violet"><div class="ci"><i data-lucide="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></i></div><h3>Events and webhooks</h3><p>Fire from another system's webhook, signature-verified, so Bolt reacts to what actually happened.</p></div>
+    <div class="card tone-amber"><div class="ci"><i data-lucide="calendar-days"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></i></div><h3>Ahead of the calendar</h3><p>Schedule a run tied to a meeting so the relevant context, pulled only from what you can already see, is ready before it starts.</p></div>
+  </div>
+  <div class="scenario">Every Monday, an account manager spends forty minutes manually pulling last week's tickets, emails and calendar notes before their pipeline review. A trigger tied to that recurring meeting gathers the same context automatically, from the same sources the account manager could already reach on their own, and has it waiting when they sit down.</div>
+  </div></div>
+
+<div class="slide" data-title="One product, read differently by every seat"><div class="s-content">
+  <div class="s-tag">One product, read differently by every seat</div>
+  <h2 class="s-h">Nobody has to <span class="grad">compromise for anybody else.</span></h2>
+  <div class="grid cols4">
+    <div class="card tone-blue"><h3>Engineer &middot; hacker</h3><p>A scriptable, chainable surface with a real API. Everything is a registry, not a black box.</p></div>
+    <div class="card tone-amber"><h3>Executive</h3><p>One number to defend in the board meeting: spend, automation, and exposure surface versus a year ago.</p></div>
+    <div class="card tone-emerald"><h3>Compliance &middot; legal</h3><p>An audit trail independently verifiable by someone who never had to log in. Erasure and SIEM export slot in.</p></div>
+    <div class="card tone-violet"><h3>IT &middot; security</h3><p>Identity provisioning, role-based access, KMS-backed encryption. You approve the boundary once; Bolt enforces it.</p></div>
+  </div></div></div>
+
+<div class="slide" data-title="Built for the audit you did not schedule"><div class="s-content">
+  <div class="s-tag">For regulated industries</div>
+  <h2 class="s-h">Built for the audit <span class="grad">you did not schedule.</span></h2>
+  <p class="s-sub">Healthcare, financial services, government and legal all share one pattern: the cost of an incident is not the incident, it is not being able to answer what happened. Bolt and Aeira are built so that answer already exists before anyone has to ask.</p>
+  <div class="rwrap">
+    <div class="rgrp"><div class="rlbl"><i data-lucide="heart-pulse" style="width:15px;height:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 8.5h4l1-2 2.5 5 1-3 1.5 2.5H21"/></svg></i> HIPAA &middot; healthcare</div><p>PHI pseudonymized before it reaches a model. A reportable exposure becomes a masked, audited, provable non-event.</p></div>
+    <div class="rgrp"><div class="rlbl"><i data-lucide="landmark" style="width:15px;height:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18v-7"/><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></svg></i> SOX &middot; financial reporting</div><p>Every query and action against financial data lands in a tamper-evident, independently verifiable trail auditors can check without trusting you.</p></div>
+    <div class="rgrp"><div class="rlbl"><i data-lucide="credit-card" style="width:15px;height:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></i> PCI-DSS &middot; payment data</div><p>Card numbers are recognized and masked on sight, never held in plaintext, never forwarded to a model unmasked.</p></div>
+    <div class="rgrp tone-emerald"><div class="rlbl"><i data-lucide="globe" style="width:15px;height:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></i> GDPR &middot; CCPA &middot; erasure</div><p>Erasure is a cryptographic disposal, not a delete statement: the key that could read the data is destroyed, the encrypted bytes and a tamper-evident receipt remain. Retention and erasure duties are satisfied at the same time, by the same construction.</p></div>
+  </div></div></div>
+
+<div class="slide quote-slide hero" data-title="A cryptographic answer, not a shrug"><div class="hero-in">
+  <div class="q-mark">&#8220;</div>
+  <h2 class="q-text">When a regulator, an auditor, or your own board asks what happened, you hand them <span class="grad">a cryptographic answer,</span> not a shrug and a support ticket.</h2>
+  <div class="q-by">Sparcle</div>
+</div></div>
+
+<div class="slide s-accent" data-title="Counted from what ships"><div class="s-content sec-mid">
+  <div class="s-tag">Not a pitch-deck number</div>
+  <h2 class="s-h big">Counted from <span class="grad">what ships,</span> not from what we hope to ship.</h2>
+  <div class="metric-grid">
+    <div class="mstat"><span class="mn">300+</span><span class="ml">runnable operations</span><span class="md">zero LLM cost, on-device</span></div>
+    <div class="mstat"><span class="mn">2,000+</span><span class="ml">recognized reference values</span><span class="md">decoded on sight, no lookup call</span></div>
+    <div class="mstat"><span class="mn">14</span><span class="ml">search scopes</span><span class="md">across your connected apps</span></div>
+    <div class="mstat"><span class="mn">30+</span><span class="ml">integrations</span><span class="md">first and third-party, growing</span></div>
+  </div>
+  <p class="s-sub" style="margin:1.6rem auto 0;text-align:center;font-size:.85rem;color:var(--t3)">Every figure above is computed from the live product registry at build time — the registry the product itself runs on.</p>
+  </div></div>
+
+<div class="slide hero" data-title="Instant when instant is enough">
+  <div class="hero-in">
+    <div class="brandlock"><svg class="blogo bolt-mark mk" viewBox="0 0 512 512" fill="none"><circle cx="256" cy="256" r="240" fill="#0e1424"/><path d="M320 64L128 288H240L192 448L384 224H272L320 64Z" fill="#4285F4" stroke="#8fbcff" stroke-width="8" stroke-linejoin="round"/></svg><span class="wm">Bolt</span><span class="plus">+</span><span class="wm2">Aeira</span></div>
+    <div class="s-tag">The bottom line</div>
+    <h1 class="hero-h">Instant when instant is enough. <span class="grad">Governed when it isn't. Provable either way.</span></h1>
+    <p class="hero-sub">See it against your own tools, your own data, your own boundary. No fabricated demo, no sanitized sandbox.</p>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hn">One surface</span><span class="hl">for your whole workforce</span></div>
+      <div class="hstat"><span class="hn">One boundary</span><span class="hl">your model, your rules</span></div>
+      <div class="hstat"><span class="hn">bolt@sparcle.app</span><span class="hl">talk to us</span></div>
+    </div>
+  </div></div>
+
+</div>
+<div id="bar"><button id="prev" aria-label="prev"><i data-lucide="chevron-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></i></button>
+<span id="counter">1 / 17</span>
+<span id="deckname"><svg class="bolt-mark dlogo" viewBox="0 0 512 512" width="13" height="13"><path d="M320 64L128 288H240L192 448L384 224H272L320 64Z"/></svg>Bolt and Aeira &middot; the exposure you already have, closed &middot; by Sparcle</span>
+<button id="theme" aria-label="theme"><i data-lucide="sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></i></button>
+<button id="next" aria-label="next"><i data-lucide="chevron-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></i></button></div></div>
+<script>
+const S=document.querySelectorAll('.slide'),N=S.length;let i=0;
+function show(n){i=Math.max(0,Math.min(N-1,n));S.forEach((s,k)=>s.classList.toggle('active',k===i));document.getElementById('counter').textContent=(i+1)+' / '+N;location.hash='#'+i;}
+document.getElementById('next').onclick=()=>show(i+1);document.getElementById('prev').onclick=()=>show(i-1);
+document.getElementById('theme').onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';};
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')show(i+1);else if(e.key==='ArrowLeft')show(i-1);else if(e.key==='Home')show(0);else if(e.key==='End')show(N-1);});
+show(location.hash?parseInt(location.hash.slice(1))||0:0);
+</script></body></html>

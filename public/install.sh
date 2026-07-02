@@ -628,14 +628,25 @@ elif [ -n "${2:-}" ]; then
 fi
 
 if [ -z "$VERSION" ]; then
-  LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
-  API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
-  V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//' || true)
-  if [ -n "$V" ]; then
-    VERSION="$V"
+  # Per-platform "latest" pointer: each OS/arch advances independently as its build
+  # publishes (channel-stable/bolt-latest-<os>-<arch>.json). Falls back to the
+  # global latest release + the arch walk-back below when no pointer exists.
+  case "$(uname -s)" in Darwin) _ph_os=darwin ;; Linux) _ph_os=linux ;; *) _ph_os=linux ;; esac
+  case "$(uname -m)" in arm64|aarch64) _ph_arch=aarch64 ;; *) _ph_arch=x86_64 ;; esac
+  PTR_URL="https://github.com/${GITHUB_REPO}/releases/download/${CHANNEL_TAG:-channel-stable}/bolt-latest-${_ph_os}-${_ph_arch}.json"
+  PTR_V=$(curl -fsSL --max-time 5 "$PTR_URL" 2>/dev/null | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1 | sed 's/^v//' || true)
+  if [ -n "$PTR_V" ]; then
+    VERSION="$PTR_V"
   else
-    VERSION="$FALLBACK_VERSION"
-    warn "Could not fetch latest version — using v${VERSION}"
+    LATEST_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
+    API_RESP=$(curl -fsSL --max-time 5 "$LATEST_URL" 2>/dev/null || true)
+    V=$(echo "$API_RESP" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' | sed 's/^v//' || true)
+    if [ -n "$V" ]; then
+      VERSION="$V"
+    else
+      VERSION="$FALLBACK_VERSION"
+      warn "Could not fetch latest version — using v${VERSION}"
+    fi
   fi
 fi
 BASE_URL="https://github.com/${GITHUB_REPO}/releases/download/v${VERSION}"

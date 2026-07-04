@@ -145,6 +145,16 @@
         '          <span style="font-size:1.25rem;font-weight:700;">Sparcle</span>',
         '        </a>',
         '        <p>Building unified intelligence for the modern enterprise.</p>',
+        '        <div class="footer-socials" aria-label="SparcleHQ on social media">',
+        '          <a class="footer-social" href="https://x.com/SparcleHQ" target="_blank" rel="noopener" aria-label="SparcleHQ on X">' +
+        '            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25h6.83l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>',
+        '          <a class="footer-social" href="https://bsky.app/profile/sparclehq.bsky.social" target="_blank" rel="noopener" aria-label="SparcleHQ on Bluesky">' +
+        '            <svg viewBox="0 0 600 530" fill="currentColor" aria-hidden="true"><path d="M135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.38-3.69-10.832-3.708-7.896-.017-2.936-1.193.516-3.707 7.896-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.449-163.25-81.433-5.956-21.281-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z"/></svg></a>',
+        '          <a class="footer-social" href="https://www.linkedin.com/company/sparclehq" target="_blank" rel="noopener" aria-label="SparcleHQ on LinkedIn">' +
+        '            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg></a>',
+        '          <a class="footer-social" href="https://www.youtube.com/@SparcleHQ" target="_blank" rel="noopener" aria-label="SparcleHQ on YouTube">' +
+        '            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.12-2.12C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.58A3 3 0 0 0 .5 6.2 31.2 31.2 0 0 0 0 12a31.2 31.2 0 0 0 .5 5.8 3 3 0 0 0 2.12 2.12C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.58a3 3 0 0 0 2.12-2.12A31.2 31.2 0 0 0 24 12a31.2 31.2 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6z"/></svg></a>',
+        '        </div>',
         '      </div>',
         '      <div class="footer-col">',
         '        <h5>Products</h5>',

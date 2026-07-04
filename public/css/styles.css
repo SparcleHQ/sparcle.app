@@ -1345,6 +1345,41 @@ section {
     max-width: 320px;
 }
 
+.footer-socials {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+.footer-social {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    border: 1px solid var(--border-default);
+    transition: color var(--transition-fast), background var(--transition-fast),
+        border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.footer-social:hover {
+    color: #fff;
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    transform: translateY(-1px);
+}
+
+.footer-social:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+}
+
+.footer-social svg {
+    width: 16px;
+    height: 16px;
+}
+
 .footer-col h5 {
     font-size: 0.8125rem;
     font-weight: 700;

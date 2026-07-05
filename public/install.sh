@@ -2,6 +2,10 @@
 # Bolt Installer — https://sparcle.app/install.sh
 # Works on macOS and Linux.
 #
+# CANONICAL SOURCE OF TRUTH for the consumer `curl | sh` installer. The copy at
+# bolt-native/scripts/install/install.sh is a read-only mirror — edit HERE only
+# and re-sync it. (dist/install.sh is the built artifact `astro build` emits.)
+#
 # Usage:
 #   curl -fsSL https://sparcle.app/install.sh | sh                          # Bolt (free), latest
 #   curl -fsSL https://sparcle.app/install.sh | sh -s -- personal 0.1.18    # Specific version (positional)
@@ -86,12 +90,14 @@ verify_runtime_contract() {
   port_end=$((port_base + port_range - 1))
   if [ "${BOLT_SKIP_API_HEALTH_CHECK:-0}" = "1" ]; then
     warn "Skipping API health verification (BOLT_SKIP_API_HEALTH_CHECK=1)"
+    BOLT_LAUNCHED=1
     return 0
   fi
 
   info "Verifying API runtime readiness..."
   if api_url=$(wait_for_api_readiness "$timeout_seconds"); then
     ok "API is healthy at ${api_url}"
+    BOLT_LAUNCHED=1
     return 0
   fi
 
@@ -564,6 +570,10 @@ resolve_macos_executable() {
   echo "$macos_dir/bolt"
 }
 # ── Pre-flight checks ───────────────────────────────────────────────────────
+# Set to 1 only once the app is confirmed launched+healthy (see
+# verify_runtime_contract) so the closing banner never claims "running" when the
+# app was merely installed but not started.
+BOLT_LAUNCHED=0
 OS="$(uname)"
 case "$OS" in
   Darwin) PLATFORM="macos" ;;
@@ -845,8 +855,21 @@ install_macos() {
   SOURCE_APP=$(find "${MOUNT_POINT}" -maxdepth 1 -name "*.app" | head -1)
   [ -n "${SOURCE_APP}" ] || { hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null; fail "No .app found in DMG."; }
 
+  # Fully stop any running Bolt before replacing the bundle. A bare `sleep 1`
+  # let bolt-api linger: macOS `cp` then silently skips the in-use binary (the
+  # "upgrade" keeps running OLD code), and a lingering sidecar holding the
+  # embedded Postgres cluster contends with the fresh launch. Send TERM, poll
+  # until the processes actually exit, then SIGKILL any straggler.
   pkill -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
-  sleep 1
+  _bolt_stop_deadline=$(( $(date +%s) + 8 ))
+  while pgrep -f "${APP_NAME}.app/Contents/MacOS" >/dev/null 2>&1; do
+    if [ "$(date +%s)" -ge "${_bolt_stop_deadline}" ]; then
+      pkill -9 -f "${APP_NAME}.app/Contents/MacOS" 2>/dev/null || true
+      break
+    fi
+    sleep 0.3
+  done
+  sleep 0.5
 
   INSTALL_BASE="/Applications"
   INSTALL_APP_PATH="${INSTALL_BASE}/${APP_NAME}.app"
@@ -952,13 +975,24 @@ install_linux_deb() {
     || fail "Failed to install .deb package. Try: sudo dpkg -i ${DL_PATH}"
   ok "Installed ${APP_NAME} via dpkg"
 
-  # Find and launch the installed binary
+  # Find and launch the installed binary. The Tauri .deb names the main GUI
+  # binary after the Cargo package (`bolt`) — NOT the productName — and installs
+  # the sidecar next to it as `bolt-api`. So the old guesses (`Bolt-Enterprise`)
+  # never matched, and the fallback passed a .deb FILENAME to `dpkg -L` (which
+  # wants a package NAME), so nothing resolved: the app was never launched and
+  # the installer still printed "is running!". Resolve the real path from dpkg's
+  # file list for the actual package, excluding the sidecar.
   LAUNCH_BIN=""
-  for candidate in "/usr/bin/${APP_FILE_NAME}" "/usr/local/bin/${APP_FILE_NAME}"; do
+  for candidate in "/usr/bin/bolt" "/usr/local/bin/bolt" \
+                   "/usr/bin/${APP_FILE_NAME}" "/usr/local/bin/${APP_FILE_NAME}"; do
     [ -x "$candidate" ] && LAUNCH_BIN="$candidate" && break
   done
   if [ -z "$LAUNCH_BIN" ]; then
-    LAUNCH_BIN=$(dpkg -L "${DL_PATH##*/}" 2>/dev/null | grep '/usr.*/bin/' | head -1 || true)
+    PKG_NAME=$(dpkg-deb -f "${DL_PATH}" Package 2>/dev/null || true)
+    [ -n "$PKG_NAME" ] || PKG_NAME="bolt-enterprise"
+    LAUNCH_BIN=$(dpkg -L "$PKG_NAME" 2>/dev/null \
+      | grep -E '/usr(/local)?/bin/' | grep -vE '/bolt-api$' \
+      | while IFS= read -r p; do [ -x "$p" ] && [ ! -d "$p" ] && printf '%s\n' "$p" && break; done)
   fi
 
   if [ -n "$LAUNCH_BIN" ] && [ -x "$LAUNCH_BIN" ]; then
@@ -1079,6 +1113,85 @@ install_linux() {
   fi
 }
 
+# ══════════════════════════════════════════════════════════════════════════════
+# Integrity verification of the downloaded artifact
+# ══════════════════════════════════════════════════════════════════════════════
+# Defends the curl|sh path against corrupted or tampered downloads. Two layers
+# with graceful degradation:
+#   1. SHA-256 (zero new deps): recompute the file's hash and compare against the
+#      release's SHA256SUMS, fetched over HTTPS from the same release.
+#   2. minisign (authenticity, stronger): when `minisign` is installed, verify the
+#      artifact's detached .sig against the key baked into THIS installer (served
+#      over HTTPS from sparcle.app). Linux .AppImage / Windows .msi ship a .sig
+#      today; macOS .dmg will once the release pipeline signs it.
+# A mismatch ALWAYS aborts and deletes the file. "Neither available" (an older
+# release, or no minisign + no SHA256SUMS) warns and continues so existing
+# releases still install — unless BOLT_REQUIRE_VERIFICATION=1, which makes
+# verification mandatory (recommended for locked-down/MDM fleets).
+BOLT_MINISIGN_PUBKEY="RWSd12rmLcdOLGl9yZ2hL7tigihN0ZGT923La8KNXaLQfW3lsSsPom0Q"
+
+sha256_of() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" 2>/dev/null | awk '{print $1}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" 2>/dev/null | awk '{print $1}'
+  fi
+}
+
+verify_download() {
+  [ -f "$DL_PATH" ] || fail "Internal error: downloaded file missing before verification."
+  fname=$(basename "$DL_PATH")
+  verified=0
+  method=""
+
+  # Layer 1 — SHA-256 against the release's SHA256SUMS.
+  sums_path="${CACHE_DIR}/SHA256SUMS-${VERSION}"
+  if curl -fsSL --max-time 30 -o "$sums_path" "${BASE_URL}/SHA256SUMS" 2>/dev/null && [ -s "$sums_path" ]; then
+    expected=$(awk -v f="$fname" '($2==f)||($2=="*"f){print $1; exit}' "$sums_path")
+    if [ -n "$expected" ]; then
+      actual=$(sha256_of "$DL_PATH" || true)   # `|| true`: under `set -e`, a host with neither shasum nor sha256sum must fail-soft (warn), not abort the installer
+      if [ -z "$actual" ]; then
+        warn "No SHA-256 tool (shasum/sha256sum) found — skipping checksum verification."
+      elif [ "$expected" = "$actual" ]; then
+        verified=1; method="SHA-256"
+      else
+        rm -f "$DL_PATH" 2>/dev/null || true
+        fail "Integrity check FAILED for ${fname}.\n  expected ${expected}\n  got      ${actual:-none}\n  The download is corrupted or has been tampered with — do not run it.\n  Re-download from https://sparcle.app/download; if it fails again, contact security@sparcle.app."
+      fi
+    fi
+  fi
+
+  # Layer 2 — minisign authenticity (best-effort; stronger than a checksum).
+  if command -v minisign >/dev/null 2>&1; then
+    sig_path="${DL_PATH}.sig"
+    if curl -fsSL --max-time 30 -o "$sig_path" "${BASE_URL}/${fname}.sig" 2>/dev/null && [ -s "$sig_path" ]; then
+      if minisign -V -P "$BOLT_MINISIGN_PUBKEY" -m "$DL_PATH" -x "$sig_path" >/dev/null 2>&1; then
+        if [ -n "$method" ]; then method="${method} + minisign"; else method="minisign"; fi
+        verified=1
+      else
+        rm -f "$DL_PATH" 2>/dev/null || true
+        fail "Signature verification FAILED for ${fname} — it is NOT authentically signed by Sparcle.\n  Do not run it. Re-download from https://sparcle.app/download or contact security@sparcle.app."
+      fi
+    fi
+  fi
+
+  if [ "$verified" -eq 1 ]; then
+    ok "Verified ${fname} (${method})"
+  else
+    warn "Could not verify ${fname}: no signature/checksum available for this release."
+    if ! command -v minisign >/dev/null 2>&1; then
+      warn "Install 'minisign' (brew install minisign / apt install minisign) for signature verification."
+    fi
+    if [ "${BOLT_REQUIRE_VERIFICATION:-0}" = "1" ]; then
+      rm -f "$DL_PATH" 2>/dev/null || true
+      fail "BOLT_REQUIRE_VERIFICATION=1 is set but ${fname} could not be verified — aborting."
+    fi
+  fi
+}
+
+# Verify before we mount/install/run anything from the download.
+verify_download
+
 # ── Run platform installer ───────────────────────────────────────────────────
 case "$PLATFORM" in
   macos) install_macos ;;
@@ -1086,7 +1199,12 @@ case "$PLATFORM" in
 esac
 
 echo ""
-echo "  ✅  ${APP_NAME} is running!"
+if [ "${BOLT_LAUNCHED:-0}" = "1" ]; then
+  echo "  ✅  ${APP_NAME} is running!"
+else
+  echo "  ✅  ${APP_NAME} is installed — launch it from your application menu"
+  echo "      (or run: bolt)"
+fi
 echo ""
 if [ "$EDITION" = "personal" ]; then
   echo "  Next: Add your AI API key in Settings → AI Configuration"

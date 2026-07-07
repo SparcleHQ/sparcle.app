@@ -303,23 +303,24 @@ seed_embedded_postgres_runtime() {
   triple=$(runtime_asset_triple)
   [ -n "$triple" ] || return 0
 
-  # If the installed app already BUNDLES the required PostgreSQL version, skip the
-  # network download entirely — the app's own prewarm seeds from that bundle
-  # (fully offline install). Fat-packaged platforms carry a bundle: macOS DMG and
-  # the Linux .deb (resources install to /usr/lib/<Product>/); the Linux AppImage
-  # and lean platforms fall through to the download below. Detection is by the
-  # shipped <version>.tar.gz under the app's embedded-postgres resources.
+  # If the installed package BUNDLES a PostgreSQL payload, skip the network
+  # download entirely — the app's own prewarm seeds from that bundle (fully
+  # offline install). Detection is version-AGNOSTIC (any <ver>.tar.gz under the
+  # app's embedded-postgres resources), so this same installer works across
+  # releases: fat packages skip the download, and old/lean packages with no
+  # bundle fall through and download as before. The app is the authority on which
+  # version it needs — if the bundle can't satisfy it, prewarm downloads anyway.
   if [ "$PLATFORM" = "macos" ] && [ -n "${INSTALL_APP_PATH:-}" ]; then
     bundled_res="${INSTALL_APP_PATH}/Contents/Resources/embedded-postgres"
-    if [ -d "$bundled_res" ] && ls "$bundled_res"/*/"${runtime_version}.tar.gz" >/dev/null 2>&1; then
-      info "App bundles PostgreSQL ${runtime_version} — skipping download (offline seed on first launch)"
+    if [ -d "$bundled_res" ] && ls "$bundled_res"/*/*.tar.gz >/dev/null 2>&1; then
+      info "Package bundles PostgreSQL, skipping download (offline seed on first launch)"
       return 0
     fi
   fi
   if [ "$PLATFORM" = "linux" ]; then
-    # Tauri .deb installs to /usr/lib/<ProductName>/embedded-postgres/<key>/<ver>.tar.gz
-    if ls /usr/lib/*/embedded-postgres/*/"${runtime_version}.tar.gz" >/dev/null 2>&1; then
-      info "App bundles PostgreSQL ${runtime_version} — skipping download (offline seed on first launch)"
+    # Tauri .deb installs resources to /usr/lib/<ProductName>/embedded-postgres/<key>/
+    if ls /usr/lib/*/embedded-postgres/*/*.tar.gz >/dev/null 2>&1; then
+      info "Package bundles PostgreSQL, skipping download (offline seed on first launch)"
       return 0
     fi
   fi

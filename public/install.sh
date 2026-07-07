@@ -1167,9 +1167,12 @@ install_linux() {
 #   1. SHA-256 (zero new deps): recompute the file's hash and compare against the
 #      release's SHA256SUMS, fetched over HTTPS from the same release.
 #   2. minisign (authenticity, stronger): when `minisign` is installed, verify the
-#      artifact's detached .sig against the key baked into THIS installer (served
-#      over HTTPS from sparcle.app). Linux .AppImage / Windows .msi ship a .sig
-#      today; macOS .dmg will once the release pipeline signs it.
+#      artifact's detached .sig against the key baked into THIS installer (the
+#      Tauri updater public key). Linux .AppImage/.deb and Windows .msi/.exe ship
+#      a .sig; macOS .dmg will once the release pipeline signs it. Tauri writes
+#      the .sig base64-WRAPPED (its bytes are the base64 of a raw minisign
+#      .minisig), so we base64-decode before `minisign -V` (which needs the raw
+#      form) — see decode_tauri_sig.
 # A mismatch ALWAYS aborts and deletes the file. "Neither available" (an older
 # release, or no minisign + no SHA256SUMS) warns and continues so existing
 # releases still install — unless BOLT_REQUIRE_VERIFICATION=1, which makes
@@ -1182,6 +1185,26 @@ sha256_of() {
   elif command -v sha256sum >/dev/null 2>&1; then
     sha256sum "$1" 2>/dev/null | awk '{print $1}'
   fi
+}
+
+# Decode a Tauri-format detached signature ($1) into a raw minisign .minisig
+# file ($2). Tauri writes the .sig base64-ENCODED; `minisign -V` needs the
+# decoded raw form (starts with "untrusted comment:"). Tries GNU `-d`, BSD `-D`,
+# then openssl for macOS/Linux portability, and validates the result actually
+# looks like a minisign file. Returns non-zero WITHOUT writing a usable file if
+# no decoder works — callers MUST then skip the minisign check (never feed the
+# wrapped file to `minisign -V`, which would false-abort a genuine signature).
+decode_tauri_sig() {
+  in="$1"; out="$2"
+  if head -c 18 "$in" 2>/dev/null | grep -q '^untrusted comment:'; then
+    cp "$in" "$out" 2>/dev/null   # already raw (defensive; future releases may ship raw)
+  else
+    base64 -d "$in" > "$out" 2>/dev/null \
+      || base64 -D "$in" > "$out" 2>/dev/null \
+      || openssl base64 -d -A -in "$in" -out "$out" 2>/dev/null \
+      || return 1
+  fi
+  [ -s "$out" ] && head -c 18 "$out" 2>/dev/null | grep -q '^untrusted comment:'
 }
 
 verify_download() {
@@ -1208,15 +1231,23 @@ verify_download() {
   fi
 
   # Layer 2 — minisign authenticity (best-effort; stronger than a checksum).
+  # Tauri ships the .sig base64-wrapped, so decode it to a raw minisign file
+  # first. If decoding fails, SKIP minisign (Layer 1/SHA-256 still stands) rather
+  # than feed a wrapped file to `minisign -V` and false-abort a valid signature.
   if command -v minisign >/dev/null 2>&1; then
     sig_path="${DL_PATH}.sig"
     if curl -fsSL --max-time 30 -o "$sig_path" "${BASE_URL}/${fname}.sig" 2>/dev/null && [ -s "$sig_path" ]; then
-      if minisign -V -P "$BOLT_MINISIGN_PUBKEY" -m "$DL_PATH" -x "$sig_path" >/dev/null 2>&1; then
-        if [ -n "$method" ]; then method="${method} + minisign"; else method="minisign"; fi
-        verified=1
+      minisig_path="${sig_path}.minisig"
+      if decode_tauri_sig "$sig_path" "$minisig_path"; then
+        if minisign -V -P "$BOLT_MINISIGN_PUBKEY" -m "$DL_PATH" -x "$minisig_path" >/dev/null 2>&1; then
+          if [ -n "$method" ]; then method="${method} + minisign"; else method="minisign"; fi
+          verified=1
+        else
+          rm -f "$DL_PATH" 2>/dev/null || true
+          fail "Signature verification FAILED for ${fname} — it is NOT authentically signed by Sparcle.\n  Do not run it. Re-download from https://sparcle.app/download or contact security@sparcle.app."
+        fi
       else
-        rm -f "$DL_PATH" 2>/dev/null || true
-        fail "Signature verification FAILED for ${fname} — it is NOT authentically signed by Sparcle.\n  Do not run it. Re-download from https://sparcle.app/download or contact security@sparcle.app."
+        warn "Could not decode signature for ${fname} — skipping minisign check (SHA-256 result stands)."
       fi
     fi
   fi

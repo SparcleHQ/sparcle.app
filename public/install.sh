@@ -303,6 +303,27 @@ seed_embedded_postgres_runtime() {
   triple=$(runtime_asset_triple)
   [ -n "$triple" ] || return 0
 
+  # If the installed app already BUNDLES the required PostgreSQL version, skip the
+  # network download entirely — the app's own prewarm seeds from that bundle
+  # (fully offline install). Fat-packaged platforms carry a bundle: macOS DMG and
+  # the Linux .deb (resources install to /usr/lib/<Product>/); the Linux AppImage
+  # and lean platforms fall through to the download below. Detection is by the
+  # shipped <version>.tar.gz under the app's embedded-postgres resources.
+  if [ "$PLATFORM" = "macos" ] && [ -n "${INSTALL_APP_PATH:-}" ]; then
+    bundled_res="${INSTALL_APP_PATH}/Contents/Resources/embedded-postgres"
+    if [ -d "$bundled_res" ] && ls "$bundled_res"/*/"${runtime_version}.tar.gz" >/dev/null 2>&1; then
+      info "App bundles PostgreSQL ${runtime_version} — skipping download (offline seed on first launch)"
+      return 0
+    fi
+  fi
+  if [ "$PLATFORM" = "linux" ]; then
+    # Tauri .deb installs to /usr/lib/<ProductName>/embedded-postgres/<key>/<ver>.tar.gz
+    if ls /usr/lib/*/embedded-postgres/*/"${runtime_version}.tar.gz" >/dev/null 2>&1; then
+      info "App bundles PostgreSQL ${runtime_version} — skipping download (offline seed on first launch)"
+      return 0
+    fi
+  fi
+
   case "$PLATFORM" in
     macos)
       base_dir="${HOME}/Library/Application Support/${app_identifier}"

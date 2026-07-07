@@ -424,6 +424,47 @@ stop_running_linux_app() {
   sleep 1
 }
 
+# Print PIDs of running .deb-installed Bolt processes — the GUI binary `bolt`
+# and the sidecar `bolt-api`. A Tauri .deb names its binaries after the Cargo
+# package (`bolt`), NOT the productName ("Bolt Enterprise"), so we match by the
+# /proc/<pid>/exe basename rather than a cmdline substring. Excludes self.
+running_bolt_deb_pids() {
+  command -v pgrep >/dev/null 2>&1 || return 0
+  pgrep -f -- '/bolt' 2>/dev/null | while IFS= read -r pid; do
+    [ -n "$pid" ] || continue
+    [ "$pid" = "$$" ] && continue
+    exe_base=$(basename "$(readlink -f "/proc/$pid/exe" 2>/dev/null || true)" 2>/dev/null || printf '')
+    case "$exe_base" in
+      bolt|bolt-api) printf '%s\n' "$pid" ;;
+    esac
+  done
+}
+
+# Stop the installed .deb's running processes BEFORE dpkg swaps the binaries.
+# The old stop logic targeted the AppImage path and `pkill -f "Bolt-Enterprise"`,
+# neither of which matches a running `/usr/bin/bolt`, so an upgrade never killed
+# the old app: it stayed frontmost, kept serving :13018 (so the health check
+# passed on STALE code → "is running!" while showing the old version), and
+# tauri-plugin-single-instance swallowed the fresh launch by focusing the old
+# window. TERM → poll to exit → SIGKILL, mirroring the macOS bundle-replace path;
+# killing bolt-api also frees the embedded Postgres cluster for the fresh launch.
+stop_installed_deb_processes() {
+  pids=$(running_bolt_deb_pids)
+  [ -n "$pids" ] || return 0
+  for pid in $pids; do kill "$pid" 2>/dev/null || true; done
+  _stop_deadline=$(( $(date +%s) + 8 ))
+  while :; do
+    remaining=$(running_bolt_deb_pids)
+    [ -n "$remaining" ] || break
+    if [ "$(date +%s)" -ge "$_stop_deadline" ]; then
+      for pid in $remaining; do kill -9 "$pid" 2>/dev/null || true; done
+      break
+    fi
+    sleep 0.3
+  done
+  sleep 0.5
+}
+
 launch_linux_app() {
   app_path="$1"
   app_name="$2"
@@ -945,11 +986,16 @@ install_linux_deb() {
 
   cleanup_legacy_linux_native_install "${APP_FILE_NAME}"
 
-  # Stop any running instance
+  # Stop any running instance BEFORE dpkg swaps the on-disk binaries. Two cases:
+  #  - migrating from a prior AppImage install at ~/.local/bin (stop_running_linux_app)
+  #  - upgrading an existing .deb whose real processes are `bolt` + `bolt-api`
+  #    (stop_installed_deb_processes). The old `pkill -f "${APP_FILE_NAME}"` matched
+  #    neither — the running cmdline is `/usr/bin/bolt`, which contains no
+  #    "Bolt-Enterprise" — so the old app was never stopped and the "upgrade"
+  #    kept running old in-memory code (see stop_installed_deb_processes).
   APPIMAGE_PATH="${HOME}/.local/bin/${APP_FILE_NAME}.AppImage"
   stop_running_linux_app "${APPIMAGE_PATH}"
-  pkill -f "${APP_FILE_NAME}" 2>/dev/null || true
-  sleep 1
+  stop_installed_deb_processes
 
   # Remove old AppImage if switching to .deb
   rm -f "${APPIMAGE_PATH}" 2>/dev/null || true

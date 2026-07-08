@@ -45,7 +45,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.4rem}
 .card{background:var(--cardgrad),var(--s);border:1px solid var(--hair);border-radius:14px;padding:1.3rem 1.25rem;box-shadow:var(--elev);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s ease,border-color .24s ease}
 .card:hover{transform:translateY(-5px);border-color:var(--ab);box-shadow:var(--elevh)}
-.card .ci{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(155deg,var(--ab),rgba(255,255,255,0));border:1px solid var(--ab);border-radius:11px;color:var(--a);margin-bottom:.85rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 6px 14px -8px var(--aglow);transition:transform .24s cubic-bezier(.2,.7,.2,1)}
+.card .ci{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(155deg,var(--ab),rgba(255,255,255,0));border:1px solid var(--ab);border-radius:11px;color:var(--a);margin-bottom:.85rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.1);transition:transform .24s cubic-bezier(.2,.7,.2,1)}
 .card:hover .ci{transform:translateY(-1px) scale(1.04)}
 .card h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem;letter-spacing:-.01em;color:var(--t)}
 .card p{font-size:.88rem;color:var(--t2);line-height:1.5}
@@ -54,7 +54,7 @@ html,body{width:100vw;height:100dvh;font-size:clamp(13px,1.45vw,22px);font-famil
 .dcol,.spanel,.bcol,.tnode,.layer{background:var(--cardgrad),var(--s);box-shadow:var(--elev);transition:transform .24s cubic-bezier(.2,.7,.2,1),box-shadow .24s ease,border-color .24s ease}
 .dcol:hover,.spanel:hover,.bcol:hover,.tnode:hover,.layer:hover{transform:translateY(-5px);box-shadow:var(--elevh)}
 .dcol:hover,.bcol:hover,.tnode:hover{border-color:var(--ab)}
-.layer .li,.tnode .ti{background:linear-gradient(155deg,var(--ab),rgba(255,255,255,0));border:1px solid var(--ab);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 5px 12px -8px var(--aglow)}
+.layer .li,.tnode .ti{background:linear-gradient(155deg,var(--ab),rgba(255,255,255,0));border:1px solid var(--ab);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
 /* red-glow grammar for risks and negatives */
 .bad{color:var(--r);-webkit-text-fill-color:currentColor;font-weight:inherit;text-shadow:0 0 16px rgba(248,113,113,.55)}
 [data-theme="light"] .bad{text-shadow:0 0 12px rgba(220,38,38,.3)}

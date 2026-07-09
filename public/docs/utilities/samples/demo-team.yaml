@@ -1,10 +1,11 @@
-# =team — directory lookup of teammates with composite actions.
+# =demo-team — directory lookup of teammates with composite actions.
 # Reference manifest demonstrating: Person canonical type, the transform:
 # jq node (filtering out self from peer list), composite actions
 # (email/chat composer + schedule_meeting tool + profile url).
 schema_version: 1
-id: team
-chip: =team
+id: demo-team
+chip: =demo-team
+demo: true
 title: My Team
 icon: users
 description: List your direct reports or peers under your manager.
@@ -133,10 +134,12 @@ presentation:
       subtitle: '{{row.title}} | {{row.department | default:''-''}}'
       image_url: '{{row.photo_url}}'
       fields:
-        - { label: Manager,  value: '{{row.manager_name | default:''-''}}' }
-        - { label: Location, value: '{{row.location | default:''-''}}' }
-        - { label: Pronouns, value: '{{row.pronouns | default:''-''}}' }
-        - { label: Joined,   value: '{{row.start_date | date:''long''}}' }
+        - { label: Email,      value: '{{row.email | default:''-''}}' }
+        - { label: Department, value: '{{row.department | default:''-''}}' }
+        - { label: Manager,    value: '{{row.manager_name | default:''-''}}' }
+        - { label: Location,   value: '{{row.location | default:''-''}}' }
+        - { label: Pronouns,   value: '{{row.pronouns | default:''-''}}' }
+        - { label: Joined,     value: '{{row.start_date | date:''long''}}' }
       actions:
         - email
         - chat

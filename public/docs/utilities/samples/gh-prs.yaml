@@ -25,6 +25,17 @@ detect:
     windows: "gh auth status"
   config_hint: ["~/.config/gh"]
   refresh: on_focus
+  # Display-only guidance. Bolt shows (never runs) these so you can sign in or
+  # install gh yourself. Official sources only.
+  setup:
+    unlock: "Bring your GitHub pull requests into the launcher. It runs as you, on this device, and stores no token."
+    signin:
+      macos: "gh auth login"
+      linux: "gh auth login"
+      windows: "gh auth login"
+    install:
+      macos: "brew install gh"
+      windows: "winget install GitHub.cli"
 
 args:
   - { name: q, from: "query.word(0)", default: "archived:false" }
@@ -55,13 +66,20 @@ presentation:
     mode: selected_row
     bind:
       title: "{{row.title}}"
-      subtitle: "{{row.repo}}#{{row.number}}"
+      # Identity matches =github/=gh (kind · repo#number) so the =git door's
+      # header reads identically across sources.
+      subtitle: "PR · {{row.repo}}#{{row.number}}"
+      # CANONICAL PR/MR field set — IDENTICAL to =github / =gh / =gitlab /
+      # =gl-mrs so the unified =git door's surface never changes with the
+      # source. The gh CLI fills every fact (Checks/Review/Merge/Diff/Branch);
+      # the MCP/PAT sources show "—" for the ones their response lacks.
       fields:
         - { label: State, value: "{{row.state}}", kind: badge }
         - { label: Checks, value: "{{row.checks}}", kind: badge }
         - { label: Review, value: "{{row.review}}", kind: badge }
         - { label: Merge, value: "{{row.merge}}", kind: badge }
         - { label: Diff, value: "{{row.diff}}", kind: diff }
+        - { label: Branch, value: "{{row.branch}}", kind: branch }
         - { label: Author, value: "@{{row.author}}" }
         - { label: Comments, value: "{{row.comments}}" }
         - { label: Updated, value: "{{row.updated | date:'rel'}}" }

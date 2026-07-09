@@ -1,3 +1,36 @@
+# =slack — Slack (official remote MCP, https://mcp.slack.com/mcp).
+#
+# STATUS: enabled:false. Unlike =notion / =linear (whose vendors publish a
+# verbatim tool catalog), Slack publishes NO tool-name or argument reference —
+# its docs (https://docs.slack.dev/ai/slack-mcp-server/, GA 2026-02-17)
+# describe only capabilities ("Search messages & files", "Read a channel", …).
+# The real tool ids + arg keys are discoverable ONLY at runtime via `tools/list`
+# against an authenticated, admin-approved mcp.slack.com connection, which is
+# not reproducible headlessly. So the contract is internally validated +
+# golden-tested (utility_runtime/builtin_tests.rs) but the live tool id/args
+# stay unverified.
+#
+# RE-ENABLE GATE (one live check, then flip enabled:true):
+#   1. Confirm the search tool's verbatim id. This manifest assumes
+#      `search_messages` (the most likely name) — UNVERIFIED.
+#   2. Confirm its arg keys (assumed `query` + `count`) and the result
+#      envelope/leaf field paths against a real response.
+#
+# VERIFIED against the docs (2026-06-24):
+#   • base url mcp.slack.com/mcp; confidential OAuth 2.0, no DCR — the connect
+#     recipe lives in providers/mcp/templates.rs slack().
+#   • Message search now uses the GRANULAR scope `search:read.public` (public
+#     channels). The pre-2026 single `search:read` no longer exists. Private
+#     channels / DMs need search:read.private / .im / .mpim with user consent
+#     (deliberately not requested here — public search is the safe default).
+#
+# Response envelope: real MCP servers wrap payloads in `structured_content`
+# (MCP spec), and Slack's underlying search.messages nests results under
+# `messages.matches[]` with an object `channel` ({id,name}) and `username`. The
+# transform below is defensive exactly like =notion / =jira-cloud: it unwraps
+# structured_content[.data] and walks the message array out of whichever key the
+# server uses (messages.matches / messages / matches / results / items / a bare
+# array), tolerating both the nested real-search shape and a flat shape.
 schema_version: 1
 id: slack
 chip: =slack
@@ -10,8 +43,10 @@ auth_profile_ref: slack_user
 requires:
   - mcp: slack
     version: ^1
+    # `search_messages` is the ASSUMED tool id — confirm via tools/list before
+    # enabling (Slack publishes no tool-name reference). See header gate.
     tools: [search_messages]
-    scopes: [search:read]
+    scopes: [search:read.public]
 
 scopes:
   - id: search
@@ -26,8 +61,33 @@ scopes:
             query: '{{query | default:''from:me''}}'
             count: '{{limit}}'
         out: r
-      - emit: r
-        path: /messages
+      # Defensive unwrap + array walk (see header) → flat rows the presentation
+      # binds directly. `?` suppresses index-on-array errors so each `//`
+      # alternative falls through cleanly.
+      - transform: |
+          ((.r.structured_content?.data? // .r.structured_content? // .r) // {}) as $p
+          | ( ($p.messages?.matches?)
+              // (($p.messages?) | if type == "array" then . else empty end)
+              // ($p.matches?)
+              // ($p.results?)
+              // ($p.items?)
+              // ($p | if type == "array" then . else empty end)
+              // [] ) as $msgs
+          | ($msgs | map(
+              . as $m
+              | (if ($m.channel | type) == "object"
+                   then ($m.channel.name // $m.channel.id)
+                   else ($m.channel_name // $m.channel) end) as $chan
+              | {
+                  ts: ($m.ts // $m.timestamp // ""),
+                  channel_name: ($chan // "—"),
+                  user_name: ($m.user_name // $m.username // $m.user // "unknown"),
+                  text: ($m.text // ""),
+                  permalink: ($m.permalink // "")
+                }
+            ))
+        out: rows
+      - emit: rows
 
 actions:
   - id: open
@@ -45,7 +105,9 @@ presentation:
   search_fields: [text, channel_name]
   sort_field: ts
   sort_order: desc
-  row_key_field: ts
+  # permalink is unique + stable per message; ts can collide across messages
+  # (each_key_duplicate crash risk in the list renderer).
+  row_key_field: permalink
   searchable: true
   right_widget:
     kind: card
@@ -57,9 +119,9 @@ presentation:
         - { label: When, value: '{{row.ts | date:''rel''}}' }
       actions: [open]
 
-# Disabled by default 2026-06-13 -- drifted/unverified MCP contract (utilities audit):
-#   team=no such MCP, figma=invented tool, jira=use =jira-cloud, outlook/slack=wrong args.
-# Manifest kept as a template; re-enable after the tool+arg contract is verified live.
+# enabled:false — see header. Internally validated + golden-tested, but the live
+# tool id/args/result shape are unverified against mcp.slack.com. Re-enable after
+# the live tools/list check in the header gate.
 enabled: false
 provisioning_mode: public
 departments: []

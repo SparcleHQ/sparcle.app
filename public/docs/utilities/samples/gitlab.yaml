@@ -152,7 +152,23 @@ scopes:
                     updated: ($mr.updated_at // "—"),
                     description: ((if ($mr.description | type) == "string" then $mr.description else "" end)
                                   | if length > 280 then (.[0:277] + "…") else . end
-                                  | if . == "" then "No description" else . end)
+                                  | if . == "" then "No description" else . end),
+                    # CANONICAL PR/MR field set (shared with =github / =gh /
+                    # =gh-prs / =gl-mrs) so the =git door is field-identical
+                    # across sources. Computed from the MR object where present;
+                    # the list response has no CI/review data, so those are "—".
+                    # `author`/`merge`/`branch`/`body` alias the GitLab-shaped
+                    # keys onto the unified field names the shared widget binds.
+                    author: ($au.name // $au.username // "—"),
+                    merge: ($mr.merge_status // "—"),
+                    branch: ("⎇ " + ($mr.source_branch // "—") + " → " + ($mr.target_branch // "—")),
+                    checks: "—",
+                    review: "—",
+                    diff: "—",
+                    comments: ($mr.user_notes_count // 0),
+                    body: ((if ($mr.description | type) == "string" then $mr.description else "" end)
+                            | if length > 280 then (.[0:277] + "…") else . end
+                            | if . == "" then "No description" else . end)
                   }
               ))
         out: enriched
@@ -300,17 +316,26 @@ presentation:
     mode: selected_row
     bind:
       title: '{{row.title}}'
-      subtitle: '{{row.key}}'
+      # Identity matches =github (kind · path!iid). MR is the GitLab "kind".
+      subtitle: 'MR · {{row.key}}'
       image_url: '{{row.authorAvatar}}'
+      # CANONICAL PR/MR field set — IDENTICAL to =github / =gh / =gh-prs /
+      # =gl-mrs so the unified =git door's surface never changes with the
+      # source. The MR list response has no CI/review data → "—"; merge/branch
+      # come from the MR object. (GitLab-only Assignees folds into the body so
+      # the shared field set stays field-identical.)
       fields:
-        - { label: State,     value: '{{row.state}}', kind: badge }
-        - { label: Merge,     value: '{{row.mergeStatus}}', kind: badge }
-        - { label: Branch,    value: '⎇ {{row.sourceBranch}} → {{row.targetBranch}}', kind: branch }
-        - { label: Author,    value: '{{row.authorName}}' }
-        - { label: Assignees, value: '{{row.assignees}}' }
-        - { label: Updated,   value: '{{row.updated | date:''rel''}}' }
-        - { label: Labels,    value: '{{row.labels}}', kind: chips }
-      body: '{{row.description}}'
+        - { label: State,    value: '{{row.state}}', kind: badge }
+        - { label: Checks,   value: '{{row.checks}}', kind: badge }
+        - { label: Review,   value: '{{row.review}}', kind: badge }
+        - { label: Merge,    value: '{{row.merge}}', kind: badge }
+        - { label: Diff,     value: '{{row.diff}}', kind: diff }
+        - { label: Branch,   value: '{{row.branch}}', kind: branch }
+        - { label: Author,   value: '@{{row.author}}' }
+        - { label: Comments, value: '{{row.comments}}' }
+        - { label: Updated,  value: '{{row.updated | date:''rel''}}' }
+        - { label: Labels,   value: '{{row.labels}}', kind: chips }
+      body: '{{row.body}}'
       actions:
         - open
 

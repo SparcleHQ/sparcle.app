@@ -375,7 +375,7 @@ scopes:
           - call: *resources_call
             out: site
           - transform: |
-              (.query // "") as $q
+              ((.query // "") | gsub("^\\s+";"") | gsub("\\s+$";"")) as $q
               | if ($q | test("(?i)( = | != | ~ | in |order by|currentuser\\()")) then { jql: $q }
                 else
                   ([ $q | scan("([A-Za-z]+):(\"[^\"]+\"|[^ ]+)") ]) as $pairs

@@ -1,0 +1,167 @@
+# =gh — your GitHub issues & PRs, direct from the GitHub REST API with a
+# personal access token you paste. NO admin, NO OAuth app, NO MCP server — the
+# no-IT fallback rung for GitHub (the OAuth/MCP path is =github).
+#
+# How auth works: auth_profile_ref `github_pat` (type personal_token, provider
+# `github-pat`). When you have no token yet the runtime returns `needs_credentials`
+# (paste your PAT). Once stored, the runtime attaches it as `Authorization:
+# Bearer <token>` on every call below — GitHub accepts a classic/fine-grained PAT
+# that way. The token is never written into this manifest and never logged.
+#
+# Get a token: GitHub → Settings → Developer settings → Personal access tokens →
+# Tokens (classic) → scopes `repo` + `read:user`.
+schema_version: 1
+id: gh
+chip: =gh
+title: GitHub (my work)
+icon: github
+description: Your open GitHub issues and pull requests, via a personal token (no IT).
+placeholder_examples:
+  - "flaky test"
+  - "needs review"
+emits: Issue
+auth_profile_ref: github_pat
+
+# confirm = a network call, don't hammer GitHub on every keystroke. The default
+# scope (your assigned open issues/PRs) auto-loads; typed text filters the loaded
+# rows client-side via the searchable fields below.
+dispatch:
+  mode: confirm
+  confirm_label: 'Load your GitHub work'
+  confirm_hint: Press Enter to load your assigned issues and PRs
+
+scopes:
+  # DEFAULT: issues and PRs assigned to you, open, most-recently-updated first.
+  # GET /issues returns items across every repo you can see; the PAT identifies
+  # the user, so no org/user id is guessed here.
+  - id: mine
+    label: My open work
+    default: true
+    flow:
+      - call:
+          kind: http
+          method: GET
+          url: https://api.github.com/issues
+          query:
+            filter: assigned
+            state: open
+            sort: updated
+            direction: desc
+            per_page: '{{limit}}'
+          headers:
+            # Authorization: Bearer <PAT> is attached by the runtime (do NOT set
+            # it here). These are GitHub's required/recommended REST headers.
+            Accept: application/vnd.github+json
+            X-GitHub-Api-Version: '2022-11-28'
+            User-Agent: Bolt
+        out: r
+      - transform: |
+          (.r // []) as $raw
+          | ($raw | if type == "array" then . else [] end) as $issues
+          | ($issues | map(
+              . as $i
+              | (("#" + (($i.number? // 0) | tostring))) as $key
+              | ([ $key,
+                   ($i.repository?.full_name? // empty),
+                   ($i.state? // empty),
+                   (if ($i.pull_request?) != null then "PR" else empty end) ]
+                 | map(select(. != null and . != "")) | join("  ·  ")) as $subline
+              | {
+                  id: (($i.id? // $i.number? // 0) | tostring),
+                  key: $key,
+                  number: ($i.number? // 0),
+                  title: ($i.title? // "(no title)"),
+                  _url: ($i.html_url? // ""),
+                  state: ($i.state? // "open"),
+                  itemType: (if ($i.pull_request?) != null then "PR" else "Issue" end),
+                  repo: ($i.repository?.full_name? // "—"),
+                  author: ($i.user?.login? // "—"),
+                  authorAvatar: ($i.user?.avatar_url? // ""),
+                  labels: (($i.labels? // []) | map(.name?) | map(select(. != null and . != "")) | join(", ")),
+                  updated: ($i.updated_at? // "—"),
+                  comments: ($i.comments? // 0),
+                  # CANONICAL PR/MR field set (shared with =github / =gh-prs /
+                  # =gitlab / =gl-mrs). GET /issues carries no CI / review /
+                  # merge / branch data, so these are "—"; the gh CLI source
+                  # fills them. Keeps the =git door field-identical per source.
+                  checks: "—",
+                  review: "—",
+                  merge: "—",
+                  diff: "—",
+                  branch: "—",
+                  subline: $subline
+                }
+            ))
+        out: enriched
+      - emit: enriched
+
+filters:
+  - id: state
+    kind: enum
+    label: State
+    apply: pre
+    maps_to: state
+    static:
+      - open
+      - closed
+      - all
+
+actions:
+  - id: open
+    kind: url
+    target: row
+    label: Open in GitHub
+    icon: external_link
+    url_template: '{{row._url}}'
+
+presentation:
+  widget: list
+  title_field: title
+  subtitle_field: subline
+  list_fields:
+    - key
+    - title
+    - state
+    - repo
+  search_fields:
+    - key
+    - title
+    - state
+    - repo
+    - author
+    - labels
+  sort_field: updated
+  sort_order: desc
+  row_key_field: id
+  searchable: true
+  filterable: true
+  right_widget:
+    kind: entity_preview
+    mode: selected_row
+    bind:
+      title: '{{row.title}}'
+      # Identity matches =github: kind · repo#number (one place, not repeated as
+      # a fact), so the =git door's header reads identically across sources.
+      subtitle: '{{row.itemType}} · {{row.repo}}#{{row.number}}'
+      image_url: '{{row.authorAvatar}}'
+      # CANONICAL PR/MR field set — IDENTICAL to =github / =gh-prs / =gitlab /
+      # =gl-mrs. GET /issues has no CI/review/merge/branch, so those show "—".
+      fields:
+        - { label: State,    value: '{{row.state}}', kind: badge }
+        - { label: Checks,   value: '{{row.checks}}', kind: badge }
+        - { label: Review,   value: '{{row.review}}', kind: badge }
+        - { label: Merge,    value: '{{row.merge}}', kind: badge }
+        - { label: Diff,     value: '{{row.diff}}', kind: diff }
+        - { label: Branch,   value: '{{row.branch}}', kind: branch }
+        - { label: Author,   value: '@{{row.author}}' }
+        - { label: Comments, value: '{{row.comments}}' }
+        - { label: Updated,  value: '{{row.updated | date:''rel''}}' }
+        - { label: Labels,   value: '{{row.labels}}', kind: chips }
+      actions:
+        - open
+
+enabled: true
+provisioning_mode: public
+departments: []
+roles: []
+groups: []

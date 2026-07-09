@@ -2,7 +2,7 @@
 # rendered as a red/green line diff in the right pane.
 #
 # CLI-backed: the chip only appears once `git` is installed. Type a tracked
-# file path (or a directory → its first changed tracked file). bolt-gitdiff.py
+# file path (or a directory → its first changed tracked file). bolt-gitdiff.sh
 # resolves the repo, reads the HEAD blob + the working-tree content, and emits
 # ONE parse:json row { file, title, subtitle, left, right } that the diff
 # widget renders as a unified HEAD → working-tree diff.
@@ -21,9 +21,9 @@ detect:
 
 bridge:
   command:
-    macos: "python3 {{scripts_dir}}/bolt-gitdiff.py {{target}}"
-    linux: "python3 {{scripts_dir}}/bolt-gitdiff.py {{target}}"
-    windows: "python {{scripts_dir}}/bolt-gitdiff.py {{target}}"
+    macos: "sh {{scripts_dir}}/bolt-gitdiff.sh {{target}}"
+    linux: "sh {{scripts_dir}}/bolt-gitdiff.sh {{target}}"
+    windows: "sh {{scripts_dir}}/bolt-gitdiff.sh {{target}}"
   parse: json
   timeout_seconds: 5
 

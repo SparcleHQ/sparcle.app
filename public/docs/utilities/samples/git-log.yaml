@@ -1,5 +1,6 @@
 # =git-log — recent commits of a repo as structured rows + a wide detail pane.
-# Type a repo NAME (resolved under ~/dev|src|Projects|~) or a path, optionally
+# Type a repo NAME (resolved against your project folders — Settings →
+# Folders & Projects) or a path, optionally
 # a count: "bolt-pwa 40". Upgraded from raw `git log --oneline` lines to parsed
 # rows (sha/subject/author/date) with the full commit message in the pane.
 schema_version: 1
@@ -18,9 +19,9 @@ detect:
 
 bridge:
   command:
-    macos: "python3 {{scripts_dir}}/bolt-gitlog.py {{repo}} {{limit}}"
-    linux: "python3 {{scripts_dir}}/bolt-gitlog.py {{repo}} {{limit}}"
-    windows: "python {{scripts_dir}}/bolt-gitlog.py {{repo}} {{limit}}"
+    macos: "sh {{scripts_dir}}/bolt-gitlog.sh {{repo}} {{limit}}"
+    linux: "sh {{scripts_dir}}/bolt-gitlog.sh {{repo}} {{limit}}"
+    windows: "sh {{scripts_dir}}/bolt-gitlog.sh {{repo}} {{limit}}"
   parse: json
   timeout_seconds: 8
 

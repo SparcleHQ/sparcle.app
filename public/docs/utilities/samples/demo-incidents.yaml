@@ -1,11 +1,12 @@
-# =incidents — unified active-incident view across PagerDuty, Datadog, and
+# =demo-incidents — unified active-incident view across PagerDuty, Datadog, and
 # ServiceNow. Reference manifest demonstrating: parallel: fan-out, merge:
 # combining heterogeneous arrays into a unified row shape with per-source
 # JSON-pointer mappings, source_tag_field for routing per-source actions,
 # tolerate_failures so a single bad MCP doesn't break the whole utility.
 schema_version: 1
-id: incidents
-chip: =incidents
+id: demo-incidents
+chip: =demo-incidents
+demo: true
 title: Active Incidents
 icon: alert-triangle
 description: PagerDuty + Datadog + ServiceNow incidents in one list.
@@ -137,9 +138,11 @@ presentation:
       title: '{{row.title}}'
       subtitle: '{{row.source}} | sev {{row.severity}}'
       fields:
-        - { label: Opened, value: '{{row.opened | date:''rel''}}' }
-        - { label: Source, value: '{{row.source | upper}}' }
+        - { label: Opened,   value: '{{row.opened | date:''rel''}}' }
         - { label: Severity, value: '{{row.severity}}' }
+        - { label: Source,   value: '{{row.source | upper}}' }
+        - { label: ID,       value: '{{row.id}}' }
+        - { label: Link,     value: '{{row.url}}' }
       actions:
         - open
         - ack

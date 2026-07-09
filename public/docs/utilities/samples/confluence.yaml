@@ -30,12 +30,14 @@ id: confluence
 chip: =confluence
 title: Confluence (Cloud)
 icon: book-open
-description: Search Confluence pages and look them up by space (Atlassian Cloud).
+description: Search Confluence pages by space, title, label, type, author, or hierarchy (Atlassian Cloud), with a full rich page preview.
 placeholder_examples:
   - "release notes"
-  - "onboarding"
   - "space:ENG architecture"
-  - "anything in a page title or body"
+  - "space:HR,Marketing title:roadmap"
+  - "label:policy sort:updated"
+  - "type:blogpost author:alex"
+  - "ancestor:123456  (children of a page)"
 emits: Document
 # Token lives under MCP id `mcp-atlassian-com` (where OAuth was completed) and
 # the Confluence content scope. Using the generic `confluence_user` profile
@@ -91,9 +93,12 @@ scopes:
             cql: 'type = page ORDER BY lastmodified DESC'
             limit: '{{limit}}'
             # Expand the result's content so space{key,name} + version.when
-            # (ISO timestamp) come back — without this the Remote MCP omits the
-            # space name (card showed "—") and the modified date.
-            expand: 'content.space,content.version'
+            # (ISO timestamp) + body.view (server-rendered page HTML for the
+            # right preview pane) come back inline — one search call, no per-row
+            # getConfluencePage fan-out. Without space/version the Remote MCP
+            # omits the space name (card showed "—") and the modified date;
+            # without body.view the preview pane has only the search excerpt.
+            expand: 'content.space,content.version,content.body.view'
         out: r
       # Normalize whatever envelope the dispatcher/MCP produces
       # ({structured_content:{data:{results}}}, flat {results}, {nodes},
@@ -122,7 +127,7 @@ scopes:
                 . as $res
                 | ($res.content // $res) as $c
                 | ($c.space // $res.space // {}) as $sp
-                | ($res.user // $c.history?.createdBy // {}) as $usr
+                | ($res.user // $c.history?.createdBy? // {}) as $usr
                 | ($c._links // {}) as $cl
                 # URL precedence: search response's _links.base + content._links.webui
                 # (most accurate, includes the page title slug); fall back to
@@ -146,7 +151,7 @@ scopes:
                 # friendlyLastModified ("2 days ago") is the last-resort fallback —
                 # the client date filter passes unparseable strings through as-is.
                 | ( ($res.lastModified
-                     // $c.version?.when // $c.history?.lastUpdated?.when
+                     // $c.version?.when? // $c.history?.lastUpdated?.when?
                      // $res.friendlyLastModified // "—") ) as $modified
                 | (($c.type // "page")) as $ctype
                 # Humanize the content type for the card subtitle/facts.
@@ -158,6 +163,19 @@ scopes:
                       then ($sp.name + (if (($sp.key // "") | length) > 0
                                         then " (" + $sp.key + ")" else "" end))
                     else "—" end ) as $spaceLabel
+                # Full rendered page body for the right preview pane. The CQL
+                # search returns it inline when `content.body.view` is expanded
+                # (view = the server-rendered XHTML — macros resolved, headings,
+                # tables, lists, links). It rides through the client's
+                # renderRichMarkdown(), which feeds it to marked (HTML passes
+                # through) then DOMPurify — so this raw page HTML is SANITIZED at
+                # the render chokepoint; no script/onload survives. Fall back to
+                # the storage format, then the search excerpt, so a page with no
+                # expandable view still shows something. Capped so a giant page
+                # doesn't bloat every list row's payload.
+                | ( ($c.body?.view?.value? // $c.body?.storage?.value?
+                     // $res.excerpt? // "") ) as $bodyRaw
+                | ( if ($bodyRaw | length) > 24000 then ($bodyRaw[0:24000] + "\n\n…") else $bodyRaw end ) as $bodyHtml
                 | {
                     id: ($c.id // $res.id // ""),
                     title: ($c.title // $res.title // "(untitled)"),
@@ -173,8 +191,13 @@ scopes:
                               | if length > 280 then (.[0:277] + "…") else . end
                               | if . == "" then "No preview" else . end),
                     authorName: ($usr.displayName // $usr.publicName // "—"),
-                    authorAvatar: ($usr.profilePicture?.path // ""),
+                    authorAvatar: ($usr.profilePicture?.path? // ""),
                     lastModified: $modified,
+                    # Rich body for the right preview pane (renderRichMarkdown →
+                    # sanitized). Empty when the page had no expandable body —
+                    # the pane then simply omits the body section (no
+                    # placeholder), and the Preview-excerpt fact still shows.
+                    body: $bodyHtml,
                     subline: ([ ($sp.name // empty), $typeLabel ]
                               | map(select(. != null and . != "")) | join("  ·  "))
                   }
@@ -183,90 +206,74 @@ scopes:
       - emit: enriched
 
   # Typing after the chip searches all of Confluence.
+  #
+  # ONE converged CQL builder (replaces the old per-token forked branches —
+  # space:/author:/text were three near-identical flows that drifted; §1). A
+  # single jq pass parses ALL `key:value` tokens out of the raw query and
+  # compiles ONE safe CQL string, so every token shares the same escaping,
+  # type-restriction, and ordering rule — no path can skip a fix applied to
+  # another. Supported tokens (compile to the real CQL surface):
+  #   space:KEY          → space = "KEY"        (KEY,KEY2 → space IN (...))
+  #   title:foo          → title ~ "foo*"
+  #   label:policy       → label = "policy"     (a,b → label IN (...))
+  #   type:page|blogpost → type = page          (overrides the default page-only)
+  #   author:user        → creator = "user"     (alias: creator:)
+  #   ancestor:<pageId>  → ancestor = <id>      (descendants → hierarchy view)
+  #   parent:<pageId>    → parent = <id>        (direct children)
+  #   sort:updated|created|title  → ORDER BY ... DESC  (alias: order:)
+  #   <bare words>       → (title ~ "words*" OR text ~ "words")
+  # All string literals are escaped for the CQL literal (\\ and " doubled),
+  # mirroring jql_escape. Numeric ids (ancestor/parent) and the type/sort enums
+  # are allow-listed, never interpolated raw, so the CQL can't be injected.
   - id: search
     label: Search
     match:
-      # space:KEY [free text] → scope the CQL to that space. The KEY is escaped
-      # for the CQL string literal; remaining words become a text/title match.
-      - regex: '^space:(?P<space>[A-Za-z0-9_]+)\s*(?P<rest>.*)$'
-        bind:
-          space: '{{groups.space}}'
-          rest: '{{groups.rest}}'
-        flow:
-          - call: *resources_call
-            out: site
-          # Build CQL declaratively so the space key and free text are escaped
-          # for the CQL string literal (jql_escape is the CQL-compatible string
-          # escaper here — both reject stray quotes/backslashes the same way).
-          - transform: |
-              (.groups.space // "") as $sp
-              | (.groups.rest // "" | gsub("^\\s+|\\s+$"; "")) as $txt
-              | { cql: ("space = \"" + ($sp | gsub("\""; "\\\"")) + "\""
-                        + (if ($txt | length) > 0
-                           then " AND (title ~ \"" + ($txt | gsub("\""; "\\\"")) + "*\""
-                                + " OR text ~ \"" + ($txt | gsub("\""; "\\\"")) + "\")"
-                           else "" end)
-                        + " AND type = page ORDER BY lastmodified DESC") }
-            out: q
-          - call:
-              kind: mcp
-              mcp: mcp-atlassian-com
-              tool: searchConfluenceUsingCql
-              args:
-                cql: '{{q.cql}}'
-                limit: '{{limit}}'
-                expand: 'content.space,content.version'
-            out: r
-          - transform: *pages_to_rows
-            out: enriched
-          - emit: enriched
-      # `author:user [free text]` — Confluence creator-scoped search. CQL
-      # `creator` accepts username (older sites) or accountId (modern); the
-      # MCP accepts either string and lets Atlassian resolve. We pass the
-      # raw value escaped for the CQL string literal.
-      - regex: '^author:(?P<author>[^\s]+)\s*(?P<rest>.*)$'
-        bind:
-          author: '{{groups.author}}'
-          rest: '{{groups.rest}}'
-        flow:
-          - call: *resources_call
-            out: site
-          - transform: |
-              (.groups.author // "") as $a
-              | (.groups.rest // "" | gsub("^\\s+|\\s+$"; "")) as $txt
-              | { cql: ("creator = \"" + ($a | gsub("\""; "\\\"")) + "\""
-                        + (if ($txt | length) > 0
-                           then " AND (title ~ \"" + ($txt | gsub("\""; "\\\"")) + "*\""
-                                + " OR text ~ \"" + ($txt | gsub("\""; "\\\"")) + "\")"
-                           else "" end)
-                        + " AND type = page ORDER BY lastmodified DESC") }
-            out: q
-          - call:
-              kind: mcp
-              mcp: mcp-atlassian-com
-              tool: searchConfluenceUsingCql
-              args:
-                cql: '{{q.cql}}'
-                limit: '{{limit}}'
-                expand: 'content.space,content.version'
-            out: r
-          - transform: *pages_to_rows
-            out: enriched
-          - emit: enriched
-      # Any other text → title OR text match across all pages. The user text is
-      # escaped for the CQL string literal via jql_escape.
       - text: '{{query}}'
         flow:
           - call: *resources_call
             out: site
+          - transform: &query_to_cql |
+              # Mirrors the jira-cloud JQL builder (same scan→reduce→clauses
+              # idiom, jaq-safe). All `key:value` tokens are scanned out, reduced
+              # into clauses, and joined with AND; leftover bare words become a
+              # fuzzy (title OR text) match. Every string value is doubled-quote
+              # escaped inline. type/sort are allow-listed enums (never raw-
+              # interpolated); ancestor/parent are digit-stripped — so the
+              # composed CQL can't be injected.
+                (.query // "") as $q
+                | if ($q | test("(?i)( = | != | ~ | !~ | in |order by|currentuser\\(|now\\(|startofday\\()")) then { cql: $q }
+                  else
+                    ([ $q | split(" ")[] | select(test(":")) ]) as $pairs
+                    | (reduce $pairs[] as $p ({clauses:[], ctype:null, order:null};
+                        ($p | split(":")) as $kv
+                        | ($kv[0] | ascii_downcase) as $k
+                        | ($kv[1:] | join(":") | sub("^\"";"") | sub("\"$";"") | gsub("\\\\";"\\\\") | gsub("\"";"\\\"")) as $v
+                        | if   $k=="space" then (($v|split(",")) as $ks | if ($ks|length)>1 then .clauses += ["space IN (" + ($ks|map("\"\(.)\"")|join(", ")) + ")"] else .clauses += ["space = \"\($v)\""] end)
+                          elif $k=="label" then (($v|split(",")) as $ls | if ($ls|length)>1 then .clauses += ["label IN (" + ($ls|map("\"\(.)\"")|join(", ")) + ")"] else .clauses += ["label = \"\($v)\""] end)
+                          elif $k=="title"   then .clauses += ["title ~ \"\($v)*\""]
+                          elif $k=="text"    then .clauses += ["text ~ \"\($v)\""]
+                          elif ($k=="author" or $k=="creator") then .clauses += ["creator = \"\($v)\""]
+                          elif ($k=="contributor") then .clauses += ["contributor = \"\($v)\""]
+                          elif $k=="type"    then .ctype = (if (["page","blogpost","attachment","comment"]|index([($v|ascii_downcase)])) then ($v|ascii_downcase) else .ctype end)
+                          elif $k=="ancestor" then (($v|gsub("[^0-9]";"")) as $id | if ($id|length)>0 then .clauses += ["ancestor = \($id)"] else . end)
+                          elif $k=="parent"   then (($v|gsub("[^0-9]";"")) as $id | if ($id|length)>0 then .clauses += ["parent = \($id)"]   else . end)
+                          elif ($k=="sort" or $k=="order") then (($v|ascii_downcase) as $s | if (["created","title"]|index([$s])) then .order = "ORDER BY \($s) DESC" elif ($s=="updated" or $s=="lastmodified" or $s=="modified") then .order = "ORDER BY lastmodified DESC" else . end)
+                          else . end)) as $acc
+                    | ([ $q | split(" ")[] | select(test(":")|not) ] | join(" ") | gsub("\\\\";"\\\\") | gsub("\"";"\\\"")) as $text
+                    | (if ($text|length)>0 then ["(title ~ \"\($text)*\" OR text ~ \"\($text)\")"] else [] end) as $tc
+                    | (if $acc.ctype then "type = \($acc.ctype)" else "type = page" end) as $typeClause
+                    | (($tc + $acc.clauses + [$typeClause]) | join(" AND ")) as $where
+                    | { cql: ($where + " " + ($acc.order // "ORDER BY lastmodified DESC")) }
+                  end
+            out: q
           - call:
               kind: mcp
               mcp: mcp-atlassian-com
               tool: searchConfluenceUsingCql
               args:
-                cql: '(title ~ "{{query | jql_escape}}*" OR text ~ "{{query | jql_escape}}") AND type = page ORDER BY lastmodified DESC'
+                cql: '{{q.cql}}'
                 limit: '{{limit}}'
-                expand: 'content.space,content.version'
+                expand: 'content.space,content.version,content.body.view'
             out: r
           - transform: *pages_to_rows
             out: enriched
@@ -339,8 +346,12 @@ presentation:
   # Clean facts card: no hero image (the Confluence author avatar is a relative
   # path that won't load, and a face is the wrong lead for a doc). subtitle packs
   # the "Space · Type" breadcrumb; the facts list carries the freshness signals;
-  # the excerpt is the last, richest block. The Modified value uses the client
-  # `date:'rel'` filter (now supported) to render "2d ago".
+  # the FULL page body (body.view HTML → renderRichMarkdown → sanitized) is the
+  # last, richest block, scrollable, mirroring the jira-cloud descriptionFull
+  # pattern. The Modified value uses the client `date:'rel'` filter to render
+  # "2d ago". The truncated "Preview" excerpt fact was dropped — the real body
+  # below supersedes it (and `body` falls back to the excerpt when a page has no
+  # expandable view, so a body-less row still shows text).
   right_widget:
     kind: entity_preview
     mode: selected_row
@@ -351,7 +362,7 @@ presentation:
         - { label: Space,    value: '{{row.spaceLabel}}' }
         - { label: Author,   value: '{{row.authorName}}' }
         - { label: Updated,  value: '{{row.lastModified | date:''rel''}}' }
-        - { label: Preview,  value: '{{row.excerpt}}' }
+      body: '{{row.body}}'
       actions:
         - open
         - copy

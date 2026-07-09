@@ -61,15 +61,21 @@ presentation:
     mode: selected_row
     bind:
       title: "{{row.title}}"
-      subtitle: "{{row.repo}}!{{row.number}}"
+      # Identity matches =gitlab (kind · path!iid). MR is the GitLab "kind".
+      subtitle: "MR · {{row.repo}}!{{row.number}}"
+      # CANONICAL PR/MR field set — IDENTICAL order/labels to =github / =gh /
+      # =gh-prs / =gitlab so the unified =git door's surface never changes with
+      # the source. The glab CLI fills every fact for the top rows; deeper rows
+      # and unenriched facts show "—".
       fields:
         - { label: State, value: "{{row.state}}", kind: badge }
-        - { label: Merge, value: "{{row.merge}}", kind: badge }
         - { label: Checks, value: "{{row.checks}}", kind: badge }
         - { label: Review, value: "{{row.review}}", kind: badge }
+        - { label: Merge, value: "{{row.merge}}", kind: badge }
         - { label: Diff, value: "{{row.diff}}", kind: diff }
         - { label: Branch, value: "{{row.branch}}", kind: branch }
         - { label: Author, value: "@{{row.author}}" }
+        - { label: Comments, value: "{{row.comments}}" }
         - { label: Updated, value: "{{row.updated | date:'rel'}}" }
         - { label: Labels, value: "{{row.labels}}", kind: chips }
       body: "{{row.body}}"

@@ -1,5 +1,6 @@
 # =gitstatus — short git status of a repo as structured rows + a detail pane.
-# Type a repo NAME (resolved under ~/dev, ~/src, ~/Projects, ~) or a path.
+# Type a repo NAME (resolved against your project folders — Settings →
+# Folders & Projects) or a path.
 # Upgraded from raw `git status --short` lines to parsed rows (a summary row +
 # one row per changed file, each with diff/checkout commands in the pane).
 # Keeps the kind:utility pivot to =git-log.
@@ -19,9 +20,9 @@ detect:
 
 bridge:
   command:
-    macos: "python3 {{scripts_dir}}/bolt-gitstatus.py {{repo}}"
-    linux: "python3 {{scripts_dir}}/bolt-gitstatus.py {{repo}}"
-    windows: "python {{scripts_dir}}/bolt-gitstatus.py {{repo}}"
+    macos: "sh {{scripts_dir}}/bolt-gitstatus.sh {{repo}}"
+    linux: "sh {{scripts_dir}}/bolt-gitstatus.sh {{repo}}"
+    windows: "sh {{scripts_dir}}/bolt-gitstatus.sh {{repo}}"
   parse: json
   timeout_seconds: 6
 

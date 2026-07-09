@@ -34,7 +34,7 @@ id: monday
 chip: =monday
 title: Monday
 icon: trello
-description: Items from a monday.com board: search, look up by board id, browse.
+description: "Items from a monday.com board: search, look up by board id, browse."
 placeholder_examples:
   - "board:1234567890"
   - "1234567890"

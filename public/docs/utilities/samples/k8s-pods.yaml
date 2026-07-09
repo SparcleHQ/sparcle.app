@@ -19,6 +19,10 @@ detect:
     windows: "kubectl config current-context"
   config_hint: ["~/.kube/config"]
   refresh: on_focus
+  # Display-only guidance. kubectl sign-in is cluster-specific (gcloud / aws eks /
+  # az aks get-credentials), so we explain the unlock rather than guess a command.
+  setup:
+    unlock: "List and inspect your Kubernetes pods from the launcher, using the cluster kubectl already points at. Read-only."
 
 args:
   - { name: filter, from: "query.word(0)", default: "" }

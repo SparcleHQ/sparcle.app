@@ -30,3 +30,6 @@ DOMAINS.md
 public/decks/sovereign-ai-intro.html
 public/decks/event-*.html
 public/decks/*stealth*
+
+# Local capability ground-truth authoring kit (not for the public site repo)
+ground-truth/

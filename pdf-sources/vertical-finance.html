@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — Finance</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 12mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+         --green:#127a4a; --card:#f4f7fb; --cardgreen:#eef5f0; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:10.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .sheet{max-width:720px;margin:0 auto;}
+  .eyebrow{font-size:9.5px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;}
+  h1{font-size:30px;margin:4px 0 4px;letter-spacing:-.6px;}
+  .sub{color:var(--mut);font-style:italic;font-size:12px;max-width:62ch;border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:12px;}
+  .callout{border-left:3px solid var(--gold);background:#faf6ec;padding:9px 14px;font-style:italic;margin:0 0 14px;color:#4a4636;}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+  .cols3 h3{font-size:11px;margin:0 0 4px;}
+  .cols3 .q{color:var(--mut);font-style:italic;font-size:9.5px;margin:0 0 5px;}
+  .cols3 p{margin:0;font-size:9.5px;}
+  .cols3 b{color:var(--ink);}
+  .panel{background:var(--card);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+  .panel h4{margin:0 0 8px;font-size:11px;}
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 0;border-bottom:1px solid #e4e9f1;font-size:9.8px;}
+  .srow:last-child{border-bottom:none;}
+  .badge{font-size:8px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+  .b-ship{background:#dcefe4;color:var(--green);}
+  .b-pilot{background:#f3ecd4;color:var(--gold);}
+  .b-no{background:#e9ebf0;color:var(--mut);}
+  h2{font-size:14px;margin:6px 0 6px;}
+  ol.why{margin:0 0 14px;padding-left:16px;}
+  ol.why li{font-size:10px;margin:5px 0;}
+  ol.why li b{color:var(--ink);}
+  .rec{border-left:3px solid var(--green);background:var(--cardgreen);padding:10px 14px;font-size:10px;margin-bottom:16px;}
+  .rec b{color:var(--ink);}
+  .foot{text-align:center;border-top:1px solid var(--line);padding-top:12px;}
+  .foot .cta{font-weight:700;font-size:12px;}
+  .foot .tag{color:var(--mut);font-style:italic;font-size:10px;margin-top:4px;}
+  .foot .meta{color:var(--mut);font-size:9px;margin-top:6px;}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:9px;background:#eef1f6;padding:0 3px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="eyebrow">For: Banks &middot; Insurance &middot; Broker-Dealers &middot; Hedge Funds &middot; Asset Managers</div>
+  <h1>AI that survives the SEC examiner's questions.</h1>
+  <div class="sub">Enterprise AI substrate for regulated US financial institutions &mdash; tamper-evident audit chain, in-perimeter deployment, BYO LLM, SOX + GLBA + Reg SCI-aligned architecture.</div>
+
+  <div class="callout">Every SaaS AI tool triggers a 6-12 month vendor-risk review and lands as a sub-processor in your operational-risk register. Sparcle deploys inside your network &mdash; every Bolt tier is self-hosted, so it does not become a sub-processor, and your existing third-party-risk boundary covers it.</div>
+
+  <div class="cols3">
+    <div>
+      <h3>SEC + FINRA examination defensibility</h3>
+      <p class="q">"When the SEC's Division of Examinations asks how an AI tool made a recommendation that touched customer accounts, what do we show them?"</p>
+      <p><b>Sparcle:</b> The standalone audit verifier. Every read, every search, every ACL decision, every LLM grounding payload is sealed into a Merkle chain, Ed25519-signed, <b>cryptographically verifiable by your examiner without Sparcle's cooperation.</b> Glean / Hebbia / Harvey ship vendor-attested logs &mdash; fine for marketing, not for an SEC subpoena.</p>
+    </div>
+    <div>
+      <h3>Customer NPI under GLBA</h3>
+      <p class="q">"Does this AI tool require us to send customer NPI to a third party?"</p>
+      <p><b>Sparcle:</b> No. Sparcle runs inside your network. Customer non-public information stays within your GLBA Safeguards Rule perimeter. You do not need to add Sparcle to your vendor-risk register as a sub-processor that handles NPI; <b>it doesn't handle NPI any more than your internal Postgres server does.</b></p>
+    </div>
+    <div>
+      <h3>SOX-controlled finance-system search</h3>
+      <p class="q">"Can our finance team search across SAP S/4HANA, Workday Financial, Concur, Coupa, and our SharePoint policy library &mdash; with proper SOX segregation of duties?"</p>
+      <p><b>Sparcle:</b> Yes. Connectors for SAP S/4HANA, Workday Financial, Oracle EBS, NetSuite, Concur, Coupa, Anaplan, Workiva are shipped. 4-axis ACL enforces SOX segregation: a controller never sees vendor-master maintenance; an AP clerk never sees the CFO's board materials.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>What's shipped today vs what ships in a 90-day financial-services pilot</h4>
+    <div class="srow"><span>In-perimeter deployment (your VPC, on-prem, sovereign cloud)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Sealed Merkle audit chain + standalone verifier (SEC + FINRA examination ready)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>4-axis ACL with <code>department</code> + <code>role-band</code> for SOX segregation</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Per-tenant CMK via Vault, AWS KMS, or PKCS#11 HSM</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Connectors: S/4HANA &middot; Workday Financial &middot; Oracle EBS &middot; NetSuite &middot; Concur &middot; Coupa &middot; Anaplan &middot; Workiva &middot; Snowflake &middot; Databricks</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Crypto-shred for customer right-to-delete</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Real-time ACL invalidation + end-to-end ingest saga</span><span class="badge b-pilot">PILOT</span></div>
+    <div class="srow"><span>SOC 2 Type II (~12 months in audit cycle with sponsor customer)</span><span class="badge b-no">NOT HELD</span></div>
+  </div>
+
+  <h2>Why financial-services buyers choose us</h2>
+  <ol class="why">
+    <li><b>No new third-party risk review.</b> Your VPC, Vault, AWS account, and LLM contract are already approved. Sparcle just runs there.</li>
+    <li><b>Examiner-defensible audit chain.</b> When an SEC sweep arrives, you produce a verifiable export &mdash; not a vendor-signed letter.</li>
+    <li><b>No inference markup.</b> Glean / Hebbia / Harvey mark up token spend 30-60%. Sparcle uses your LLM contract directly.</li>
+    <li><b>Continuity if Sparcle fails.</b> Your deployment keeps running on your infrastructure, with optional source-code escrow at pilot tier.</li>
+  </ol>
+
+  <div class="rec"><b>Recommended deployment:</b> any self-hosted Bolt tier &mdash; <b>Authorize</b>, <b>Backbone</b>, or <b>Certify</b>. All are fully customer-hosted in your VPC / on-prem / sovereign cloud, run on your own LLM contract, and keep Sparcle off your sub-processor register. There is no Sparcle-managed hosting tier; nothing runs on Sparcle infrastructure.</div>
+
+  <div class="foot">
+    <div class="cta">Brief us in 30 minutes. Production pilot in your VPC in 90 days.</div>
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/finance &middot; bolt@sparcle.app &middot; v2 &middot; 2026-07</div>
+  </div>
+</div>
+</body>
+</html>

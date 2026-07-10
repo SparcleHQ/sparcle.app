@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — Federal Civilian</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 12mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+         --green:#127a4a; --card:#f4f7fb; --cardgreen:#eef5f0; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:10.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .sheet{max-width:720px;margin:0 auto;}
+  .eyebrow{font-size:9.5px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;}
+  h1{font-size:30px;margin:4px 0 4px;letter-spacing:-.6px;}
+  .sub{color:var(--mut);font-style:italic;font-size:12px;max-width:62ch;border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:12px;}
+  .callout{border-left:3px solid var(--gold);background:#faf6ec;padding:9px 14px;font-style:italic;margin:0 0 14px;color:#4a4636;}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+  .cols3 h3{font-size:11px;margin:0 0 4px;}
+  .cols3 .q{color:var(--mut);font-style:italic;font-size:9.5px;margin:0 0 5px;}
+  .cols3 p{margin:0;font-size:9.5px;}
+  .cols3 b{color:var(--ink);}
+  .panel{background:var(--card);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+  .panel h4{margin:0 0 8px;font-size:11px;}
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 0;border-bottom:1px solid #e4e9f1;font-size:9.8px;}
+  .srow:last-child{border-bottom:none;}
+  .badge{font-size:8px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+  .b-ship{background:#dcefe4;color:var(--green);}
+  .b-pilot{background:#f3ecd4;color:var(--gold);}
+  .b-no{background:#e9ebf0;color:var(--mut);}
+  h2{font-size:14px;margin:6px 0 6px;}
+  ol.why{margin:0 0 14px;padding-left:16px;}
+  ol.why li{font-size:10px;margin:5px 0;}
+  ol.why li b{color:var(--ink);}
+  .rec{border-left:3px solid var(--green);background:var(--cardgreen);padding:10px 14px;font-size:10px;margin-bottom:16px;}
+  .rec b{color:var(--ink);}
+  .foot{text-align:center;border-top:1px solid var(--line);padding-top:12px;}
+  .foot .cta{font-weight:700;font-size:12px;}
+  .foot .tag{color:var(--mut);font-style:italic;font-size:10px;margin-top:4px;}
+  .foot .meta{color:var(--mut);font-size:9px;margin-top:6px;}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:9px;background:#eef1f6;padding:0 3px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="eyebrow">For: Federal Civilian Agencies + Agency Contractors</div>
+  <h1>Bring AI into the agency. Keep the data in the agency.</h1>
+  <div class="sub">Enterprise AI substrate for federal civilian missions &mdash; deployable in AWS GovCloud, Azure Government, or on-prem, with FedRAMP-ready architecture and BYO LLM.</div>
+
+  <div class="callout">Every agency CIO wants to deploy AI. Every agency security officer requires FedRAMP. Every commercial AI product is years from FedRAMP-High &mdash; or doesn't pursue it at all. Sparcle is architected to be deployable in your existing sovereign cloud authorization boundary. You don't wait for our paperwork to start your pilot.</div>
+
+  <div class="cols3">
+    <div>
+      <h3>FedRAMP boundary</h3>
+      <p class="q">"Can we deploy this inside our existing ATO boundary?"</p>
+      <p><b>Sparcle:</b> Yes. Bolt + Aeira deploy via Helm into your existing GovCloud or Azure Government Kubernetes cluster. The full software stack is open to your security team's review (source escrow at pilot tier). <b>Your existing ATO covers Sparcle; we do not require a separate FedRAMP authorization to begin operating.</b></p>
+    </div>
+    <div>
+      <h3>CUI + NIST 800-171</h3>
+      <p class="q">"How does this comply with NIST SP 800-171 for our contractor base?"</p>
+      <p><b>Sparcle:</b> The 4-axis ACL with <code>country</code> &middot; <code>office</code> &middot; <code>role-band</code> &middot; <code>employment-type</code> maps to the 800-171 access-control family. Documents pre-filter at index time; access decisions audit-log in a tamper-evident Merkle chain. CMMC-aware contractors adopt the same architecture in their enclave.</p>
+    </div>
+    <div>
+      <h3>FIPS 140 cryptography</h3>
+      <p class="q">"Do we have to wait for FIPS 140-3 module validation?"</p>
+      <p><b>Sparcle:</b> No, because Sparcle does not ship its own cryptographic module. KMS operations route to <b>your</b> validated module &mdash; Vault FIPS, AWS KMS FIPS endpoints, Azure Key Vault Premium, or PKCS#11 HSM. Your FIPS posture covers the crypto path; Sparcle is the orchestration layer.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>What's shipped today vs what ships in a 90-day federal pilot</h4>
+    <div class="srow"><span>GovCloud / Azure Government deployable Helm chart</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>AWS KMS + HashiCorp Vault + PKCS#11 HSM support</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Air-gap mode (no outbound traffic)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>4-axis ACL with <code>country</code> + <code>office</code> for CUI handling</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Sealed Merkle audit chain + standalone verifier</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>BYO LLM &mdash; on-prem or sovereign-cloud inference</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Webhook-driven real-time ACL invalidation</span><span class="badge b-pilot">PILOT</span></div>
+    <div class="srow"><span>End-to-end ingest saga</span><span class="badge b-pilot">PILOT</span></div>
+    <div class="srow"><span>FedRAMP Moderate authorization (~12-18 mo with sponsor)</span><span class="badge b-no">NOT HELD</span></div>
+    <div class="srow"><span>FIPS 140-3 module validation (uses your validated KMS)</span><span class="badge b-no">NOT HELD</span></div>
+  </div>
+
+  <h2>Why federal civilian buyers choose us over Glean / Copilot</h2>
+  <ol class="why">
+    <li><b>Microsoft Copilot is in GCC-High but lock-in is total.</b> Microsoft-only sources, Microsoft-only inference, Microsoft-only roadmap. If your agency runs Workday + ServiceNow + Salesforce + Confluence on the side, Copilot doesn't help.</li>
+    <li><b>Glean / Hebbia / Harvey are not in GovCloud.</b> They cannot authorize on your timeline. Earliest realistic GovCloud date is 2027+; you can pilot Sparcle in your enclave in 60 days.</li>
+    <li><b>No vendor lock-in on the LLM.</b> Switch between Anthropic Claude on Bedrock, Llama 3.3 on AWS GovCloud, Azure OpenAI in Government, or on-prem &mdash; without changing your Sparcle deployment.</li>
+  </ol>
+
+  <div class="rec"><b>Recommended deployment:</b> any self-hosted Bolt tier &mdash; <b>Authorize</b>, <b>Backbone</b>, or <b>Certify</b> &mdash; customer-hosted in GovCloud / Azure Government inside your existing ATO boundary. All are fully customer-hosted and send zero outbound traffic to Sparcle. There is no Sparcle-managed hosting tier, so no Sparcle-managed sub-processor is added in any tier.</div>
+
+  <div class="foot">
+    <div class="cta">Brief us in 30 minutes. Demo in your sovereign cloud in 60 days.</div>
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/federal &middot; bolt@sparcle.app &middot; v2 &middot; 2026-07</div>
+  </div>
+</div>
+</body>
+</html>

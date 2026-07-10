@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — EU Finance</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 12mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+         --green:#127a4a; --card:#f4f7fb; --cardgreen:#eef5f0; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:10.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .sheet{max-width:720px;margin:0 auto;}
+  .eyebrow{font-size:9.5px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;}
+  h1{font-size:30px;margin:4px 0 4px;letter-spacing:-.6px;}
+  .sub{color:var(--mut);font-style:italic;font-size:12px;max-width:62ch;border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:12px;}
+  .callout{border-left:3px solid var(--gold);background:#faf6ec;padding:9px 14px;font-style:italic;margin:0 0 14px;color:#4a4636;}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+  .cols3 h3{font-size:11px;margin:0 0 4px;}
+  .cols3 .q{color:var(--mut);font-style:italic;font-size:9.5px;margin:0 0 5px;}
+  .cols3 p{margin:0;font-size:9.5px;}
+  .cols3 b{color:var(--ink);}
+  .panel{background:var(--card);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+  .panel h4{margin:0 0 8px;font-size:11px;}
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 0;border-bottom:1px solid #e4e9f1;font-size:9.8px;}
+  .srow:last-child{border-bottom:none;}
+  .badge{font-size:8px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+  .b-ship{background:#dcefe4;color:var(--green);}
+  .b-pilot{background:#f3ecd4;color:var(--gold);}
+  .b-avail{background:#e7e3d3;color:#6f5f2e;}
+  .b-no{background:#e9ebf0;color:var(--mut);}
+  h2{font-size:14px;margin:6px 0 6px;}
+  ol.why{margin:0 0 14px;padding-left:16px;}
+  ol.why li{font-size:10px;margin:5px 0;}
+  ol.why li b{color:var(--ink);}
+  .rec{border-left:3px solid var(--green);background:var(--cardgreen);padding:10px 14px;font-size:10px;margin-bottom:16px;}
+  .rec b{color:var(--ink);}
+  .foot{text-align:center;border-top:1px solid var(--line);padding-top:12px;}
+  .foot .cta{font-weight:700;font-size:12px;}
+  .foot .tag{color:var(--mut);font-style:italic;font-size:10px;margin-top:4px;}
+  .foot .meta{color:var(--mut);font-size:9px;margin-top:6px;}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:9px;background:#eef1f6;padding:0 3px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="eyebrow">For: EU Banks &middot; Asset Managers &middot; Insurance &middot; DORA-scope Financial Entities</div>
+  <h1>AI that satisfies your DPO and your DORA auditor.</h1>
+  <div class="sub">Enterprise AI substrate for EU financial institutions &mdash; sovereign deployment in EU regions, GDPR-aligned architecture, DORA-ready operational resilience, BYO LLM.</div>
+
+  <div class="callout">Glean, Hebbia, Harvey, and Copilot all process EU customer data on US infrastructure &mdash; each triggers a Schrems II Transfer Impact Assessment and a 2-3 month DPO delay. Sparcle deploys in your EU region (Frankfurt, Dublin, Amsterdam, Stockholm, Paris); <b>the third-country transfer never happens.</b> No TIA. No SCC negotiation. No Article 49 derogation.</div>
+
+  <div class="cols3">
+    <div>
+      <h3>GDPR residency + Schrems II</h3>
+      <p class="q">"How do we comply with GDPR Article 44 (transfers to third countries) when adopting an AI tool?"</p>
+      <p><b>Sparcle:</b> You don't transfer. Sparcle deploys in your EU region's sovereign cloud (Azure West Europe, AWS eu-central-1, GCP europe-west) or your on-prem EU data center. <b>Personal data of EU data subjects stays in the EEA.</b> No Article 44 transfer event. No SCC, no BCR, no derogation.</p>
+    </div>
+    <div>
+      <h3>DORA classification</h3>
+      <p class="q">"DORA requires us to maintain a register of ICT third-party service providers. How does Sparcle classify?"</p>
+      <p><b>Sparcle:</b> As a software vendor whose product runs inside your operational perimeter, <b>not as an ICT third-party service provider.</b> DORA Article 28 register treats us as non-critical. Compare to Glean / Hebbia / Harvey, which are ICT service providers requiring full Article 30 contractual provisions and exit strategy assessments.</p>
+    </div>
+    <div>
+      <h3>Article 17 Right to Erasure</h3>
+      <p class="q">"When a data subject invokes Article 17, how do we erase their data from AI embeddings?"</p>
+      <p><b>Sparcle:</b> Crypto-shred. Per-tenant CMK held in your Vault or KMS. Deleting the key cryptographically destroys all derived data &mdash; vector embeddings, keyword indexes, audit-event payloads. <b>Your Article 17 response window becomes a one-API-call operation, not a multi-vendor coordination exercise.</b></p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>What's shipped today vs what ships in a 90-day EU pilot</h4>
+    <div class="srow"><span>EU-region deployment (Frankfurt / Dublin / Amsterdam / Stockholm / Paris)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>GDPR-aligned architecture (residency, crypto-shred, audit)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Per-tenant CMK with EU-resident KMS (Vault, AWS KMS eu-region, Azure Key Vault)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Sealed Merkle audit chain (BaFin / ACPR / Banca d'Italia examination-ready)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>4-axis ACL &mdash; <code>country</code> axis explicitly supports EU-member-state segmentation</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Cross-region transfer refusal + real-time ACL invalidation + ingest saga</span><span class="badge b-pilot">PILOT</span></div>
+    <div class="srow"><span>DORA Article 30 register support documentation</span><span class="badge b-avail">AVAILABLE</span></div>
+    <div class="srow"><span>ISO 27001 / ISO 27017 (~18 months in audit cycle)</span><span class="badge b-no">NOT HELD</span></div>
+  </div>
+
+  <h2>Why EU financial buyers choose us</h2>
+  <ol class="why">
+    <li><b>Sparcle does not invoke Schrems II.</b> No transfer occurs. Your DPO sleeps better.</li>
+    <li><b>DORA register treats us as non-critical.</b> Most AI vendors land in Article 28 critical-ICT-third-party scope; Sparcle does not.</li>
+    <li><b>EU-sovereign LLM choice.</b> BYO LLM means Mistral Large, Aleph Alpha, or any model fitting your AI Act risk class. Glean / Hebbia / Harvey funnel through US-based GPT-4 endpoints.</li>
+    <li><b>EU AI Act readiness.</b> The audit chain produces the "logs and traceability" evidence the AI Act will require of high-risk system providers.</li>
+  </ol>
+
+  <div class="rec"><b>Recommended deployment:</b> any self-hosted Bolt tier &mdash; <b>Authorize</b>, <b>Backbone</b>, or <b>Certify</b> &mdash; customer-hosted in your EU region (Frankfurt / Dublin / Amsterdam / Stockholm / Paris). All are fully customer-hosted, run on your own EU-sovereign LLM, and send zero outbound traffic to Sparcle. There is no Sparcle-managed hosting tier and no Sparcle-managed sub-processor, in any tier &mdash; nothing runs on Sparcle infrastructure. Avoids both Schrems II transfer events and DORA Article 28 critical-ICT-third-party classification.</div>
+
+  <div class="foot">
+    <div class="cta">Brief us in 30 minutes. EU-region production pilot in 90 days.</div>
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/eu-finance &middot; bolt@sparcle.app &middot; v2 &middot; 2026-07</div>
+  </div>
+</div>
+</body>
+</html>

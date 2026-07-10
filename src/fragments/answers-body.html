@@ -246,8 +246,9 @@ spend. The desktop build is free (bring your own key). Paid self-hosted tiers st
 $30 per seat per month with a 10-seat minimum, and founding customers get 25 percent off for
 24 months. Because you bring the model there is no vendor token margin, which is why a Bolt
 deployment typically undercuts stacking a cloud assistant plus an enterprise search tool plus
-an automation tool. See <a href="/pricing">pricing</a> for the current tiers, or ask for a
-modeled total-cost scenario in an architecture review.</p>
+an automation tool. See <a href="/pricing">pricing</a> for the current tiers, the
+<a href="/docs/pdfs/bolt-aeira-tco-calculator.pdf">TCO one-pager (PDF)</a> for a modeled
+1,000-seat scenario, or ask for a tenant-specific model in an architecture review.</p>
 <h3>Who it is for</h3>
 <p>Anyone can run the free build on a laptop to evaluate with real data. The paid tiers suit
 teams that want central deployment and governance, and Bolt has the lowest seat minimum in
@@ -328,6 +329,12 @@ system of record. Almost everything else people ask for is reachable by configur
 
 <details class="gt-faq"><summary>Can I add a new country or regulation myself, air-gapped?</summary>
 <div class="gt-body"><p>Yes. A regulation pack is a short signed YAML manifest (jurisdiction, residency, retention, rights, safeguards, recognizers). You, a partner, or your counsel can author and sign one, and it installs offline with a review-and-consent step. Multi-jurisdiction is stacking packs.</p></div></details>
+
+<details class="gt-faq"><summary>Is Bolt a SaaS? Should I evaluate it like one?</summary>
+<div class="gt-body"><p>No, and this trips up a lot of security reviews. Bolt is self-hosted software that runs inside your own perimeter; Sparcle operates no cloud that receives your data and has no hosted ingest path. So you do not evaluate a Sparcle-run production environment the way you would a SaaS vendor, because there is not one handling your data. What you evaluate is the software and the architecture, running under your own controls. That is a different, and for regulated buyers usually stronger, security posture.</p></div></details>
+
+<details class="gt-faq"><summary>Do you have SOC 2 Type II?</summary>
+<div class="gt-body"><p>First, the reframe that matters: SOC 2 attests a SaaS vendor's hosted environment that processes your data. Because Bolt is self-hosted and your data never reaches Sparcle, the data-handling scope a SaaS SOC 2 covers does not apply to us; that data stays in your environment, under your own SOC 2 or ISO controls. For Sparcle as a company, SOC 2 Type I is targeted for Q4 2026 and Type II for Q2 2027; a SOC 2 readiness package and gap analysis are available now, and our Trust Center maps SOC 2, HIPAA, GDPR, and ISO 27001 criteria to concrete evidence, backed by independent penetration testing. If your procurement hard-requires a completed vendor SOC 2 Type II report today, that is a fair reason to wait. For many buyers, the self-hosted architecture is a stronger assurance than a vendor attestation, because your data never reaches us to audit in the first place. See the Trust Center and the security questionnaire on our site.</p></div></details>
 
 <details class="gt-faq"><summary>Is my data sent to Sparcle?</summary>
 <div class="gt-body"><p>No. Sparcle operates no cloud that receives your data and has no hosted ingest path. Local device data (clipboard, notes, screenshot indexes) is stored encrypted on your machine. When you connect a third-party system such as Gmail or Jira, Bolt talks to that system's API as you configured it; that is action on your systems, not exfiltration to a vendor. PII is masked before any prompt reaches a model.</p></div></details>

@@ -150,6 +150,15 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
   Salesforce, ServiceNow, SAP, and more via open MCP, with any OIDC identity. Copilot is
   welded to Microsoft and Gemini to Google; Bolt is welded to no suite. No-lock-in spans
   five layers: model, ecosystem/suite, protocol, deployment, and agent.
+- MISCONCEPTION: "Bolt is a SaaS, so it needs a SOC 2 Type II report before we can buy."
+  Reframe: Bolt is SELF-HOSTED; Sparcle operates no cloud that receives customer data (no
+  hosted ingest path), so the data-handling scope a SaaS SOC 2 covers does not apply, the
+  data stays in the customer's environment under their own SOC 2/ISO. For Sparcle the
+  company: SOC 2 Type I targeted Q4 2026, Type II Q2 2027; SOC 2 readiness package + gap
+  analysis available now; Trust Center maps SOC 2/HIPAA/GDPR/ISO 27001 to evidence +
+  independent pen-testing. Do NOT claim Sparcle holds SOC 2 today. If a buyer hard-requires
+  a completed vendor SOC 2 Type II now, that is a fair reason to wait; for many, the
+  self-hosted architecture is stronger assurance because data never reaches Sparcle to audit.
 
 ## On-device / local capabilities (GA unless noted)
 

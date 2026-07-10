@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — A brief for a first conversation</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  :root{
+    --ink:#151b26; --mut:#5a6472; --line:#dde2ea; --navy:#16233c;
+    --blue:#2a54e0; --red:#c62828; --green:#127a4a; --orange:#c2721a;
+    --card:#f4f7fb; --note:#eef2fd; --warn:#fdeeee; --hl:#eef3ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#fff;color:var(--ink);
+    font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .serif{font-family:Georgia,"Times New Roman",Times,serif;}
+  .page{
+    position:relative;width:297mm;height:210mm;
+    padding:15mm 18mm 16mm;overflow:hidden;
+    page-break-after:always;
+  }
+  .page:last-child{page-break-after:auto;}
+
+  .eyebrow{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;font-weight:700;
+    letter-spacing:.16em;color:var(--blue);text-transform:uppercase;margin:0 0 14px;}
+  .eyebrow .dot{color:var(--mut);font-weight:400;margin:0 6px;}
+  .eyebrow .ctx{color:var(--mut);font-weight:600;}
+
+  h1{font-family:Georgia,"Times New Roman",Times,serif;font-weight:700;
+    font-size:52px;line-height:1.02;letter-spacing:-.6px;margin:0 0 16px;}
+  h1 .i{color:var(--blue);font-style:italic;}
+  .sub{font-family:Georgia,serif;font-style:italic;color:var(--mut);
+    font-size:19px;line-height:1.4;max-width:78ch;margin:0 0 20px;}
+  .sub b{color:var(--ink);font-style:italic;}
+
+  .foot{position:absolute;left:18mm;right:18mm;bottom:9mm;
+    display:flex;justify-content:space-between;align-items:flex-end;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--mut);
+    letter-spacing:.14em;}
+  .foot .rt{letter-spacing:.28em;text-transform:none;}
+
+  /* cards */
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .cols4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;}
+
+  .tcard{border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:10px;
+    padding:16px 18px;background:#fff;}
+  .tcard .lbl{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;
+    letter-spacing:.14em;color:var(--blue);text-transform:uppercase;margin:0 0 8px;}
+  .tcard p{margin:0;font-size:14.5px;color:#39424f;line-height:1.45;}
+
+  .lcard{border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:8px;
+    padding:15px 18px;background:#fff;}
+  .lcard.green{border-left-color:var(--green);}
+  .lcard.orange{border-left-color:var(--orange);}
+  .lcard.red{border-left-color:var(--red);}
+  .lcard .lbl{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;
+    letter-spacing:.13em;color:var(--mut);text-transform:uppercase;margin:0 0 8px;}
+  .lcard h3{font-family:Georgia,serif;font-size:20px;font-weight:700;margin:0 0 8px;line-height:1.12;}
+  .lcard h3 .i{color:var(--blue);font-style:italic;}
+  .lcard p{margin:0;font-size:14px;color:#39424f;line-height:1.42;}
+
+  .note{background:var(--note);border-left:4px solid var(--blue);border-radius:0 8px 8px 0;
+    padding:16px 20px;font-size:15px;line-height:1.5;color:#2c3542;}
+  .note b{color:var(--ink);}
+  .note i{color:var(--blue);font-style:italic;}
+  .note.warn{background:var(--warn);border-left-color:var(--red);}
+  .note.warn .rd{color:var(--red);}
+
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;background:#eef1f6;
+    border:1px solid #e0e5ee;padding:1px 5px;border-radius:4px;}
+
+  .spacer{height:16px;}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="eyebrow">&#10070; SPARCLE <span class="dot">&middot;</span> BOLT + AEIRA</div>
+  <h1>Productivity superagent.<br><span class="i">Sovereign by construction.</span></h1>
+  <p class="sub">One interface for every system you have access to &mdash; instant, identity-aware, within your boundary. Any integration, any tool, any agent, any LLM. <b>Do more with less. Less clicks, tabs, apps, time, LLM tokens and cost</b> &mdash; without trading privacy or sovereignty.</p>
+  <p style="font-family:Georgia,serif;font-size:17px;margin:-6px 0 18px;"><b>Empower</b> (Workforce) &middot; <b>Govern</b> (Integrations) &middot; <b>Audit</b> (Access).</p>
+
+  <div class="cols3" style="margin-bottom:18px;">
+    <div class="tcard"><div class="lbl">For the workforce</div><p>One palette, every system. Instant. Identity-aware. Productivity with or without tokens.</p></div>
+    <div class="tcard"><div class="lbl">For the CISO / CIO</div><p>BYO LLM, IdP, MCP. On-prem, VPC, or air-gap. In every self-hosted Bolt tier, no Sparcle component in the data path.</p></div>
+    <div class="tcard"><div class="lbl">For audit &amp; compliance</div><p>Sealed Merkle audit chain. Crypto-shred for right-to-erasure. Controls by construction.</p></div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:10px 12px;max-width:960px;">
+    <span class="chip">Self-hosted &amp; air-gap-capable</span>
+    <span class="chip">Patent-pending: ACL &middot; audit chain &middot; crypto-shred</span>
+    <span class="chip">3 USPTO provisionals &middot; more in preparation</span>
+    <span class="chip">No Sparcle servers in the data path (every self-hosted tier)</span>
+    <span class="chip">Productive day one &middot; with or without LLM tokens</span>
+    <span class="chip">Identity-aware end to end &middot; OIDC &middot; SAML &middot; MCP &middot; A2A</span>
+  </div>
+
+  <div style="position:absolute;left:18mm;right:18mm;bottom:14mm;border-top:1px solid var(--line);padding-top:12px;display:flex;justify-content:space-between;align-items:flex-end;">
+    <div>
+      <div style="font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.14em;color:var(--mut);">FROM</div>
+      <div style="font-family:Georgia,serif;font-size:17px;font-weight:700;">Sparcle LLC</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--blue);">bolt@sparcle.app &middot; sparcle.app</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.16em;color:var(--mut);">A BRIEF FROM</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.22em;color:var(--mut);margin:2px 0;">Brief &middot; for a first conversation</div>
+      <div style="font-family:Georgia,serif;font-style:italic;font-size:16px;font-weight:700;">Bolt + Aeira</div>
+    </div>
+  </div>
+  <div class="foot"><span>01 / 12</span></div>
+  <style>
+    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:22px;
+      padding:7px 15px;font-size:13px;color:#2f3946;}
+    .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--blue);flex:0 0 6px;}
+  </style>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="eyebrow">&#9656; The problem</div>
+  <h1>Millions paid. Hundreds of tools.<br>The workforce still loses <span class="i">hours, every day.</span></h1>
+  <p class="sub">Hundreds of SaaS apps. Each promised easier work. Together &mdash; they made it harder, adding a context-switching tax on every role.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px 26px;margin:6px 0 22px;">
+    <div class="stat"><div class="num b">~28%</div><p>of a knowledge worker&rsquo;s week is spent <b>searching for information.</b> At $100K loaded cost &rarr; <b>~$28K/yr reclaimable per worker.</b></p><div class="src">&#9656; McKinsey Global Institute</div></div>
+    <div class="stat"><div class="num b">250+</div><p>SaaS apps per average enterprise &mdash; <b>~half see no monthly use.</b></p><div class="src">&#9656; Gartner Research</div></div>
+    <div class="stat"><div class="num b">~60%</div><p>of business decisions made with <b>stale or partial information.</b></p><div class="src">&#9656; Forrester</div></div>
+    <div class="stat"><div class="num r">$4.4M</div><p>average cost of a single data breach. <b>Highest in healthcare &amp; finance.</b></p><div class="src">&#9656; IBM Cost of a Data Breach 2025</div></div>
+    <div class="stat"><div class="num r">&euro;5.6B+</div><p>cumulative GDPR fines since 2018. <b>Enforcement keeps accelerating.</b></p><div class="src">&#9656; EDPB / GDPR Enforcement Tracker 2025</div></div>
+    <div class="stat"><div class="num r">~30%</div><p>of breaches involve a <b>third-party in the data path.</b></p><div class="src">&#9656; Verizon DBIR 2025</div></div>
+  </div>
+
+  <div class="note warn"><b>Spending on tools went up. <span class="rd">Tokens are sky-rocketing.</span></b> Yet productivity, privacy, and compliance remain <i style="color:var(--red)">more challenging than before</i> &mdash; and modern AI is making it worse.</div>
+
+  <div class="foot"><span>02 / 12</span><span class="rt">The problem</span></div>
+  <style>
+    .stat{border-left:2px solid #e6e9f0;padding-left:16px;}
+    .stat .num{font-family:Georgia,serif;font-weight:700;font-size:58px;line-height:1;letter-spacing:-1px;margin-bottom:8px;}
+    .stat .num.b{color:var(--blue);} .stat .num.r{color:var(--red);}
+    .stat p{margin:0 0 8px;font-size:13.5px;line-height:1.4;color:#39424f;}
+    .stat .src{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.08em;color:var(--mut);text-transform:uppercase;}
+  </style>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page">
+  <div class="eyebrow">&#9656; Why we built this</div>
+  <h1>Responsible AI adoption.<br>With what you <span class="i">already pay for.</span></h1>
+  <p class="sub">Productivity, sovereignty, governance. Every enterprise wants all three &mdash; the industry asks them to pick two.</p>
+
+  <div class="cols3" style="margin-bottom:18px;">
+    <div class="pcard">
+      <div class="plbl">Path 1 &middot; SaaS AI</div>
+      <h3 class="serif">Modern AI. <span style="font-style:italic">Lost sovereignty.</span></h3>
+      <ul class="cx">
+        <li class="y">Modern AI productivity</li>
+        <li class="n">Your data, their cloud</li>
+        <li class="n">Vendor in the data path</li>
+        <li class="n">Privacy is an SLA promise</li>
+        <li class="n">Audit is logs you must trust</li>
+      </ul>
+    </div>
+    <div class="pcard">
+      <div class="plbl">Path 2 &middot; On-prem only</div>
+      <h3 class="serif">Sovereign. <span style="font-style:italic">And slow.</span></h3>
+      <ul class="cx">
+        <li class="y">Sovereign data</li>
+        <li class="n">Dumb tools, little or no AI</li>
+        <li class="n">Workforce drag continues</li>
+        <li class="n">&ldquo;Air-gap&rdquo; means outdated</li>
+        <li class="n">Compliance via human process</li>
+      </ul>
+    </div>
+    <div class="pcard hi">
+      <div class="plbl" style="color:var(--blue)">Path 3 &middot; Sparcle</div>
+      <h3 class="serif">Both. <span style="font-style:italic;color:var(--blue)">No trade-off.</span></h3>
+      <ul class="cx">
+        <li class="y">Modern AI productivity &mdash; with or without LLM tokens</li>
+        <li class="y">Your data, your perimeter &mdash; on-prem, VPC, or air-gap</li>
+        <li class="y">BYO LLM &middot; no LLM-vendor lock-in. Self-hosted tiers keep Sparcle out of the data path entirely</li>
+        <li class="y">Privacy is cryptographic, not contractual</li>
+        <li class="y">Audit chain a regulator can verify independently</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="font-family:Georgia,serif;font-style:italic;font-size:15px;line-height:1.5;color:#3a4453;margin:0;">For decades, knowledge workers across every industry have struggled with the same drag &mdash; <b style="font-style:italic;color:var(--ink)">tools that don&rsquo;t talk, context that doesn&rsquo;t travel, decisions made on stale information.</b> Modern AI promised relief and quietly shipped a new tax: rising token bills and data leaving the perimeter. We built Bolt and Aeira on an <b style="font-style:italic;color:var(--ink)">intelligent architecture</b> that lets every organization adopt AI as a daily driver &mdash; <b style="font-style:italic;color:var(--ink)">without sacrificing data privacy, without exploding LLM token costs, and without re-buying what they already have.</b> Do the work that matters. Reduce cognitive fatigue. Stay sovereign.</p>
+  <div style="font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-top:10px;">&#9656; The founding team, Sparcle</div>
+
+  <div class="foot"><span>03 / 12</span><span class="rt">Hiding in plain sight</span></div>
+  <style>
+    .pcard{background:#f6f8fb;border-radius:10px;padding:16px 18px;}
+    .pcard.hi{background:#fff;border:2px solid var(--blue);}
+    .plbl{font-family:ui-monospace,monospace;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;margin-bottom:8px;}
+    .pcard h3{font-size:22px;margin:0 0 12px;line-height:1.1;}
+    ul.cx{list-style:none;margin:0;padding:0;}
+    ul.cx li{position:relative;padding-left:20px;font-size:13.5px;line-height:1.32;margin:8px 0;color:#39424f;}
+    ul.cx li::before{position:absolute;left:0;top:0;font-weight:700;}
+    ul.cx li.y::before{content:"\2713";color:var(--green);}
+    ul.cx li.n::before{content:"\2717";color:#b6bcc6;}
+  </style>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page">
+  <div class="eyebrow">&#9656; What this actually is</div>
+  <h1>Superagent on top.<br>Substrate <span class="i">underneath.</span></h1>
+  <p class="sub">Bolt = the surface your workforce lives in. Aeira = the substrate that makes it defensible.</p>
+
+  <div class="cols2">
+    <div class="tcard" style="border-top-color:var(--blue);">
+      <div class="lbl">&#9656; Bolt &nbsp;&nbsp; Productivity superagent</div>
+      <h3 class="serif" style="font-size:20px;margin:2px 0 4px;">Access. Search. Automate. <span style="color:var(--blue);font-style:italic">Agentically.</span></h3>
+      <p style="font-size:12.5px;color:var(--mut);margin:0 0 8px;">One interface for every system you have access to &middot; multi-OS &middot; multi-surface</p>
+      <div class="krow"><span class="k">Access</span><span class="v">One palette across local, cloud, Aeira, and enterprise indexes &mdash; only what your identity is allowed to see</span></div>
+      <div class="krow"><span class="k">Any LLM</span><span class="v">BYO model + keys. Admin gated. Lock which model the org uses, by role.</span></div>
+      <div class="krow"><span class="k">Any tool</span><span class="v">Any MCP server plugs in &mdash; Bolt is a hub. 8 enterprise auth modes.</span></div>
+      <div class="krow"><span class="k">Any agent</span><span class="v">Bidirectional A2A peer &mdash; orchestrate or be orchestrated. OpenAI-compatible.</span></div>
+      <div class="krow"><span class="k">Automate</span><span class="v">Schedule, watch, trigger &mdash; recurring reports, reminders, watch-and-respond, unattended</span></div>
+      <div class="krow"><span class="k">Data privacy</span><span class="v">You control. No sensitive data crosses the boundary. Audit, govern, restrict &mdash; org-wide.</span></div>
+      <div class="krow"><span class="k">Anywhere</span><span class="v">Wherever your workforce works &mdash; macOS, Windows, Linux, browser, mobile, command-line</span></div>
+      <div class="krow"><span class="k">Your boundary</span><span class="v">On-prem, VPC, or fully air-gapped on self-hosted tiers &mdash; data stays inside your perimeter.</span></div>
+    </div>
+    <div class="tcard" style="border-top-color:var(--orange);">
+      <div class="lbl" style="color:var(--orange)">&#9656; Aeira &nbsp;&nbsp; Org knowledge, unlocked</div>
+      <h3 class="serif" style="font-size:20px;margin:2px 0 4px;">Sovereign by <span style="color:var(--orange);font-style:italic">construction.</span></h3>
+      <p style="font-size:12.5px;color:var(--mut);margin:0 0 8px;">Your answers, buried across 40 systems &mdash; one corpus, access-controlled per identity</p>
+      <div class="krow o"><span class="k">One corpus</span><span class="v">Finance, contracts, secure access-controlled corp data, docs, wikis, code, tickets, CRM, HR &mdash; plus your existing connectors</span></div>
+      <div class="krow o"><span class="k">ACL</span><span class="v">Patent-pending 4-level pre-filter, at the index, not post-retrieval</span></div>
+      <div class="krow o"><span class="k">Identity</span><span class="v">Visibility maps to your IdP groups &mdash; automatically. No manual permissioning.</span></div>
+      <div class="krow o"><span class="k">Encryption</span><span class="v">Per-tenant CMK + envelope encryption + signed integrity</span></div>
+      <div class="krow o"><span class="k">Erasure</span><span class="v">Crypto-shred for HIPAA / GDPR / DPDPA right-to-erasure &mdash; works on WORM</span></div>
+      <div class="krow o"><span class="k">Audit</span><span class="v">Sealed Merkle chain, KMS-signed &mdash; auditors verify independently</span></div>
+      <div class="krow o"><span class="k">Two modes</span><span class="v">Instant retrieval (no LLM, zero token cost) or reasoned synthesis (agentic)</span></div>
+    </div>
+  </div>
+
+  <div class="foot"><span>04 / 12</span><span class="rt">Bolt + Aeira</span></div>
+  <style>
+    .krow{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--line);position:relative;padding-left:16px;}
+    .krow::before{content:"\25C7";position:absolute;left:0;top:6px;font-size:10px;color:var(--blue);}
+    .krow.o::before{color:var(--orange);}
+    .krow .k{flex:0 0 90px;font-weight:700;color:var(--ink);font-size:12.5px;}
+    .krow .v{flex:1;color:#3a4453;font-size:12.5px;line-height:1.34;}
+  </style>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page">
+  <div class="eyebrow">&#9656; The bill problem <span class="dot">&middot;</span> <span class="ctx">Matters most to CIO + CFO</span></div>
+  <h1>Productive with or without<br><span class="i">LLM tokens.</span></h1>
+
+  <div class="cols3" style="margin:12px 0 22px;">
+    <div class="lcard green" style="min-height:150px;">
+      <div class="lbl">Query</div>
+      <h3 class="serif">&ldquo;Find my Q4 deck&rdquo;</h3>
+      <p>Local + remote + Aeira / your corp <i style="font-style:italic;color:var(--mut)">&rarr; 0 tokens</i></p>
+    </div>
+    <div class="lcard green" style="min-height:150px;">
+      <div class="lbl">Query</div>
+      <h3 class="serif">&ldquo;Now in Tokyo&rdquo; &middot; &ldquo;EUR-USD&rdquo; &middot; &ldquo;Free meeting room&rdquo;</h3>
+      <p><code>=tz</code> &middot; <code>=fx</code> &middot; <code>=room</code> utilities <i style="font-style:italic;color:var(--mut)">&rarr; 0 tokens</i></p>
+    </div>
+    <div class="lcard orange" style="min-height:150px;">
+      <div class="lbl">Query</div>
+      <h3 class="serif">&ldquo;Summarize last week&rsquo;s calls, draft a reply&rdquo;</h3>
+      <p>Reasoning required <i style="font-style:italic;color:var(--mut)">&rarr; LLM tokens</i></p>
+    </div>
+  </div>
+
+  <div class="note">Bolt&rsquo;s <b>first-class integrations</b> &mdash; search, files, utilities, clipboard, apps, slash commands &mdash; carry <b>70&ndash;90% of daily work at zero LLM tokens.</b> The model is the <i>last resort,</i> not the first. <b>Fewer clicks. Less time. Less tokens. Smaller bill. Less PII surface.</b> Time reclaim alone pays for Bolt &mdash; token savings are the encore.</div>
+
+  <div class="foot"><span>05 / 12</span><span class="rt">The token wedge</span></div>
+</div>
+
+<!-- PAGE 6 -->
+<div class="page">
+  <div class="eyebrow">&#9656; The trust problem <span class="dot">&middot;</span> <span class="ctx">Matters most to anyone acting on AI output</span></div>
+  <h1>Every answer carries <span class="i">its<br>receipts.</span></h1>
+
+  <div class="cols3" style="margin:12px 0 22px;">
+    <div class="lcard">
+      <div class="lbl">Generic</div>
+      <h3 class="serif" style="margin-bottom:6px;">&ldquo;Find my Q4 deck&rdquo;</h3>
+      <div class="hr"></div>
+      <div style="font-family:Georgia,serif;font-weight:700;font-size:15px;">Q4 Sales Deck.pptx</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--mut);margin:2px 0 8px;">Drive &middot; Marketing folder</div>
+      <span class="bpill">Updated 2 weeks ago</span><span class="bpill">Approved</span><span class="bpill">For your audience</span>
+      <p style="margin-top:26px;">Default pack: freshness, approval, audience.</p>
+    </div>
+    <div class="lcard">
+      <div class="lbl">Healthcare</div>
+      <h3 class="serif" style="margin-bottom:6px;">&ldquo;Latest hypertension treatment guideline&rdquo;</h3>
+      <div class="hr"></div>
+      <div style="font-family:Georgia,serif;font-weight:700;font-size:15px;">Hypertension Management &mdash; Tier 1 Guideline</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--mut);margin:2px 0 8px;">Clinical Library &middot; Cardiology</div>
+      <span class="bpill">Clinical guideline</span><span class="bpill">CME current</span><span class="bpill">Authoritative source-of-record</span>
+      <p style="margin-top:16px;">Healthcare pack: evidence ladder, CME currency.</p>
+    </div>
+    <div class="lcard red">
+      <div class="lbl">Demoted</div>
+      <h3 class="serif" style="margin-bottom:6px;">&ldquo;Expense policy&rdquo;</h3>
+      <div class="hr"></div>
+      <div style="font-family:Georgia,serif;font-weight:700;font-size:15px;">Expense Policy v3 (2023)</div>
+      <div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--mut);margin:2px 0 8px;">Confluence &middot; Finance space</div>
+      <span class="bpill red">Retired policy &mdash; do not cite</span>
+      <p style="margin-top:26px;">Regulated pack: retired policies sink below the cut.</p>
+    </div>
+  </div>
+
+  <div class="note"><b>Authority Policy SDK</b> ships three reference packs out of the box &mdash; <b>Default</b> (universal signals), <b>Regulated</b> (industry compliance), <b>Healthcare</b> (clinical evidence ladder). Customers extend or write their own in Rust + YAML; trust scoring runs inside your perimeter, on the substrate you already control. <i>Your search. Your policy. Your code.</i></div>
+
+  <div class="foot"><span>06 / 12</span><span class="rt">Trust on every answer</span></div>
+  <style>
+    .hr{border-top:1px dashed #cfd6e0;margin:8px 0 10px;}
+    .bpill{display:inline-block;border:1px solid var(--green);color:var(--green);border-radius:4px;
+      padding:3px 8px;font-size:11px;font-weight:600;margin:3px 4px 0 0;}
+    .bpill.red{border-color:var(--red);color:var(--red);}
+  </style>
+</div>
+
+<!-- PAGE 7 -->
+<div class="page">
+  <div class="eyebrow">&#9656; The exposure problem <span class="dot">&middot;</span> <span class="ctx">Matters most to CISO + DPO + audit</span></div>
+  <h1>Sensitive data, <span class="i">protected at<br>the call.</span></h1>
+
+  <div class="cols3" style="margin:12px 0 22px;">
+    <div class="lcard"><div class="lbl">Tools</div><h3 class="serif">See the <span class="i">real values.</span></h3><p>Function calls receive unmasked data &mdash; so the action actually works.</p></div>
+    <div class="lcard"><div class="lbl">The model</div><h3 class="serif">Sees <span class="i">masked tokens.</span></h3><p>PII / PHI / financial values pseudonymized before any LLM call &mdash; in both directions.</p></div>
+    <div class="lcard"><div class="lbl">The audit log</div><h3 class="serif">Stays <span class="i">PII-free.</span></h3><p>Tokens are tenant-isolated and reversible only inside your perimeter.</p></div>
+  </div>
+
+  <div class="note">Layered detection across <b>three pluggable engines</b>: <b>regex</b> for structured patterns (SSN, IBAN, credit card, MRN, employee IDs), <b>GLiNER / Microsoft Presidio / your own NER sidecar</b> for unstructured free-text PII and PHI, and <b>Tesseract or any OCR you already run</b> for image &amp; document text. Even when using a frontier public model, sensitive values never reach it.</div>
+
+  <div class="foot"><span>07 / 12</span><span class="rt">The exposure wedge</span></div>
+</div>
+
+<!-- PAGE 8 -->
+<div class="page">
+  <div class="eyebrow">&#9656; The lock-in problem <span class="dot">&middot;</span> <span class="ctx">Matters most to CIO + CISO</span></div>
+  <h1>BYO everything. <span class="i">In your<br>perimeter.</span></h1>
+
+  <div class="cols4" style="margin:12px 0 22px;">
+    <div class="lcard"><div class="lbl">Model</div><h3 class="serif">BYO <span class="i">LLM</span></h3><p>OpenAI, Anthropic, Gemini, Llama, local, your own &mdash; admin-gated by role.</p></div>
+    <div class="lcard"><div class="lbl">Identity</div><h3 class="serif">BYO <span class="i">IdP</span></h3><p>OIDC, SAML 2.0, SCIM. Okta, Azure AD, Keycloak, Ping &mdash; or yours.</p></div>
+    <div class="lcard"><div class="lbl">Tools</div><h3 class="serif">BYO <span class="i">MCP</span></h3><p>Any MCP server plugs in. Bolt is also a host &amp; A2A peer.</p></div>
+    <div class="lcard"><div class="lbl">Deployment</div><h3 class="serif">Self-hosted &middot; <span class="i">air-gap</span></h3><p>Helm chart. On-prem, VPC, or fully air-gapped. Self-hosted by default.</p></div>
+  </div>
+
+  <div class="note"><b>Self-hosted by default</b> &mdash; All Bolt tiers, Authorize / Backbone / Certify, run in your perimeter with no Sparcle component in the data path. (There is no Sparcle-managed hosting tier; every tier is self-hosted.) Open protocols (OIDC, SAML, MCP, A2A, OpenAI-compatible) at every external boundary. <b>Bolt picks what you already have</b> &mdash; LLMs, embeddings, rerankers, PII engines, OCR. Nothing is replaced unless you want it replaced. <b>For procurement on self-hosted tiers: not a critical vendor on your TPRM list, no LLM concentration risk, no BAA needed for Sparcle.</b></div>
+
+  <div class="foot"><span>08 / 12</span><span class="rt">The lock-in wedge</span></div>
+</div>
+
+<!-- PAGE 9 -->
+<div class="page">
+  <div class="eyebrow">&#9656; The trust problem <span class="dot">&middot;</span> <span class="ctx">Matters most to CISO + audit + compliance</span></div>
+  <h1>Cryptographic.<br><span class="i">Not contractual.</span></h1>
+
+  <div class="cols3" style="margin:12px 0 22px;">
+    <div class="lcard"><div class="lbl">Audit chain</div><h3 class="serif">Sealed <span class="i">Merkle.</span> KMS-signed.</h3><p>Ed25519-signed roots, rotated nightly. Bitcoin-style integrity tree.</p></div>
+    <div class="lcard"><div class="lbl">Right-to-erasure</div><h3 class="serif">Crypto-shred. <span class="i">Works on WORM.</span></h3><p>Destroy the key &rarr; record is unrecoverable. HIPAA / GDPR / DPDPA defensible.</p></div>
+    <div class="lcard"><div class="lbl">Access control</div><h3 class="serif">ACL <span class="i">at the index.</span></h3><p>Patent-pending 4-level pre-filter. Restricted docs cannot leak via counts.</p></div>
+  </div>
+
+  <div class="note">A regulator verifies any audit root using <b>only the published algorithm and the raw events</b> &mdash; no trust required in Sparcle code. Evidence-grade, not SLA-grade.</div>
+
+  <div class="foot"><span>09 / 12</span><span class="rt">The trust wedge</span></div>
+</div>
+
+<!-- PAGE 10 -->
+<div class="page">
+  <div class="eyebrow">&#9656; For the audit, compliance &amp; security lens</div>
+  <h1 style="font-size:44px;margin-bottom:8px;">Controls <span class="i">by construction.</span></h1>
+  <p class="sub" style="margin-bottom:16px;">Frameworks aligned. Standards adopted. Controls implemented &mdash; all inside your perimeter.</p>
+
+  <div class="cols3">
+    <div class="tcard">
+      <div class="lbl">&#9656; Frameworks aligned</div>
+      <div style="font-family:Georgia,serif;font-weight:700;font-size:16px;margin-bottom:8px;">What you can defend.</div>
+      <ul class="ck">
+        <li><b>HIPAA / HITECH &middot; HITRUST CSF</b> &mdash; PHI handling, audit, erasure</li>
+        <li><b>GDPR &middot; DPDPA</b> &mdash; right-to-erasure (&sect;15) by crypto-shred</li>
+        <li><b>SOC 2 &middot; ISO 27001 / 27701</b> &mdash; security &amp; privacy baseline</li>
+        <li><b>EU AI Act &middot; NIST AI RMF &middot; ISO 42001</b> &mdash; AI governance &amp; transparency</li>
+        <li><b>PCI-DSS &middot; GLBA &middot; DORA</b> &mdash; financial data &amp; operational resilience</li>
+        <li><b>MAS TRMG &middot; OSFI &middot; CERT-In</b> &mdash; data residency, multi-jurisdiction</li>
+        <li><b>FedRAMP / IL4 &middot; CMMC &middot; NIST 800-171</b> &mdash; gov / defense / CUI handling</li>
+        <li><b>ITAR / export-aware</b> &mdash; sovereign, air-gap-capable deployment</li>
+      </ul>
+    </div>
+    <div class="tcard">
+      <div class="lbl">&#9656; Standards adopted</div>
+      <div style="font-family:Georgia,serif;font-weight:700;font-size:16px;margin-bottom:8px;">What you can verify.</div>
+      <ul class="ck">
+        <li><b>Identity</b> &mdash; OIDC, SAML 2.0, SCIM</li>
+        <li><b>Crypto</b> &mdash; AES-256-GCM, Ed25519, KMS envelope</li>
+        <li><b>Primitives</b> &mdash; FIPS 140-3 eligible</li>
+        <li><b>API auth</b> &mdash; OAuth 2.1, HMAC-SHA256, RFC-9457</li>
+        <li><b>Observability</b> &mdash; OpenTelemetry, Prometheus</li>
+        <li><b>Open protocols</b> &mdash; MCP, A2A, OpenAI-compatible</li>
+        <li><b>Deployment</b> &mdash; Helm 3, OCI, Kubernetes</li>
+      </ul>
+    </div>
+    <div class="tcard">
+      <div class="lbl">&#9656; Controls implemented</div>
+      <div style="font-family:Georgia,serif;font-weight:700;font-size:16px;margin-bottom:8px;">What you can audit.</div>
+      <ul class="ck">
+        <li><b>Identity-aware retrieval</b> &mdash; ACL at the index</li>
+        <li><b>PII / PHI pseudonymization</b> &mdash; at LLM and external boundaries</li>
+        <li><b>Human-in-the-loop (HITL)</b> &mdash; approval gates on risk-classed actions</li>
+        <li><b>Central admin hub</b> &mdash; provisioning, model &amp; tool gating per role</li>
+        <li><b>Sealed Merkle audit chain</b> &mdash; KMS-signed roots</li>
+        <li><b>Per-tenant CMK</b> &mdash; crypto-shred for erasure</li>
+        <li><b>Sandboxed agents</b> &mdash; path / command allowlists</li>
+        <li><b>Rate limit &middot; circuit breaker &middot; DLQ</b> &mdash; per MCP</li>
+        <li><b>Cryptographically-verifiable provenance</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:18mm;right:18mm;bottom:15mm;font-family:Georgia,serif;font-style:italic;font-size:11.5px;color:var(--mut);border-top:1px solid var(--line);padding-top:8px;">List is representative, not exhaustive. Detailed control mappings available on request. In every self-hosted Bolt tier, no Sparcle-hosted component sits in the data path.</div>
+
+  <div class="foot"><span>10 / 12</span><span class="rt">Controls by construction</span></div>
+  <style>
+    ul.ck{list-style:none;margin:0;padding:0;}
+    ul.ck li{position:relative;padding-left:18px;font-size:12px;line-height:1.32;margin:7px 0;color:#39424f;}
+    ul.ck li::before{content:"\2713";position:absolute;left:0;top:0;color:var(--green);font-weight:700;}
+    ul.ck li b{color:var(--ink);}
+  </style>
+</div>
+
+<!-- PAGE 11 -->
+<div class="page">
+  <div class="eyebrow">&#9656; How we compare</div>
+  <h1 style="font-size:46px;margin-bottom:12px;">We don&rsquo;t <span class="i">have</span> a cloud.</h1>
+
+  <table class="cmp">
+    <colgroup><col style="width:150px"><col class="us" style="width:280px"><col><col><col></colgroup>
+    <thead><tr>
+      <th>Dimension</th><th class="us">Bolt + Aeira</th><th>Glean</th><th>Microsoft Copilot</th><th>OpenAI Enterprise</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="d">What it reduces</td><td class="us"><b>Clicks &middot; tabs &middot; open apps &middot; time &middot; LLM tokens &middot; cost</b> &mdash; all down</td><td>Adds a search surface; tokens per query</td><td>Adds a chat sidebar; M365-tier tokens per chat</td><td>Adds a web chat; tokens per message</td></tr>
+      <tr><td class="d">Daily drivers</td><td class="us"><b>Unified surface</b> &mdash; local + 1P &amp; 3P apps, utilities, secure clips, notes, files, devices, AI, automation, and more</td><td>Enterprise search only</td><td>M365 chat sidebar</td><td>Web chat only</td></tr>
+      <tr><td class="d">Pluggability</td><td class="us"><b>BYO at every layer</b> &mdash; LLM, IdP, MCP, embeddings, PII, OCR</td><td>Some BYO at edges</td><td>Microsoft stack</td><td>OpenAI stack</td></tr>
+      <tr><td class="d">Where the data lives</td><td class="us"><b>Customer infra</b> &mdash; on-prem, VPC, or air-gap</td><td>Glean Cloud (VPC retrofit)</td><td>Microsoft Cloud (tenant)</td><td>OpenAI Cloud</td></tr>
+      <tr><td class="d">LLM choice</td><td class="us"><b>BYO &mdash; any model</b> (frontier, local, on-prem)</td><td>Glean-selected</td><td>Microsoft-curated</td><td>OpenAI only</td></tr>
+      <tr><td class="d">Tokens cost</td><td class="us"><b>0 tokens on 70&ndash;90% of work</b> &mdash; LLM only when reasoning is needed</td><td>Every query routes via LLM</td><td>Every chat = M365 tier tokens</td><td>Every chat = LLM tokens</td></tr>
+      <tr><td class="d">PII at the LLM call</td><td class="us"><b>Masked &mdash; both directions</b></td><td>None native</td><td>Tenant scope only</td><td>Contractual only</td></tr>
+      <tr><td class="d">Audit chain</td><td class="us"><b>Sealed Merkle &middot; KMS-signed &middot; auditor-verifiable</b></td><td>SaaS audit logs</td><td>M365 unified log</td><td>Vendor logs</td></tr>
+      <tr><td class="d">Right-to-erasure</td><td class="us"><b>Crypto-shred (works on WORM)</b></td><td>Deletion (best-effort)</td><td>Deletion</td><td>Deletion</td></tr>
+      <tr><td class="d">ACL enforcement</td><td class="us"><b>At the index (pre-filter)</b></td><td>Post-retrieval filter</td><td>M365 permissions</td><td>None</td></tr>
+      <tr><td class="d">Air-gap deployable</td><td class="us"><b>Yes</b></td><td>No</td><td>No</td><td>No</td></tr>
+    </tbody>
+  </table>
+
+  <div class="foot"><span>11 / 12</span><span class="rt">How we compare</span></div>
+  <style>
+    table.cmp{border-collapse:collapse;width:100%;table-layout:fixed;}
+    table.cmp th,table.cmp td{padding:7px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);
+      font-size:12px;line-height:1.3;}
+    table.cmp thead th{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--mut);border-bottom:1.5px solid var(--navy);font-weight:700;}
+    table.cmp thead th.us{color:var(--navy);}
+    table.cmp td.d{font-weight:700;color:var(--ink);}
+    table.cmp .us{background:var(--hl);}
+    table.cmp td.us{color:var(--navy);}
+    table.cmp td.us b{color:var(--navy);}
+  </style>
+</div>
+
+<!-- PAGE 12 -->
+<div class="page">
+  <div class="eyebrow">&#9656; Next steps <span class="dot">&middot;</span> <span class="ctx">How to engage</span></div>
+  <h1 style="font-size:46px;margin-bottom:12px;">Next steps.</h1>
+  <p class="sub" style="margin-bottom:16px;">Four shapes &mdash; from a 7-day free trial to a year-long design partner. Scoped, measurable, independently useful.</p>
+
+  <div class="cols3" style="margin-bottom:16px;">
+    <div class="tcard">
+      <div class="lbl" style="color:var(--blue)">Shape 1 &middot; Free trial</div>
+      <div class="mono-sub">7 days &middot; no commercials</div>
+      <h3 class="serif shp">Trial <span class="i">inside your boundary.</span></h3>
+      <p class="shpp">Plug Bolt into your <b>IdP via OIDC</b> (Microsoft 365, Google Workspace, Okta, Azure AD, any OIDC) &mdash; <b>data stays on device, you keep your AI keys.</b> Or sign in with Gmail / Outlook / Zoho via <b>Sparcle ID</b> for the quickest first look. <a>sparcle.app/download</a></p>
+      <div class="shpf">&#9656; CISO + CFO + IT &middot; Trial in your own perimeter</div>
+    </div>
+    <div class="tcard" style="position:relative;">
+      <span class="recbadge">Recommended start</span>
+      <div class="lbl" style="color:var(--blue)">Shape 2 &middot; Pilot</div>
+      <div class="mono-sub">90 days &middot; founding terms</div>
+      <h3 class="serif shp">Cohort. Quarter. <span class="i">Measurable.</span></h3>
+      <p class="shpp">Bolt to a small cohort (10&ndash;50 users), with <b>optional Aeira</b> for governance. Success metrics agreed up front &mdash; <b>token delta, time reclaimed, audit posture.</b> Founding-customer pricing.</p>
+      <div class="shpf">&#9656; CIO + CFO + workforce lead &middot; Mid-to-large enterprise</div>
+    </div>
+    <div class="tcard">
+      <div class="lbl" style="color:var(--blue)">Shape 3 &middot; Aeira eval</div>
+      <div class="mono-sub">30&ndash;180 days &middot; eval pricing</div>
+      <h3 class="serif shp">Aeira <span class="i">under what you run.</span></h3>
+      <p class="shpp">Slide Aeira&rsquo;s governance substrate beneath an existing AI workload. <b>Sealed audit, crypto-shred, ACL at the index.</b> Eval team only, no production change. <b>Discounted evaluation pricing</b> for the trial period.</p>
+      <div class="shpf">&#9656; CISO + audit + DPO &middot; Regulated industries</div>
+    </div>
+  </div>
+
+  <div class="tcard" style="margin-bottom:14px;">
+    <div style="display:grid;grid-template-columns:1.1fr 1.9fr 1fr;gap:18px;align-items:start;">
+      <div>
+        <div class="lbl" style="color:var(--blue)">Shape 4 &middot; Design partner</div>
+        <div class="mono-sub">6&ndash;12 months &middot; deep</div>
+        <h3 class="serif shp" style="margin-bottom:0;">Locked terms.<br><span class="i">Roadmap influence.</span></h3>
+      </div>
+      <p class="shpp" style="align-self:center;margin:0;">Multi-quarter partnership. <b>25% off list, locked 24 months, direct roadmap influence,</b> joint case study. For enterprises ready to anchor on Sparcle as their sovereign AI platform.</p>
+      <div class="shpf" style="align-self:center;">&#9656; CEO + board level strategic adopters</div>
+    </div>
+  </div>
+
+  <div class="note"><b>Flexible, risk-free and collaborative.</b> Our success depends on delivering the value and making you successful with Bolt and Aeira. <span style="color:var(--blue)">bolt@sparcle.app</span></div>
+
+  <div class="foot"><span>12 / 12</span><span class="rt">Next steps</span></div>
+  <style>
+    .mono-sub{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.06em;color:var(--mut);margin:2px 0 8px;}
+    h3.shp{font-size:19px;margin:0 0 8px;line-height:1.1;}
+    .shpp{font-size:12.5px;line-height:1.4;color:#39424f;margin:0 0 12px;}
+    .shpp a{color:var(--blue);text-decoration:underline;}
+    .shpf{font-family:ui-monospace,monospace;font-size:9.5px;letter-spacing:.08em;color:var(--mut);
+      text-transform:uppercase;border-top:1px dashed #cfd6e0;padding-top:8px;}
+    .recbadge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;
+      font-family:ui-monospace,monospace;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      padding:4px 10px;border-radius:4px;white-space:nowrap;}
+  </style>
+</div>
+
+</body>
+</html>

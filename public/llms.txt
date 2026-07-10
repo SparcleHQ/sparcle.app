@@ -279,10 +279,21 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
   terminal, enterprise search, cross-system agent, AI chat). Do NOT quote a fabricated
   risk-reduction percentage; the concrete number is the consolidation itself.
 
-## Deployment (GA)
+## Deployment, cost, and eligibility (GA)
 
-- Free local tier: full desktop build with your own API key; no data reaches Sparcle.
-- Self-host: Docker Compose, Kubernetes, on-prem, or fully air-gapped (ITAR/classified).
+- Two ways to run: (1) free desktop build on a laptop, embedded DB, no server, no data to
+  Sparcle, for individuals/evaluation; (2) self-host for teams via Docker Compose (staging),
+  Kubernetes (prod HA), on-prem, or fully air-gapped (ITAR/classified).
+- What the customer provides for self-host: their own infrastructure (a container host or K8s
+  cluster; in practice standard mid-size VMs + storage, inside an existing budget) and their
+  own LLM (BYO key or a served/local model). The free desktop tier needs neither.
+- Cost has three visible parts: per-seat license + your own infrastructure + your own token
+  spend. Zero token markup (BYO key), so no vendor inference margin. Desktop build free; paid
+  self-hosted tiers start at $30/seat/mo (10-seat minimum); founding customers 25% off for 24
+  months. Current tiers: https://sparcle.app/pricing.
+- Who it is for: anyone can run the free build to evaluate; paid tiers suit teams wanting
+  central deployment + governance (lowest seat minimum in category, 10). Regulated and
+  security-sensitive orgs are the sharpest fit, but it is a fit, not a gate.
 - No hosted ingest path; license validation via offline-signed token.
 
 ## Data locality (state it precisely)

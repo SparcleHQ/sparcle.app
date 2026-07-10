@@ -24,6 +24,7 @@
     <li><a href="#extend">Bring anything into Bolt</a></li>
     <li><a href="#replaces">One app replaces a stack</a></li>
     <li><a href="#evidence">The problem we remove (evidence)</a></li>
+    <li><a href="#run">What you need to run it, and cost</a></li>
     <li><a href="#notfit">When Bolt is not the right tool</a></li>
     <li><a href="#faq">Full FAQ</a></li>
   </ol>
@@ -226,6 +227,33 @@ an outside tool goes away, while masking, approvals, and audit govern the times 
 genuinely is needed. That is data locality delivered as daily productivity, not as a policy
 nobody follows.</p>
 
+<h2 id="run">What you need to run it, and what it costs</h2>
+<p>Setting expectations plainly, because a governed tool you cannot budget for or deploy is
+no use.</p>
+<h3>Two ways to run it</h3>
+<ul>
+  <li><strong>On your laptop, free.</strong> The full desktop build runs on your own machine with your own API key. No server to stand up, no external database (it ships an embedded one), and no data reaches Sparcle. This is the individual and evaluation path.</li>
+  <li><strong>Self-hosted, for teams.</strong> Deploy inside your own perimeter: Docker Compose for staging, Kubernetes for production high availability, on-prem, or fully air-gapped. It runs in your VPC or data center, not ours.</li>
+</ul>
+<h3>What you provide</h3>
+<ul>
+  <li><strong>Your infrastructure (self-host only).</strong> A container host or Kubernetes cluster sized to your seats: in practice, standard mid-size VMs plus storage, which fits inside an existing cloud or on-prem budget. The free desktop tier needs none of this.</li>
+  <li><strong>Your LLM.</strong> Bring your own key (OpenAI, Anthropic, Bedrock, Vertex, and more) or your own served or local model. Bolt adds zero token markup, so your model spend is exactly your provider's price, and a local model costs nothing per token.</li>
+</ul>
+<h3>What it costs</h3>
+<p>Three visible parts: the per-seat license, your own infrastructure, and your own token
+spend. The desktop build is free (bring your own key). Paid self-hosted tiers start at
+$30 per seat per month with a 10-seat minimum, and founding customers get 25 percent off for
+24 months. Because you bring the model there is no vendor token margin, which is why a Bolt
+deployment typically undercuts stacking a cloud assistant plus an enterprise search tool plus
+an automation tool. See <a href="/pricing">pricing</a> for the current tiers, or ask for a
+modeled total-cost scenario in an architecture review.</p>
+<h3>Who it is for</h3>
+<p>Anyone can run the free build on a laptop to evaluate with real data. The paid tiers suit
+teams that want central deployment and governance, and Bolt has the lowest seat minimum in
+its category (10 seats). The sharpest fit is regulated and security-sensitive organizations,
+but that is a fit, not a gate. If your need is one of the honest non-fits below, we say so.</p>
+
 <h2 id="notfit">When Bolt is not the right tool</h2>
 <p>Credibility depends on saying where we stop. Bolt is not, and does not pretend to be:</p>
 <table>
@@ -341,7 +369,19 @@ system of record. Almost everything else people ask for is reachable by configur
 <div class="gt-body"><p>Yes. Docker Compose for staging, Kubernetes for production HA, on-prem, or fully air-gapped for ITAR and classified environments. License validation uses an offline-signed token, with no outbound calls.</p></div></details>
 
 <details class="gt-faq"><summary>What does it cost, and is there a free tier?</summary>
-<div class="gt-body"><p>The full desktop build is free on your own machine with your own API key. Paid self-hosted tiers start at $30/seat/month (10-seat minimum). Founding customers get 25% off any tier, locked for 24 months, through the end of 2026 or until 50 customers sign.</p></div></details>
+<div class="gt-body"><p>The full desktop build is free on your own machine with your own API key. Paid self-hosted tiers start at $30/seat/month (10-seat minimum). Founding customers get 25% off any tier, locked for 24 months, through the end of 2026 or until 50 customers sign. See the pricing page for current tiers.</p></div></details>
+
+<details class="gt-faq"><summary>Do I need my own servers to run Bolt?</summary>
+<div class="gt-body"><p>Not for the free desktop build, which runs entirely on your laptop with an embedded database and no external services. For a team deployment you self-host inside your own perimeter (Docker Compose for staging, Kubernetes for production HA, on-prem, or air-gapped), so you provide a container host or cluster sized to your seats. In practice that is standard mid-size VMs plus storage, inside your existing cloud or on-prem budget.</p></div></details>
+
+<details class="gt-faq"><summary>Do I need to bring my own LLM, and does that cost extra?</summary>
+<div class="gt-body"><p>Yes, you bring the model, and that is the point: Bolt adds zero token markup. Use your own key (OpenAI, Anthropic, Bedrock, Vertex, and more) or your own served or local model. Your model spend is exactly your provider's price, and a local model costs nothing per token. There is no vendor inference margin on top.</p></div></details>
+
+<details class="gt-faq"><summary>What is the total cost of ownership?</summary>
+<div class="gt-body"><p>Three visible parts: the per-seat license, your own infrastructure, and your own token spend. The desktop build is free; paid tiers start at $30 per seat per month. Because there is no token markup and one governed app replaces a stack of point tools, a Bolt deployment typically undercuts stacking a cloud assistant plus an enterprise search tool plus an automation tool. Ask for a modeled scenario in an architecture review, or see the pricing page.</p></div></details>
+
+<details class="gt-faq"><summary>Who is Bolt for? Is it only for large regulated companies?</summary>
+<div class="gt-body"><p>Anyone can run the free build on a laptop to evaluate with real data. The paid tiers suit teams that want central deployment and governance, and Bolt has the lowest seat minimum in its category (10 seats). Regulated and security-sensitive organizations are the sharpest fit, but that is a fit, not a gate.</p></div></details>
 
 <details class="gt-faq"><summary>Do you have Fortune-500 reference logos today?</summary>
 <div class="gt-body"><p>Public reference logos at that scale are something a pre-scale company earns over time, and many of our target buyers are in environments where references are contractually restricted. If your procurement requires named public references before any purchase, that is a fair reason to wait. It is a stage limitation, not a capability gap.</p></div></details>

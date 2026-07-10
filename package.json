@@ -7,7 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "./scripts/sync-docs.sh",
+    "prebuild": "./scripts/sync-docs.sh && ./scripts/check-no-internal.sh",
+    "check:no-internal": "./scripts/check-no-internal.sh",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

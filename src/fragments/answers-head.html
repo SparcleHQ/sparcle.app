@@ -1,0 +1,120 @@
+<style>
+.answers-doc{
+    --bg:#ffffff; --fg:#141922; --muted:#5a6472; --line:#e5e8ee;
+    --accent:#2b5cff; --good:#127a4a; --warn:#8a5a00; --card:#f7f9fc;
+    --maxw:860px;
+  }
+
+  @media (prefers-color-scheme: dark){.answers-doc{ --bg:#0f1216; --fg:#e7ebf2; --muted:#9aa5b4; --line:#232a34;
+      --accent:#6d92ff; --good:#4fd08a; --warn:#e0b25a; --card:#161b22; }
+
+  }
+.answers-doc *{box-sizing:border-box}
+.answers-doc{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.answers-doc{margin:0;background:var(--bg);color:var(--fg);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    letter-spacing:.1px}
+.answers-doc .gt-wrap{max-width:var(--maxw);margin:0 auto;padding:48px 24px 96px}
+.answers-doc header.gt-top{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:36px}
+.answers-doc .gt-kicker{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.answers-doc h1{font-size:34px;line-height:1.15;margin:.35em 0 .25em;letter-spacing:-.4px}
+.answers-doc h2{font-size:24px;line-height:1.2;margin:2.4em 0 .5em;letter-spacing:-.3px;scroll-margin-top:20px}
+.answers-doc h3{font-size:18px;margin:1.8em 0 .4em}
+.answers-doc .gt-lede{font-size:18px;color:var(--muted);max-width:62ch}
+.answers-doc p{margin:.7em 0}
+.answers-doc a{color:var(--accent);text-decoration:none}
+.answers-doc a:hover{text-decoration:underline}
+.answers-doc .gt-toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:8px 0 8px}
+.answers-doc .gt-toc h4{margin:0 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.answers-doc .gt-toc ol{margin:0;padding-left:20px;columns:2;column-gap:28px}
+.answers-doc .gt-toc li{margin:4px 0}
+.answers-doc .gt-pillars{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0}
+
+  @media(max-width:640px){.answers-doc .gt-pillars{grid-template-columns:1fr}
+.answers-doc .gt-toc ol{columns:1}}
+.answers-doc .gt-pill{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.answers-doc .gt-pill b{display:block;margin-bottom:4px}
+.answers-doc .gt-pill span{color:var(--muted);font-size:14px}
+.answers-doc table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14.5px}
+.answers-doc th, .answers-doc td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+.answers-doc th{background:var(--card);font-weight:600}
+.answers-doc .gt-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;
+    padding:2px 7px;border-radius:999px;white-space:nowrap}
+.answers-doc .gt-ga{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+.answers-doc .gt-staged{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.answers-doc code, .answers-doc kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px}
+.answers-doc kbd{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.answers-doc pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    overflow-x:auto;font-size:13px;line-height:1.5}
+.answers-doc .gt-faq{border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden;background:var(--card)}
+.answers-doc .gt-faq summary{cursor:pointer;padding:14px 18px;font-weight:600;list-style:none;position:relative}
+.answers-doc .gt-faq summary::-webkit-details-marker{display:none}
+.answers-doc .gt-faq summary::after{content:"+";position:absolute;right:18px;color:var(--muted);font-weight:400}
+.answers-doc .gt-faq[open] summary::after{content:"–"}
+.answers-doc .gt-faq .gt-body{padding:0 18px 16px;color:var(--fg)}
+.answers-doc .gt-faq .gt-body p:first-child{margin-top:0}
+.answers-doc .gt-note{border-left:3px solid var(--accent);padding:2px 0 2px 16px;margin:16px 0;color:var(--muted)}
+.answers-doc footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+
+  @media print{.answers-doc{--bg:#fff;--fg:#111;--muted:#444;--line:#ccc;--card:#f4f4f4;--accent:#1a3fb8}
+.answers-doc{font-size:11pt}
+.answers-doc .gt-wrap{padding:0}
+.answers-doc .gt-faq{break-inside:avoid}
+.answers-doc .gt-faq summary::after{display:none}
+.answers-doc .gt-faq .gt-body{display:block!important}
+.answers-doc h2{break-after:avoid}
+.answers-doc a{color:inherit;text-decoration:none}
+.answers-doc .gt-toc{break-inside:avoid}
+
+  }
+
+
+
+:root[data-theme="dark"] .answers-doc{ --bg:#0f1216; --fg:#e7ebf2; --muted:#9aa5b4; --line:#232a34; --accent:#6d92ff; --good:#4fd08a; --warn:#e0b25a; --card:#161b22; }
+:root[data-theme="light"] .answers-doc{ --bg:#ffffff; --fg:#141922; --muted:#5a6472; --line:#e5e8ee; --accent:#2b5cff; --good:#127a4a; --warn:#8a5a00; --card:#f7f9fc; }
+.answers-doc{ padding: 6rem 0 4rem; }
+
+/* Layout hardening: this page renders inside the full-width site <main>, so the
+   content must self-constrain and no grid/table may overflow horizontally. */
+.answers-doc{ max-width: 960px; margin-inline: auto; overflow-x: clip; }
+.answers-doc .gt-wrap{ max-width: none; width: 100%; box-sizing: border-box; padding: 24px 24px 96px; }
+.answers-doc .gt-pillars{ grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.answers-doc .gt-pill{ min-width: 0; }
+.answers-doc table{ table-layout: fixed; width: 100%; }
+.answers-doc th, .answers-doc td{ overflow-wrap: anywhere; }
+.answers-doc pre{ white-space: pre-wrap; word-break: break-word; }
+@media (max-width: 640px){ .answers-doc .gt-toc ol{ columns: 1; } }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Does Bolt work offline, and is it really useful before the AI fires?","acceptedAnswer":{"@type":"Answer","text":"Yes. Bolt opens as a desktop launcher and does 80+ instant utilities (JSON, base64, hashes, JWT, regex, time zones, currency, and more), clipboard history, notes, screenshot OCR, and local file search with no model call and no network. The launcher earns its keep before any AI cost starts. You can verify by turning off Wi-Fi and watching local tasks keep working."}},
+    {"@type":"Question","name":"Does Bolt have clipboard history?","acceptedAnswer":{"@type":"Answer","text":"Yes. Bolt captures copied text, images, and files into a searchable, pinnable clipboard history, stored encrypted on your device."}},
+    {"@type":"Question","name":"Can Bolt search my screenshots and local files?","acceptedAnswer":{"@type":"Answer","text":"Yes. On-device OCR makes the text inside screenshots and images searchable, and an opt-in on-device image model adds visual search. Bolt also indexes and searches your own file locations such as Home, Desktop, Documents, and Downloads by name and content, with exclusions you control."}},
+    {"@type":"Question","name":"Does Bolt keep notes?","acceptedAnswer":{"@type":"Answer","text":"Yes. Bolt has device-local quick notes with full-text search, encrypted at rest."}},
+    {"@type":"Question","name":"Does Bolt have voice search or voice input?","acceptedAnswer":{"@type":"Answer","text":"Yes, and it is fully on-device. You can speak to the launcher; the microphone is captured and transcribed locally with Whisper, so audio never leaves the machine, unlike cloud dictation. Bolt adopts a local Whisper model if one is present, otherwise offers a one-time download. Voice input is currently an opt-in Labs experiment in builds that include it, not on by default."}},
+    {"@type":"Question","name":"Is my local data encrypted at rest?","acceptedAnswer":{"@type":"Answer","text":"Yes. Clipboard history, notes, and screenshot indexes are stored in a whole-database-encrypted local store, with the encryption key derived on-device and file-permission locked. Connector and OAuth tokens are held in a separate AES-256-GCM vault. Nothing local sits in plaintext."}},
+    {"@type":"Question","name":"How deep is the offline surface, really?","acceptedAnswer":{"@type":"Answer","text":"Deep. Beyond the utilities, Bolt carries a large offline knowledge catalog (currency, country and airport codes, time zones, HTTP status, ports, MIME types, ICD-10, exit codes, chmod, ASCII, and more), recognizes hundreds of value shapes on sight, and validates identifiers with real check-digit math offline (Luhn, IBAN, ISO 7064, Verhoeff for Aadhaar, plus 17+ national validators). Every paste is also scanned locally for hidden and dangerous characters, homograph attacks, and leaked secrets. None of this needs a network."}},
+    {"@type":"Question","name":"Does Bolt protect against Trojan-Source and homograph attacks?","acceptedAnswer":{"@type":"Answer","text":"Yes, offline, on every paste. Bolt flags hidden bidirectional and zero-width characters (the Trojan-Source class), homograph and confusable look-alikes, and leaked secrets such as cloud keys and private keys, before the content goes anywhere."}},
+    {"@type":"Question","name":"How does Bolt serve regulated industries like healthcare, finance, and defense?","acceptedAnswer":{"@type":"Answer","text":"Through swappable, signed compliance and vertical packs. 28 ship in the box, including healthcare, finance, defense, and legal cores plus jurisdiction privacy packs (GDPR, UK GDPR, CCPA, LGPD, DPDP, PIPL, APPI, PIPA, PDPA, POPIA, and more). An enabled pack masks or blocks its sensitive patterns at the model boundary and validates national IDs with real check-digit math. Packs install offline as signed bundles, so new regulation reaches an air-gapped deployment without a software update, and you can author your own pack in a short YAML manifest."}},
+    {"@type":"Question","name":"Can I add a new country or regulation myself, air-gapped?","acceptedAnswer":{"@type":"Answer","text":"Yes. A regulation pack is a short signed YAML manifest (jurisdiction, residency, retention, rights, safeguards, recognizers). You, a partner, or your counsel can author and sign one, and it installs offline with a review-and-consent step. Multi-jurisdiction is stacking packs."}},
+    {"@type":"Question","name":"Is my data sent to Sparcle?","acceptedAnswer":{"@type":"Answer","text":"No. Sparcle operates no cloud that receives your data and has no hosted ingest path. Local device data such as clipboard, notes, and screenshot indexes is stored encrypted on your machine. When you connect a third-party system such as Gmail or Jira, Bolt talks to that system's API as you configured it; that is action on your systems, not exfiltration to a vendor. PII is masked before any prompt reaches a model."}},
+    {"@type":"Question","name":"Can I use my own LLM, and can I switch models later?","acceptedAnswer":{"@type":"Answer","text":"Yes at every tier. Point Bolt at OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, LM Studio, or any OpenAI-compatible endpoint. Models are hot-swappable with zero token markup; you pay your provider directly. Bolt also auto-detects and adopts a local OpenAI-compatible runtime if one is already running on your machine."}},
+    {"@type":"Question","name":"If I switch models or backends, do I lose governance or have to re-run compliance?","acceptedAnswer":{"@type":"Answer","text":"No. PII masking, human approvals, audit, and identity-aware access attach to the boundary, above a swappable provider layer. Change the model, change the backend, or move to an air-gapped local model, and the same governance applies. You do not re-run compliance because you changed a model."}},
+    {"@type":"Question","name":"Do you support our system?","acceptedAnswer":{"@type":"Answer","text":"Almost certainly, by configuration. If it speaks MCP, point Bolt at the server and its tools become governed actions. If it has an API, a short YAML utility manifest turns it into a first-class Bolt action. Bolt ships 100+ integrations today (103 in-house connectors, roughly 350 more via Airbyte, plus any MCP-compliant server), and you can add your own without waiting on our roadmap."}},
+    {"@type":"Question","name":"How hard is it to add a new integration or format?","acceptedAnswer":{"@type":"Answer","text":"A few lines of YAML. A utility manifest has a recognize block that matches the input and a transform pipeline that shapes and routes it, locally or to any MCP tool. No fork, no vendor ticket."}},
+    {"@type":"Question","name":"Is there vendor lock-in?","acceptedAnswer":{"@type":"Answer","text":"No, at three layers. Model: bring and swap any LLM. Protocol: open MCP, not a proprietary plugin marketplace. Deployment: self-host anywhere including air-gapped, with no dependency on a Sparcle cloud."}},
+    {"@type":"Question","name":"Is Bolt just enterprise search? Do I have to pay for parts I will not use?","acceptedAnswer":{"@type":"Answer","text":"No. Bolt is a daily-driver workspace that people open for local utilities, clipboard, notes, and search from day one, then use for governed action across connected systems. Aeira is the separate ACL-aware document-retrieval plane; you can run Bolt without it, or add it when you need governed enterprise search."}},
+    {"@type":"Question","name":"Is Bolt a network proxy, firewall, CASB, or antivirus?","acceptedAnswer":{"@type":"Answer","text":"No. Bolt is not an inline network device and not endpoint security. It governs what your workforce does with AI. Keep your proxy and your EDR; Bolt complements them."}},
+    {"@type":"Question","name":"Does Bolt run, fine-tune, or serve models on GPUs?","acceptedAnswer":{"@type":"Answer","text":"No. Bolt is the governed workspace, not ML infrastructure. You bring your model, and you or your serving stack such as NVIDIA NIM or vLLM run it. If your primary need is a model farm, pair Bolt with that infrastructure."}},
+    {"@type":"Question","name":"Is local model inference fully on-device today?","acceptedAnswer":{"@type":"Answer","text":"Partly. Bolt auto-detects and adopts a local OpenAI-compatible runtime and masks PII unconditionally at the boundary; that is generally available. The fully on-device generation loop is a committed next slice, and we do not claim it is finished."}},
+    {"@type":"Question","name":"Does Bolt work inside Word and Excel like an Office assistant?","acceptedAnswer":{"@type":"Answer","text":"No. Bolt is an overlay plus connectors, not an AI embedded in the Office ribbon. If your entire AI value is in-document and cloud AI is acceptable, a native Office assistant fits that specific need. Bolt fits when you need sovereignty, model choice, cross-system action, and a governed local surface."}},
+    {"@type":"Question","name":"Can I deploy air-gapped?","acceptedAnswer":{"@type":"Answer","text":"Yes. Docker Compose for staging, Kubernetes for production HA, on-prem, or fully air-gapped for ITAR and classified environments. License validation uses an offline-signed token, with no outbound calls."}},
+    {"@type":"Question","name":"What does it cost, and is there a free tier?","acceptedAnswer":{"@type":"Answer","text":"The full desktop build is free on your own machine with your own API key. Paid self-hosted tiers start at $30 per seat per month with a 10-seat minimum. Founding customers get 25% off any tier, locked for 24 months, through the end of 2026 or until 50 customers sign."}},
+    {"@type":"Question","name":"Do you have Fortune-500 reference logos today?","acceptedAnswer":{"@type":"Answer","text":"Public reference logos at that scale are something a pre-scale company earns over time, and many target buyers are in environments where references are contractually restricted. If your procurement requires named public references before any purchase, that is a fair reason to wait. It is a stage limitation, not a capability gap."}},
+    {"@type":"Question","name":"How do I verify the data-locality claims myself?","acceptedAnswer":{"@type":"Answer","text":"Install the free desktop build, turn off Wi-Fi, and confirm local utilities, clipboard, notes, and file search keep working. For the enterprise deployment, everything runs inside your perimeter, so your own network monitoring is the proof. Request a pilot or an architecture review to run this end to end."}}
+  ]
+}
+</script>

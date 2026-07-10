@@ -51,7 +51,7 @@
             return ' nav-active';
         }
         if (page === 'aeira' && path.indexOf('/aeira') !== -1) return ' nav-active';
-        if (page === 'resources' && (path.indexOf('architecture') !== -1 || path.indexOf('security') !== -1 || path.indexOf('integrations') !== -1 || path.indexOf('research') !== -1 || path.indexOf('terms') !== -1 || path.indexOf('privacy') !== -1)) return ' nav-active';
+        if (page === 'resources' && (path.indexOf('answers') !== -1 || path.indexOf('architecture') !== -1 || path.indexOf('security') !== -1 || path.indexOf('integrations') !== -1 || path.indexOf('research') !== -1 || path.indexOf('terms') !== -1 || path.indexOf('privacy') !== -1)) return ' nav-active';
         return '';
     }
 
@@ -81,6 +81,7 @@
         '        </svg>',
         '      </button>',
         '      <ul class="nav-submenu">',
+        '        <li><a href="/answers" class="nav-link">Answers &amp; FAQ</a></li>',
         '        <li><a href="/docs" class="nav-link">Documentation</a></li>',
         '        <li><a href="/docs/utilities" class="nav-link">Apps</a></li>',
         '        <li><a href="/docs/integrate" class="nav-link">Bring your stack</a></li>',
@@ -172,6 +173,7 @@
         '      <div class="footer-col">',
         '        <h5>Resources</h5>',
         '        <ul>',
+        '          <li><a href="/answers">Answers &amp; FAQ</a></li>',
         '          <li><a href="/docs">Documentation</a></li>',
         '          <li><a href="/docs/utilities">Apps</a></li>',
         '          <li><a href="/docs/integrate">Bring your stack</a></li>',
@@ -182,6 +184,7 @@
         '          <li><a href="/research.html">Research &amp; Whitepaper</a></li>',
         '          <li><a href="/media/Bolt_Strategic_Vision.pdf" target="_blank">Strategic Vision</a></li>',
         '          <li><a href="https://sparcle.app/docs/pdfs/workplace-fragmentation-whitepaper.pdf" target="_blank">Full Whitepaper (PDF)</a></li>',
+        '          <li><a href="/answers.pdf" target="_blank">Capabilities &amp; FAQ (PDF)</a></li>',
         '          <li><a href="/status">Status</a></li>',
         '        </ul>',
         '      </div>',

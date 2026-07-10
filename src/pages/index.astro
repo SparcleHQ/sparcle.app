@@ -426,9 +426,35 @@ const proofs = [
         ))}
       </CardGrid>
 
-      <div style="text-align: center; margin-top: var(--space-block);">
+      <div style="text-align: center; margin-top: var(--space-block); display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
         <a href="/why-sparcle" class="btn btn-secondary btn-lg">
           Our Mission &amp; Story
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="/answers" class="btn btn-secondary btn-lg">
+          Every objection, answered
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </PageSection>
+
+    <!-- Answers teaser: counter the "it's just a VPC server" misread; route to /answers -->
+    <PageSection
+      eyebrow="Answers"
+      title="Heard Bolt is &ldquo;just an enterprise server&rdquo;? It runs on your laptop, offline."
+      lede="Bolt is a daily driver before it is a deployment. Clipboard history, encrypted notes, screenshot OCR and visual search, local file search, 80+ instant utilities, and on-device voice, all working with no network and encrypted at rest. Then the same surface reaches your SaaS under one governance model that survives a model swap, and almost anything else plugs in with a few lines of YAML."
+      stripe="a"
+    >
+      <div style="display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom: var(--space-block);">
+        <a href="/answers#local" class="btn btn-secondary btn-sm">Works offline</a>
+        <a href="/answers#packs" class="btn btn-secondary btn-sm">Healthcare, finance, defense packs</a>
+        <a href="/answers#lockin" class="btn btn-secondary btn-sm">No lock-in</a>
+        <a href="/answers#extend" class="btn btn-secondary btn-sm">Bring anything (YAML)</a>
+        <a href="/answers#notfit" class="btn btn-secondary btn-sm">When Bolt is not the fit</a>
+      </div>
+      <div style="text-align: center;">
+        <a href="/answers" class="btn btn-primary btn-lg">
+          See everything Bolt actually does
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
       </div>

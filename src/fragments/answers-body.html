@@ -1,0 +1,272 @@
+<div class="answers-doc">
+<div class="gt-wrap">
+
+<header class="gt-top">
+  <div class="gt-kicker">Ground truth</div>
+  <h1>What Bolt and Aeira actually do</h1>
+  <p class="gt-lede">Straight answers to the questions and objections that come up most, with
+  what is shipped today, what is still staged, and where Bolt is honestly not the right
+  tool. If a capability is not on this page, do not assume we have it.</p>
+</header>
+
+<div class="gt-toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ol>
+    <li><a href="#unmatched">The one thing no one else does</a></li>
+    <li><a href="#local">Runs on your laptop, works offline</a></li>
+    <li><a href="#depth">Depth: recognize, validate, protect</a></li>
+    <li><a href="#packs">Healthcare, finance, defense: packs</a></li>
+    <li><a href="#unified">Your device and your SaaS, one surface</a></li>
+    <li><a href="#lockin">No lock-in, governance that outlives your model</a></li>
+    <li><a href="#extend">Bring anything into Bolt</a></li>
+    <li><a href="#evidence">The problem we remove (evidence)</a></li>
+    <li><a href="#notfit">When Bolt is not the right tool</a></li>
+    <li><a href="#faq">Full FAQ</a></li>
+  </ol>
+</div>
+
+<h2 id="unmatched">The one thing no one else does</h2>
+<p>We do not claim to beat every specialist tool at its single specialty. We claim
+something narrower and true: <strong>no other product unifies all of the following in one
+governed, self-hostable surface.</strong></p>
+<div class="gt-pillars">
+  <div class="gt-pill"><b>Offline daily driver</b><span>A real desktop launcher with local utilities, clipboard, notes, screenshot OCR and visual search, and local file search, useful before any model is called.</span></div>
+  <div class="gt-pill"><b>Device plus SaaS, unified</b><span>First-party context on your machine and third-party enterprise systems in one place an agent can act on.</span></div>
+  <div class="gt-pill"><b>Governance that survives a swap</b><span>Masking, approvals, audit, and identity stay the same when you change the model or the backend.</span></div>
+  <div class="gt-pill"><b>Extensible by configuration</b><span>Open MCP plus a few lines of YAML brings almost any system or format in, without waiting on a vendor roadmap.</span></div>
+</div>
+<p>Copilot has the Office surface but not sovereignty or model choice. Enterprise search
+tools have retrieval but not the local daily driver or governed action. Local-file tools
+have device context but no governance, no enterprise reach, no audit. Sovereign model
+platforms have the infrastructure but not the end-user workspace. Each owns a slice. Bolt
+and Aeira own the unification, and the unification is the point.</p>
+
+<h2 id="local">Runs on your laptop, works offline</h2>
+<p>This is the part external writeups miss most, because these features live inside the
+app and were under-described in public copy. They are shipped and generally available
+today. You can verify the offline claim by turning off Wi-Fi and watching local tasks
+keep working.</p>
+<table>
+  <thead><tr><th>Capability</th><th>Status</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>Overlay launcher <kbd>Cmd/Ctrl+Shift+K</kbd></td><td><span class="gt-tag gt-ga">GA</span></td><td>Non-disruptive overlay on top of your focused app; the daily entry point.</td></tr>
+    <tr><td>80+ instant offline utilities</td><td><span class="gt-tag gt-ga">GA</span></td><td>JSON/YAML/SQL, base64/hex, hashes, JWT, regex, timestamps and time zones, currency and unit conversion, UUIDs, color, and more, with no LLM call and no network.</td></tr>
+    <tr><td>Clipboard history</td><td><span class="gt-tag gt-ga">GA</span></td><td>Captures copied text, images, and files into a searchable, pinnable history, stored encrypted on your device.</td></tr>
+    <tr><td>Quick notes</td><td><span class="gt-tag gt-ga">GA</span></td><td>Device-local notes with full-text search, encrypted at rest.</td></tr>
+    <tr><td>Screenshot capture and OCR</td><td><span class="gt-tag gt-ga">GA</span></td><td>On-device optical character recognition makes the text inside screenshots and images searchable.</td></tr>
+    <tr><td>Screenshot visual search</td><td><span class="gt-tag gt-staged">GA, opt-in</span></td><td>Search screenshots by visual meaning with an on-device image model, downloaded once on your explicit opt-in.</td></tr>
+    <tr><td>Local file search</td><td><span class="gt-tag gt-ga">GA</span></td><td>Indexes and searches your own file locations by name and content, with exclusions you control.</td></tr>
+    <tr><td>Desktop agent</td><td><span class="gt-tag gt-ga">GA</span></td><td>With your permission, browse local files, run terminal commands, and open applications, sandboxed and permission-controlled.</td></tr>
+    <tr><td>On-device voice input</td><td><span class="gt-tag gt-staged">Opt-in</span></td><td>Speak to the launcher: the microphone is captured and transcribed entirely on-device with Whisper, so audio never leaves the machine. It adopts a local Whisper model if present, otherwise offers a one-time download. Currently an opt-in Labs experiment in builds that include it, not on by default.</td></tr>
+    <tr><td>On-device encrypted storage</td><td><span class="gt-tag gt-ga">GA</span></td><td>Clipboard, notes, and indexes live in an encrypted local database; an embedded database ships in the app, so no external database is required for the desktop build.</td></tr>
+  </tbody>
+</table>
+<p class="gt-note"><strong>Encrypted at rest, everywhere.</strong> Clipboard history, notes,
+and screenshot indexes are stored in a whole-database-encrypted local store, with the
+encryption key derived on-device and file-permission locked. Connector and OAuth tokens are
+held in a separate AES-256-GCM vault. Nothing local sits in plaintext.</p>
+<p class="gt-note">Precise note on search: screenshot visual search uses an on-device image
+model. General document retrieval in Bolt is keyword and entity based; Aeira is the
+dedicated plane for enterprise document search.</p>
+
+<h2 id="depth">Depth: it does not just recognize, it validates and protects</h2>
+<p>The local surface is not a handful of toys. It is deep, and much of it is security you
+get for free on every paste, offline.</p>
+<table>
+  <thead><tr><th>Capability</th><th>Status</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>Offline knowledge catalog</td><td><span class="gt-tag gt-ga">GA</span></td><td>Tens of thousands of reference entries answer instantly with no network: currency, country and airport codes, time zones, HTTP status codes, ports, MIME types, ICD-10, Unix exit codes, chmod bits, ASCII, and more.</td></tr>
+    <tr><td>Security scan on every paste</td><td><span class="gt-tag gt-ga">GA</span></td><td>Local scan for hidden and dangerous characters (bidirectional and zero-width, the Trojan-Source class), homograph and confusable look-alike attacks, and leaked secrets (cloud keys, tokens, private keys), before anything is sent anywhere.</td></tr>
+    <tr><td>Identifier validation</td><td><span class="gt-tag gt-ga">GA</span></td><td>Validates pasted identifiers with real check-digit math, offline: Luhn, IBAN, ISO 7064, Verhoeff (Aadhaar), plus 17+ national validators (NHS, CPF/CNPJ, MyNumber, and more). Catches look-alikes that pass a naive regex.</td></tr>
+    <tr><td>Structural shape recognition</td><td><span class="gt-tag gt-ga">GA</span></td><td>Recognizes hundreds of value shapes on sight: git SHAs, UUIDs with mint time, semver, MAC and IP/CIDR, crypto addresses, CVE/GHSA/CVSS, DOI/arXiv/PMID, tickers, and roughly 50 regional government IDs.</td></tr>
+    <tr><td>PII masking at the model boundary</td><td><span class="gt-tag gt-ga">GA</span></td><td>Emails, phones, cards, secrets, and more are masked before any prompt reaches a model, and restored in the response, from an authoritative server-side catalog. Optional pluggable NER (name, address, org) for deeper detection.</td></tr>
+    <tr><td>Redact before you paste out</td><td><span class="gt-tag gt-ga">GA</span></td><td>A one-motion redact so sensitive values are stripped locally before you copy anything into an outside tool.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="packs">Healthcare, finance, and defense, without a code release</h2>
+<p>Regulation and vertical rules are not hard-coded. They ship as swappable, signed packs,
+so a new jurisdiction or industry is a data change, not a software update. This is how one
+product serves regulated verticals honestly.</p>
+<ul>
+  <li><strong>28 packs ship in the box,</strong> including healthcare, finance, defense, and legal cores, plus jurisdiction privacy packs: GDPR, UK GDPR, CCPA, LGPD, DPDP (India), PIPL (China), APPI (Japan), PIPA (Korea), PDPA (Singapore and Thailand), Australia Privacy, PIPEDA and Quebec Law 25, POPIA, NDPA, KVKK, PDPL, FADP, and more.</li>
+  <li><strong>An enabled pack masks or blocks its sensitive patterns at the model boundary,</strong> and validates national IDs with real check-digit math, so look-alikes are caught, not just regex-matched.</li>
+  <li><strong>Packs install offline as signed bundles.</strong> New regulation reaches an air-gapped deployment without a software update.</li>
+  <li><strong>Cryptographic erasure and evidence export</strong> support GDPR and HIPAA right-to-be-forgotten obligations, with an offline-verifiable audit proof.</li>
+  <li><strong>You can author your own pack</strong> in a short YAML manifest. Multi-jurisdiction is stacking packs.</li>
+</ul>
+<p class="gt-note">Honest scope: the packs deliver defensible safeguards, masking, and evidence.
+They are not a consent manager and do not by themselves issue a compliance certification;
+pair them with your DPO or counsel. Automated DSR request-intake is staged; the erasure
+cascade and evidence export are live today.</p>
+
+<h2 id="unified">Your device and your SaaS, one surface</h2>
+<p>The same launcher that does the local work reaches outward. Your first-party context
+(local files, clipboard, notes, terminal, other machines you own, reachable by
+phone-to-desktop bridge and multi-machine routing) and your third-party systems (email,
+calendar, Slack, Jira, Salesforce, ServiceNow, SAP, and 100+ more via the open Model
+Context Protocol) sit together, so an agent can act across both under one set of rules.
+This is what removes the "two AI worlds" problem, where people keep a cloud assistant for
+work systems and separate local tools for their own machine.</p>
+
+<h2 id="lockin">No lock-in, and governance that outlives your model</h2>
+<p>Lock-in in enterprise AI usually happens at three layers. Bolt refuses all three.</p>
+<ul>
+  <li><strong>Model layer.</strong> Bring your own LLM at every tier: OpenAI, Anthropic, Amazon Bedrock, Google Vertex, Ollama, NVIDIA NIM, LM Studio, or any OpenAI-compatible endpoint. Hot-swappable, zero token markup, you pay your provider directly.</li>
+  <li><strong>Protocol layer.</strong> Integrations ride the open MCP standard, not a proprietary plugin marketplace. Bring your own MCP servers.</li>
+  <li><strong>Deployment layer.</strong> Self-host anywhere, including air-gapped. No dependency on a Sparcle-operated cloud.</li>
+</ul>
+<p>The differentiator most competitors cannot match: <strong>your governance is defined
+once and survives the swap.</strong> PII masking, human approvals, audit, and
+identity-aware access attach to the boundary, not to a particular model or vendor. Change
+the model, change the backend, even move from a frontier API to a local model in an
+air-gapped room, and the same masking, approvals, and audit chain apply. You do not re-run
+compliance because you changed a model. A cloud AI assistant cannot offer this, because
+its governance is its cloud.</p>
+
+<h2 id="extend">Bring anything into Bolt</h2>
+<p>The honest boundaries below are narrow because Bolt is built to be extended, not
+replaced, when you need something it does not ship. The practical answer to most "does
+Bolt do X?" questions is: if X has an API or an MCP server, yes, by configuration, usually
+in minutes, and under your governance.</p>
+<ul>
+  <li><strong>If it speaks MCP, it plugs in.</strong> Point Bolt at any MCP-compliant server and its tools become governed actions the agent can take.</li>
+  <li><strong>If it has an API, you can wrap it.</strong> A short YAML utility manifest turns an external API or internal system into a first-class Bolt action.</li>
+  <li><strong>If it is a data format, Bolt probably already knows it,</strong> and if not, you teach it in a few lines of the same manifest.</li>
+</ul>
+<p>The shape of a user utility: a <code>recognize</code> block matches the input, a
+<code>transform</code> pipeline shapes and routes it, locally or to any MCP tool.</p>
+<pre>utility: acme-ticket
+recognize:
+  - pattern: "ACME-\\d+"          # matches ACME-1234 anywhere you type or paste
+    read_as: "Acme ticket id"
+transform:
+  pipe:
+    - mcp: acme.get_ticket         # call your own MCP server
+    - pick: [id, title, status, owner]
+    - table                        # render a clean result in the launcher</pre>
+<p>That is the whole idea: you are not waiting on our roadmap to reach your systems.</p>
+
+<h2 id="evidence">The problem we remove, and why it is expensive</h2>
+<p>The offline surface matters because the single biggest AI risk in the enterprise is
+people pasting sensitive data into public chatbots because it is fast. Every task Bolt
+absorbs locally is a leak that never happens. The pain is documented by independent
+researchers (figures below are attributed to their publishers, not our own measurement):</p>
+<table>
+  <thead><tr><th>Finding</th><th>Source</th></tr></thead>
+  <tbody>
+    <tr><td>Employees routinely paste into public GenAI tools, much of it through unmanaged personal accounts, many times a day, and a meaningful share of those pastes contain PII or regulated data.</td><td>LayerX Enterprise AI/SaaS Security Report; Verizon DBIR coverage</td></tr>
+    <tr><td>A significant share of files uploaded to GenAI and of text pasted into it contains PII or payment data.</td><td>Cloud Security Alliance; LayerX</td></tr>
+    <tr><td>Shadow AI adds roughly $670,000 to the average breach, and most breached organizations had no AI governance policy.</td><td>IBM Cost of a Data Breach 2025</td></tr>
+    <tr><td>The EU AI Act carries penalties up to 35 million euros or 7 percent of global turnover, with high-risk obligations enforceable from August 2026.</td><td>EU Regulation 2024/1689</td></tr>
+  </tbody>
+</table>
+<p>Bolt is the structural antidote: the fast, sanctioned, local alternative for the
+everyday reformat, decode, compute, validate, and redact tasks, so the reason to paste into
+an outside tool goes away, while masking, approvals, and audit govern the times a model
+genuinely is needed. That is data locality delivered as daily productivity, not as a policy
+nobody follows.</p>
+
+<h2 id="notfit">When Bolt is not the right tool</h2>
+<p>Credibility depends on saying where we stop. Bolt is not, and does not pretend to be:</p>
+<table>
+  <thead><tr><th>Not this</th><th>What to use instead</th></tr></thead>
+  <tbody>
+    <tr><td>Inline network security (secure web gateway, forward proxy, CASB, firewall)</td><td>Keep your proxy. Bolt governs what your workforce does with AI; it does not sit inline on your network. It complements your proxy.</td></tr>
+    <tr><td>Endpoint security, antivirus, or EDR</td><td>Run your EDR alongside Bolt. Bolt is not a threat-detection or malware-defense agent.</td></tr>
+    <tr><td>GPU or MLOps infrastructure (scheduling, fine-tuning, model serving)</td><td>Pair Bolt with your serving stack (for example NVIDIA NIM or vLLM). Bolt brings your model; it does not run the model farm.</td></tr>
+    <tr><td>In-document Office co-authoring</td><td>If your entire AI value is inside Word or Excel and cloud AI is acceptable, a native Office assistant fits that specific need. Bolt is an overlay plus connectors, not an AI in the ribbon.</td></tr>
+    <tr><td>A system of record</td><td>Bolt acts across your systems; it does not replace your database, CRM, or ticketing system.</td></tr>
+  </tbody>
+</table>
+<p>Where we are early rather than unsuitable, we say so: public reference logos at
+Fortune-500 scale and multi-year connector-maintenance SLAs are things a pre-scale company
+earns over time. That is real, and it is a reason some conservative buyers wait. It is not
+a capability gap. Note the shape of the list above: the genuine non-fits are inline network
+security, endpoint security, ML infrastructure, in-document Office authoring, and being a
+system of record. Almost everything else people ask for is reachable by configuration.</p>
+
+<h2 id="faq">Full FAQ</h2>
+
+<details class="gt-faq"><summary>Does Bolt work offline, and is it really useful before the AI fires?</summary>
+<div class="gt-body"><p>Yes. Bolt opens as a desktop launcher and does 80+ instant utilities (JSON, base64, hashes, JWT, regex, time zones, currency, and more), clipboard history, notes, screenshot OCR, and local file search with no model call and no network. The launcher earns its keep before any AI cost starts. You can verify by turning off Wi-Fi and watching local tasks keep working.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt have clipboard history?</summary>
+<div class="gt-body"><p>Yes. Bolt captures copied text, images, and files into a searchable, pinnable clipboard history, stored encrypted on your device.</p></div></details>
+
+<details class="gt-faq"><summary>Can Bolt search my screenshots and local files?</summary>
+<div class="gt-body"><p>Yes. On-device OCR makes the text inside screenshots and images searchable, and an opt-in on-device image model adds visual search. Bolt also indexes and searches your own file locations (for example Home, Desktop, Documents, Downloads) by name and content, with exclusions you control.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt keep notes?</summary>
+<div class="gt-body"><p>Yes. Bolt has device-local quick notes with full-text search, encrypted at rest.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt have voice search or voice input?</summary>
+<div class="gt-body"><p>Yes, and it is fully on-device. You can speak to the launcher; the microphone is captured and transcribed locally with Whisper, so audio never leaves the machine, unlike cloud dictation. Bolt adopts a local Whisper model if one is present, otherwise offers a one-time download. Voice input is currently an opt-in Labs experiment in builds that include it, not on by default.</p></div></details>
+
+<details class="gt-faq"><summary>Is my local data encrypted at rest?</summary>
+<div class="gt-body"><p>Yes. Clipboard history, notes, and screenshot indexes are stored in a whole-database-encrypted local store, with the encryption key derived on-device and file-permission locked. Connector and OAuth tokens are held in a separate AES-256-GCM vault. Nothing local sits in plaintext.</p></div></details>
+
+<details class="gt-faq"><summary>How deep is the offline surface, really?</summary>
+<div class="gt-body"><p>Deep. Beyond the utilities, Bolt carries a large offline knowledge catalog (currency, country and airport codes, time zones, HTTP status, ports, MIME types, ICD-10, exit codes, chmod, ASCII, and more), recognizes hundreds of value shapes on sight, and validates identifiers with real check-digit math offline (Luhn, IBAN, ISO 7064, Verhoeff for Aadhaar, plus 17+ national validators). Every paste is also scanned locally for hidden and dangerous characters, homograph attacks, and leaked secrets. None of this needs a network.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt protect against Trojan-Source and homograph attacks?</summary>
+<div class="gt-body"><p>Yes, offline, on every paste. Bolt flags hidden bidirectional and zero-width characters (the Trojan-Source class), homograph and confusable look-alikes, and leaked secrets such as cloud keys and private keys, before the content goes anywhere.</p></div></details>
+
+<details class="gt-faq"><summary>How does Bolt serve regulated industries like healthcare, finance, and defense?</summary>
+<div class="gt-body"><p>Through swappable, signed compliance and vertical packs. 28 ship in the box, including healthcare, finance, defense, and legal cores plus jurisdiction privacy packs (GDPR, UK GDPR, CCPA, LGPD, DPDP, PIPL, APPI, PIPA, PDPA, POPIA, and more). An enabled pack masks or blocks its sensitive patterns at the model boundary and validates national IDs with real check-digit math. Packs install offline as signed bundles, so new regulation reaches an air-gapped deployment without a software update, and you can author your own pack in a short YAML manifest.</p></div></details>
+
+<details class="gt-faq"><summary>Can I add a new country or regulation myself, air-gapped?</summary>
+<div class="gt-body"><p>Yes. A regulation pack is a short signed YAML manifest (jurisdiction, residency, retention, rights, safeguards, recognizers). You, a partner, or your counsel can author and sign one, and it installs offline with a review-and-consent step. Multi-jurisdiction is stacking packs.</p></div></details>
+
+<details class="gt-faq"><summary>Is my data sent to Sparcle?</summary>
+<div class="gt-body"><p>No. Sparcle operates no cloud that receives your data and has no hosted ingest path. Local device data (clipboard, notes, screenshot indexes) is stored encrypted on your machine. When you connect a third-party system such as Gmail or Jira, Bolt talks to that system's API as you configured it; that is action on your systems, not exfiltration to a vendor. PII is masked before any prompt reaches a model.</p></div></details>
+
+<details class="gt-faq"><summary>Can I use my own LLM, and can I switch models later?</summary>
+<div class="gt-body"><p>Yes at every tier. Point Bolt at OpenAI, Anthropic, Bedrock, Vertex, Ollama, NVIDIA NIM, LM Studio, or any OpenAI-compatible endpoint. Models are hot-swappable with zero token markup; you pay your provider directly. Bolt also auto-detects and adopts a local OpenAI-compatible runtime if one is already running on your machine.</p></div></details>
+
+<details class="gt-faq"><summary>If I switch models or backends, do I lose governance or have to re-run compliance?</summary>
+<div class="gt-body"><p>No. PII masking, human approvals, audit, and identity-aware access attach to the boundary, above a swappable provider layer. Change the model, change the backend, or move to an air-gapped local model, and the same governance applies. You do not re-run compliance because you changed a model.</p></div></details>
+
+<details class="gt-faq"><summary>Do you support [our system]?</summary>
+<div class="gt-body"><p>Almost certainly, by configuration. If it speaks MCP, point Bolt at the server and its tools become governed actions. If it has an API, a short YAML utility manifest turns it into a first-class Bolt action. Bolt ships 100+ integrations today (103 in-house connectors, roughly 350 more via Airbyte, plus any MCP-compliant server), and you can add your own without waiting on our roadmap.</p></div></details>
+
+<details class="gt-faq"><summary>How hard is it to add a new integration or format?</summary>
+<div class="gt-body"><p>A few lines of YAML. A utility manifest has a recognize block that matches the input and a transform pipeline that shapes and routes it, locally or to any MCP tool. No fork, no vendor ticket.</p></div></details>
+
+<details class="gt-faq"><summary>Is there vendor lock-in?</summary>
+<div class="gt-body"><p>No, at three layers. Model: bring and swap any LLM. Protocol: open MCP, not a proprietary plugin marketplace. Deployment: self-host anywhere including air-gapped, with no dependency on a Sparcle cloud.</p></div></details>
+
+<details class="gt-faq"><summary>Is Bolt just enterprise search? Do I have to pay for parts I will not use?</summary>
+<div class="gt-body"><p>No. Bolt is a daily-driver workspace that people open for local utilities, clipboard, notes, and search from day one, then use for governed action across connected systems. Aeira is the separate ACL-aware document-retrieval plane; you can run Bolt without it, or add it when you need governed enterprise search.</p></div></details>
+
+<details class="gt-faq"><summary>Is Bolt a network proxy, firewall, CASB, or antivirus?</summary>
+<div class="gt-body"><p>No. Bolt is not an inline network device and not endpoint security. It governs what your workforce does with AI. Keep your proxy and your EDR; Bolt complements them.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt run, fine-tune, or serve models on GPUs?</summary>
+<div class="gt-body"><p>No. Bolt is the governed workspace, not ML infrastructure. You bring your model, and you or your serving stack (for example NVIDIA NIM or vLLM) run it. If your primary need is a model farm, pair Bolt with that infrastructure.</p></div></details>
+
+<details class="gt-faq"><summary>Is local model inference fully on-device today?</summary>
+<div class="gt-body"><p>Partly. Bolt auto-detects and adopts a local OpenAI-compatible runtime and masks PII unconditionally at the boundary; that is generally available. The fully on-device generation loop is a committed next slice, and we do not claim it is finished.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt work inside Word and Excel like an Office assistant?</summary>
+<div class="gt-body"><p>No. Bolt is an overlay plus connectors, not an AI embedded in the Office ribbon. If your entire AI value is in-document and cloud AI is acceptable, a native Office assistant fits that specific need. Bolt fits when you need sovereignty, model choice, cross-system action, and a governed local surface.</p></div></details>
+
+<details class="gt-faq"><summary>Can I deploy air-gapped?</summary>
+<div class="gt-body"><p>Yes. Docker Compose for staging, Kubernetes for production HA, on-prem, or fully air-gapped for ITAR and classified environments. License validation uses an offline-signed token, with no outbound calls.</p></div></details>
+
+<details class="gt-faq"><summary>What does it cost, and is there a free tier?</summary>
+<div class="gt-body"><p>The full desktop build is free on your own machine with your own API key. Paid self-hosted tiers start at $30/seat/month (10-seat minimum). Founding customers get 25% off any tier, locked for 24 months, through the end of 2026 or until 50 customers sign.</p></div></details>
+
+<details class="gt-faq"><summary>Do you have Fortune-500 reference logos today?</summary>
+<div class="gt-body"><p>Public reference logos at that scale are something a pre-scale company earns over time, and many of our target buyers are in environments where references are contractually restricted. If your procurement requires named public references before any purchase, that is a fair reason to wait. It is a stage limitation, not a capability gap.</p></div></details>
+
+<details class="gt-faq"><summary>How do I verify the data-locality claims myself?</summary>
+<div class="gt-body"><p>Install the free desktop build, turn off Wi-Fi, and confirm local utilities, clipboard, notes, and file search keep working. For the enterprise deployment, everything runs inside your perimeter, so your own network monitoring is the proof. Request a pilot or an architecture review to run this end to end.</p></div></details>
+
+<footer>
+  <p>Every claim on this page reflects shipped behavior as of publication, with staged items
+  marked. For verification, request a pilot or an architecture review at sparcle.app.
+  Contact: bolt@sparcle.app.</p>
+</footer>
+</div>
+</div>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — Comparison</title>
+<style>
+  @page { size: A4 landscape; margin: 8mm 10mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+         --green:#127a4a; --card:#f4f7fb; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:10px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .sheet{max-width:1260px;margin:0 auto;padding:2px 2px 0;zoom:0.86;}
+  header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:10px;}
+  .brand b{font-size:19px;letter-spacing:-.3px;}
+  .brand .by{color:var(--mut);font-size:11px;font-weight:400;}
+  .brand .tag{color:var(--mut);font-style:italic;font-size:10.5px;margin-top:2px;}
+  .htitle{text-align:right;}
+  .htitle h1{font-size:20px;margin:0;letter-spacing:-.4px;}
+  .htitle .sub{color:var(--mut);font-style:italic;font-size:10.5px;margin-top:2px;}
+  table{border-collapse:collapse;width:100%;table-layout:fixed;}
+  th,td{padding:4px 7px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);}
+  thead th{font-size:9.5px;color:var(--ink);border-bottom:1.5px solid var(--navy);}
+  th.n,td.n{width:24px;color:var(--mut);text-align:center;}
+  col.dim{width:210px;}
+  .us{background:var(--card);}
+  thead th.us{color:var(--navy);}
+  td.c{text-align:center;font-weight:700;}
+  .yes{color:var(--green);}
+  .part{color:var(--gold);}
+  .no{color:#9aa3af;}
+  .dimt b{font-size:10px;}
+  .dimt span{color:var(--mut);font-size:8.5px;}
+  .val{font-weight:700;text-align:center;}
+  .legend{font-size:9px;color:var(--mut);margin:8px 0 2px;display:flex;gap:18px;flex-wrap:wrap;}
+  .footcols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;}
+  .fcol h4{font-size:9.5px;letter-spacing:.06em;margin:0 0 5px;}
+  .fcol.w h4{color:var(--green);} .fcol.t h4{color:var(--navy);} .fcol.l h4{color:var(--gold);}
+  .fcol ol{margin:0;padding-left:15px;} .fcol li{font-size:9px;margin:3px 0;}
+  .fcol li b{color:var(--ink);}
+  .fnote{font-size:8.5px;color:var(--mut);margin-top:8px;border-top:1px solid var(--line);padding-top:6px;}
+  .brandbar{display:flex;justify-content:space-between;font-size:9px;color:var(--mut);margin-top:6px;}
+  .brandbar em{font-style:italic;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <div class="brand">
+      <b>Bolt + Aeira</b> <span class="by">by Sparcle</span>
+      <div class="tag">With your LLM. On your audit trail.</div>
+    </div>
+    <div class="htitle">
+      <h1>Sovereign enterprise AI &mdash; inside your perimeter.</h1>
+      <div class="sub">Bolt + Aeira vs. Glean &middot; Hebbia &middot; Harvey &middot; Microsoft Copilot &mdash; at a glance.</div>
+    </div>
+  </header>
+
+  <table>
+    <colgroup><col style="width:24px"><col class="dim"><col class="us" style="width:110px"><col><col><col><col></colgroup>
+    <thead><tr>
+      <th class="n">#</th><th>Dimension</th><th class="us c">Bolt + Aeira</th><th class="c">Glean</th><th class="c">Hebbia</th><th class="c">Harvey</th><th class="c">MS Copilot</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td class="dimt"><b>Deploys inside customer perimeter</b> <span>on-prem &middot; VPC &middot; air-gap &middot; sovereign cloud<sup>&dagger;</sup></span></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">2</td><td class="dimt"><b>Data never reaches vendor servers</b><sup>&dagger;</sup></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">3</td><td class="dimt"><b>BYO LLM</b> <span>any vendor, any model, on-prem option</span></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">4</td><td class="dimt"><b>Zero inference markup</b> <span>customer pays LLM vendor directly</span></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">5</td><td class="dimt"><b>Patent-pending 4-axis ACL</b> <span>country &middot; office &middot; role-band &middot; employment-type</span></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">6</td><td class="dimt"><b>Cryptographically-verifiable audit chain</b> <span>standalone auditor binary</span></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">7</td><td class="dimt"><b>In-house source connectors</b></td><td class="val us">103</td><td class="val">~100</td><td class="val">~10</td><td class="val">~5</td><td class="val">MS-only</td></tr>
+      <tr><td class="n">8</td><td class="dimt"><b>Total source coverage</b> <span>incl. Airbyte bridge</span></td><td class="val us">~450</td><td class="val">~100</td><td class="val">~10</td><td class="val">~5</td><td class="val">MS-only</td></tr>
+      <tr><td class="n">9</td><td class="dimt"><b>Cross-source agentic actions via MCP</b></td><td class="c us yes">&#10003;</td><td class="c part">&#9680;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c part">&#9680;</td></tr>
+      <tr><td class="n">10</td><td class="dimt"><b>Desktop-native superagent</b> <span>Cmd-Space, voice, tray &middot; iOS / Android Q3 2026+</span></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td></tr>
+      <tr><td class="n">11</td><td class="dimt"><b>Per-region key residency + sovereignty enforcement</b></td><td class="c us yes">&#10003;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c no">&mdash;</td><td class="c part">&#9680;</td></tr>
+      <tr><td class="n">12</td><td class="dimt"><b>IdP coverage</b> <span>Okta &middot; Entra &middot; OneLogin &middot; Auth0 &middot; Google &middot; Zoho &middot; generic OIDC/SAML</span></td><td class="c us yes">&#10003;</td><td class="c part">&#9680;</td><td class="c part">&#9680;</td><td class="c part">&#9680;</td><td class="c part">&#9680;</td></tr>
+      <tr><td class="n">13</td><td class="dimt"><b>Web UX polish</b></td><td class="c us part">&#9680;</td><td class="c yes">&#10003;</td><td class="c yes">&#10003;</td><td class="c yes">&#10003;</td><td class="c yes">&#10003;</td></tr>
+      <tr><td class="n">14</td><td class="dimt"><b>Established brand + paying customer references at scale</b></td><td class="c us part">&#9680;</td><td class="c yes">&#10003;</td><td class="c yes">&#10003;</td><td class="c yes">&#10003;</td><td class="c yes">&#10003;</td></tr>
+    </tbody>
+  </table>
+
+  <div class="legend"><span><b class="yes">&#10003;</b> shipped</span><span><b class="part">&#9680;</b> pilot deliverable / partial</span><span><b class="no">&mdash;</b> not available</span></div>
+
+  <div class="footcols">
+    <div class="fcol w">
+      <h4>WHERE WE WIN</h4>
+      <ol>
+        <li><b>Sovereignty.</b> Deploy in your DMZ, VPC, or air-gap. No competitor can match this.</li>
+        <li><b>TCO.</b> Per-seat Bolt + flat Aeira tier; <b>zero inference markup</b> &mdash; you pay the LLM vendor directly at wholesale.</li>
+        <li><b>Auditability.</b> Your auditor verifies our logs without touching our infrastructure.</li>
+      </ol>
+    </div>
+    <div class="fcol t">
+      <h4>WHERE WE TIE</h4>
+      <ol>
+        <li><b>Coverage.</b> 103 in-house + ~350 via the Airbyte bridge.</li>
+        <li><b>Agentic surface.</b> Cross-source action verbs via MCP.</li>
+        <li><b>4-axis ACL.</b> Patent-pending; nobody else indexes on these dimensions.</li>
+      </ol>
+    </div>
+    <div class="fcol l">
+      <h4>WHERE THEY WIN (TODAY)</h4>
+      <ol>
+        <li><b>Web UX polish.</b> Glean is smoother in browser. We're 3&ndash;6 months behind.</li>
+        <li><b>Brand recognition.</b> Glean / Hebbia / Harvey are known names.</li>
+        <li><b>Customer references.</b> They have anchor logos; ours are pilot-stage.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="fnote"><sup>&dagger;</sup> Bolt is <b>self-hosted across all tiers</b> (Authorize &middot; Backbone &middot; Certify), customer-hosted inside your own perimeter. Sparcle operates no cloud that receives your data, and no Sparcle component sits in the data path. There is no managed-hosting tier.</div>
+  <div class="brandbar"><span>sparcle.app &middot; bolt@sparcle.app</span><em>Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</em><span>v2 &middot; 2026-07</span></div>
+</div>
+</body>
+</html>

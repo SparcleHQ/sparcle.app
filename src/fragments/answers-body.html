@@ -15,10 +15,14 @@
     <li><a href="#unmatched">The one thing no one else does</a></li>
     <li><a href="#local">Runs on your laptop, works offline</a></li>
     <li><a href="#depth">Depth: recognize, validate, protect</a></li>
+    <li><a href="#share">Secure sharing, on your own storage</a></li>
+    <li><a href="#power">A governed terminal, and the agents you bring</a></li>
+    <li><a href="#cost">Productive without burning tokens</a></li>
     <li><a href="#packs">Healthcare, finance, defense: packs</a></li>
     <li><a href="#unified">Your device and your SaaS, one surface</a></li>
     <li><a href="#lockin">No lock-in, governance that outlives your model</a></li>
     <li><a href="#extend">Bring anything into Bolt</a></li>
+    <li><a href="#replaces">One app replaces a stack</a></li>
     <li><a href="#evidence">The problem we remove (evidence)</a></li>
     <li><a href="#notfit">When Bolt is not the right tool</a></li>
     <li><a href="#faq">Full FAQ</a></li>
@@ -52,7 +56,9 @@ keep working.</p>
     <tr><td>Overlay launcher <kbd>Cmd/Ctrl+Shift+K</kbd></td><td><span class="gt-tag gt-ga">GA</span></td><td>Non-disruptive overlay on top of your focused app; the daily entry point.</td></tr>
     <tr><td>80+ instant offline utilities</td><td><span class="gt-tag gt-ga">GA</span></td><td>JSON/YAML/SQL, base64/hex, hashes, JWT, regex, timestamps and time zones, currency and unit conversion, UUIDs, color, and more, with no LLM call and no network.</td></tr>
     <tr><td>Clipboard history</td><td><span class="gt-tag gt-ga">GA</span></td><td>Captures copied text, images, and files into a searchable, pinnable history, stored encrypted on your device.</td></tr>
-    <tr><td>Quick notes</td><td><span class="gt-tag gt-ga">GA</span></td><td>Device-local notes with full-text search, encrypted at rest.</td></tr>
+    <tr><td>Notes and image annotation</td><td><span class="gt-tag gt-ga">GA</span></td><td>Device-local rich notes (formatting, lists, checklists, tables, links) with full-text search, encrypted at rest. Mark up screenshots and images (arrows, text, redaction) and keep or share the result. See secure sharing below.</td></tr>
+    <tr><td>Browser extension and live context</td><td><span class="gt-tag gt-ga">GA</span></td><td>A Chrome extension (side panel, omnibox) brings the current tab and selection to Bolt. In the launcher, pull your screen, selection, current tab, clipboard, or an on-device OCR of what is on screen into a prompt as first-class context. The sensitive ones are masked at the boundary before any model sees them.</td></tr>
+    <tr><td>Timers, reminders, and snippets</td><td><span class="gt-tag gt-ga">GA</span></td><td>Local timers, reminders, notifications, and text snippets with expansion, so the launcher stays the daily driver for small tasks too.</td></tr>
     <tr><td>Screenshot capture and OCR</td><td><span class="gt-tag gt-ga">GA</span></td><td>On-device optical character recognition makes the text inside screenshots and images searchable.</td></tr>
     <tr><td>Screenshot visual search</td><td><span class="gt-tag gt-staged">GA, opt-in</span></td><td>Search screenshots by visual meaning with an on-device image model, downloaded once on your explicit opt-in.</td></tr>
     <tr><td>Local file search</td><td><span class="gt-tag gt-ga">GA</span></td><td>Indexes and searches your own file locations by name and content, with exclusions you control.</td></tr>
@@ -81,8 +87,42 @@ get for free on every paste, offline.</p>
     <tr><td>Structural shape recognition</td><td><span class="gt-tag gt-ga">GA</span></td><td>Recognizes hundreds of value shapes on sight: git SHAs, UUIDs with mint time, semver, MAC and IP/CIDR, crypto addresses, CVE/GHSA/CVSS, DOI/arXiv/PMID, tickers, and roughly 50 regional government IDs.</td></tr>
     <tr><td>PII masking at the model boundary</td><td><span class="gt-tag gt-ga">GA</span></td><td>Emails, phones, cards, secrets, and more are masked before any prompt reaches a model, and restored in the response, from an authoritative server-side catalog. Optional pluggable NER (name, address, org) for deeper detection.</td></tr>
     <tr><td>Redact before you paste out</td><td><span class="gt-tag gt-ga">GA</span></td><td>A one-motion redact so sensitive values are stripped locally before you copy anything into an outside tool.</td></tr>
+    <tr><td>Screen-share-safe mode</td><td><span class="gt-tag gt-ga">GA</span></td><td>One toggle widens on-screen masking to an extended tier (email, phone, and more) so nothing identifying is painted while you screen-share or demo; secrets and marked-sensitive values stay hidden regardless. (Automatic meeting detection is staged; the manual toggle is live.)</td></tr>
+    <tr><td>Cross-surface search operators</td><td><span class="gt-tag gt-ga">GA</span></td><td>Gmail-grade operators (from:, to:, is:unread, has:attachment, before:/after:, assignee:, due:) parsed locally and applied across email, calendar, tasks, files, people, and clips at once, not just one keyword-matched folder.</td></tr>
   </tbody>
 </table>
+
+<h2 id="share">Secure sharing, on your own storage</h2>
+<p>When you do need to share a note or an annotated screenshot, Bolt turns it into an
+expiring, revocable link, and the file lives on storage you control, not on Sparcle.</p>
+<ul>
+  <li><strong>The bytes never touch Sparcle.</strong> Bolt encrypts every file on your device before it is stored, then mints an expiring capability link. Storage is your own cloud drive (Google Drive, OneDrive, or Dropbox, connected automatically) or, for teams, your organization's own S3 or MinIO bucket.</li>
+  <li><strong>You keep the controls.</strong> Set an expiry (one hour to never), require a password, limit downloads, restrict to your organization, and revoke access at any time, with a per-open audit trail. The encryption keys and the revoke control stay with you.</li>
+  <li><strong>Annotate first, locally.</strong> Mark up a screenshot or image with arrows, text, and redaction, then share the result.</li>
+</ul>
+<p class="gt-note">Individuals share through their own connected drive automatically; a central
+team deployment adds server-enforced org-only access, passwords, download limits, per-open
+audit, and instant revoke on top. Either way, nothing is stored on Sparcle infrastructure.</p>
+
+<h2 id="power">A governed terminal, and the agents you bring</h2>
+<p>Bolt is also a power surface, and the governance follows it there.</p>
+<table>
+  <thead><tr><th>Capability</th><th>Status</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>Policy-governed terminal</td><td><span class="gt-tag gt-ga">GA</span></td><td>A real terminal and tmux inside the launcher. Every command that Bolt itself injects (a saved recipe, a tmux send, an agent action) crosses a native policy chokepoint where admins allow or deny by rule, and the whole capability can be turned off by policy for regulated orgs. What you type by hand is never governed. (The confirm-before-destructive dialog is staged; deny and catastrophic-command enforcement are live.)</td></tr>
+    <tr><td>Bring your own coding agent</td><td><span class="gt-tag gt-ga">GA</span></td><td>Run Devin, Claude Code, Codex, or Gemini locally on your workspace through the open Agent Client Protocol, under the same approvals and audit, so you are not locked to one vendor's agent. (Bolt hosts the agent locally; deeper server-side orchestration is staged.)</td></tr>
+    <tr><td>Password and secret vault</td><td><span class="gt-tag gt-ga">GA</span></td><td>Search across your connected vaults (1Password, Bitwarden, Apple Keychain, Windows Credentials) and copy a password, username, or TOTP in one keystroke, locally. Revealing a corporate or shared secret is policy-gated and audited; personal vaults stay ungoverned. Generates strong passwords on demand.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="cost">Productive without burning tokens</h2>
+<p>The "AI is too expensive" objection is answered by an engine, not a dashboard. Before the
+agent loop runs, a lightweight classifier decides whether the query even needs a model:
+knowledge, greeting, and meta questions skip the model and tool-loading entirely, and most
+everyday queries resolve on the instant local engines with no model call at all. When a model
+is genuinely needed, Bolt caches the stable prompt prefix for a large discount and enforces a
+token budget, and because you bring your own key there is zero token markup. The PII masking
+still runs on the classifier path, so cost discipline never costs you the privacy guarantee.</p>
 
 <h2 id="packs">Healthcare, finance, and defense, without a code release</h2>
 <p>Regulation and vertical rules are not hard-coded. They ship as swappable, signed packs,
@@ -115,6 +155,7 @@ work systems and separate local tools for their own machine.</p>
   <li><strong>Model layer.</strong> Bring your own LLM at every tier: OpenAI, Anthropic, Amazon Bedrock, Google Vertex, Ollama, NVIDIA NIM, LM Studio, or any OpenAI-compatible endpoint. Hot-swappable, zero token markup, you pay your provider directly.</li>
   <li><strong>Protocol layer.</strong> Integrations ride the open MCP standard, not a proprietary plugin marketplace. Bring your own MCP servers.</li>
   <li><strong>Deployment layer.</strong> Self-host anywhere, including air-gapped. No dependency on a Sparcle-operated cloud.</li>
+  <li><strong>Agent layer.</strong> Bring any ACP coding agent (Devin, Claude Code, Codex, Gemini) and run it locally under the same approvals and audit. You are not locked to one vendor's agent any more than one vendor's model.</li>
 </ul>
 <p>The differentiator most competitors cannot match: <strong>your governance is defined
 once and survives the swap.</strong> PII masking, human approvals, audit, and
@@ -146,6 +187,23 @@ transform:
     - pick: [id, title, status, owner]
     - table                        # render a clean result in the launcher</pre>
 <p>That is the whole idea: you are not waiting on our roadmap to reach your systems.</p>
+
+<h2 id="replaces">One app replaces a stack, and shrinks the attack surface</h2>
+<p>Because the daily surface is broad and local, one governed app absorbs what is usually a
+drawer of single-purpose tools:</p>
+<ul>
+  <li><strong>Utilities and dev tools:</strong> clipboard manager, snippet expander, JSON/YAML/SQL formatter, regex tester, base64/hash/JWT tools, timezone and currency converters, UUID and password generators, QR maker, color tools.</li>
+  <li><strong>Local knowledge and files:</strong> screenshot-OCR search, local file search, a notes and annotation app, and a reference catalog (ports, HTTP codes, ICD-10, and more).</li>
+  <li><strong>Secure workflow:</strong> password-vault access, secure file sharing with expiry and revoke, image annotation, and a terminal.</li>
+  <li><strong>Work systems and AI:</strong> enterprise search, a cross-system agent, and an AI chat client, all under one identity and one audit trail.</li>
+</ul>
+<p>That is easily two dozen point tools folded into one surface you deploy and govern once,
+with fewer licenses, fewer vendors, and fewer places your data can leak.</p>
+<p><strong>On risk, we quantify honestly.</strong> Every point tool Bolt retires and every
+task it keeps local is attack surface removed and one less place data can leak. The size of
+that problem is real and third-party documented (see the evidence below), but we will not
+quote a made-up risk-reduction percentage. The honest, concrete number is the consolidation
+itself: one governed surface instead of two dozen ungoverned ones.</p>
 
 <h2 id="evidence">The problem we remove, and why it is expensive</h2>
 <p>The offline surface matters because the single biggest AI risk in the enterprise is
@@ -197,8 +255,32 @@ system of record. Almost everything else people ask for is reachable by configur
 <details class="gt-faq"><summary>Can Bolt search my screenshots and local files?</summary>
 <div class="gt-body"><p>Yes. On-device OCR makes the text inside screenshots and images searchable, and an opt-in on-device image model adds visual search. Bolt also indexes and searches your own file locations (for example Home, Desktop, Documents, Downloads) by name and content, with exclusions you control.</p></div></details>
 
-<details class="gt-faq"><summary>Does Bolt keep notes?</summary>
-<div class="gt-body"><p>Yes. Bolt has device-local quick notes with full-text search, encrypted at rest.</p></div></details>
+<details class="gt-faq"><summary>Does Bolt keep notes, and can I annotate images?</summary>
+<div class="gt-body"><p>Yes to both. Bolt has device-local rich notes (formatting, lists, checklists, tables, links) with full-text search, encrypted at rest. You can also mark up screenshots and images with arrows, text, and redaction, then keep or securely share the result.</p></div></details>
+
+<details class="gt-faq"><summary>Can I share files and notes securely, and where are they stored?</summary>
+<div class="gt-body"><p>Yes. Bolt turns a note or an annotated screenshot into an expiring, revocable link. Every file is encrypted on your device before it is stored, and the storage is yours: your own cloud drive (Google Drive, OneDrive, Dropbox) or, for teams, your organization's own S3 or MinIO bucket. The bytes never touch Sparcle. You control expiry (one hour to never), password, download limits, org-only access, and instant revoke, with a per-open audit trail.</p></div></details>
+
+<details class="gt-faq"><summary>Does Bolt have a terminal, and is it governed?</summary>
+<div class="gt-body"><p>Yes. There is a real terminal and tmux in the launcher. Commands you type by hand are never governed, but any command Bolt itself injects (a saved recipe, a tmux send, an agent action) crosses a native policy chokepoint where admins allow or deny by rule, and the whole capability can be disabled by policy for regulated orgs. Deny and catastrophic-command enforcement are live today; a confirm-before-destructive dialog is staged.</p></div></details>
+
+<details class="gt-faq"><summary>Can I run coding agents like Devin or Claude Code inside Bolt?</summary>
+<div class="gt-body"><p>Yes. Through the open Agent Client Protocol you can run Devin, Claude Code, Codex, or Gemini locally on your workspace, under the same approvals and audit, so you are not locked to one vendor's agent. Bolt hosts the agent locally; deeper server-side orchestration is a staged follow-up.</p></div></details>
+
+<details class="gt-faq"><summary>Is running AI in Bolt expensive?</summary>
+<div class="gt-body"><p>It is designed not to be. A lightweight classifier runs before the agent loop and skips the model and tool-loading entirely for knowledge, greeting, and meta questions, and most everyday queries resolve on instant local engines with no model call at all. When a model is needed, Bolt caches the stable prompt prefix for a large discount and enforces a token budget, and because you bring your own key there is zero token markup. PII masking still runs on that fast path.</p></div></details>
+
+<details class="gt-faq"><summary>Can Bolt use my password vault?</summary>
+<div class="gt-body"><p>Yes. Bolt searches across your connected vaults (1Password, Bitwarden, Apple Keychain, Windows Credentials) and copies a password, username, or TOTP in one keystroke, locally. Revealing a corporate or shared secret is policy-gated and audited; personal vaults stay ungoverned. Bolt can also generate strong passwords on demand.</p></div></details>
+
+<details class="gt-faq"><summary>Can Bolt use my screen, selection, or current tab as context?</summary>
+<div class="gt-body"><p>Yes. A Chrome extension brings the current tab and selection to Bolt, and the launcher can pull your screen, selection, open tab, clipboard, or an on-device OCR of what is on screen into a prompt as first-class context. The sensitive ones are masked at the boundary before any model sees them.</p></div></details>
+
+<details class="gt-faq"><summary>How many tools can Bolt replace?</summary>
+<div class="gt-body"><p>Easily two dozen categories: clipboard manager, snippet expander, JSON/regex/hash/JWT tools, timezone and currency converters, UUID and password generators, QR and color tools, screenshot-OCR search, local file search, a notes and annotation app, a password-vault front end, a secure file-sharing tool, a terminal, enterprise search, a cross-system agent, and an AI chat client, all under one identity and audit. Fewer licenses, fewer vendors, and fewer places your data can leak.</p></div></details>
+
+<details class="gt-faq"><summary>Is there a screen-share-safe mode for demos and meetings?</summary>
+<div class="gt-body"><p>Yes. One toggle widens on-screen masking to an extended tier (email, phone, and more) so nothing identifying is painted while you screen-share or present; secrets and marked-sensitive values stay hidden regardless. Automatic meeting detection is a staged follow-up; the manual toggle is live.</p></div></details>
 
 <details class="gt-faq"><summary>Does Bolt have voice search or voice input?</summary>
 <div class="gt-body"><p>Yes, and it is fully on-device. You can speak to the launcher; the microphone is captured and transcribed locally with Whisper, so audio never leaves the machine, unlike cloud dictation. Bolt adopts a local Whisper model if one is present, otherwise offers a one-time download. Voice input is currently an opt-in Labs experiment in builds that include it, not on by default.</p></div></details>

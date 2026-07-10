@@ -237,6 +237,43 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
 - "The One Thing" priority engine (patent-pending): surfaces the single most important
   action across connected systems, with a human-readable reason.
 
+## More shipped capabilities (often missed)
+
+- Notes and image annotation (GA): device-local rich notes (formatting, lists, checklists,
+  tables) with full-text search, encrypted at rest; mark up screenshots/images with arrows,
+  text, redaction.
+- Secure sharing (GA): expiring, revocable, password-protected, download-limited capability
+  links. Files are encrypted on-device before storage; storage is the user's own cloud drive
+  (Google Drive, OneDrive, Dropbox) or the org's own S3/MinIO bucket. Bytes never touch
+  Sparcle. Per-open audit + instant revoke; org-only access for team deployments.
+- Policy-governed terminal (GA): real terminal + tmux in the launcher; commands Bolt injects
+  (recipes, tmux sends, agent actions) cross a native policy chokepoint (admin allow/deny),
+  disable-able by policy for regulated orgs; hand-typed commands are never governed. Deny and
+  catastrophic enforcement live; confirm-before-destructive dialog staged.
+- Bring your own coding agent (GA): run Devin, Claude Code, Codex, or Gemini locally via the
+  open Agent Client Protocol, under the same approvals and audit. No lock-in to one agent.
+  (Local host GA; deeper server-side orchestration staged.)
+- Cost-discipline engine (GA): a preflight classifier skips the model and tool-loading for
+  knowledge/greeting/meta queries; most everyday queries resolve on local engines with no
+  model call; prompt-prefix caching + token budget; zero token markup (BYO key). PII masking
+  runs on the classifier path too.
+- Password/secret vault (GA): search connected vaults (1Password, Bitwarden, Apple Keychain,
+  Windows Credentials), copy password/username/TOTP locally; corporate-secret reveal is
+  policy-gated and audited; also generates strong passwords.
+- Browser extension + live context (GA): Chrome MV3 extension; pull screen, selection, tab,
+  clipboard, or on-device OCR into a prompt as first-class context; sensitive context is
+  masked at the boundary first.
+- Screen-share-safe mode (GA manual; auto meeting-detection staged): one toggle masks
+  extended on-screen PII during demos/meetings.
+- Cross-surface search operators (GA): from:, to:, is:unread, has:attachment, before:/after:,
+  assignee:, due:, parsed locally across email/calendar/tasks/files/people/clips at once.
+- Timers, reminders, notifications, snippet expansion (GA): local everyday utilities.
+- Consolidation: one governed surface replaces ~two dozen point tools (clipboard manager,
+  snippet expander, format/regex/hash/JWT utilities, timezone/currency converters, UUID and
+  password generators, screenshot-OCR search, notes/annotation, vault front end, secure share,
+  terminal, enterprise search, cross-system agent, AI chat). Do NOT quote a fabricated
+  risk-reduction percentage; the concrete number is the consolidation itself.
+
 ## Deployment (GA)
 
 - Free local tier: full desktop build with your own API key; no data reaches Sparcle.

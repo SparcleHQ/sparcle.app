@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>90-Day Pilot Pre-Flight Checklist</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 12mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+         --green:#127a4a; --card:#f4f7fb; --cardgreen:#eef5f0; --blue:#2c5aa0; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:10px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .page{max-width:720px;margin:0 auto;min-height:273mm;display:flex;flex-direction:column;page-break-after:always;}
+  .page:last-child{page-break-after:auto;}
+
+  .eyebrow{font-size:9px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;}
+  h1{font-size:29px;margin:5px 0 5px;letter-spacing:-.6px;}
+  .sub{color:var(--mut);font-style:italic;font-size:11.5px;max-width:64ch;border-bottom:2.5px solid var(--navy);padding-bottom:11px;margin-bottom:13px;}
+
+  .sec{display:flex;align-items:center;gap:8px;border-bottom:1.5px solid var(--gold);padding-bottom:5px;margin:2px 0 9px;}
+  .sec .num{color:var(--gold);font-size:16px;font-weight:700;line-height:1;}
+  .sec h2{margin:0;font-size:14px;letter-spacing:-.2px;}
+
+  .legend{display:flex;justify-content:flex-end;gap:18px;font-size:9px;color:var(--mut);margin:0 2px 7px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .chk{display:inline-block;width:9px;height:9px;border:1.4px solid var(--blue);border-radius:2px;flex:none;margin-top:1px;}
+  .chk.g{border-color:var(--green);}
+
+  .lanes{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .lane{border-radius:8px;padding:11px 13px;}
+  .lane.cust{background:var(--card);}
+  .lane.spar{background:var(--cardgreen);}
+  .lane h3{margin:0 0 8px;font-size:11.5px;}
+  .lane.cust h3{color:var(--blue);}
+  .lane.spar h3{color:var(--green);}
+  .crow{display:flex;gap:7px;margin:0 0 7px;font-size:9px;line-height:1.35;}
+  .crow:last-child{margin-bottom:0;}
+  .crow b{color:var(--ink);}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:8.3px;background:#e9edf3;padding:0 3px;border-radius:3px;}
+
+  .callout{border-left:3px solid var(--green);background:var(--cardgreen);padding:9px 14px;font-size:9.5px;margin-top:14px;color:#2f3a34;line-height:1.45;}
+  .callout b{color:var(--ink);}
+
+  table{border-collapse:collapse;width:100%;table-layout:fixed;margin-bottom:16px;}
+  td{padding:8px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);}
+  td.lbl{width:118px;font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:.03em;text-transform:uppercase;color:var(--gold);font-weight:600;line-height:1.3;}
+  td.day{width:86px;font-family:ui-monospace,Menlo,monospace;font-size:9.5px;color:var(--mut);}
+  td.desc{font-size:9.6px;line-height:1.4;}
+  td.desc b{color:var(--ink);}
+
+  .panel{background:var(--card);border-radius:8px;padding:13px 16px;margin:2px 0 16px;}
+  .panel h4{margin:0 0 8px;font-size:11.5px;}
+  ol.crit{margin:0;padding-left:17px;}
+  ol.crit li{font-size:9.6px;margin:5px 0;line-height:1.4;}
+  ol.crit li b{color:var(--ink);}
+
+  .signbox{border:1px solid var(--line);border-radius:8px;padding:15px 18px 6px;}
+  .signbox h4{margin:0 0 12px;font-size:11.5px;}
+  .siggrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 34px;}
+  .sig{margin-bottom:14px;}
+  .sig .cap{font-size:10px;}
+  .sig .cap b{color:var(--ink);}
+  .sig .cap span{color:var(--mut);}
+  .sig .rule{border-bottom:1px solid #9aa3af;height:26px;}
+
+  .spacer{flex:1;}
+  .foot{text-align:center;border-top:1px solid var(--line);padding-top:11px;margin-top:14px;}
+  .foot .tag{font-style:italic;font-size:10.5px;color:var(--ink);}
+  .foot .meta{color:var(--mut);font-size:9px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;letter-spacing:.01em;}
+</style>
+</head>
+<body>
+
+<!-- ===================== PAGE 1 ===================== -->
+<div class="page">
+  <div class="eyebrow">For: Regulated-buyer 90-day pilot &middot; Self-hosted Bolt tier (Authorize / Backbone / Certify) &middot; Customer-hosted</div>
+  <h1>90-Day Pilot Pre-Flight Checklist.</h1>
+  <div class="sub">Two parallel lanes &mdash; customer-side configuration + Sparcle-side preparation &mdash; that must complete in the 30-day deployment window before the 60-day validation window begins. Maps directly to the Bolt and Aeira threat models.</div>
+
+  <div class="sec"><span class="num">&#9312;</span><h2>Pre-pilot &middot; Two parallel lanes</h2></div>
+
+  <div class="legend">
+    <span><span class="chk"></span>Customer-owned</span>
+    <span><span class="chk g"></span>Sparcle-owned</span>
+  </div>
+
+  <div class="lanes">
+    <div class="lane cust">
+      <h3>Customer (your security + platform team)</h3>
+      <div class="crow"><span class="chk"></span><div><b>IdP wiring.</b> Configure Okta / Entra / OneLogin / Auth0 / Google / Zoho &mdash; or any compliant OIDC / SAML 2.0 &mdash; with required claims: <code>tenant_id</code> &middot; <code>user_id</code> &middot; <code>region</code> &middot; <code>office</code> &middot; <code>role_band</code> &middot; <code>employment_type</code> &middot; <code>country</code> &middot; <code>is_admin</code>. Backs Aeira &sect;01 B4.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Per-tenant CMK provisioned</b> in Vault / AWS KMS / Azure Key Vault / PKCS#11 HSM. Decide HSM-backed for highest-assurance tenants. Backs Aeira &sect;01 B5 + &sect;03.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>LLM endpoint chosen + contracted.</b> OpenAI Enterprise / Azure OpenAI / Bedrock / on-prem Llama / Mistral / Aleph Alpha. Confirm endpoint logging + replay policy with vendor.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Egress / network rules.</b> Allow-list Aeira API, LLM endpoint, and source-system endpoints; deny everything else. Confirm your self-hosted tier has zero outbound to Sparcle.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Postgres hardened</b> per your DBA standard: at-rest encryption, restricted DB role, query logging if required. Aeira does not enforce Postgres-side controls.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Endpoint controls on user devices.</b> FileVault / BitLocker, MDM enrollment, code-signing enforcement. Threat model out-of-scopes physical compromise.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Bridge consent mode chosen.</b> Default vs. require-every-action &mdash; set tenant-wide. Backs Bolt &sect;02.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Top-10 sources identified</b> for late-bind backfill priority (see Sparcle lane). Provide list of source ACL primitives Aeira must respect.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Pilot users defined</b> (8-20 ideal). Include at least one of each persona: executive, engineer, finance, HR, regional rep &mdash; to exercise the 4-axis ACL.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Security review window booked.</b> CISO / SecArch slot in week 2-3; threat-model walkthrough in week 4.</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Procurement docs requested.</b> DPA template, MSA template, BAA (if PHI), source-code escrow agent decision (Iron Mountain / NCC Group).</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Pen-test report shared</b> when Sparcle's external report lands (week 4 of deployment).</div></div>
+    </div>
+
+    <div class="lane spar">
+      <h3>Sparcle (you'll see these completed)</h3>
+      <div class="crow"><span class="chk g"></span><div><b>Trial sidecar delivered</b> (signed binary, embedded Postgres, Contoso 2,573-row demo corpus). Customer can run before any infra work.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Helm chart / docker-compose tuned</b> for customer's VPC sizing. Production deployment artifacts in customer's internal registry.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Connector backfill</b> &mdash; <code>check_permissions()</code> implementations for the top-10 sources you identified. Today: 6 of 103 sources have it; 4-10 more land during pilot's week 1-2.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Per-tenant CMK rotation runbook</b> + your KMS adapter pre-configured.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>End-to-end ingest saga wired</b> for the chosen connectors (~1-2 days from green-light).</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Audit-verifier binary delivered</b> + walkthrough scheduled with your CISO team.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Threat-model documents</b> (Aeira + Bolt) reviewed with your SecArch in week 1-2.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>External pen-test report</b> by HackerOne / Bishop Fox / NCC Group delivered in week 3-4 (if Sparcle hasn't booked one already, this is a contract trigger).</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Pre-filled SIG Lite + CAIQ</b> handed over to your procurement at kickoff.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Tenant onboarding</b> &mdash; first 8-20 user accounts provisioned + persona assignments validated against ACL.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Compliance handbook + IR plan</b> handed over.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Source-code escrow agreement</b> executed with customer-selected agent.</div></div>
+    </div>
+  </div>
+
+  <div class="callout"><b>Tier scope:</b> This checklist applies to every self-hosted Bolt tier &mdash; <b>Authorize</b>, <b>Backbone</b>, and <b>Certify</b> (customer-hosted; recommended for regulated workloads). All Bolt tiers are self-hosted inside your own perimeter with your own LLM; there is no Sparcle-managed hosting tier. See the compliance handbook &sect;4.1 sub-processor table.</div>
+
+  <div class="spacer"></div>
+  <div class="foot">
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/pilot &middot; bolt@sparcle.app &middot; sparcle-pilot-preflight-checklist.pdf &middot; v2 &middot; 2026-07 &middot; p.1 / 2</div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 2 ===================== -->
+<div class="page">
+  <div class="eyebrow">90-Day pilot timeline &middot; Acceptance criteria &middot; Sign-off</div>
+  <h1>Timeline + Acceptance.</h1>
+  <div class="sub">30-day deployment window + 60-day validation window = 90-day pilot. Validation cannot begin until Phase B sign-off; sign-off requires every deployment row complete.</div>
+
+  <div class="sec"><span class="num">&#9313;</span><h2>Phase A &middot; Discovery + sign-on &middot; Days &minus;7 &rarr; 0</h2></div>
+  <table>
+    <tr><td class="lbl">Discovery</td><td class="day">&minus;7 &rarr; &minus;3</td><td class="desc"><b>Sparcle:</b> deliver trial sidecar + demo screencast. <b>Customer:</b> stand up trial in dev VM, see Contoso ACL personas filter live. <b>Joint:</b> review the 10-artifact sales portfolio (leave-behind, CISO brief, TCO, architecture, compliance handbook, threat models, vertical brief).</td></tr>
+    <tr><td class="lbl">Scope lock</td><td class="day">&minus;3 &rarr; &minus;1</td><td class="desc"><b>Joint:</b> sign pilot MSA + DPA (plus BAA if PHI in scope, SCC if EU). Lock the connector list (top-10 + extended), pilot-user list, success criteria.</td></tr>
+    <tr><td class="lbl">Kickoff</td><td class="day">Day 0</td><td class="desc"><b>Joint kickoff call.</b> Hand off the pre-filled SIG Lite / CAIQ. Schedule weekly Sparcle-side check-ins.</td></tr>
+  </table>
+
+  <div class="sec"><span class="num">&#9314;</span><h2>Phase B &middot; Deployment &middot; Days 1 &rarr; 30</h2></div>
+  <table>
+    <tr><td class="lbl">Infra</td><td class="day">1 &rarr; 7</td><td class="desc"><b>Customer:</b> Helm chart or docker-compose deployed in VPC; per-tenant CMK provisioned; egress allow-list applied. <b>Sparcle:</b> tune sizing, complete top-10 connector backfills.</td></tr>
+    <tr><td class="lbl">IdP + Auth</td><td class="day">5 &rarr; 10</td><td class="desc"><b>Customer:</b> IdP configured with the 9-claim contract. <b>Joint:</b> first SSO login test; verify JWT validation rejects malformed tokens with 401 + emits no audit event.</td></tr>
+    <tr><td class="lbl">Connectors</td><td class="day">8 &rarr; 18</td><td class="desc"><b>Joint:</b> wire the chosen connectors (typically: SharePoint / Confluence / Slack / Jira / Salesforce / Workday / Snowflake / ServiceNow / GitHub / GDrive &mdash; depending on customer's primary data). Verify each connector's ACL semantics with a test document tagged for restriction.</td></tr>
+    <tr><td class="lbl">Audit chain</td><td class="day">12 &rarr; 16</td><td class="desc"><b>Customer security:</b> run <code>aeira-audit-verify</code> binary on an audit-chain export. Confirm Ed25519 signatures validate against your KMS public key. Modify a byte, confirm verifier reports the break.</td></tr>
+    <tr><td class="lbl">Threat-model walkthrough</td><td class="day">15 &rarr; 22</td><td class="desc"><b>Joint:</b> CISO / SecArch reviews Bolt + Aeira threat models against the deployed system. Document any custom mitigations.</td></tr>
+    <tr><td class="lbl">Pen-test landing</td><td class="day">22 &rarr; 28</td><td class="desc"><b>Sparcle:</b> deliver external pen-test report (or accelerate-fund inside pilot). <b>Customer:</b> review with your security team.</td></tr>
+    <tr><td class="lbl">Phase B gate</td><td class="day">30</td><td class="desc"><b>Joint sign-off:</b> all Phase B rows complete. Sign the deployment-acceptance form on p.2. Validation cannot begin until this signs.</td></tr>
+  </table>
+
+  <div class="spacer"></div>
+  <div class="foot">
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/pilot &middot; bolt@sparcle.app &middot; sparcle-pilot-preflight-checklist.pdf &middot; v2 &middot; 2026-07 &middot; p.2 / 3</div>
+  </div>
+</div>
+
+<!-- ===================== PAGE 3 ===================== -->
+<div class="page">
+  <div class="eyebrow">Phase C validation timeline &middot; Acceptance criteria &middot; Sign-off</div>
+  <h1>Validation + Sign-Off.</h1>
+  <div class="sub">60-day validation window starts only after Phase B sign-off. Acceptance criteria define what "successful pilot" means.</div>
+
+  <div class="sec"><span class="num">&#9315;</span><h2>Phase C &middot; Validation &middot; Days 31 &rarr; 90</h2></div>
+  <table>
+    <tr><td class="lbl">User onboarding</td><td class="day">31 &rarr; 38</td><td class="desc">8-20 pilot users on Bolt desktop + browser extension + PWA. Each onboarded against their assigned persona; ACL behavior validated per user.</td></tr>
+    <tr><td class="lbl">Workflow capture</td><td class="day">38 &rarr; 60</td><td class="desc">Users run real cross-source workflows. Each user logs at least 5 multi-source workflows. Sparcle observes (via shared session export) and tunes connectors.</td></tr>
+    <tr><td class="lbl">Measurement</td><td class="day">55 &rarr; 80</td><td class="desc">Measure against acceptance criteria below. Time-on-task, query latency, ACL-correctness checks, audit-chain integrity samples.</td></tr>
+    <tr><td class="lbl">Go-live decision</td><td class="day">81 &rarr; 90</td><td class="desc"><b>Joint:</b> review acceptance criteria. Decision: expand to production, extend pilot, or terminate. Reference-case slide drafted if expand.</td></tr>
+  </table>
+
+  <div class="panel">
+    <h4>Acceptance criteria &mdash; what "successful pilot" means</h4>
+    <ol class="crit">
+      <li><b>ACL correctness.</b> Zero recorded incidents of a user retrieving a document outside their 4-axis ACL scope. Validated by structured test set + observed user activity.</li>
+      <li><b>Audit-chain integrity.</b> Customer's verifier runs at week 4, 8, 12 &mdash; all three sample runs return chain-valid + signature-valid. Customer holds the chain export, not Sparcle.</li>
+      <li><b>Latency.</b> p95 search latency under customer-defined SLA (typical: 250-500ms on 100K-doc corpus; benchmark published before pilot end).</li>
+      <li><b>Connector reliability.</b> Each connector polls within its declared cadence; zero connector-side credential leaks; conformance harness green throughout.</li>
+      <li><b>User adoption.</b> &ge;70% of pilot users active in the final 2 weeks. &ge;5 multi-source workflows logged per active user.</li>
+      <li><b>No new sub-processors introduced.</b> Per your self-hosted Bolt commitments. Validated in compliance handbook &sect;4.1 review.</li>
+      <li><b>Threat-model walkthrough sign-off.</b> CISO / SecArch confirms in writing that the deployed system matches the documented threat model + no critical residual risks remain unfunded.</li>
+    </ol>
+  </div>
+
+  <div class="signbox">
+    <h4>Phase B (Deployment) acceptance &mdash; sign at Day 30</h4>
+    <div class="siggrid">
+      <div class="sig"><div class="cap"><b>Customer security lead</b> <span>&middot; printed name + role</span></div><div class="rule"></div></div>
+      <div class="sig"><div class="cap"><b>Sparcle deployment lead</b> <span>&middot; printed name + role</span></div><div class="rule"></div></div>
+      <div class="sig"><div class="cap"><b>Customer platform lead</b> <span>&middot; printed name</span></div><div class="rule"></div></div>
+      <div class="sig"><div class="cap"><b>Date</b> <span>(YYYY-MM-DD)</span></div><div class="rule"></div></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+  <div class="foot">
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/pilot &middot; bolt@sparcle.app &middot; sparcle-pilot-preflight-checklist.pdf &middot; v2 &middot; 2026-07 &middot; p.2 / 2</div>
+  </div>
+</div>
+
+</body>
+</html>

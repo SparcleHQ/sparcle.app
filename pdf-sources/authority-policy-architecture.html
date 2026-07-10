@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — Authority Policy Architecture</title>
+<style>
+  @page { size: A4 landscape; margin: 7mm 8mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c;
+         --gold:#8a6d1f; --green:#127a4a; --card:#f4f7fb;
+         --red:#a8402f; --cream:#faf6ec; --aeira:#eef5f0; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:9px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .sheet{max-width:1180px;margin:0 auto;zoom:0.98;}
+
+  /* header */
+  header{text-align:center;padding-bottom:8px;margin-bottom:8px;}
+  header h1{font-size:23px;margin:0;letter-spacing:-.5px;}
+  header .sub{color:var(--mut);font-style:italic;font-size:12px;margin-top:4px;}
+  header .cap{color:var(--mut);font-size:9px;margin-top:3px;}
+
+  .main{display:grid;grid-template-columns:1.92fr 1fr;gap:12px;align-items:stretch;}
+
+  /* left diagram column */
+  .diagram{display:flex;flex-direction:column;gap:6px;}
+  .perimeter{border:2px dashed var(--red);border-radius:8px;padding:8px 9px 9px;}
+  .perim-head b{color:var(--red);font-size:11px;letter-spacing:.04em;}
+  .perim-head .ps{color:var(--mut);font-size:8px;margin:1px 0 7px;}
+
+  .inner{display:grid;grid-template-columns:1.55fr .78fr;gap:7px;}
+  .stack{display:flex;flex-direction:column;gap:6px;}
+  .side{display:flex;flex-direction:column;gap:5px;}
+
+  .box{border:1px solid var(--line);border-radius:6px;padding:6px 8px;position:relative;background:#fff;}
+  .box>.t{font-size:9.5px;font-weight:700;letter-spacing:.03em;}
+  .box>.d{color:var(--mut);font-size:8px;margin-top:2px;}
+
+  .bolt{background:var(--card);border-left:3px solid var(--navy);}
+  .aeira{background:var(--aeira);border:1px solid #cfe0d4;padding:7px 8px;}
+  .aeira>.t{color:var(--ink);}
+  .aeira .lrows{display:flex;flex-direction:column;gap:4px;margin-top:5px;}
+  .lrow{background:#fff;border:1px solid #dbe6dd;border-radius:5px;padding:4px 7px;font-size:8.5px;}
+  .lrow b{font-weight:700;}
+  .lrow .m{color:var(--mut);}
+  .lrow2{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+
+  .sdk{background:var(--cream);border:1.5px solid var(--gold);border-radius:5px;padding:5px 8px;}
+  .sdk .sh{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;}
+  .sdk .sh b{color:var(--gold);font-size:9px;font-weight:800;letter-spacing:.02em;}
+  .sdk .badges{display:flex;gap:4px;flex-shrink:0;}
+  .pill{font-size:6.5px;font-weight:700;letter-spacing:.03em;padding:1.5px 5px;border-radius:3px;white-space:nowrap;}
+  .pill.ap{background:#dcefe4;color:var(--green);}
+  .pill.mo{background:#e7ebf2;color:var(--navy);}
+  .pill.dep{background:#f3ddd6;color:var(--red);}
+  .sdk .sd{color:#4a4636;font-size:8px;margin-top:3px;}
+  .sdk .sd b{color:#3a3a2c;}
+
+  .acl{background:var(--navy);color:#fff;border:none;border-radius:5px;padding:5px 8px;}
+  .acl .t{color:#fff;font-size:9px;}
+  .acl .d{color:#c3cbd8;font-size:8px;}
+
+  .ingest .flow{display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:nowrap;}
+  .chip{border:1px solid var(--line);border-radius:5px;padding:4px 8px;font-size:8.5px;font-weight:700;text-align:center;background:#fff;flex:1;}
+  .chip.gold{border:1.5px solid var(--gold);color:var(--gold);background:var(--cream);}
+  .arrow{color:var(--mut);font-weight:700;flex:0 0 auto;font-size:10px;}
+
+  .sources .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:5px;}
+  .scell{border:1px solid var(--line);border-radius:5px;padding:4px 6px;font-size:8.5px;font-weight:700;text-align:center;background:#fff;}
+
+  /* side navy byo boxes */
+  .byo{background:var(--navy);color:#fff;border-radius:5px;padding:5px 7px;}
+  .byo .t{color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.03em;}
+  .byo .d{color:#c3cbd8;font-size:7.5px;margin-top:2px;line-height:1.3;}
+  .merkle{background:#0f1a2e;color:#fff;border-radius:5px;padding:6px 7px;}
+  .merkle .t{color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.03em;}
+  .merkle .d{color:#bcc6d6;font-size:7.5px;margin-top:2px;line-height:1.3;}
+  .deploy{background:var(--cream);border:1px solid #e6dcbf;border-radius:5px;padding:5px 7px;}
+  .deploy .t{color:var(--gold);font-size:8.5px;font-weight:800;letter-spacing:.03em;}
+  .deploy .d{color:#5b533f;font-size:7.5px;margin-top:2px;line-height:1.3;}
+
+  /* numbered badge */
+  .badge{position:absolute;width:15px;height:15px;border-radius:50%;background:var(--navy);color:#fff;
+    font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    top:-6px;left:-6px;box-shadow:0 0 0 2px #fff;}
+  .badge.gold{background:var(--gold);}
+  .rel{position:relative;}
+
+  .maskline{text-align:center;color:var(--mut);font-size:7.5px;font-style:italic;margin:1px 0;}
+
+  .outside{border:1.5px dashed #9aa3af;border-radius:8px;padding:7px 9px;position:relative;}
+  .outside .t{font-size:9.5px;font-weight:700;letter-spacing:.03em;color:var(--ink);}
+  .outside .d{color:var(--mut);font-size:8px;margin-top:2px;}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:7.5px;color:var(--mut);margin-top:4px;align-items:center;}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .sw{width:11px;height:9px;border-radius:2px;display:inline-block;}
+  .sw.per{border:1.5px dashed var(--red);background:#fff;}
+  .sw.plat{background:var(--navy);}
+  .sw.vend{background:#c3cbd8;}
+  .sw.cust{background:var(--gold);}
+  .sw.out{border:1.5px dashed #9aa3af;background:#fff;}
+
+  /* right how-it-works panel */
+  .how{border:1px solid var(--line);border-radius:7px;overflow:hidden;display:flex;flex-direction:column;}
+  .how .hh{background:var(--navy);color:#fff;padding:6px 10px;font-size:10px;font-weight:800;letter-spacing:.06em;}
+  .how .intro{font-style:italic;color:var(--mut);font-size:8px;padding:6px 10px 2px;}
+  .how ol{list-style:none;margin:0;padding:2px 10px 8px;counter-reset:step;}
+  .how li{position:relative;padding:4px 0 4px 20px;border-bottom:1px solid #eef1f6;font-size:8px;line-height:1.35;}
+  .how li:last-child{border-bottom:none;}
+  .how li .n{position:absolute;left:0;top:4px;width:14px;height:14px;border-radius:50%;background:var(--navy);
+    color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .how li b{color:var(--ink);}
+  .how li .hl{color:var(--gold);font-weight:600;}
+
+  footer{display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);margin-top:8px;padding-top:6px;
+    font-size:8.5px;color:var(--mut);}
+  footer em{font-style:italic;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <h1>Your search. Your policy. Your code.</h1>
+    <div class="sub">Bolt + Aeira inside your perimeter, with the Authority Policy SDK on top.</div>
+    <div class="cap">Architecture overview &middot; how the three layers compose</div>
+  </header>
+
+  <div class="main">
+    <!-- LEFT: diagram -->
+    <div class="diagram">
+      <div class="perimeter">
+        <div class="perim-head">
+          <b>YOUR PERIMETER</b>
+          <div class="ps">On-prem &middot; VPC &middot; sovereign cloud &middot; air-gap. Data never leaves your perimeter on any self-hosted Bolt tier.</div>
+        </div>
+
+        <div class="inner">
+          <!-- main stack -->
+          <div class="stack">
+            <div class="box bolt rel">
+              <span class="badge">1</span>
+              <div class="t">BOLT &mdash; DESKTOP SUPERAGENT</div>
+              <div class="d">Cmd-Space launcher &middot; persona-aware utility packs &middot; scoped action verbs &middot; MCP tool invocation &middot; recurring watches &middot; voice + keyboard &middot; macOS &middot; Windows &middot; Linux &middot; PWA &middot; browser extension</div>
+            </div>
+
+            <div class="box aeira">
+              <div class="t">AEIRA &mdash; SEARCH SUBSTRATE</div>
+              <div class="lrows">
+                <div class="lrow"><b>L5 &middot; Reranker</b> <span class="m">(optional &middot; cross-encoder &middot; vendor-swappable)</span></div>
+
+                <div class="sdk rel">
+                  <span class="badge">4</span>
+                  <div class="sh">
+                    <b>L4.5 &middot; AUTHORITY POLICY SDK</b>
+                    <div class="badges">
+                      <span class="pill ap">Approved</span>
+                      <span class="pill mo">3 mo ago</span>
+                      <span class="pill dep">Deprecated</span>
+                    </div>
+                  </div>
+                  <div class="sd"><b>You write.</b> Rust trait or YAML rules. Reference impls: Default &middot; Regulated &middot; Healthcare. Vertical packs: Finance &middot; Defense &middot; Legal (co-developed).</div>
+                </div>
+
+                <div class="lrow"><b>L4 &middot; RRF fusion</b> <span class="m">(weighted reciprocal-rank merge &middot; vendor-swappable)</span></div>
+
+                <div class="lrow2">
+                  <div class="lrow"><b>L2 &middot; Keyword</b> <span class="m">(PG &middot; Quickwit)</span></div>
+                  <div class="lrow"><b>L3 &middot; Vector</b> <span class="m">(pgvector &middot; Qdrant &middot; Lance)</span></div>
+                </div>
+
+                <div class="acl box rel">
+                  <span class="badge">5</span>
+                  <div class="t">L1 &middot; 4-AXIS ACL PRE-FILTER</div>
+                  <div class="d">patent-pending &middot; country &middot; office &middot; role-band &middot; employment-type</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="box ingest rel">
+              <span class="badge gold">3</span>
+              <div class="t">INGEST CHAIN</div>
+              <div class="flow">
+                <div class="chip">Connectors</div>
+                <span class="arrow">&rarr;</span>
+                <div class="chip gold">ENRICHER CHAIN</div>
+                <span class="arrow">&rarr;</span>
+                <div class="chip">ACL classify</div>
+                <span class="arrow">&rarr;</span>
+                <div class="chip">Index write</div>
+              </div>
+            </div>
+
+            <div class="box sources rel">
+              <span class="badge gold">2</span>
+              <div class="t">YOUR SOURCES</div>
+              <div class="three">
+                <div class="scell">Deep tier &middot; ~25</div>
+                <div class="scell">Standard &middot; ~80</div>
+                <div class="scell">Airbyte bridge &middot; ~350</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- side BYO column -->
+          <div class="side">
+            <div class="byo">
+              <div class="t">BYO LLM</div>
+              <div class="d">OpenAI &middot; Anthropic &middot; Azure &middot; Bedrock<br>Llama &middot; Mistral &middot; on-prem &middot; your keys</div>
+            </div>
+            <div class="byo">
+              <div class="t">BYO IDP</div>
+              <div class="d">Okta &middot; Entra &middot; OneLogin &middot; Auth0<br>Google &middot; Zoho &middot; OIDC &middot; SAML &middot; SCIM</div>
+            </div>
+            <div class="byo">
+              <div class="t">BYO MCP TOOLS</div>
+              <div class="d">Any MCP server plugs in.<br>Bolt is host &amp; A2A peer.</div>
+            </div>
+            <div class="byo">
+              <div class="t">BYO KMS</div>
+              <div class="d">AWS &middot; Vault &middot; PKCS#11 HSM<br>Per-tenant CMK &middot; crypto-shred</div>
+            </div>
+            <div class="merkle rel">
+              <span class="badge">6</span>
+              <div class="t">SEALED MERKLE AUDIT</div>
+              <div class="d">Cross-product. Ed25519-signed. Standalone verifier &mdash; regulator can run without our cooperation. Platform-locked.</div>
+            </div>
+            <div class="deploy">
+              <div class="t">DEPLOYMENT TIERS</div>
+              <div class="d">Authorize &middot; Backbone &middot; Certify &mdash; all self-hosted. You host. You key. Sparcle is never in the data path. No managed-hosting tier.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="maskline">&darr; PII-masked prompt only</div>
+
+      <div class="outside rel">
+        <span class="badge">7</span>
+        <div class="t">OUTSIDE YOUR PERIMETER &middot; OPTIONAL</div>
+        <div class="d">LLM vendor of your choice (OpenAI &middot; Anthropic &middot; Azure &middot; Bedrock &middot; on-prem). Only PII-masked prompts cross the boundary; raw documents never leave your perimeter.</div>
+      </div>
+
+      <div class="legend">
+        <span><span class="sw per"></span> Your perimeter</span>
+        <span><span class="sw plat"></span> Platform layer &middot; Sparcle ships, locked</span>
+        <span><span class="sw vend"></span> Vendor-swappable &middot; you pick</span>
+        <span><span class="sw cust"></span> Customer-extensible &middot; <b>your code</b></span>
+        <span><span class="sw out"></span> Outside perimeter (optional)</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: how it works -->
+    <div class="how">
+      <div class="hh">HOW IT WORKS &middot; 7 LAYERS</div>
+      <div class="intro">Numbered to the diagram. The architecture, layer by layer.</div>
+      <ol>
+        <li><span class="n">1</span><b>Bolt &mdash; desktop superagent.</b> Cmd-Space launcher runs on the user's own desktop. Queries are identity-bound. No data leaves the machine to start the search.</li>
+        <li><span class="n">2</span><b>Three connector tiers.</b> Deep-integration sources (~25) preserve source-fidelity ACL plus per-source enrichment. Standard in-house connectors (~80). Airbyte bridge (~350) for long-tail breadth. Depth matters where your domain authority signals live.</li>
+        <li><span class="n">3</span><b>Enricher chain at ingest.</b> Per-source rules pull domain metadata into authority signals. <span class="hl">FHIR evidence levels, classification markings, regulatory-source tiers.</span> Your domain knowledge enters the search index through this channel.</li>
+        <li><span class="n">4</span><b>Authority Policy SDK.</b> The customer-extensible ranking layer. Reference impls ship for general enterprise, regulated industries, and healthcare. Vertical packs for finance, defense, and legal are co-developed by engagement. The trust model is written in customer code (Rust trait or YAML rules) and runs inside the customer perimeter.</li>
+        <li><span class="n">5</span><b>Patent-pending 4-axis ACL.</b> Country, office, role-band, and employment-type pre-filter at index time. The ACL layer is platform-locked. The Authority Policy ranks on top, on documents the ACL already authorized.</li>
+        <li><span class="n">6</span><b>Sealed Merkle audit chain.</b> Every query, every result, every score, every policy decision. Ed25519-signed. A standalone verifier binary lets an auditor or regulator verify the chain independently, without vendor cooperation.</li>
+        <li><span class="n">7</span><b>BYO everything.</b> LLM, IdP, MCP tools, KMS. Customer choice at every external boundary. Outside the perimeter, only PII-masked prompts cross to the customer-chosen LLM vendor. On every self-hosted Bolt tier, Sparcle is not in the data path.</li>
+      </ol>
+    </div>
+  </div>
+
+  <footer>
+    <em>Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail, ranked by your policy.</em>
+    <span>sparcle.app</span>
+  </footer>
+</div>
+</body>
+</html>

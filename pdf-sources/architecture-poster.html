@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — Architecture Poster</title>
+<style>
+  @page { size: A3 landscape; margin: 7mm 8mm; }
+  :root{
+    --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+    --green:#127a4a; --card:#f4f7fb; --cardgreen:#eef5f0; --cardblue:#eef2fa;
+    --bound:#b0281f; --tan:#c9ad63;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:9px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .mono{font-family:ui-monospace,Menlo,"SF Mono",monospace;}
+  .sheet{width:1560px;margin:0 auto;zoom:0.95;}
+
+  /* header */
+  header{position:relative;text-align:center;padding-bottom:6px;margin-bottom:8px;}
+  header h1{font-size:27px;margin:0;letter-spacing:-.5px;color:var(--navy);font-weight:800;}
+  header .sub{color:var(--mut);font-style:italic;font-size:12.5px;margin-top:3px;}
+  header .meta{position:absolute;right:0;top:8px;color:var(--mut);font-size:10px;letter-spacing:.03em;}
+
+  .bhead{text-align:center;color:var(--bound);font-size:11px;letter-spacing:.04em;font-weight:600;margin:2px 0 6px;}
+
+  /* main 3-col */
+  .main{display:grid;grid-template-columns:210px 1fr 210px;gap:14px;align-items:start;}
+
+  /* left annotations */
+  .notes{display:flex;flex-direction:column;gap:14px;padding-top:26px;}
+  .note{display:flex;gap:8px;font-size:10px;line-height:1.32;}
+  .num{flex:0 0 auto;width:17px;height:17px;border-radius:50%;background:var(--navy);color:#fff;
+    font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .note b{color:var(--navy);}
+  .pill{display:inline-block;font-size:7.5px;font-weight:700;letter-spacing:.06em;
+    background:#f3ecd4;color:var(--gold);padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:2px;}
+
+  /* boundary */
+  .boundary{border:2.2px dashed var(--bound);border-radius:12px;padding:12px;position:relative;}
+  .panel{border-radius:9px;padding:9px 11px 10px;margin-bottom:11px;}
+  .panel:last-child{margin-bottom:0;}
+  .p-bolt{background:var(--cardblue);border:1px solid #d5deef;}
+  .p-aeira{background:var(--cardgreen);border:1px solid #cfe3d7;}
+  .p-conn{background:var(--card);border:1px solid var(--line);}
+  .p-head{display:flex;align-items:baseline;gap:9px;margin-bottom:8px;}
+  .p-head b{font-size:14px;color:var(--navy);letter-spacing:-.2px;}
+  .p-head i{color:var(--mut);font-size:10px;}
+  .p-foot{color:var(--mut);font-style:italic;font-size:8.6px;line-height:1.4;margin-top:8px;}
+
+  .seclab{font-size:8px;letter-spacing:.1em;color:var(--mut);font-weight:700;margin:8px 0 5px;}
+  .seclab:first-of-type{margin-top:0;}
+
+  .boxrow{display:grid;gap:7px;}
+  .box{background:#fff;border:1px solid #dde3ec;border-radius:6px;padding:6px 8px;min-height:40px;}
+  .box .t{font-weight:700;font-size:9.6px;color:var(--ink);line-height:1.2;}
+  .box .d{color:var(--mut);font-size:8.4px;margin-top:2px;line-height:1.25;}
+  .box .x{font-size:7.4px;color:#9aa3af;margin-top:2px;font-style:italic;}
+  .box.gold{background:#faf6ec;border-color:#d8c48a;}
+  .box.gold .t{color:var(--gold);}
+  .box.gold .x{color:var(--gold);}
+
+  /* connectors grid */
+  .conngrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+  .cbox{background:#fff;border:1px solid #dde3ec;border-radius:6px;padding:6px 8px;}
+  .cbox .t{font-weight:700;font-size:9.4px;color:var(--navy);margin-bottom:2px;}
+  .cbox .l{color:var(--mut);font-size:8.2px;line-height:1.35;}
+
+  /* below-boundary row */
+  .underrow{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;margin-top:12px;}
+  .sdkbox{background:var(--gold);color:#fdf7e6;border-radius:8px;padding:9px 12px;}
+  .sdkbox b{display:block;font-size:11px;letter-spacing:.06em;margin-bottom:3px;color:#fff;}
+  .sdkbox i{font-style:italic;font-size:8.8px;line-height:1.4;color:#f3e6c2;}
+  .custbox{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 12px;}
+  .custbox b{font-size:10.5px;color:var(--navy);}
+  .custbox .l{color:var(--mut);font-size:8.6px;margin-top:4px;line-height:1.35;}
+
+  /* tech stack */
+  .stack{background:var(--navy);color:#eef2f8;border-radius:10px;padding:14px 15px;}
+  .stack h3{margin:0 0 10px;font-size:13px;letter-spacing:.08em;color:#fff;}
+  .srow{display:flex;justify-content:space-between;gap:8px;padding:4.5px 0;border-bottom:1px solid #24344f;font-size:9.3px;}
+  .srow:last-child{border-bottom:none;}
+  .srow .k{color:var(--tan);}
+  .srow .v{color:#eef2f8;text-align:right;}
+
+  /* bottom guides */
+  .guides{display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#faf9f4;border:1px solid #ece7d6;
+    border-radius:9px;padding:11px 14px;margin-top:12px;}
+  .guides h4{margin:0 0 5px;font-size:10.5px;color:var(--navy);}
+  .guides p{margin:0;font-size:9px;line-height:1.5;color:var(--ink);}
+  .guides b{color:var(--navy);}
+
+  .lists{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;}
+  .lists h4{margin:0 0 6px;font-size:11px;}
+  .lists .w{color:var(--green);} .lists .p{color:var(--gold);}
+  .lists ul{margin:0;padding-left:14px;}
+  .lists li{font-size:9.2px;margin:3px 0;line-height:1.35;}
+  .lists li b{color:var(--ink);}
+  .lists .bul-w li::marker{color:var(--green);}
+  .lists .bul-p li::marker{color:var(--gold);}
+
+  footer{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;color:var(--mut);
+    border-top:1px solid var(--line);margin-top:12px;padding-top:8px;}
+  footer em{font-style:italic;}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <h1>Bolt + Aeira &middot; Enterprise AI Substrate Architecture</h1>
+    <div class="sub">Inside your perimeter. With your LLM. On your audit trail.</div>
+    <div class="meta mono">Architecture v2 &middot; 2026&ndash;07 &middot; sparcle.app/architecture</div>
+  </header>
+
+  <div class="bhead mono">&mdash; Customer network boundary &middot; All Bolt tiers self-hosted &middot; No outbound to Sparcle &middot; No telemetry &mdash;</div>
+
+  <div class="main">
+
+    <!-- LEFT ANNOTATIONS -->
+    <div class="notes">
+      <div class="note"><span class="num">1</span><div><b>BYO LLM here</b> &mdash; customer's existing endpoint, any vendor.</div></div>
+      <div class="note"><span class="num">2</span><div><b>Audit chain seals here</b> &mdash; 10-second Merkle epochs, KMS-signed.</div></div>
+      <div class="note"><span class="num">3</span><div><b>ACL pre-filter here</b> &mdash; 4-axis GIN index at query time.</div></div>
+      <div class="note"><span class="num">4</span><div><b>Webhook receivers here</b> &mdash; push-mode for top-10 sources <span class="pill">PILOT</span></div></div>
+      <div class="note"><span class="num">5</span><div><b>Cross-source action verbs via MCP</b> &mdash; Bolt invokes live source APIs.</div></div>
+      <div class="note"><span class="num">6</span><div><b>Connector poll here</b> &mdash; per-source cadence, 5 min to hourly.</div></div>
+      <div class="note"><span class="num">7</span><div><b>Per-region keyrings</b> &mdash; sovereignty enforced at write + read <span class="pill">PILOT</span></div></div>
+      <div class="note"><span class="num">8</span><div><b>Permission cache</b> &mdash; L1 LRU shipped; L2 Redis <span class="pill">PILOT</span></div></div>
+      <div class="note"><span class="num">9</span><div><b>Late-bind check</b> &mdash; top-K only, 6 connectors shipped today.</div></div>
+    </div>
+
+    <!-- CENTER DIAGRAM -->
+    <div>
+      <div class="boundary">
+
+        <!-- BOLT -->
+        <div class="panel p-bolt">
+          <div class="p-head"><b>Bolt</b><i>Desktop + PWA + Browser Extension</i></div>
+          <div class="boxrow" style="grid-template-columns:repeat(4,1fr);">
+            <div class="box"><div class="t">Cmd-Space launcher</div><div class="d">Native desktop, code-signed</div></div>
+            <div class="box"><div class="t">Web app</div><div class="d">installable on desktop + mobile browsers</div></div>
+            <div class="box"><div class="t">Browser extension</div><div class="d">cmd palette anywhere</div></div>
+            <div class="box"><div class="t">Local bridge</div><div class="d">ws://127.0.0.1, WebCrypto pairing</div></div>
+          </div>
+          <div class="p-foot">Persona-aware utility packs &middot; Scoped action verbs &middot; Cross-source workflows via MCP &middot; Voice + keyboard &middot; Append-only signed session history</div>
+        </div>
+
+        <!-- AEIRA -->
+        <div class="panel p-aeira">
+          <div class="p-head"><b>Aeira</b><i>ACL-Aware Search + Audit Substrate</i></div>
+
+          <div class="seclab">SEARCH PIPELINE</div>
+          <div class="boxrow" style="grid-template-columns:repeat(8,1fr);">
+            <div class="box"><div class="t">API server</div><div class="d">axum &middot; JWT</div></div>
+            <div class="box"><div class="t">Permission classifier</div><div class="d">Flatten / Tuple / Hybrid</div></div>
+            <div class="box"><div class="t">ACL pre-filter</div><div class="d">4-axis GIN</div><div class="x">platform-locked</div></div>
+            <div class="box"><div class="t">Keyword + Vector</div><div class="d">FTS &middot; pgvector</div></div>
+            <div class="box"><div class="t">RRF fusion</div><div class="d">top-K bounded</div></div>
+            <div class="box gold"><div class="t">Authority Policy SDK</div><div class="d">your code &middot; Rust + YAML</div><div class="x">customer-extensible</div></div>
+            <div class="box"><div class="t">Late-bind</div><div class="d">top-K only</div></div>
+            <div class="box"><div class="t">Audit emitter</div><div class="d">signed events</div></div>
+          </div>
+
+          <div class="seclab">STORAGE + CRYPTOGRAPHY</div>
+          <div class="boxrow" style="grid-template-columns:repeat(5,1fr);">
+            <div class="box"><div class="t">Per-tenant CMK</div><div class="d">Vault &middot; AWS KMS &middot; HSM</div></div>
+            <div class="box"><div class="t">At-rest encryption</div><div class="d">per-tenant keys</div></div>
+            <div class="box"><div class="t">Crypto-shred</div><div class="d">GDPR Art. 17 &middot; HIPAA erasure</div></div>
+            <div class="box"><div class="t">Merkle audit chain</div><div class="d">Ed25519, 10s seals</div></div>
+            <div class="box"><div class="t">Standalone verifier</div><div class="d">customer auditor runs</div></div>
+          </div>
+
+          <div class="seclab">INGEST SPINE + CACHE</div>
+          <div class="boxrow" style="grid-template-columns:repeat(5,1fr);">
+            <div class="box"><div class="t">NATS spine</div><div class="d">per-tenant subjects</div></div>
+            <div class="box"><div class="t">Ingest saga worker <span class="pill">PILOT</span></div></div>
+            <div class="box"><div class="t">PII detection</div><div class="d">mask at LLM boundary</div></div>
+            <div class="box"><div class="t">Permission cache</div><div class="d">L1 LRU shipped, L2 Redis <span class="pill">PILOT</span></div></div>
+            <div class="box"><div class="t">Webhook receiver <span class="pill">PILOT</span></div></div>
+          </div>
+        </div>
+
+        <!-- CONNECTORS -->
+        <div class="panel p-conn">
+          <div class="p-head"><b>Connectors</b><i>103 in-house + Airbyte bridge (~350 sources)</i></div>
+          <div class="conngrid">
+            <div class="cbox"><div class="t">Productivity</div><div class="l">Jira &middot; Confluence &middot; Slack &middot; Teams &middot; GitHub &middot; GitLab &middot; Linear &middot; Notion &middot; Box &middot; Dropbox &middot; GDrive &middot; OneDrive &middot; SharePoint</div></div>
+            <div class="cbox"><div class="t">Mail + calendar</div><div class="l">Gmail &middot; Outlook &middot; GCalendar &middot; Exchange archive</div></div>
+            <div class="cbox"><div class="t">CRM + sales</div><div class="l">Salesforce &middot; HubSpot &middot; Outreach &middot; Salesloft &middot; Marketo</div></div>
+            <div class="cbox"><div class="t">ERP + finance</div><div class="l">SAP S/4HANA &middot; Oracle EBS &middot; NetSuite &middot; Workday Financial &middot; Concur &middot; Coupa &middot; Anaplan &middot; Workiva</div></div>
+
+            <div class="cbox"><div class="t">HR + HCM</div><div class="l">Workday &middot; BambooHR &middot; Greenhouse &middot; Lattice &middot; SuccessFactors</div></div>
+            <div class="cbox"><div class="t">Data + BI</div><div class="l">Snowflake &middot; Databricks &middot; BigQuery &middot; Redshift &middot; MongoDB Atlas &middot; Tableau &middot; Looker &middot; Power BI</div></div>
+            <div class="cbox"><div class="t">Support + ITSM</div><div class="l">Zendesk &middot; Freshdesk &middot; Freshservice &middot; ServiceNow &middot; Intercom &middot; HelpScout</div></div>
+            <div class="cbox"><div class="t">ECM + WCMS</div><div class="l">FileNet &middot; Documentum &middot; Alfresco &middot; AEM &middot; Sitecore &middot; Drupal &middot; WordPress &middot; Domino &middot; Quip</div></div>
+
+            <div class="cbox"><div class="t">Security + observability</div><div class="l">CrowdStrike &middot; SentinelOne &middot; Tenable &middot; Qualys &middot; Vanta &middot; Proofpoint &middot; Mimecast &middot; Veritas &middot; Vault &middot; Splunk &middot; Datadog &middot; NewRelic &middot; Sentry &middot; PagerDuty</div></div>
+            <div class="cbox"><div class="t">IDP + IT + iPaaS + CDN</div><div class="l">Okta &middot; Entra &middot; OneLogin &middot; Jamf &middot; MuleSoft &middot; Boomi &middot; Cloudflare &middot; Akamai &middot; Fastly</div></div>
+            <div class="cbox"><div class="t">e-sign + collab + analytics</div><div class="l">DocuSign &middot; Adobe Sign &middot; Airtable &middot; Smartsheet &middot; Monday &middot; Asana &middot; ClickUp &middot; Wrike &middot; Trello &middot; Zoom &middot; Mixpanel &middot; Pendo</div></div>
+            <div class="cbox"><div class="t">Generic adapters + External</div><div class="l">REST &middot; JDBC &middot; WebCrawler (config-driven) + ~350 via Airbyte container bridge</div></div>
+          </div>
+          <div class="p-foot"><b>Three tiers:</b> Deep (~25) source-fidelity ACL + per-source enrichment &middot; Standard (~80) coarser ACL &middot; Airbyte bridge (~350) long-tail. 4-axis ACL emission &middot; IR with Flatten/Tuple/Hybrid materialization &middot; Late-bind on 6 sources today (Filesystem &middot; Outlook &middot; ServiceNow &middot; Splunk &middot; OneDrive &middot; Salesforce); backfilling per pilot. Enricher chain at ingest pulls source-specific metadata (Confluence status &middot; FHIR evidence &middot; regulatory tier) into the Authority Policy signals.</div>
+        </div>
+
+      </div><!-- /boundary -->
+
+      <!-- BELOW BOUNDARY -->
+      <div class="underrow">
+        <div class="sdkbox">
+          <b>AUTHORITY POLICY SDK</b>
+          <i>The customer-extensible wedge. Your domain's notion of "authoritative" lives in your code, in your perimeter. Reference impls + vertical packs.</i>
+        </div>
+        <div class="custbox"><b>&#8627; Customer IDP</b><div class="l">Okta &middot; Entra &middot; OneLogin &middot; SAML &middot; OIDC</div></div>
+        <div class="custbox"><b>&#8627; Customer LLM</b><div class="l">OpenAI &middot; Anthropic &middot; Bedrock &middot; Azure OpenAI &middot; on-prem Llama / Mistral / Qwen</div></div>
+        <div class="custbox"><b>&#8627; Customer KMS</b><div class="l">Vault &middot; AWS KMS &middot; PKCS#11 HSM</div></div>
+      </div>
+    </div>
+
+    <!-- TECH STACK -->
+    <div class="stack">
+      <h3>TECH STACK</h3>
+      <div class="srow"><span class="k mono">language</span><span class="v">Rust 1.85+</span></div>
+      <div class="srow"><span class="k mono">workspace</span><span class="v">~130 crates</span></div>
+      <div class="srow"><span class="k mono">api</span><span class="v">axum &middot; tower</span></div>
+      <div class="srow"><span class="k mono">runtime</span><span class="v">tokio</span></div>
+      <div class="srow"><span class="k mono">search</span><span class="v">Postgres FTS + pgvector</span></div>
+      <div class="srow"><span class="k mono">fusion</span><span class="v">RRF (weighted)</span></div>
+      <div class="srow"><span class="k mono">policy</span><span class="v">Authority Policy SDK</span></div>
+      <div class="srow"><span class="k mono">spine</span><span class="v">NATS JetStream</span></div>
+      <div class="srow"><span class="k mono">cache L1</span><span class="v">LRU</span></div>
+      <div class="srow"><span class="k mono">cache L2</span><span class="v">Redis [pilot]</span></div>
+      <div class="srow"><span class="k mono">rebac</span><span class="v">OpenFGA [pilot]</span></div>
+      <div class="srow"><span class="k mono">storage</span><span class="v">FS + S3 Object Lock [pilot]</span></div>
+      <div class="srow"><span class="k mono">kms</span><span class="v">Vault &middot; AWS &middot; PKCS#11</span></div>
+      <div class="srow"><span class="k mono">auth</span><span class="v">OIDC &middot; SAML &middot; JWT</span></div>
+      <div class="srow"><span class="k mono">audit</span><span class="v">Ed25519 + Merkle</span></div>
+      <div class="srow"><span class="k mono">telemetry</span><span class="v">OpenTelemetry &middot; Prom</span></div>
+      <div class="srow"><span class="k mono">desktop</span><span class="v">Native &middot; macOS &middot; Linux &middot; Windows</span></div>
+      <div class="srow"><span class="k mono">web</span><span class="v">Svelte 5 &middot; installable</span></div>
+      <div class="srow"><span class="k mono">browser ext</span><span class="v">Chrome Manifest v3</span></div>
+      <div class="srow"><span class="k mono">mobile</span><span class="v">iOS &middot; Android [Q3 2026+]</span></div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- BOTTOM GUIDES -->
+  <div class="guides">
+    <div>
+      <h4>Bolt tier guide &middot; Pick by buyer type</h4>
+      <p><b>Authorize $30/seat</b> &middot; customer self-hosted &middot; BYO LLM &middot; full data sovereignty &middot; regulated &amp; on-prem. <b>Backbone $60/seat</b> &middot; customer self-hosted &middot; BYO LLM &middot; AI orchestration over your keys &middot; PII masking + workflows &middot; regulated mid-market (most popular). <b>Certify $90/seat</b> &middot; customer self-hosted &middot; BYO LLM &middot; SOC 2 readiness + signed DPA/BAA &middot; dedicated delivery + native mobile &middot; audit-ready enterprise. All tiers self-host inside your perimeter &mdash; no data reaches Sparcle, and there is no managed-hosting tier.</p>
+    </div>
+    <div>
+      <h4>IDP coverage &middot; Authentication-side</h4>
+      <p><b>Native:</b> Okta &middot; Microsoft Entra &middot; OneLogin &middot; Auth0 &middot; Google Workspace &middot; Zoho. <b>Via generic OIDC + SAML 2.0</b> (any compliant IdP): Ping Identity &middot; Keycloak &middot; AWS Cognito &middot; AWS IAM Identity Center &middot; ForgeRock &middot; JumpCloud. <b>Directory connectors</b> ship for Okta, Entra, OneLogin; Ping &amp; LDAP/AD on pilot-deliverable list.</p>
+    </div>
+  </div>
+
+  <!-- SHIPPED / PILOT -->
+  <div class="lists">
+    <div>
+      <h4 class="w">&#10003; What's shipped today</h4>
+      <ul class="bul-w">
+        <li><b>103 in-house source connectors</b> + Airbyte bridge (~350 sources)</li>
+        <li><b>4-axis ACL pre-filter</b> at index time (provable in audit chain)</li>
+        <li><b>Authority Policy SDK</b> + 3 reference impls (Default &middot; Regulated &middot; Healthcare)</li>
+        <li><b>Sealed Merkle audit chain</b> + standalone verifier binary</li>
+        <li><b>3 deployment SKUs:</b> trial sidecar &middot; docker-compose &middot; Helm</li>
+        <li><b>4 KMS variants:</b> Vault &middot; AWS KMS &middot; PKCS#11 HSM &middot; local-dev</li>
+        <li><b>Cross-product audit byte-compat</b> between Bolt + Aeira</li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="p">&#9670; What ships during pilot</h4>
+      <ul class="bul-p">
+        <li><b>End-to-end ingest saga</b> (1-2 days from green-light)</li>
+        <li><b>Real-time webhook receivers</b> for top-10 sources</li>
+        <li><b>L2 Redis permission cache</b> + webhook invalidation</li>
+        <li><b>OpenFGA wire-up</b> for tuple-mode ACL</li>
+        <li><b>Late-bind on next 14 connectors</b> (per design partner priority)</li>
+        <li><b>First published latency benchmark</b> (target p95 &le; 200ms on 100M-doc tenant)</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <span>sparcle.app &middot; bolt@sparcle.app</span>
+    <em>Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail, ranked by your policy.</em>
+    <span>v2 &middot; 2026-07</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -153,7 +153,11 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
 - MISCONCEPTION: "Bolt is a SaaS, so it needs a SOC 2 Type II report before we can buy."
   Reframe: Bolt is SELF-HOSTED; Sparcle operates no cloud that receives customer data (no
   hosted ingest path), so the data-handling scope a SaaS SOC 2 covers does not apply, the
-  data stays in the customer's environment under their own SOC 2/ISO. For Sparcle the
+  data stays in the customer's environment under their own SOC 2/ISO. Type II's substance is
+  operating-effectiveness OVER TIME; because the customer self-hosts and Bolt emits a
+  tamper-evident, independently verifiable audit trail, the customer and their auditor can
+  verify the deployed controls and their operation continuously, in their own environment,
+  over time, rather than waiting on a vendor's annual attestation window. For Sparcle the
   company: SOC 2 Type I targeted Q4 2026, Type II Q2 2027; SOC 2 readiness package + gap
   analysis available now; Trust Center maps SOC 2/HIPAA/GDPR/ISO 27001 to evidence +
   independent pen-testing. Do NOT claim Sparcle holds SOC 2 today. If a buyer hard-requires

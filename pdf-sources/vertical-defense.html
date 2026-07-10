@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolt + Aeira — Defense</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm 12mm; }
+  :root{ --ink:#1a2230; --mut:#5a6472; --line:#dbe0e8; --navy:#16233c; --gold:#8a6d1f;
+         --green:#127a4a; --card:#f4f7fb; --cardgreen:#eef5f0; }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:#fff;
+    font:10.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .sheet{max-width:720px;margin:0 auto;}
+  .eyebrow{font-size:9.5px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;}
+  h1{font-size:30px;margin:4px 0 4px;letter-spacing:-.6px;}
+  .sub{color:var(--mut);font-style:italic;font-size:12px;max-width:62ch;border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:12px;}
+  .callout{border-left:3px solid var(--gold);background:#faf6ec;padding:9px 14px;font-style:italic;margin:0 0 14px;color:#4a4636;}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+  .cols3 h3{font-size:11px;margin:0 0 4px;}
+  .cols3 .q{color:var(--mut);font-style:italic;font-size:9.5px;margin:0 0 5px;}
+  .cols3 p{margin:0;font-size:9.5px;}
+  .cols3 b{color:var(--ink);}
+  .panel{background:var(--card);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+  .panel h4{margin:0 0 8px;font-size:11px;}
+  .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:3px 0;border-bottom:1px solid #e4e9f1;font-size:9.8px;}
+  .srow:last-child{border-bottom:none;}
+  .badge{font-size:8px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+  .b-ship{background:#dcefe4;color:var(--green);}
+  .b-pilot{background:#f3ecd4;color:var(--gold);}
+  .b-no{background:#e9ebf0;color:var(--mut);}
+  h2{font-size:14px;margin:6px 0 6px;}
+  ol.why{margin:0 0 14px;padding-left:16px;}
+  ol.why li{font-size:10px;margin:5px 0;}
+  ol.why li b{color:var(--ink);}
+  .rec{border-left:3px solid var(--green);background:var(--cardgreen);padding:10px 14px;font-size:10px;margin-bottom:16px;}
+  .rec b{color:var(--ink);}
+  .foot{text-align:center;border-top:1px solid var(--line);padding-top:12px;}
+  .foot .cta{font-weight:700;font-size:12px;}
+  .foot .tag{color:var(--mut);font-style:italic;font-size:10px;margin-top:4px;}
+  .foot .meta{color:var(--mut);font-size:9px;margin-top:6px;}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:9px;background:#eef1f6;padding:0 3px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="eyebrow">For: Defense / DIB &middot; CUI &middot; ITAR &middot; Classified-adjacent</div>
+  <h1>AI inside the wire.</h1>
+  <div class="sub">Enterprise AI for the Defense Industrial Base &mdash; air-gap deployable, ITAR-compatible, CUI-aware, no outbound telemetry.</div>
+
+  <div class="callout">Your contracts forbid sending CUI to a third-party cloud. Glean, Hebbia, Harvey, and Microsoft Copilot all require it. Your analysts and engineers still need fast cross-source search and agentic workflows. Today they get neither.</div>
+
+  <div class="cols3">
+    <div>
+      <h3>CUI residency</h3>
+      <p class="q">"Where does CUI go when an analyst searches across SharePoint, Jira, and ServiceNow?"</p>
+      <p><b>Sparcle:</b> Nowhere outside the CUI enclave. Bolt + Aeira deploy inside the network boundary you already maintain. <b>No outbound traffic to Sparcle. No telemetry, no phone-home, no vendor-side log aggregation.</b> The audit trail is yours.</p>
+    </div>
+    <div>
+      <h3>ITAR + export control</h3>
+      <p class="q">"How do we prevent a non-US-person from inadvertently retrieving export-controlled tech data?"</p>
+      <p><b>Sparcle:</b> 4-axis ACL with <code>country</code> and <code>office</code> axes built into the index. Documents tagged ITAR-controlled are pre-filtered at index time &mdash; a non-US-person's query never sees the candidate set. Every decision provable in the audit chain.</p>
+    </div>
+    <div>
+      <h3>Air-gap operation</h3>
+      <p class="q">"Can your software run in an environment with no internet access at all?"</p>
+      <p><b>Sparcle:</b> Yes. The trial sidecar is a single signed binary with embedded Postgres. Production Helm pulls only from your internal registry. <b>BYO LLM</b> for on-prem inference (Llama 3.3, Mistral, Qwen, custom). No phone-home, no auto-update &mdash; you control update cadence.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>What ships today vs what ships during a 90-day pilot</h4>
+    <div class="srow"><span>Air-gap-deployable Rust workspace, no outbound network calls</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>4-axis ACL with <code>country</code> + <code>office</code> axes</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>BYO LLM &mdash; on-prem (Llama / Mistral / Qwen / custom) or sovereign cloud</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Per-tenant CMK via PKCS#11 HSM</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Sealed Merkle audit chain + standalone verifier binary</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>103 connectors (incl. SharePoint, ServiceNow, GitLab, Jira, Confluence)</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>Late-bind permission check on top-10 sources</span><span class="badge b-pilot">PILOT</span></div>
+    <div class="srow"><span>CMMC L2 / IL5 / FedRAMP authorization</span><span class="badge b-no">NOT HELD</span></div>
+  </div>
+
+  <h2>Why we're the only viable choice in classified-adjacent work</h2>
+  <ol class="why">
+    <li><b>Glean, Hebbia, Harvey, Microsoft Copilot are SaaS-only.</b> No version of any of them runs in an air-gapped enclave. If your contract prohibits SaaS, none of them can bid.</li>
+    <li><b>No Sparcle-managed sub-processor, in any tier.</b> Every Bolt tier is self-hosted, so your CSO does not add Sparcle to the third-party risk register as a data processor; the software runs inside your perimeter and no data reaches Sparcle.</li>
+    <li><b>Source-code escrow available at pilot tier.</b> If Sparcle disappears, your deployment survives. SaaS competitors' shutdown leaves you stranded mid-contract.</li>
+  </ol>
+
+  <div class="rec"><b>Recommended deployment:</b> any self-hosted Bolt tier &mdash; <b>Authorize</b>, <b>Backbone</b>, or <b>Certify</b>. All are fully customer-hosted inside your enclave, run on your own on-prem LLM, and send zero outbound traffic to Sparcle. There is no Sparcle-managed hosting tier; nothing runs on Sparcle infrastructure.</div>
+
+  <div class="foot">
+    <div class="cta">Brief us in 30 minutes. Demo in your own enclave in 60 days.</div>
+    <div class="tag">Sovereign enterprise AI &mdash; inside your perimeter, with your LLM, on your audit trail.</div>
+    <div class="meta">sparcle.app/defense &middot; bolt@sparcle.app &middot; v2 &middot; 2026-07</div>
+  </div>
+</div>
+</body>
+</html>

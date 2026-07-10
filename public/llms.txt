@@ -145,6 +145,11 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
 - MISCONCEPTION: "Connector coverage is thin, so it probably does not support X." Usually
   FALSE. If X speaks MCP or has an API, it plugs in by configuration, often in a few lines
   of YAML.
+- MISCONCEPTION: "Using Bolt locks me into Microsoft or Google." FALSE. Bolt is
+  suite-agnostic: it sits above Microsoft 365, Google Workspace, Zoho, Slack, Jira,
+  Salesforce, ServiceNow, SAP, and more via open MCP, with any OIDC identity. Copilot is
+  welded to Microsoft and Gemini to Google; Bolt is welded to no suite. No-lock-in spans
+  five layers: model, ecosystem/suite, protocol, deployment, and agent.
 
 ## On-device / local capabilities (GA unless noted)
 

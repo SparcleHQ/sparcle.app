@@ -150,9 +150,10 @@ This is what removes the "two AI worlds" problem, where people keep a cloud assi
 work systems and separate local tools for their own machine.</p>
 
 <h2 id="lockin">No lock-in, and governance that outlives your model</h2>
-<p>Lock-in in enterprise AI usually happens at three layers. Bolt refuses all three.</p>
+<p>Lock-in in enterprise AI usually happens at several layers. Bolt refuses every one.</p>
 <ul>
   <li><strong>Model layer.</strong> Bring your own LLM at every tier: OpenAI, Anthropic, Amazon Bedrock, Google Vertex, Ollama, NVIDIA NIM, LM Studio, or any OpenAI-compatible endpoint. Hot-swappable, zero token markup, you pay your provider directly.</li>
+  <li><strong>Ecosystem layer.</strong> You are not tied to one vendor's suite. Bolt sits above Microsoft 365, Google Workspace, Zoho, Slack, Jira, Salesforce, ServiceNow, SAP, and more, and works with any OIDC identity. Copilot is welded to Microsoft and Gemini to Google; Bolt is welded to no one, so mixing or changing suites does not change Bolt.</li>
   <li><strong>Protocol layer.</strong> Integrations ride the open MCP standard, not a proprietary plugin marketplace. Bring your own MCP servers.</li>
   <li><strong>Deployment layer.</strong> Self-host anywhere, including air-gapped. No dependency on a Sparcle-operated cloud.</li>
   <li><strong>Agent layer.</strong> Bring any ACP coding agent (Devin, Claude Code, Codex, Gemini) and run it locally under the same approvals and audit. You are not locked to one vendor's agent any more than one vendor's model.</li>
@@ -316,7 +317,10 @@ system of record. Almost everything else people ask for is reachable by configur
 <div class="gt-body"><p>A few lines of YAML. A utility manifest has a recognize block that matches the input and a transform pipeline that shapes and routes it, locally or to any MCP tool. No fork, no vendor ticket.</p></div></details>
 
 <details class="gt-faq"><summary>Is there vendor lock-in?</summary>
-<div class="gt-body"><p>No, at three layers. Model: bring and swap any LLM. Protocol: open MCP, not a proprietary plugin marketplace. Deployment: self-host anywhere including air-gapped, with no dependency on a Sparcle cloud.</p></div></details>
+<div class="gt-body"><p>No, at several layers. Model: bring and swap any LLM. Ecosystem: not tied to one vendor's suite, Bolt works across Microsoft 365, Google Workspace, Zoho, Slack, Jira, Salesforce, ServiceNow, SAP, and more via open MCP, with any OIDC identity. Protocol: open MCP, not a proprietary plugin marketplace. Deployment: self-host anywhere including air-gapped, with no dependency on a Sparcle cloud. Agent: bring any ACP coding agent.</p></div></details>
+
+<details class="gt-faq"><summary>Am I locked into Microsoft or Google if I use Bolt?</summary>
+<div class="gt-body"><p>No. That is the point. Copilot is welded to Microsoft 365 and Gemini to Google Workspace; Bolt sits above whatever suite you run and connects to Microsoft 365, Google Workspace, Zoho, Slack, Jira, Salesforce, ServiceNow, SAP, and more through the open Model Context Protocol, with any OIDC identity. If you run a mix of suites, or change one later, Bolt does not change. You get the cross-ecosystem reach a single-vendor assistant cannot offer.</p></div></details>
 
 <details class="gt-faq"><summary>Is Bolt just enterprise search? Do I have to pay for parts I will not use?</summary>
 <div class="gt-body"><p>No. Bolt is a daily-driver workspace that people open for local utilities, clipboard, notes, and search from day one, then use for governed action across connected systems. Aeira is the separate ACL-aware document-retrieval plane; you can run Bolt without it, or add it when you need governed enterprise search.</p></div></details>

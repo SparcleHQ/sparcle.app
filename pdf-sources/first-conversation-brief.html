@@ -334,7 +334,7 @@
     <div class="lcard"><div class="lbl">The audit log</div><h3 class="serif">Stays <span class="i">PII-free.</span></h3><p>Tokens are tenant-isolated and reversible only inside your perimeter.</p></div>
   </div>
 
-  <div class="note">Layered detection across <b>three pluggable engines</b>: <b>regex</b> for structured patterns (SSN, IBAN, credit card, MRN, employee IDs), <b>GLiNER / Microsoft Presidio / your own NER sidecar</b> for unstructured free-text PII and PHI, and <b>Tesseract or any OCR you already run</b> for image &amp; document text. Even when using a frontier public model, sensitive values never reach it.</div>
+  <div class="note">Layered detection across <b>three pluggable engines</b>: <b>regex</b> for structured patterns (SSN, IBAN, credit card, MRN, employee IDs), <b>GLiNER / Microsoft Presidio / your own NER sidecar</b> for unstructured free-text PII and PHI, and <b>Tesseract or any OCR you already run</b> for image &amp; document text. Even when using a frontier public model, detected sensitive values are tokenized before the prompt leaves your boundary.</div>
 
   <div class="foot"><span>07 / 12</span><span class="rt">The exposure wedge</span></div>
 </div>

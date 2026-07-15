@@ -26,7 +26,7 @@ const mechanismSteps = [
 const whyItWorks = [
   [
     "Erasure right satisfied",
-    "GDPR Art. 17 and HIPAA Right to be Forgotten require that the data subject's information cease to be available. Cryptographic destruction of the only key capable of decrypting the data delivers that result without depending on every downstream backup, replica, or archive cooperating with a row-level delete.",
+    "GDPR Art. 17 right to erasure (with HIPAA-aligned disposal and retention) requires that the data subject's information cease to be available. Cryptographic destruction of the only key capable of decrypting the data delivers that result without depending on every downstream backup, replica, or archive cooperating with a row-level delete.",
   ],
   [
     "Retention duty preserved",
@@ -58,15 +58,15 @@ const honestLimits = [
 ];
 ---
 <BaseLayout
-  title="Cryptographic Erasure: How Bolt and Aeira Satisfy GDPR Art. 17 and HIPAA | Sparcle"
-  description="The construction Bolt and Aeira use to satisfy GDPR Art. 17, HIPAA Right to be Forgotten, and CCPA erasure rights while simultaneously preserving SOX, SEC, and HIPAA retention obligations. Per-tenant CMK destruction, WORM ciphertext, tamper-evident audit receipt."
+  title="Cryptographic Erasure: How Bolt and Aeira Satisfy GDPR Art. 17 with HIPAA-Aligned Retention | Sparcle"
+  description="The construction Bolt and Aeira use to satisfy GDPR Art. 17 and CCPA erasure rights while simultaneously preserving SOX, SEC, and HIPAA retention obligations. Per-tenant CMK destruction, WORM ciphertext, tamper-evident audit receipt."
   canonical="https://sparcle.app/trust/cryptographic-erasure"
 >
   <main class="page-crypto-erasure">
     <Hero
       eyebrow="Cryptographic Erasure"
       title="Disposal you can prove. Retention you can keep."
-      lede="GDPR Art. 17, HIPAA Right to be Forgotten, and CCPA erasure rights pull in one direction. SOX, SEC Rule 17a-4, FINRA 4511, and HIPAA record-retention pull in the other. Bolt and Aeira use a single cryptographic construction that satisfies both, by destroying the only key that can read the data while preserving the ciphertext and an independently verifiable receipt."
+      lede="GDPR Art. 17 and CCPA erasure rights pull in one direction. SOX, SEC Rule 17a-4, FINRA 4511, and HIPAA record-retention pull in the other. Bolt and Aeira use a single cryptographic construction that satisfies both, by destroying the only key that can read the data while preserving the ciphertext and an independently verifiable receipt."
     >
       <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Request the architecture brief</a>
       <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>

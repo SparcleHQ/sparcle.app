@@ -63,24 +63,24 @@ const phases = [
       "Audit chain export + verifier walk-through for your compliance team.",
       "TCO walkthrough for finance: per-seat cost at Founding Customer terms vs. Pilot list price.",
       "Decision: convert to Founding Customer (25% off list, 24-month lock, $15K credits year one), continue at standard pricing, expand the scope, or end with no further obligation.",
-      "If converting: counter-sign annual MSA + revised DPA. No reinstall required &mdash; same deployment continues under the new contract.",
+      "If converting: counter-sign annual MSA + revised DPA. No reinstall required. Same deployment continues under the new contract.",
     ],
   },
 ];
 
 const youBring = [
-  "<strong>Deployment target</strong> &mdash; one Linux host (Docker compose path) or a Kubernetes cluster (Helm path). 4 vCPU / 16GB RAM is the comfortable floor for 30 seats.",
-  "<strong>LLM endpoint</strong> &mdash; Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic API, OpenAI API, on-prem Llama / vLLM, or any OpenAI-compatible endpoint. Bring your own API key.",
-  "<strong>IdP</strong> &mdash; Microsoft Entra, Google Workspace, Okta, OneLogin, Auth0, or any OIDC provider. We need OAuth Client ID + Secret, and a service account for SCIM if you want provisioning.",
-  "<strong>Pilot user list</strong> &mdash; up to 30 named users with SSO accounts. They will use Bolt as their daily AI tool for the duration.",
-  "<strong>Corpora list</strong> &mdash; the DMS folders, mailbox scopes, drive folders, code repos, ticketing, CRM scopes you authorize for indexing. Up to 250GB default; larger by scope letter.",
-  "<strong>Security reviewer</strong> &mdash; one named contact who will run the architecture review, sign off on the DPA, and validate the audit chain.",
+  "<strong>Deployment target</strong>: one Linux host (Docker compose path) or a Kubernetes cluster (Helm path). 4 vCPU / 16GB RAM is the comfortable floor for 30 seats.",
+  "<strong>LLM endpoint</strong>: Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic API, OpenAI API, on-prem Llama / vLLM, or any OpenAI-compatible endpoint. Bring your own API key.",
+  "<strong>IdP</strong>: Microsoft Entra, Google Workspace, Okta, OneLogin, Auth0, or any OIDC provider. We need OAuth Client ID + Secret, and a service account for SCIM if you want provisioning.",
+  "<strong>Pilot user list</strong>: up to 30 named users with SSO accounts. They will use Bolt as their daily AI tool for the duration.",
+  "<strong>Corpora list</strong>: the DMS folders, mailbox scopes, drive folders, code repos, ticketing, CRM scopes you authorize for indexing. Up to 250GB default; larger by scope letter.",
+  "<strong>Security reviewer</strong>: one named contact who will run the architecture review, sign off on the DPA, and validate the audit chain.",
 ];
 
 const sparcleBrings = [
-  "<strong>Production deployment</strong> &mdash; Docker compose or Helm chart, founder-led install.",
-  "<strong>Founder onboarding</strong> &mdash; kickoff call, weekly 30-min check-ins for 12 weeks, dedicated Slack channel.",
-  "<strong>Engagement scope</strong> &mdash; 90 days of founder-led support for up to 30 users.",
+  "<strong>Production deployment</strong>: Docker compose or Helm chart, founder-led install.",
+  "<strong>Founder onboarding</strong>: kickoff call, weekly 30-min check-ins for 12 weeks, dedicated Slack channel.",
+  "<strong>Engagement scope</strong>: 90 days of founder-led support for up to 30 users.",
   "<strong>SIG Lite + threat model + DPA + MSA drafts</strong> for your security and legal review.",
   "<strong>2 to 5 MCP connectors</strong> wired from our standard catalog.",
   "<strong>Architecture diagram + audit-chain primer</strong> for your CISO conversation.",
@@ -95,7 +95,7 @@ const successCriteria = [
 ];
 
 const outOfScope = [
-  "Air-gapped or classified-network installs &mdash; that requires the Federated Aeira tier and a separate architecture engagement.",
+  "Air-gapped or classified-network installs: that requires the Federated Aeira tier and a separate architecture engagement.",
   "Custom MCP connector development beyond the standard catalog (available as paid Customization).",
   "Custom Aeira authority policy or reranker beyond the 3 reference impls (Default, Regulated, Healthcare).",
   "FedRAMP / IL4 / IL5 deployment (not authorized today).",
@@ -163,8 +163,8 @@ const outOfScope = [
         Founding Customer.
       </p>
       <p>
-        Pilot is <em>not</em> the sidecar deployment. That is the <a href="/discovery-pilot">Discovery rung</a>
-        &mdash; 30 days, up to 10 seats, $5K, a single binary that runs locally on each user's laptop with
+        Pilot is <em>not</em> the sidecar deployment. That is the <a href="/discovery-pilot">Discovery rung</a>:
+        30 days, up to 10 seats, $5K, a single binary that runs locally on each user's laptop with
         no server install. Most customers do Discovery <em>or</em> Pilot first based on team size and
         whether they have IT to support a deployment, not both.
       </p>
@@ -390,7 +390,7 @@ const outOfScope = [
     font-weight: 700;
   }
   .preflight-out li::before {
-    content: "—";
+    content: "–";
     position: absolute;
     left: 0;
     color: var(--text-muted);

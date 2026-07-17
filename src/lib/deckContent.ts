@@ -7,7 +7,7 @@
  * The decks in public/decks are chrome-less HTML payloads that PersonaStrip
  * fetches and injects into a shadow DOM. Two consequences fall out of that:
  *
- *   1. Their prose is invisible to every crawler — 175k characters across 18
+ *   1. Their prose is invisible to every crawler. 175k characters across 18
  *      decks that appear in no document a bot ever sees. Shadow DOM is exactly
  *      what makes the modal work and exactly what makes it unindexable.
  *   2. Their CSS declares `:root{--bg:#070b14;...}`, which would capture the
@@ -16,7 +16,7 @@
  *
  * So a persona page cannot simply embed a deck: shadow DOM would keep it
  * unindexable, and no shadow DOM would break the site's theming. We take the
- * content and leave the presentation — the deck stays the deck (reachable via
+ * content and leave the presentation. the deck stays the deck (reachable via
  * the homepage modal at /#deck=<key>), and the page carries the same substance
  * as prose inside BaseLayout, where it gets nav, footer, canonical, a CTA and a
  * crawlable URL.
@@ -31,9 +31,9 @@ export interface PersonaSection {
 }
 
 export interface PersonaContent {
-  /** The deck's own <title> — already written for the persona. */
+  /** The deck's own <title>. already written for the persona. */
   title: string;
-  /** Composed for the <meta> tag. Not rendered — see `tagline`. */
+  /** Composed for the <meta> tag. Not rendered. see `tagline`. */
   description: string;
   /** The cover slide's own line, shown as the visible lede. */
   tagline: string;
@@ -47,7 +47,7 @@ const decodeEntities = (s: string): string =>
   s
     .replace(/&#8220;|&#8221;|&ldquo;|&rdquo;/g, '"')
     .replace(/&#8217;|&rsquo;/g, "’")
-    .replace(/&mdash;/g, "—")
+    .replace(/&mdash;/g, "\u2014") // faithful; the source decks carry no em-dash (check-emdash.sh)
     .replace(/&middot;/g, "·")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
@@ -74,7 +74,7 @@ export function parseDeck(html: string): PersonaContent {
     const paragraphs: string[] = [];
     for (const m of chunk.matchAll(/<(?:p|h1|h2|h3)\b[^>]*>([\s\S]*?)<\/(?:p|h1|h2|h3)>/g)) {
       const text = clean(m[1]);
-      // Drop UI fragments and single words — they read as noise out of the deck.
+      // Drop UI fragments and single words. they read as noise out of the deck.
       if (text.length > 40 && text.split(" ").length > 6) paragraphs.push(text);
     }
 
@@ -97,7 +97,7 @@ export function parseDeck(html: string): PersonaContent {
  * Compose a meta description from the opening prose.
  *
  * A cover slide's first line is often a tagline ("Use AI on the contract. Keep
- * the privilege." — 43 chars). That is too thin to survive as a search snippet:
+ * the privilege.". 43 chars). That is too thin to survive as a search snippet:
  * engines discard a description that short and write their own from the page,
  * so we lose control of what a buyer reads. Accumulate whole paragraphs until
  * there is enough substance, then cut on a sentence or word boundary rather

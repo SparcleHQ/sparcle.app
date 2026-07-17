@@ -7,13 +7,13 @@
 # The persona decks are 18 hand-maintained HTML files with byte-identical
 # shared slides and no generator, so one sentence lives in up to 12 copies.
 # On 2026-07-15 a copy sweep fixed the masking headlines and still missed the
-# card headings and closing lines in 8 more files — not carelessness, just what
+# card headings and closing lines in 8 more files: not carelessness, just what
 # happens when a rule has no owner. This script is that owner: the files stay
 # forked (converging the deck pipeline is a separate job), but the RULE lives
 # in exactly one place and the build enforces it.
 #
 # Every entry cites the code that makes the claim false. Before removing one,
-# re-read the evidence and confirm the code changed — do not "fix" the guard.
+# re-read the evidence and confirm the code changed: do not "fix" the guard.
 # Companion: ~/private/Sparcle-LLC/verify-claims.sh proves the CAN-CLAIM side
 # against bolt-api; this proves the DO-NOT-SAY side against the website.
 #
@@ -26,9 +26,8 @@ fail=0
 
 # ban_near <"a|b"> <"c|d"> <window> <"why">
 # Flags a claim only when it sits within <window> chars of a disqualifying
-# context. Some claims are true or false depending on what they attach to —
-# "gated and audited" is correct about the governed server and false about the
-# free client — and a flat phrase ban would delete good copy along with bad.
+# context. Some claims are true or false depending on what they attach to: # "gated and audited" is correct about the governed server and false about the
+# free client: and a flat phrase ban would delete good copy along with bad.
 ban_near() {
   local ctx="$1" claim="$2" window="$3" why="$4"
   local out
@@ -92,7 +91,7 @@ ban "Leak nothing" \
 
 # BYO-LLM asserted as the product's default rather than a choice the customer
 # makes. Caught only when the persona pages surfaced this deck prose into
-# indexable HTML — it sat in 9 decks while this guard reported clean, because
+# indexable HTML: it sat in 9 decks while this guard reported clean, because
 # the ban list held the strings I had already seen, not the rule they violate.
 # A phrase list catches REGRESSIONS of known claims; it does not prove the
 # absence of new phrasings of the same idea. When adding copy, ask whether the
@@ -107,10 +106,10 @@ ban "the document never leaves" \
 #
 # A substring cannot tell a claim from its own disclaimer. Banning
 # "data never leaves" flagged exactly two files, and both were CORRECT:
-#   - trust/where-the-model-runs.astro: "What we do not claim — We do not claim
+#   - trust/where-the-model-runs.astro: "What we do not claim: We do not claim
 #     that data never leaves your perimeter in Mode C. It does, in masked form."
 #     The guard flagged the page for being honest. That is backwards.
-#   - persona-overview: "Air-gap deployable — Runs with zero outbound calls;
+#   - persona-overview: "Air-gap deployable: Runs with zero outbound calls;
 #     citizen data never leaves the boundary." True, and scoped to the air-gap
 #     tier (verified: zero phone-home).
 # It is also TRUE of genuinely local surfaces: "searchable clipboard history,
@@ -141,21 +140,21 @@ ban "yours or ours" \
 
 # --- Vector / semantic search --------------------------------------------
 # bolt-api config.rs EpisodicEmbeddingConfig: "enabled = false (the default)
-# keeps recall on the classic entity/keyword/recency ranking — exactly the
+# keeps recall on the classic entity/keyword/recency ranking: exactly the
 # behavior with no embedder."
 ban "keyword-plus-vector" \
     "vector signal is off by default; say \"keyword and entity-overlap\""
 
 # --- MCP transport --------------------------------------------------------
 # bolt-api providers/mcp/discovery.rs McpTransportType has StreamableHttp,
-# LegacySse, CustomRest, Unknown — there is NO stdio variant.
+# LegacySse, CustomRest, Unknown: there is NO stdio variant.
 ban "connect any MCP server" \
     "MCP is HTTP-only (no stdio transport); say \"connect any HTTP MCP server\""
 
 # --- Instant compliance ---------------------------------------------------
 # 28 packs ship, 6 enabled by default; GovernanceProfile::Standard leaves the
 # PDP inert ("byte-identical to pre-governance Bolt") and even Regulated only
-# resolves config — enforcement wiring is explicitly a follow-up.
+# resolves config: enforcement wiring is explicitly a follow-up.
 ban "Day 1 compliance" \
     "PDP is inert by default and 22/28 packs are opt-in; say \"configurable compliance policy packs\""
 ban "Compliance readiness" \
@@ -168,15 +167,15 @@ ban "compliant from day one" \
 # provider. bolt-api state.rs names this exact marketing phrase as the thing it
 # contradicts: without them the install "is NOT auditable despite the
 # 'auditable from day one' claim", falling back to NoopAuditRepository (stdout).
-# It IS guaranteed under the Regulated SERVER posture — that boot path refuses
-# to start without a durable sink — but Standard is the default and degrades
+# It IS guaranteed under the Regulated SERVER posture: that boot path refuses
+# to start without a durable sink: but Standard is the default and degrades
 # gracefully by design, and verify-claims.sh confirms no shipped config selects
 # Regulated. So the claim is true ON THE GOVERNED SERVER and false as a blanket
 # or free-client promise. Scope it; do not delete it.
 ban "auditable from day one" \
     "audit needs Postgres + KMS; true on the governed server, not by default. Scope it."
 
-# "gated and audited" is TRUE when scoped to the governed server — persona-cio's
+# "gated and audited" is TRUE when scoped to the governed server: persona-cio's
 # "Switch on the governed server ... and every action becomes masked, gated and
 # audited" is correct and must not be flagged. It is FALSE only when attached to
 # the free desktop client, which has no Postgres/CMK and therefore no durable
@@ -186,7 +185,7 @@ ban_near "free client|free desktop|every support desktop|free build" \
     "governance attached to the FREE client, which has no durable audit sink; scope it to the governed server"
 
 if [ "$fail" -ne 0 ]; then
-  echo "check-claims: FAILED — the copy above outruns what the code does."
+  echo "check-claims: FAILED: the copy above outruns what the code does."
   echo "If a claim became TRUE, update the evidence in this script and remove"
   echo "the ban in the same commit. Do not silence a guard to ship copy."
   exit 1

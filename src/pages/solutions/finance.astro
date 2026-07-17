@@ -44,7 +44,7 @@ const trustDossier = [
     <Hero
       eyebrow="Sparcle for Financial Services"
       title="Erasure and retention. One primitive."
-      lede="Regulated finance has a structural contradiction: GDPR demands erasure, SEC and FINRA demand retention. Bolt and Aeira resolve it with one cryptographic primitive &mdash; disposal of the per-tenant key destroys readability while WORM ciphertext remains on the shelf. Both auditors satisfied. The verifier binary is in your hands; Sparcle is not in the loop."
+      lede="Regulated finance has a structural contradiction: GDPR demands erasure, SEC and FINRA demand retention. Bolt and Aeira resolve it with one cryptographic primitive. Disposal of the per-tenant key destroys readability while WORM ciphertext remains on the shelf. Both auditors satisfied. The verifier binary is in your hands; Sparcle is not in the loop."
     >
       <a href="#" onclick="openContactModal('Finance Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule finance review</a>
       <a href="/docs/pdfs/vertical-finance.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
@@ -119,7 +119,7 @@ const trustDossier = [
     >
       <ul class="vertical-dossier">
         {trustDossier.map((row) => (
-          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+          <li><a href={row[0]}>{row[0]}</a>: {row[1]}</li>
         ))}
       </ul>
     </PageSection>

@@ -1,5 +1,5 @@
 /**
- * Persona metadata — the single source for the icon, tag and short title of
+ * Persona metadata. the single source for the icon, tag and short title of
  * each persona deck.
  *
  * This lived inside PersonaStrip while the homepage carousel was the only
@@ -19,7 +19,7 @@ export interface Persona {
   icon: string;
   /** Role + function, e.g. "CISO · Security". */
   tag: string;
-  /** Short, curated headline — not the deck's <title>. */
+  /** Short, curated headline. Not the deck's <title>. */
   title: string;
 }
 

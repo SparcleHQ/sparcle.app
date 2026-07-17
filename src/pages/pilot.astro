@@ -28,12 +28,12 @@ const inclusions = [
 ];
 
 const youGet = [
-  "<strong>Production Bolt deployment</strong> in your infrastructure &mdash; Docker compose (single-host, <code>docker-compose.ha.yml</code>) for smaller scenarios, Helm (multi-node, multi-cluster) for larger ones. Runs in your VPC, on-prem datacenter, or your cloud account.",
-  "<strong>Aeira Dynamic tier</strong> deployed alongside &mdash; identity-bound search across the corpora you authorize: DMS, mailbox, file shares, code repos, ticketing, CRM.",
+  "<strong>Production Bolt deployment</strong> in your infrastructure: Docker compose (single-host, <code>docker-compose.ha.yml</code>) for smaller scenarios, Helm (multi-node, multi-cluster) for larger ones. Runs in your VPC, on-prem datacenter, or your cloud account.",
+  "<strong>Aeira Dynamic tier</strong> deployed alongside, identity-bound search across the corpora you authorize: DMS, mailbox, file shares, code repos, ticketing, CRM.",
   "<strong>Identity integration</strong> with Microsoft Entra, Google Workspace, Okta, or any OIDC provider. SCIM 2.0 server for provisioning.",
   "<strong>MCP connectors</strong> wired to the tools your team already uses (Microsoft 365, Google Workspace, Slack, GitHub, Jira, Salesforce, Confluence, ServiceNow, and more on request).",
-  "<strong>BYO LLM</strong> &mdash; Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic, on-prem Llama, anything OpenAI-compatible. Zero token markup.",
-  "<strong>Governance enabled by default</strong> &mdash; sealed Merkle audit chain, per-tenant CMK envelopes, crypto-shred for right-to-erasure, audit-trail responses on every query.",
+  "<strong>BYO LLM</strong>: Azure OpenAI, AWS Bedrock, Google Vertex, Anthropic, on-prem Llama, anything OpenAI-compatible. Zero token markup.",
+  "<strong>Governance enabled by default</strong>: sealed Merkle audit chain, per-tenant CMK envelopes, crypto-shred for right-to-erasure, audit-trail responses on every query.",
   "<strong>Weekly 30-minute check-in</strong> with the founding team for the full 90 days. Dedicated Slack channel for the pilot duration.",
   "Optional anonymized reference logo and case study (mutual approval).",
 ];
@@ -49,10 +49,10 @@ const inScope = [
 ];
 
 const outOfScope = [
-  "Air-gapped or classified-network install &mdash; that is the <a href=\"/pricing\">Federated Aeira tier</a>",
+  "Air-gapped or classified-network install: that is the <a href=\"/pricing\">Federated Aeira tier</a>",
   "Custom MCP connector development beyond the standard catalog",
   "Custom Aeira reranker or authority policy beyond the 3 reference impls (available as paid Customization, not in Pilot scope)",
-  "FedRAMP / IL4 / IL5 deployment &mdash; not authorized today; talk to us about the federal roadmap",
+  "FedRAMP / IL4 / IL5 deployment: not authorized today; talk to us about the federal roadmap",
   "24x7 production SLA (available at Founding Customer)",
 ];
 
@@ -60,7 +60,7 @@ const faqs = [
   {
     question: "How is Pilot different from Discovery?",
     answer:
-      "<p><strong>Discovery</strong> ($5K, 30 days, up to 10 seats) is the Bolt <em>sidecar</em> deployed on user laptops &mdash; no server install. <strong>Pilot</strong> ($15K, 90 days, up to 30 seats) is a real <em>production deployment</em> in your infrastructure via Docker or Helm. Different scale, different deployment shape, different validation question. Most customers do one or the other based on team size, not both. <a href=\"/discovery-pilot\">See Discovery &rarr;</a></p>",
+      "<p><strong>Discovery</strong> ($5K, 30 days, up to 10 seats) is the Bolt <em>sidecar</em> deployed on user laptops. No server install. <strong>Pilot</strong> ($15K, 90 days, up to 30 seats) is a real <em>production deployment</em> in your infrastructure via Docker or Helm. Different scale, different deployment shape, different validation question. Most customers do one or the other based on team size, not both. <a href=\"/discovery-pilot\">See Discovery &rarr;</a></p>",
   },
   {
     question: "Docker or Helm? How do you decide?",
@@ -111,7 +111,7 @@ const faqs = [
     <Hero
       eyebrow="Pilot"
       title="<strong>$15,000.</strong> Up to 30 seats. <br>90 days. Production deployment."
-      lede="The 90-day stress test. Bolt and Aeira deployed via Docker or Helm inside your VPC, on-prem, or cloud account. Real users, real corpora, real audit chain &mdash; before you commit to a multi-year Founding Customer engagement."
+      lede="The 90-day stress test. Bolt and Aeira deployed via Docker or Helm inside your VPC, on-prem, or cloud account. Real users, real corpora, real audit chain. Before you commit to a multi-year Founding Customer engagement."
     >
       <a href="#apply" class="btn btn-primary btn-lg">Apply for Pilot</a>
       <a href="/discovery-pilot" class="btn btn-secondary btn-lg">Smaller? See Discovery &rarr;</a>
@@ -156,7 +156,7 @@ const faqs = [
     <PageSection
       eyebrow="Deployment shape"
       title="Your infrastructure, not ours"
-      lede="Bolt Pilot is a <strong>production deployment</strong>. Same Docker images and Helm charts customers use at Founding Customer scale &mdash; just scoped to 30 seats and 90 days."
+      lede="Bolt Pilot is a <strong>production deployment</strong>. Same Docker images and Helm charts customers use at Founding Customer scale, just scoped to 30 seats and 90 days."
       stripe="a"
       width="prose"
       align="left"
@@ -184,7 +184,7 @@ const faqs = [
 
       <p class="pilot-deploy-note">
         We confirm topology in the architecture call before kickoff. Switching between Docker and Helm
-        later is a config and image change, not a re-architect &mdash; both run the same product code.
+        later is a config and image change, not a re-architect. Both run the same product code.
       </p>
     </PageSection>
 

@@ -1,5 +1,5 @@
 ---
-// Professional stroke icons (Lucide-style paths), inlined — no emoji on the
+// Professional stroke icons (Lucide-style paths), inlined: no emoji on the
 // live site. Each card references a key below; markup is injected via
 // set:html so the SVG renders as a real vector icon, not a glyph font.
 import { ICONS, PERSONAS as decks } from "../../data/personas";
@@ -22,7 +22,7 @@ const loop = [...decks, ...decks];
         {/*
           Cards are real <a href> links, not buttons. The deck itself is a
           shadow-DOM payload no crawler can read, so the persona page is the
-          indexable surface — and a link is how it gets discovered and how its
+          indexable surface: and a link is how it gets discovered and how its
           authority flows. JS intercepts the click below to keep the modal
           experience; without JS, or for a bot, this is an ordinary link.
         */}
@@ -43,7 +43,7 @@ const loop = [...decks, ...decks];
 </section>
 
 <!-- overlay backdrop blurs the live website; deck host is a real DOM node so
-     backdrop-filter actually reaches through — no iframe compositing boundary -->
+     backdrop-filter actually reaches through: no iframe compositing boundary -->
 <div class="bfe-overlay" id="bfeOverlay" hidden>
   <button class="bfe-close" id="bfeClose" type="button" aria-label="Close deck (Esc)">&times;</button>
   <div class="bfe-deck-host" id="bfeDeckHost"></div>
@@ -83,7 +83,7 @@ const loop = [...decks, ...decks];
   .bfe-open { font-size: 0.8rem; font-weight: 600; color: var(--brand-primary); }
 
   /* Overlay blurs the live website behind it. The deck host is a real DOM element
-     (not an iframe) so no compositing boundary — the blurred backdrop shows through
+     (not an iframe) so no compositing boundary: the blurred backdrop shows through
      transparent regions of the deck exactly as intended. */
   .bfe-overlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -111,7 +111,7 @@ const loop = [...decks, ...decks];
 <script>
   const FROST_CSS = `
     :host { display: block; width: 100%; height: 100%; font-family: 'Inter', system-ui, sans-serif; }
-    /* deck fills the host — NOT 100vw/100dvh which would overflow the padded container */
+    /* deck fills the host: NOT 100vw/100dvh which would overflow the padded container */
     #deck { width: 100% !important; height: 100% !important; }
     /* light: semi-opaque so site shows through; cards stay near-solid for readability */
     #deck {
@@ -132,10 +132,9 @@ const loop = [...decks, ...decks];
       --a:  #7db0ff; --a2: #adccff; --g:  #22d3a0;
     }
     #viewport { background: transparent !important; }
-    /* every slide gets the same translucent theme field the section/hero slides have —
-       keeps the see-through frost but makes text readable on plain content slides */
+    /* every slide gets the same translucent theme field the section/hero slides have: keeps the see-through frost but makes text readable on plain content slides */
     #deck .slide:not(.hero):not(.s-accent) { background: var(--bg); }
-    /* accent panels fade their bg to transparent — restore a readable tinted surface */
+    /* accent panels fade their bg to transparent: restore a readable tinted surface */
     #deck .spanel.bolt {
       background: linear-gradient(180deg, rgba(37,99,235,0.10), rgba(255,255,255,0.94)) !important;
     }
@@ -169,7 +168,7 @@ const loop = [...decks, ...decks];
     // Navigation handle for the open deck, so the global keydown can drive it.
     let deckNav: { next: () => void; prev: () => void; first: () => void; last: () => void } | null = null;
 
-    // Parse each deck once — the CSS + body are identical on re-open / deep-link.
+    // Parse each deck once: the CSS + body are identical on re-open / deep-link.
     const deckCache = new Map<string, { css: string; body: string }>();
 
     async function openDeck(key: string, startSlide = 0) {
@@ -211,7 +210,7 @@ const loop = [...decks, ...decks];
       deckEl?.setAttribute("data-theme", siteTheme());
 
       // Native slide navigation. The deck ships an inline <script> that drives
-      // this, but production CSP forbids unsafe-eval — so we can't run it. The
+      // this, but production CSP forbids unsafe-eval: so we can't run it. The
       // logic is identical across every deck, so we reimplement it here against
       // the shadow root (CSP-safe: this code is bundled as 'self').
       const slidesEls = shadow.querySelectorAll<HTMLElement>(".slide");
@@ -261,7 +260,7 @@ const loop = [...decks, ...decks];
     document.querySelectorAll<HTMLElement>(".bfe-card").forEach((card) => {
       card.addEventListener("click", (e) => {
         // Let modified clicks (new tab/window) and non-primary buttons through
-        // to the browser — the href points at a real persona page, so those
+        // to the browser: the href points at a real persona page, so those
         // gestures should navigate rather than open an overlay.
         const me = e as MouseEvent;
         if (me.metaKey || me.ctrlKey || me.shiftKey || me.altKey || me.button !== 0) return;

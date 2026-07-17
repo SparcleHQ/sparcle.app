@@ -14,8 +14,8 @@ const frameworks = [
 ];
 
 const residency = [
-  ["Per-matter ACL enforcement", "Aeira's 4-axis ACL pre-filter enforces matter membership at the index, not at the application layer. A user not assigned to the matter cannot retrieve from it &mdash; the rows do not enter the candidate set."],
-  ["BYO LLM + on-prem inference path", "Bolt runs against your LLM endpoint &mdash; on-prem Llama, Mistral, Qwen, or Azure OpenAI inside the firm's tenant. Privileged content does not leave the firm's network in the supported postures."],
+  ["Per-matter ACL enforcement", "Aeira's 4-axis ACL pre-filter enforces matter membership at the index, not at the application layer. A user not assigned to the matter cannot retrieve from it. The rows do not enter the candidate set."],
+  ["BYO LLM + on-prem inference path", "Bolt runs against your LLM endpoint: on-prem Llama, Mistral, Qwen, or Azure OpenAI inside the firm's tenant. Privileged content does not leave the firm's network in the supported postures."],
   ["Customer-held KMS", "Vault Transit, AWS KMS, Azure Key Vault, or PKCS#11 HSM. The firm holds tenant master keys; Sparcle does not. The crypto-shred construction supports matter-specific erasure obligations."],
   ["Audit chain the partner-in-charge can read end-to-end", "Every retrieval, every action, every tool invocation. The audit chain is the partner-in-charge's view of what happened on a matter, without requiring the firm to take Sparcle's word for it."],
 ];
@@ -116,7 +116,7 @@ const trustDossier = [
     >
       <ul class="vertical-dossier">
         {trustDossier.map((row) => (
-          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+          <li><a href={row[0]}>{row[0]}</a>: {row[1]}</li>
         ))}
       </ul>
     </PageSection>

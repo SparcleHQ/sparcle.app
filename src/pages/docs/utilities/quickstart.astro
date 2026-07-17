@@ -2,12 +2,12 @@
 import { Code } from "astro:components";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 
-// Utility manifest quickstart — three examples, escalating complexity.
+// Utility manifest quickstart: three examples, escalating complexity.
 //
-// 1. =worldclock — one HTTP call, one row. "Hello world."
-// 2. =country    — five public APIs, one rich row. Sequential dependency,
+// 1. =worldclock: one HTTP call, one row. "Hello world."
+// 2. =country: five public APIs, one rich row. Sequential dependency,
 //                  parallel fan-out, transform merge, right_widget card.
-// 3. =status     — five vendor status feeds in parallel, five-row board.
+// 3. =status: five vendor status feeds in parallel, five-row board.
 //                  Wide parallel, multi-row presentation, row actions.
 //
 // Voice: short, plain punctuation, no em-dashes, no section symbol.
@@ -151,7 +151,7 @@ presentation:
         - { label: "Summary",    value: "{{row.summary | truncate:280}}" }
 `;
 
-const statusYaml = `# =status — SaaS vendor status board via public Statuspage.io feeds.
+const statusYaml = `# =status: SaaS vendor status board via public Statuspage.io feeds.
 #
 # Reference manifest for the WIDE PARALLEL FAN-OUT pattern. Five vendor
 # status pages, all on the Statuspage.io platform, all expose the same
@@ -293,7 +293,7 @@ presentation:
 
     <section class="qs-section">
       <div class="container">
-        <h2>1 &middot; <code>=worldclock</code> &mdash; the hello world</h2>
+        <h2>1 &middot; <code>=worldclock</code>: the hello world</h2>
         <p class="qs-section-blurb">
           One public HTTP call, one row. The smallest useful manifest. Once this
           saves and runs, every richer one is incremental.
@@ -367,7 +367,7 @@ presentation:
 
     <section class="qs-section">
       <div class="container">
-        <h2>2 &middot; <code>=country</code> &mdash; multi-source synthesis</h2>
+        <h2>2 &middot; <code>=country</code>: multi-source synthesis</h2>
         <p class="qs-section-blurb">
           Five public APIs, one rich row. This is where Bolt earns the pitch:
           a real answer assembled from sources that no single API can give you
@@ -448,7 +448,7 @@ presentation:
 
     <section class="qs-section">
       <div class="container">
-        <h2>3 &middot; <code>=status</code> &mdash; wide parallel, multi-row board</h2>
+        <h2>3 &middot; <code>=status</code>: wide parallel, multi-row board</h2>
         <p class="qs-section-blurb">
           Five Statuspage.io feeds in parallel, one five-row status board. The
           canonical pattern for any "multi-vendor unified view" where the

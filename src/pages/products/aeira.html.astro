@@ -1,7 +1,7 @@
 ---
 // Premium pass: Aeira gets its own canonical URL with no tab switcher
 // or hidden Bolt content. Aeira is content[0] (the page's primary)
-// rather than a secondContent variant — the template renders just one
+// rather than a secondContent variant: the template renders just one
 // product cleanly when no secondContent is passed.
 import ProductPageTemplate from "../../components/marketing/ProductPageTemplate.astro";
 import { aeiraProductContent } from "../../data/offerings";
@@ -19,7 +19,7 @@ import { aeiraProductContent } from "../../data/offerings";
       <div class="trust-callout__body">
         <h3 class="trust-callout__title">Reading this for security review?</h3>
         <p class="trust-callout__lede">
-          The complete trust dossier &mdash; sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy &mdash; lives at the Trust Center.
+          The complete trust dossier (sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy) lives at the Trust Center.
         </p>
         <a href="/trust" class="trust-callout__cta">
           Browse the Trust Center &nearr;

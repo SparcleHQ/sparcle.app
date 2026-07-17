@@ -20,13 +20,13 @@ const SITE = "https://sparcle.app";
 const DIST = "dist";
 
 // Never list these, regardless of what they declare.
-//   legacy/ — superseded copies kept only so old deep links resolve.
-//   decks/  — persona decks are hand-shared into conversations, not search
+//   legacy/: superseded copies kept only so old deep links resolve.
+//   decks/: persona decks are hand-shared into conversations, not search
 //             surfaces, and they are raw HTML under public/ that never passes
 //             through BaseLayout, so they cannot declare noindex themselves.
 //             Listing them is a deliberate call; until it is made, match the
 //             hand-maintained sitemap this replaced and leave them out.
-//   404     — an error page is not a destination.
+//   404: an error page is not a destination.
 const EXCLUDED_PREFIXES = ["legacy/", "decks/", "404.html"];
 
 async function* walk(dir) {
@@ -62,8 +62,7 @@ function sourceFor(route) {
   const base = route === "/" ? "index" : route.slice(1).replace(/\/$/, "");
 
   // /personas/<key>/ is rendered by a dynamic route from a deck file, so there
-  // is no src/pages/personas/<key>.astro to date. The deck IS the content —
-  // when its copy changes, the page changes — so date the page by the deck.
+  // is no src/pages/personas/<key>.astro to date. The deck IS the content: // when its copy changes, the page changes: so date the page by the deck.
   const persona = /^personas\/(.+)$/.exec(base);
   if (persona) return [`public/decks/persona-${persona[1]}.html`];
 

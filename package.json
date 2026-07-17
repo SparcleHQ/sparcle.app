@@ -7,14 +7,15 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "./scripts/sync-docs.sh && ./scripts/check-no-internal.sh && ./scripts/check-claims.sh",
+    "prebuild": "./scripts/sync-docs.sh && ./scripts/check-no-internal.sh && ./scripts/check-claims.sh && ./scripts/check-emdash.sh",
     "check:claims": "./scripts/check-claims.sh",
     "check:no-internal": "./scripts/check-no-internal.sh",
     "build": "astro build",
     "postbuild": "node scripts/gen-sitemap.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "pdf:trial-quickstart": "node scripts/render-pdf.mjs /docs/trial-quickstart public/docs/pdfs/trial-quickstart.pdf"
+    "pdf:trial-quickstart": "node scripts/render-pdf.mjs /docs/trial-quickstart public/docs/pdfs/trial-quickstart.pdf",
+    "check:emdash": "./scripts/check-emdash.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",

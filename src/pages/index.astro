@@ -20,7 +20,7 @@ const proofs = [
 >
   <main class="page-home">
     <!--
-      HERO — preserved with its bespoke 2-video grid + modal player.
+      HERO: preserved with its bespoke 2-video grid + modal player.
       The video-grid behavior is genuinely page-specific (deep-link via
       ?video=…, hover-preview-then-modal). Outer hero structure uses the
       same nav-clearance + center-aligned pattern as Hero.astro.
@@ -97,7 +97,7 @@ const proofs = [
               </div>
             </div>
 
-            <!-- Supporting row — product walkthrough + brand video. -->
+            <!-- Supporting row: product walkthrough + brand video. -->
             <div class="hero-video-grid" id="heroVideoGrid">
               <div class="hero-video-card" data-video-src="media/Bolt-Walkthrough.mp4" data-video-title="Bolt Walkthrough" role="button" tabindex="0" aria-label="Open Bolt Walkthrough with audio">
                 <video class="hero-preview-video" muted playsinline preload="metadata" loop>
@@ -197,7 +197,7 @@ const proofs = [
     </section>
 
     <!--
-      Pre-launch by design — the absence of public logos is intentional. The
+      Pre-launch by design: the absence of public logos is intentional. The
       ICP (defense, federal, regulated finance, AmLaw, healthcare M&A) often
       contractually forbids vendor reference. Flipping that constraint into
       identity: we choose partners, we don't collect logos.
@@ -217,7 +217,7 @@ const proofs = [
       </div>
       <p class="design-partners-note">
         Sparcle deploys into environments where vendor reference is contractually forbidden.
-        We are not collecting logos &mdash; we are choosing partners. The first 50 founding
+        We are not collecting logos. We are choosing partners. The first 50 founding
         customers get founder-led integration, 25% off list locked for 24 months, direct
         roadmap influence, and a contract structured for your security posture, not ours.
         <br>
@@ -337,7 +337,7 @@ const proofs = [
       </CardGrid>
     </PageSection>
 
-    <!-- Bolt is for everyone — role decks after product is established -->
+    <!-- Bolt is for everyone: role decks after product is established -->
     <PersonaStrip />
 
     <!-- Stack layers: how Sparcle sits alongside identity, search, edge security. -->
@@ -491,7 +491,7 @@ const proofs = [
   </main>
 
   <!--
-    Hero-video modal player JS — moved out of the body fragment, scoped to this page.
+    Hero-video modal player JS: moved out of the body fragment, scoped to this page.
     Deep-link via ?video=walkthrough|pure or #left|#right; hover-preview the right
     card; full-audio playback on click.
   -->
@@ -648,7 +648,7 @@ const proofs = [
 </BaseLayout>
 
 <style is:global>
-  /* Design partners — placeholder logo tiles, even spacing. */
+  /* Design partners: placeholder logo tiles, even spacing. */
   .design-partners-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -684,7 +684,7 @@ const proofs = [
     .design-partners-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  /* Founding customers banner — wide, eye-catching highlighted block.
+  /* Founding customers banner: wide, eye-catching highlighted block.
      Uses full PageSection body width (1120px). Two-column layout on
      desktop so the perks list reads alongside the title, single-column
      on tablet. */
@@ -764,7 +764,7 @@ const proofs = [
     .founding-banner { padding: 1.75rem 1.5rem; }
   }
 
-  /* Platform cards — Bolt + Aeira product showcase. */
+  /* Platform cards: Bolt + Aeira product showcase. */
   .platform-card {
     background: var(--bg-surface-solid);
     border: 1px solid var(--border-default);
@@ -850,7 +850,7 @@ const proofs = [
     .platform-card .btn { width: 100%; align-self: stretch; }
   }
 
-  /* Stack-layers matrix — "A different layer. Not a replacement."
+  /* Stack-layers matrix: "A different layer. Not a replacement."
      Three-column comparison styled as a banded table. The Sparcle column
      gets a brand tint so the reader's eye lands on the "Where Sparcle sits"
      side without us needing to attack the other columns. Collapses to

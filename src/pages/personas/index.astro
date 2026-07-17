@@ -2,7 +2,7 @@
 /**
  * Hub for the persona pages.
  *
- * Without this, /personas/ 404s — the URL a visitor or a crawler naturally
+ * Without this, /personas/ 404s. the URL a visitor or a crawler naturally
  * tries after seeing /personas/ciso/. It also gives the 18 pages a single
  * parent to link them, so discovery does not depend on the homepage strip
  * alone.
@@ -10,7 +10,7 @@
  * Cards mirror the homepage strip: same icon, same tag, same short title, from
  * the same list in data/personas. The first cut used each deck's <title> and
  * tagline instead, which printed near-identical text twice on every card
- * ("Bolt — one trusted surface for everything your org runs on" over "One
+ * ("Bolt. one trusted surface for everything your org runs on" over "One
  * trusted surface for everything your org runs on") and looked nothing like the
  * strip a visitor had just scrolled past.
  *
@@ -41,8 +41,8 @@ const words = (s: string): string[] =>
 /**
  * The tagline earns its place only when it says something the title does not.
  * For 16 of 18 personas it does ("Triage in a keystroke" / "Triage at the speed
- * of paste"). For the other two it just restates the title — decision-makers is
- * word-for-word identical — and printing both looks like a rendering bug.
+ * of paste"). For the other two it just restates the title. decision-makers is
+ * word-for-word identical. and printing both looks like a rendering bug.
  */
 const taglineFor = (file: string, title: string): string => {
   const tagline = parseDeck(decks[`/public/decks/${file}.html`] ?? "").tagline;
@@ -56,14 +56,14 @@ const taglineFor = (file: string, title: string): string => {
 
 <BaseLayout
   title="Bolt for your role: CISO, DPO, CIO, CFO, Legal and more | Sparcle"
-  description="What Bolt does for your role — governed AI inside your own perimeter, on the LLM you choose. Pages for the CISO, DPO, General Counsel, CIO, CFO, SOC and more."
+  description="What Bolt does for your role. Governed AI inside your own perimeter, on the LLM you choose. Pages for the CISO, DPO, General Counsel, CIO, CFO, SOC and more."
   canonical="https://sparcle.app/personas/"
 >
   <main>
     <Hero
       eyebrow="Built for every role"
       title="Pick the seat you sit in"
-      lede="The same governed AI surface, argued from where you sit — what it changes for your role, and what your security review will ask about it."
+      lede="The same governed AI surface, argued from where you sit. What it changes for your role, and what your security review will ask about it."
       stripe="a"
     />
 

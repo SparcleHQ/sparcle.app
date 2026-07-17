@@ -44,7 +44,7 @@ const trustDossier = [
     <Hero
       eyebrow="Sparcle for Healthcare"
       title="PHI masked before any LLM call. The auditor verifies."
-      lede="HIPAA-covered, 21 CFR Part 11-eligible workloads have a non-negotiable boundary: PHI cannot leave the covered-entity perimeter. Bolt and Aeira ship for that boundary &mdash; PII masked at the LLM call, audit chain inside your perimeter, cryptographic erasure designed to satisfy Right-to-be-Forgotten obligations while preserving record-retention duties."
+      lede="HIPAA-covered, 21 CFR Part 11-eligible workloads have a non-negotiable boundary: PHI cannot leave the covered-entity perimeter. Bolt and Aeira ship for that boundary: PII masked at the LLM call, audit chain inside your perimeter, cryptographic erasure designed to satisfy Right-to-be-Forgotten obligations while preserving record-retention duties."
     >
       <a href="#" onclick="openContactModal('Healthcare Architecture Review'); return false;" class="btn btn-primary btn-lg">Schedule healthcare review</a>
       <a href="/docs/pdfs/vertical-healthcare.pdf" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Download 1-page brief</a>
@@ -119,7 +119,7 @@ const trustDossier = [
     >
       <ul class="vertical-dossier">
         {trustDossier.map((row) => (
-          <li><a href={row[0]}>{row[0]}</a> &mdash; {row[1]}</li>
+          <li><a href={row[0]}>{row[0]}</a>: {row[1]}</li>
         ))}
       </ul>
     </PageSection>

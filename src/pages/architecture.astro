@@ -11,7 +11,7 @@ const tierRows = [
   ["AI inference",    "Your LLM (BYOK / BYO)",   "Sparcle-managed gateway (zero-retention)"],
   ["Hosting",         "You",                     "You"],
   ["SLA",             "Self-managed",            "Priority support"],
-  ["Air-gap option",  "✓",                  "—"],
+  ["Air-gap option",  "✓",                  "·"],
 ];
 ---
 <BaseLayout
@@ -43,7 +43,7 @@ const tierRows = [
       <div class="trust-callout__body">
         <h3 class="trust-callout__title">Reading this for security review?</h3>
         <p class="trust-callout__lede">
-          The complete trust dossier &mdash; sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy &mdash; lives at the Trust Center.
+          The complete trust dossier (sub-processor disclosure, controls evidence map, cryptographic-erasure whitepaper, standalone audit-chain verifier, incident-response framework, and vulnerability disclosure policy) lives at the Trust Center.
         </p>
         <a href="/trust" class="trust-callout__cta">
           Browse the Trust Center &nearr;
@@ -561,7 +561,7 @@ const tierRows = [
 </BaseLayout>
 
 <style is:global>
-  /* 3-column data-table variant — for the operating-model matrix.
+  /* 3-column data-table variant: for the operating-model matrix.
      Shares the .data-table base styles defined globally on /security. */
   .data-table--cols3 .data-table__row {
     grid-template-columns: 180px repeat(2, 1fr);
@@ -572,7 +572,7 @@ const tierRows = [
     }
   }
 
-  /* Architecture diagrams — shared container + scaling rules. The SVGs
+  /* Architecture diagrams: shared container + scaling rules. The SVGs
      themselves carry their own embedded <style> that wires to CSS vars,
      so they theme-track in both light and dark mode. */
   .page-architecture .arch-diagram {
@@ -595,8 +595,7 @@ const tierRows = [
   .page-architecture .arch-l45-svg { max-width: 880px; }
   .page-architecture .arch-pipeline-svg { max-width: 560px; }
 
-  /* The full-detail architecture diagram is intentionally information-dense
-     — text size requires roughly 1100px of render width to stay readable.
+  /* The full-detail architecture diagram is intentionally information-dense: text size requires roughly 1100px of render width to stay readable.
      Below that, we let the container scroll horizontally rather than
      compressing the SVG into an unreadable thumbnail. */
   .page-architecture .arch-diagram--wide {
@@ -612,7 +611,7 @@ const tierRows = [
     margin: 0 auto;
   }
 
-  /* PDF poster embed — iframe shows the print-quality artifact inline.
+  /* PDF poster embed: iframe shows the print-quality artifact inline.
      Clicking the wrapper opens the same iframe full-screen via the
      global diagram-modal. */
   .page-architecture .arch-pdf-embed {
@@ -638,7 +637,7 @@ const tierRows = [
     text-align: center;
     margin: 0;
   }
-  /* Fallback link above the embed — sits between the lede and the iframe
+  /* Fallback link above the embed: sits between the lede and the iframe
      so users with PDF-rendering disabled (Brave shields, locked-down
      enterprise browsers) have a path before they even try the embed. */
   .page-architecture .arch-pdf-fallback-link {
@@ -668,7 +667,7 @@ const tierRows = [
     margin: 1.5rem 0 0;
   }
 
-  /* Tech stack — 4-column dense table-like grid of name/value pairs.
+  /* Tech stack: 4-column dense table-like grid of name/value pairs.
      Matches the right-side column on the PDF poster. */
   .page-architecture .tech-stack-grid {
     display: grid;
@@ -728,7 +727,7 @@ const tierRows = [
     letter-spacing: 0.06em;
   }
 
-  /* Shipped vs Pilot — two side-by-side card columns matching the
+  /* Shipped vs Pilot: two side-by-side card columns matching the
      PDF poster footer. */
   .page-architecture .shipped-pilot-grid {
     display: grid;

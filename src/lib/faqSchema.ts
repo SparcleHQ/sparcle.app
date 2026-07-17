@@ -1,11 +1,11 @@
 /**
- * FAQPage structured-data helper — emits Google FAQ rich-snippet JSON-LD.
+ * FAQPage structured-data helper: emits Google FAQ rich-snippet JSON-LD.
  *
  * Google's guideline: the schema Q&A text MUST match the visible FAQ
  * content on the page. Page-level FAQ arrays store answers as HTML
  * (e.g. "<p>...<kbd>Cmd+K</kbd>...</p>"), so we strip tags and decode
  * the handful of entities the FAQ copy actually uses to produce the
- * plain-text answer the schema requires. We do NOT paraphrase — the
+ * plain-text answer the schema requires. We do NOT paraphrase: the
  * text is the visible answer with markup removed.
  */
 export interface FaqItem {
@@ -25,7 +25,7 @@ export function htmlToPlainText(html: string): string {
     .replace(/&#39;|&apos;/g, "'")
     .replace(/&ldquo;|&rdquo;/g, '"')
     .replace(/&lsquo;|&rsquo;/g, "'")
-    .replace(/&mdash;/g, "—")
+    .replace(/&mdash;/g, "—")  // check-emdash:allow (this line handles the character itself)
     .replace(/&ndash;/g, "–")
     .replace(/&rarr;/g, "→")
     .replace(/&middot;/g, "·")

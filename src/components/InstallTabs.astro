@@ -1,6 +1,6 @@
 ---
 // Platform-tabbed install widget. Same look + behavior as the install card on
-// /download — extracted so /docs/trial-quickstart (and any future page) can
+// /download: extracted so /docs/trial-quickstart (and any future page) can
 // reuse it without duplicating markup, CSS, or tab-switching JS.
 //
 // CSS lives at :global scope under .dl-* and .download-section. /download
@@ -108,7 +108,7 @@ const { macos, linux, windows } = Astro.props;
       try {
         navigator.clipboard.writeText(cmd);
       } catch (e) {
-        // Fallback for very old browsers — create a hidden textarea.
+        // Fallback for very old browsers: create a hidden textarea.
         var ta = document.createElement('textarea');
         ta.value = cmd;
         ta.setAttribute('readonly', '');
@@ -156,7 +156,7 @@ const { macos, linux, windows } = Astro.props;
 </script>
 
 <style is:global>
-  /* Install-tabs widget — global so any page importing <InstallTabs>
+  /* Install-tabs widget: global so any page importing <InstallTabs>
      picks up the same look. Mirrors the rules at /download (which still
      duplicates them inline today; will be reconciled in a follow-up). */
   .download-section .dl-tabs {

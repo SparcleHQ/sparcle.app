@@ -749,7 +749,7 @@
         }
         function scheduleHide(delay) {
             if (revealTimer) clearTimeout(revealTimer);
-            // Keep the button visible whenever audio is playing —
+            // Keep the button visible whenever audio is playing ,
             // users need to be able to pause without re-hunting for it.
             if (!audio.paused) return;
             revealTimer = setTimeout(() => {

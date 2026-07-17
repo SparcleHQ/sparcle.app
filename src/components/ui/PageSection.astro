@@ -1,6 +1,6 @@
 ---
 /**
- * PageSection — the canonical <section> wrapper for every marketing page.
+ * PageSection: the canonical <section> wrapper for every marketing page.
  *
  * Renders a consistent rhythm:
  *   [optional eyebrow] [title] [optional lede]   ← always w-prose, centered
@@ -14,7 +14,7 @@
  *   eyebrow      small caps label above title
  *   title        h2 (use Hero for h1)
  *   lede         paragraph below title, centered, prose-width
- *   stripe       'a' (body bg) | 'b' (muted bg) — alternate down a page
+ *   stripe       'a' (body bg) | 'b' (muted bg): alternate down a page
  *   width        slot width: 'prose' | 'content' (default) | 'page'
  *   align        slot align: 'center' (default) | 'left'
  *   id           anchor id
@@ -69,7 +69,7 @@ const hasHeader = Boolean(eyebrow || title || lede);
   .page-section__title {
     text-align: center;
     margin: 0 auto 1rem;
-    /* Sized via global h2 clamp — no override here. */
+    /* Sized via global h2 clamp: no override here. */
   }
   .page-section__lede {
     font-size: 1.125rem;

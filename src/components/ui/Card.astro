@@ -1,16 +1,15 @@
 ---
 /**
- * Card — the one card primitive for the entire site.
+ * Card: the one card primitive for the entire site.
  *
  * Variants tune visual emphasis only; padding, radius, border treatment, and
  * hover are constant. Anything more bespoke (a price plan, a comparison cell)
- * lives in its own component built on top of Card or as its own block —
- * NOT as another generic "feature card" class.
+ * lives in its own component built on top of Card or as its own block: * NOT as another generic "feature card" class.
  *
  * Variants:
  *   default  text card (replaces .pillar, .arch-pillar, .sec-pillar, .sec-deploy, .feature-card)
- *   stat     metric-forward (number + label + impact) — replaces .stat-card
- *   proof    metric-forward, centered — replaces .proof-card
+ *   stat     metric-forward (number + label + impact): replaces .stat-card
+ *   proof    metric-forward, centered: replaces .proof-card
  *   muted    subtle background (use inside section-stripe-a sections)
  *
  * Props:
@@ -214,7 +213,7 @@ const Tag = href ? 'a' : 'article';
     color: var(--text-muted);
   }
 
-  /* Stat / proof variants — metric-forward, centered. */
+  /* Stat / proof variants: metric-forward, centered. */
   .card--stat,
   .card--proof {
     text-align: center;
@@ -244,7 +243,7 @@ const Tag = href ? 'a' : 'article';
     color: var(--text-muted);
   }
 
-  /* Accent stripe — left border for status/category tagging. */
+  /* Accent stripe: left border for status/category tagging. */
   .card.accent-success { border-left: 3px solid var(--color-success-strong); }
   .card.accent-warning { border-left: 3px solid var(--color-warning); }
   .card.accent-danger  { border-left: 3px solid var(--color-danger-strong); }

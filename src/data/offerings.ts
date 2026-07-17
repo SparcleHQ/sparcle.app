@@ -515,11 +515,11 @@ export const aeiraPricingContent: PricingPageContent = {
     },
     {
       feature: "Rate limiting",
-      values: ["—", "30 QPS", "30 QPS + burst", "Custom profile"],
+      values: ["–", "30 QPS", "30 QPS + burst", "Custom profile"],
     },
     {
       feature: "Per-user quotas",
-      values: ["—", "—", "Soft + hard limits", "Custom"],
+      values: ["–", "–", "Soft + hard limits", "Custom"],
     },
     {
       feature: "Support",

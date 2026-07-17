@@ -21,10 +21,10 @@ const { quote, citation, href } = Astro.props;
     {
       href ? (
         <a href={href} style="color: var(--accent); text-decoration: none;">
-          &mdash; {citation}
+          &ndash; {citation}
         </a>
       ) : (
-        <span>&mdash; {citation}</span>
+        <span>&ndash; {citation}</span>
       )
     }
   </footer>

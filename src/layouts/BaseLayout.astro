@@ -31,7 +31,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 // Cache-busting version string for /js/shared-nav.js (and other public
 // assets we want to force-refresh on edit). Bump this whenever you edit
-// public/js/shared-nav.js — Cloudflare's edge cache otherwise serves the
+// public/js/shared-nav.js: Cloudflare's edge cache otherwise serves the
 // stale file for up to 24h (cache-control: max-age=86400). The dashboard
 // cache-purge works too, but bumping this is the zero-click path.
 const sharedNavVersion = "20260621a";
@@ -246,7 +246,7 @@ const sharedNavVersion = "20260621a";
     </main>
 
     <!--
-      Click-to-expand diagram modal — wraps any element with [data-expandable]
+      Click-to-expand diagram modal: wraps any element with [data-expandable]
       and clones its inner SVG into a full-viewport overlay. ESC, click-outside,
       or the explicit close button dismisses. One modal serves every page; the
       trigger script is delegated so any number of containers can opt in by
@@ -387,7 +387,7 @@ const sharedNavVersion = "20260621a";
           clone.style.height = 'auto';
           clone.style.maxWidth = 'none';
           clone.style.minWidth = '0';
-          // Iframes need an explicit pixel height — auto collapses them.
+          // Iframes need an explicit pixel height: auto collapses them.
           if (clone.tagName === 'IFRAME') {
             clone.style.height = '85vh';
           }

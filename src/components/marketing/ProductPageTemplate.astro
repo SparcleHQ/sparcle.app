@@ -41,7 +41,7 @@ function renderIcon(iconId: string | undefined): string {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconPaths[iconId]}</svg>`;
 }
 
-/* FAQPage structured data — Google FAQ rich snippets.
+/* FAQPage structured data: Google FAQ rich snippets.
  * The schema Q&A text MUST match the visible FAQ accordion on the page.
  * Offerings-driven faqs use title=question, detail=answer (plain text),
  * so they map straight through with no HTML stripping needed. We merge
@@ -164,7 +164,7 @@ const faqSchema = {
             <div class="section-title-wrap">
               <p class="eyebrow">Agentic Desktop Agent</p>
               <h2>{content.productName} doesn't just answer. <em>It takes action.</em></h2>
-              <p>Most AI assistants stop at "here's what I found." {content.productName} reads, writes, and executes across your entire stack &mdash; from email to your local file system.</p>
+              <p>Most AI assistants stop at "here's what I found." {content.productName} reads, writes, and executes across your entire stack: from email to your local file system.</p>
             </div>
             <div class="card-grid">
               {content.agenticActions.map((action) => (

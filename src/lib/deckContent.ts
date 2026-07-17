@@ -47,7 +47,7 @@ const decodeEntities = (s: string): string =>
   s
     .replace(/&#8220;|&#8221;|&ldquo;|&rdquo;/g, '"')
     .replace(/&#8217;|&rsquo;/g, "’")
-    .replace(/&mdash;/g, "\u2014") // faithful; the source decks carry no em-dash (check-emdash.sh)
+    .replace(/&mdash;/g, "\u2014") // check-emdash:allow (decoder; source decks carry none, enforced by check-emdash.sh)
     .replace(/&middot;/g, "·")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")

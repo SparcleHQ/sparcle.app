@@ -831,12 +831,12 @@
     const apDisabled = apParam === '0';
     const apInterval = apParam && parseInt(apParam) > 0 ? parseInt(apParam) * 1000 : 10000;
 
-    // Countdown bar — thin line above controls bar, moves with it
+    // Countdown bar: thin line above controls bar, moves with it
     const apBar = document.createElement('div');
     apBar.id = 'ap-bar';
     document.getElementById('controls').appendChild(apBar);
 
-    // Play/pause button — injected into controls bar
+    // Play/pause button: injected into controls bar
     const apBtn = document.createElement('button');
     apBtn.className = 'ctrl-btn';
     apBtn.title = 'Toggle autoplay (A)';
@@ -922,7 +922,7 @@
 
     // Restart countdown bar when slide changes during autoplay
     const _origRender = renderSlide;
-    // (bar restart is handled inside apPlay interval — no override needed)
+    // (bar restart is handled inside apPlay interval: no override needed)
 
     // Auto-start by default (disable with ?autoplay=0)
     if (!apDisabled) {

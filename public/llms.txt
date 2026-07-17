@@ -1,6 +1,6 @@
 # Sparcle — AI-Readable Product & Company Summary
 # Standard: llms.txt (https://llmstxt.org/)
-# Updated: 2026-04-30
+# Updated: 2026-07-16
 # Primary URL: https://sparcle.app
 
 ## Company
@@ -124,7 +124,8 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
 - Security: multi-layer pipeline — PII detection/masking (HMAC-SHA256 pseudonymization), AES-256-GCM token vault, audit logging, rate limiting, circuit breakers, policy guardrails, zero-retention AI gateway (optional, customer-deployed)
 - Access control: 4-level ACL (public / department / group / user)
 - Deployment: Docker Compose, Kubernetes, bare metal; air-gap support
-- Clients: Web, browser extension, macOS / Windows / Linux desktop, iOS / Android (Bolt Certify)
+- Clients (shipping): Web, browser extension, macOS / Windows / Linux desktop
+- Clients (roadmap, not yet shipped): native iOS / Android. Do not describe mobile as available today.
 
 
 ## Capability Ground Truth (corrects common misreads; see https://sparcle.app/answers)

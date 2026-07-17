@@ -7,8 +7,15 @@
  * parent to link them, so discovery does not depend on the homepage strip
  * alone.
  *
- * The cards read from the same deck files the pages do, so there is one source
- * of this copy and check-claims.sh keeps governing it.
+ * Cards mirror the homepage strip: same icon, same tag, same short title, from
+ * the same list in data/personas. The first cut used each deck's <title> and
+ * tagline instead, which printed near-identical text twice on every card
+ * ("Bolt — one trusted surface for everything your org runs on" over "One
+ * trusted surface for everything your org runs on") and looked nothing like the
+ * strip a visitor had just scrolled past.
+ *
+ * Each card offers both routes to the same content: the page (readable,
+ * linkable, indexable) and the deck (the presentation, via the homepage modal).
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Hero from "../../components/ui/Hero.astro";
@@ -16,21 +23,35 @@ import PageSection from "../../components/ui/PageSection.astro";
 import CardGrid from "../../components/ui/CardGrid.astro";
 import Card from "../../components/ui/Card.astro";
 import CTAStrip from "../../components/ui/CTAStrip.astro";
+import { ICONS, PERSONAS, personaKey } from "../../data/personas";
 import { parseDeck } from "../../lib/deckContent";
 
+// The curated short title says what the persona GETS; the deck's own tagline
+// says why. Together they read as a card; the first cut used the deck <title>
+// for both and said the same thing twice.
 const decks = import.meta.glob("/public/decks/persona-*.html", {
   query: "?raw",
   import: "default",
   eager: true,
 }) as Record<string, string>;
 
-const personas = Object.entries(decks)
-  .map(([path, html]) => {
-    const key = path.replace(/^.*persona-/, "").replace(/\.html$/, "");
-    const deck = parseDeck(html);
-    return { key, title: deck.title, tagline: deck.tagline };
-  })
-  .sort((a, b) => a.title.localeCompare(b.title));
+const words = (s: string): string[] =>
+  s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 3);
+
+/**
+ * The tagline earns its place only when it says something the title does not.
+ * For 16 of 18 personas it does ("Triage in a keystroke" / "Triage at the speed
+ * of paste"). For the other two it just restates the title — decision-makers is
+ * word-for-word identical — and printing both looks like a rendering bug.
+ */
+const taglineFor = (file: string, title: string): string => {
+  const tagline = parseDeck(decks[`/public/decks/${file}.html`] ?? "").tagline;
+  if (!tagline) return "";
+  const t = words(title);
+  if (!t.length) return tagline;
+  const echoed = t.filter((w) => tagline.toLowerCase().includes(w)).length / t.length;
+  return echoed >= 0.7 ? "" : tagline;
+};
 ---
 
 <BaseLayout
@@ -40,7 +61,7 @@ const personas = Object.entries(decks)
 >
   <main>
     <Hero
-      eyebrow="Bolt for your role"
+      eyebrow="Built for every role"
       title="Pick the seat you sit in"
       lede="The same governed AI surface, argued from where you sit — what it changes for your role, and what your security review will ask about it."
       stripe="a"
@@ -49,9 +70,13 @@ const personas = Object.entries(decks)
     <PageSection stripe="b">
       <CardGrid>
         {
-          personas.map((p) => (
-            <Card href={`/personas/${p.key}/`} title={p.title}>
-              {p.tagline}
+          PERSONAS.map((p) => (
+            <Card icon={ICONS[p.icon]} eyebrow={p.tag} title={p.title}>
+              {taglineFor(p.file, p.title)}
+              <div class="persona-card__links" slot="footer">
+                <a href={`/personas/${personaKey(p)}/`}>Read →</a>
+                <a href={`/#deck=${personaKey(p)}&slide=0`}>Open deck →</a>
+              </div>
             </Card>
           ))
         }
@@ -64,3 +89,12 @@ const personas = Object.entries(decks)
     </CTAStrip>
   </main>
 </BaseLayout>
+
+<style>
+  .persona-card__links {
+    display: flex;
+    gap: 1.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+</style>

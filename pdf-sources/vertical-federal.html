@@ -64,14 +64,15 @@
     <div>
       <h3>FIPS 140 cryptography</h3>
       <p class="q">"Do we have to wait for FIPS 140-3 module validation?"</p>
-      <p><b>Sparcle:</b> No, because Sparcle does not ship its own cryptographic module. KMS operations route to <b>your</b> validated module &mdash; Vault FIPS, AWS KMS FIPS endpoints, Azure Key Vault Premium, or PKCS#11 HSM. Your FIPS posture covers the crypto path; Sparcle is the orchestration layer.</p>
+      <p><b>Sparcle:</b> No, because Sparcle does not ship its own cryptographic module. KMS operations route to <b>your</b> validated module &mdash; Vault FIPS or AWS KMS FIPS endpoints today, with Azure Key Vault Premium and PKCS#11 HSM on the roadmap. Your FIPS posture covers the crypto path; Sparcle is the orchestration layer.</p>
     </div>
   </div>
 
   <div class="panel">
     <h4>What's shipped today vs what ships in a 90-day federal pilot</h4>
     <div class="srow"><span>GovCloud / Azure Government deployable Helm chart</span><span class="badge b-ship">SHIPPED</span></div>
-    <div class="srow"><span>AWS KMS + HashiCorp Vault + PKCS#11 HSM support</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>AWS KMS + HashiCorp Vault support</span><span class="badge b-ship">SHIPPED</span></div>
+    <div class="srow"><span>PKCS#11 HSM + Azure Key Vault support</span><span class="badge b-no">ROADMAP</span></div>
     <div class="srow"><span>Air-gap mode (no outbound traffic)</span><span class="badge b-ship">SHIPPED</span></div>
     <div class="srow"><span>4-axis ACL with <code>country</code> + <code>office</code> for CUI handling</span><span class="badge b-ship">SHIPPED</span></div>
     <div class="srow"><span>Sealed Merkle audit chain + standalone verifier</span><span class="badge b-ship">SHIPPED</span></div>

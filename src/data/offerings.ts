@@ -119,7 +119,7 @@ export const boltProductContent: ProductPageContent = {
     {
       title: "Open MCP integrations. No vendor lock-in.",
       detail:
-        "Built on the open Model Context Protocol. Out-of-the-box connections to Slack, Jira, Confluence, Salesforce, GitHub, Notion, Drive, M365, and a growing roster. Durable agents, self-hosted in your own perimeter from Docker Compose to air-gapped.",
+        "Built on the open Model Context Protocol. Out-of-the-box connections to Jira, Confluence, Salesforce, GitHub, Notion, Zendesk, and a growing roster, with Slack, Drive, and M365 in the connector gallery once your admin completes setup. Durable agents, self-hosted in your own perimeter from Docker Compose to air-gapped.",
       icon: "code",
     },
     {

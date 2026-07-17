@@ -100,7 +100,7 @@
       <div class="crow"><span class="chk"></span><div><b>Pilot users defined</b> (8-20 ideal). Include at least one of each persona: executive, engineer, finance, HR, regional rep &mdash; to exercise the 4-axis ACL.</div></div>
       <div class="crow"><span class="chk"></span><div><b>Security review window booked.</b> CISO / SecArch slot in week 2-3; threat-model walkthrough in week 4.</div></div>
       <div class="crow"><span class="chk"></span><div><b>Procurement docs requested.</b> DPA template, MSA template, BAA (if PHI), source-code escrow agent decision (Iron Mountain / NCC Group).</div></div>
-      <div class="crow"><span class="chk"></span><div><b>Pen-test report shared</b> when Sparcle's external report lands (week 4 of deployment).</div></div>
+      <div class="crow"><span class="chk"></span><div><b>Pen-test report shared</b> when Sparcle's external report lands (scheduled Q4 2026, or earlier if this pilot funds an accelerated scope).</div></div>
     </div>
 
     <div class="lane spar">
@@ -112,11 +112,11 @@
       <div class="crow"><span class="chk g"></span><div><b>End-to-end ingest saga wired</b> for the chosen connectors (~1-2 days from green-light).</div></div>
       <div class="crow"><span class="chk g"></span><div><b>Audit-verifier binary delivered</b> + walkthrough scheduled with your CISO team.</div></div>
       <div class="crow"><span class="chk g"></span><div><b>Threat-model documents</b> (Aeira + Bolt) reviewed with your SecArch in week 1-2.</div></div>
-      <div class="crow"><span class="chk g"></span><div><b>External pen-test report</b> by HackerOne / Bishop Fox / NCC Group delivered in week 3-4 (if Sparcle hasn't booked one already, this is a contract trigger).</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Security evidence pack</b> delivered in week 1-2: internal hardening run (completed 2026-05-13), SBOM, and the standalone audit verifier your team runs offline against your own deployment. Sparcle's first external pen-test is scheduled for Q4 2026; an accelerated third-party test scoped to this pilot is available as a contract trigger.</div></div>
       <div class="crow"><span class="chk g"></span><div><b>Pre-filled SIG Lite + CAIQ</b> handed over to your procurement at kickoff.</div></div>
       <div class="crow"><span class="chk g"></span><div><b>Tenant onboarding</b> &mdash; first 8-20 user accounts provisioned + persona assignments validated against ACL.</div></div>
       <div class="crow"><span class="chk g"></span><div><b>Compliance handbook + IR plan</b> handed over.</div></div>
-      <div class="crow"><span class="chk g"></span><div><b>Source-code escrow agreement</b> executed with customer-selected agent.</div></div>
+      <div class="crow"><span class="chk g"></span><div><b>Source-code escrow agreement</b> initiated with customer-selected agent (Iron Mountain / NCC Group) during the pilot.</div></div>
     </div>
   </div>
 
@@ -149,7 +149,7 @@
     <tr><td class="lbl">Connectors</td><td class="day">8 &rarr; 18</td><td class="desc"><b>Joint:</b> wire the chosen connectors (typically: SharePoint / Confluence / Slack / Jira / Salesforce / Workday / Snowflake / ServiceNow / GitHub / GDrive &mdash; depending on customer's primary data). Verify each connector's ACL semantics with a test document tagged for restriction.</td></tr>
     <tr><td class="lbl">Audit chain</td><td class="day">12 &rarr; 16</td><td class="desc"><b>Customer security:</b> run <code>aeira-audit-verify</code> binary on an audit-chain export. Confirm Ed25519 signatures validate against your KMS public key. Modify a byte, confirm verifier reports the break.</td></tr>
     <tr><td class="lbl">Threat-model walkthrough</td><td class="day">15 &rarr; 22</td><td class="desc"><b>Joint:</b> CISO / SecArch reviews Bolt + Aeira threat models against the deployed system. Document any custom mitigations.</td></tr>
-    <tr><td class="lbl">Pen-test landing</td><td class="day">22 &rarr; 28</td><td class="desc"><b>Sparcle:</b> deliver external pen-test report (or accelerate-fund inside pilot). <b>Customer:</b> review with your security team.</td></tr>
+    <tr><td class="lbl">Security evidence</td><td class="day">22 &rarr; 28</td><td class="desc"><b>Sparcle:</b> deliver the evidence pack (internal hardening run, SBOM, offline audit verifier); scope an accelerated third-party pen-test if the pilot funds one. <b>Customer:</b> review with your security team.</td></tr>
     <tr><td class="lbl">Phase B gate</td><td class="day">30</td><td class="desc"><b>Joint sign-off:</b> all Phase B rows complete. Sign the deployment-acceptance form on p.2. Validation cannot begin until this signs.</td></tr>
   </table>
 

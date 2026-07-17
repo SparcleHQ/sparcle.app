@@ -33,10 +33,10 @@ const categories = [
       { name: "Microsoft OneDrive" }, { name: "Microsoft SharePoint" },
       { name: "Google Gmail" }, { name: "Google Calendar" }, { name: "Google Drive" },
       { name: "Google Docs / Sheets / Slides" },
-      { name: "Slack" }, { name: "Discord" },
+      { name: "Slack" },
       { name: "Zoom (meetings + recordings)" }, { name: "Cisco Webex" },
       { name: "Notion" }, { name: "Confluence (Atlassian)" },
-      { name: "Coda" }, { name: "Quip" },
+      { name: "Quip" },
     ],
   },
   {
@@ -78,7 +78,7 @@ const categories = [
     items: [
       { name: "Aeira (built-in)", note: "Compliance-grade search" },
       { name: "Confluence (read)" }, { name: "SharePoint (read)" },
-      { name: "Notion (read)" }, { name: "Glean", note: "Federated query" },
+      { name: "Notion (read)" },
       { name: "Elastic / OpenSearch" }, { name: "Algolia" },
     ],
   },
@@ -128,7 +128,7 @@ const iconPaths: Record<string, string> = {
 };
 ---
 <BaseLayout
-  title="Integrations: 100+ Enterprise Systems via Open MCP Protocol | Sparcle"
+  title="Integrations: 100+ Enterprise Systems | Sparcle"
   description="Bolt connects to identity (Okta, Entra, Workspace, Zoho), productivity, engineering, sales, ITSM, knowledge, data warehouse, and LLM providers via the Model Context Protocol. BYO MCP servers welcome."
   canonical="https://sparcle.app/integrations/"
 >
@@ -136,7 +136,7 @@ const iconPaths: Record<string, string> = {
     <Hero
       eyebrow="Integrations"
       title="Connected to the work your team already does."
-      lede={`Bolt connects to <strong>100+</strong> enterprise systems via the open <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol</a>. 103 in-house connectors, ~350 more via Airbyte, and any MCP-compliant server. No proprietary APIs, no vendor lock-in. Bring your own MCP servers and they slot in alongside ours.`}
+      lede={`Bolt connects to <strong>100+</strong> enterprise systems: 103 in-house Aeira connectors that map each source's own permission model into a unified ACL, ~350 more via our Airbyte bridge, and Bolt's own connectors built on the open <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol</a>. No proprietary Sparcle protocol, no vendor lock-in. Bring your own MCP servers and they slot in alongside ours.`}
     >
       <a href="#" onclick="openContactModal('Custom Integration Request'); return false;" class="btn btn-primary btn-lg">
         Request Custom Integration
@@ -295,8 +295,8 @@ const iconPaths: Record<string, string> = {
         <p>
           The Model Context Protocol is open. Any MCP-compliant server slots in alongside Bolt's
           built-in integrations, including custom-built connectors for your internal systems.
-          Sparcle ships connector SDKs in TypeScript and Python; the protocol itself is
-          language-agnostic.
+          The protocol itself is language-agnostic, so an MCP server can be written in
+          whatever your team already uses.
         </p>
         <p>
           For enterprise contracts, we offer <strong>custom MCP connector development</strong> as

@@ -37,10 +37,18 @@ async function* walk(dir) {
   }
 }
 
-// dist/foo/index.html -> /foo   ·   dist/index.html -> /
+// dist/foo/index.html -> /foo/   ·   dist/index.html -> /
+//
+// The trailing slash is load-bearing, not cosmetic. Cloudflare Pages serves
+// directory-format output at /foo/ and 308s /foo to it, so a sitemap listing
+// /foo names a redirect rather than a destination. Google asks for the final
+// URL; the earlier hand-maintained sitemap listed the redirect form for every
+// entry and this generator faithfully reproduced it. Verified against the live
+// site: /pricing -> 308 -> /pricing/, and /products.html -> 308 ->
+// /products.html/, so the rule is uniform across every shape we emit.
 function toRoute(file) {
-  const rel = relative(DIST, file).replace(/index\.html$/, "").replace(/\.html$/, "");
-  return "/" + rel.replace(/\/$/, "");
+  const rel = relative(DIST, file).replace(/index\.html$/, "");
+  return "/" + rel;
 }
 
 // Map a route back to the .astro page that produced it, so lastmod can be the
@@ -48,7 +56,17 @@ function toRoute(file) {
 // point: a sitemap that stamps everything with today's build time gets its
 // lastmod ignored, which is how the stale one lost its credibility.
 function sourceFor(route) {
-  const base = route === "/" ? "index" : route.slice(1);
+  // Routes carry a trailing slash (see toRoute); strip it before joining a path
+  // or "/pricing/" resolves to "src/pages/pricing/.astro" and every lastmod
+  // silently falls back to null.
+  const base = route === "/" ? "index" : route.slice(1).replace(/\/$/, "");
+
+  // /personas/<key>/ is rendered by a dynamic route from a deck file, so there
+  // is no src/pages/personas/<key>.astro to date. The deck IS the content —
+  // when its copy changes, the page changes — so date the page by the deck.
+  const persona = /^personas\/(.+)$/.exec(base);
+  if (persona) return [`public/decks/persona-${persona[1]}.html`];
+
   return [
     `src/pages/${base}.astro`,
     `src/pages/${base}/index.astro`,

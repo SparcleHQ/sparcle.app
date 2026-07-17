@@ -34,7 +34,7 @@ export async function getStaticPaths() {
 
 const { html, key } = Astro.props;
 const deck = parseDeck(html);
-const canonical = `https://sparcle.app/personas/${key}`;
+const canonical = `https://sparcle.app/personas/${key}/`;
 ---
 
 <BaseLayout title={`${deck.title} | Sparcle`} description={deck.description} canonical={canonical}>

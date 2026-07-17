@@ -7,7 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "./scripts/sync-docs.sh && ./scripts/check-no-internal.sh",
+    "prebuild": "./scripts/sync-docs.sh && ./scripts/check-no-internal.sh && ./scripts/check-claims.sh",
+    "check:claims": "./scripts/check-claims.sh",
     "check:no-internal": "./scripts/check-no-internal.sh",
     "build": "astro build",
     "postbuild": "node scripts/gen-sitemap.mjs",

@@ -6,6 +6,7 @@ interface Props {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -15,7 +16,16 @@ const {
   ogTitle = title,
   ogDescription = description,
   ogImage = "https://sparcle.app/images/og-preview.png",
+  noindex = false,
 } = Astro.props;
+
+// This layout is the single owner of the robots directive. Pages must pass
+// noindex rather than emitting their own <meta name="robots"> into the head
+// slot: two robots tags on one page is a contradiction crawlers resolve by
+// their own rules, not ours.
+const robotsContent = noindex
+  ? "noindex, nofollow"
+  : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
 
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
@@ -55,7 +65,7 @@ const sharedNavVersion = "20260621a";
     <meta name="rating" content="general" />
     <meta name="category" content="technology" />
     <meta name="classification" content="Business" />
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="robots" content={robotsContent} />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1020" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
 

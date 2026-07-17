@@ -6,9 +6,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   title="Redirecting | Download Bolt"
   description="Redirecting to the Bolt download page."
   canonical="https://sparcle.app/download"
+  noindex
 >
   <Fragment slot="head">
-    <meta name="robots" content="noindex, nofollow" />
     <meta http-equiv="refresh" content="0; url=/download" />
     <script is:inline>
       window.location.replace('/download');

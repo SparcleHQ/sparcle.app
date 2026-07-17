@@ -10,6 +10,7 @@
     "prebuild": "./scripts/sync-docs.sh && ./scripts/check-no-internal.sh",
     "check:no-internal": "./scripts/check-no-internal.sh",
     "build": "astro build",
+    "postbuild": "node scripts/gen-sitemap.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "pdf:trial-quickstart": "node scripts/render-pdf.mjs /docs/trial-quickstart public/docs/pdfs/trial-quickstart.pdf"

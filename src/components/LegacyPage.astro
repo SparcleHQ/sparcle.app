@@ -8,12 +8,13 @@ interface Props {
   bodyHtml: string;
   headHtml?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description, canonical, bodyHtml, headHtml = "", ogImage } = Astro.props;
+const { title, description, canonical, bodyHtml, headHtml = "", ogImage, noindex } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} canonical={canonical} ogImage={ogImage}>
+<BaseLayout title={title} description={description} canonical={canonical} ogImage={ogImage} noindex={noindex}>
   {headHtml && <Fragment slot="head" set:html={headHtml} />}
   <Fragment set:html={bodyHtml} />
 </BaseLayout>

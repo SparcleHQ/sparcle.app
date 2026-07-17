@@ -24,6 +24,47 @@ cd "$(dirname "$0")/.."
 
 fail=0
 
+# ban_near <"a|b"> <"c|d"> <window> <"why">
+# Flags a claim only when it sits within <window> chars of a disqualifying
+# context. Some claims are true or false depending on what they attach to —
+# "gated and audited" is correct about the governed server and false about the
+# free client — and a flat phrase ban would delete good copy along with bad.
+ban_near() {
+  local ctx="$1" claim="$2" window="$3" why="$4"
+  local out
+  out=$(CTX="$ctx" CLAIM="$claim" WIN="$window" python3 - <<'PY'
+import os, re, pathlib, sys
+ctx = re.compile(os.environ["CTX"], re.I)
+claim = re.compile(os.environ["CLAIM"], re.I)
+win = int(os.environ["WIN"])
+roots = [pathlib.Path("public/decks"), pathlib.Path("src/pages"), pathlib.Path("src/fragments")]
+hits = set()
+for r in roots:
+    if not r.exists():
+        continue
+    for f in list(r.rglob("*.html")) + list(r.rglob("*.astro")):
+        if "legacy" in f.as_posix():
+            continue
+        t = f.read_text(errors="ignore")
+        flat = re.sub(r"<[^>]+>", " ", t)
+        for m in ctx.finditer(flat):
+            seg = flat[m.start(): m.end() + win]
+            if claim.search(seg):
+                hits.add(f.as_posix())
+for h in sorted(hits):
+    print(h)
+sys.exit(0)
+PY
+  )
+  if [ -n "$out" ]; then
+    echo "BANNED CLAIM (context): \"$claim\" near \"$ctx\""
+    echo "  why: $why"
+    echo "$out" | sed 's/^/    /'
+    echo
+    fail=1
+  fi
+}
+
 # ban <"phrase"> <"why it is false + the evidence"> [grep-flags]
 ban() {
   local phrase="$1" why="$2"
@@ -88,6 +129,30 @@ ban "Day 1 compliance" \
     "PDP is inert by default and 22/28 packs are opt-in; say \"configurable compliance policy packs\""
 ban "Compliance readiness" \
     "same as above; say \"configurable compliance policy packs\""
+ban "compliant from day one" \
+    "compliance needs configuration and is not a product state; say what ships instead"
+
+# --- Audit, stated unconditionally --------------------------------------
+# The tamper-evident Merkle chain requires BOTH a Postgres pool AND a CMK/KMS
+# provider. bolt-api state.rs names this exact marketing phrase as the thing it
+# contradicts: without them the install "is NOT auditable despite the
+# 'auditable from day one' claim", falling back to NoopAuditRepository (stdout).
+# It IS guaranteed under the Regulated SERVER posture — that boot path refuses
+# to start without a durable sink — but Standard is the default and degrades
+# gracefully by design, and verify-claims.sh confirms no shipped config selects
+# Regulated. So the claim is true ON THE GOVERNED SERVER and false as a blanket
+# or free-client promise. Scope it; do not delete it.
+ban "auditable from day one" \
+    "audit needs Postgres + KMS; true on the governed server, not by default. Scope it."
+
+# "gated and audited" is TRUE when scoped to the governed server — persona-cio's
+# "Switch on the governed server ... and every action becomes masked, gated and
+# audited" is correct and must not be flagged. It is FALSE only when attached to
+# the free desktop client, which has no Postgres/CMK and therefore no durable
+# sink. So this is a proximity rule, not a phrase ban.
+ban_near "free client|free desktop|every support desktop|free build" \
+         "gated and audited|governed and audited|masked, gated" 400 \
+    "governance attached to the FREE client, which has no durable audit sink; scope it to the governed server"
 
 if [ "$fail" -ne 0 ]; then
   echo "check-claims: FAILED — the copy above outruns what the code does."

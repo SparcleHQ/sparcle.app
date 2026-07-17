@@ -55,12 +55,44 @@ function sourceFor(route) {
   ];
 }
 
+function git(args) {
+  return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+}
+
+// Per-file history is the whole basis for lastmod here, and a shallow clone has
+// none: `git log -1 -- <file>` falls back to the single cloned commit, so every
+// page would claim it changed at build time. Cloudflare Pages clones shallow by
+// default, which is exactly how the first cut of this script shipped a sitemap
+// whose 48 URLs all read the same day. Deepen if we can; if we cannot, drop
+// lastmod entirely rather than emit 48 identical lies.
+function ensureFullHistory() {
+  try {
+    if (git(["rev-parse", "--is-shallow-repository"]) !== "true") return true;
+  } catch {
+    return false; // no git at all (e.g. a tarball build)
+  }
+  try {
+    execFileSync("git", ["fetch", "--unshallow", "--quiet"], { stdio: "ignore" });
+    return git(["rev-parse", "--is-shallow-repository"]) !== "true";
+  } catch {
+    return false;
+  }
+}
+
+const haveHistory = ensureFullHistory();
+if (!haveHistory) {
+  console.warn(
+    "sitemap: shallow clone and could not deepen; emitting without lastmod.\n" +
+      "         Crawlers ignore a lastmod that is always the build date, so no\n" +
+      "         date is strictly better than a uniform one.",
+  );
+}
+
 function lastmodFor(route) {
+  if (!haveHistory) return null;
   for (const candidate of sourceFor(route)) {
     try {
-      const date = execFileSync("git", ["log", "-1", "--format=%cs", "--", candidate], {
-        encoding: "utf8",
-      }).trim();
+      const date = git(["log", "-1", "--format=%cs", "--", candidate]);
       if (date) return date;
     } catch {
       // not a tracked path; try the next candidate

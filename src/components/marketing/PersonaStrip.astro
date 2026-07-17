@@ -59,13 +59,20 @@ const loop = [...decks, ...decks];
     </button>
     <div class="bfe-strip">
       <div class="bfe-track">
+        {/*
+          Cards are real <a href> links, not buttons. The deck itself is a
+          shadow-DOM payload no crawler can read, so the persona page is the
+          indexable surface — and a link is how it gets discovered and how its
+          authority flows. JS intercepts the click below to keep the modal
+          experience; without JS, or for a bot, this is an ordinary link.
+        */}
         {loop.map((d, i) => (
-          <button class="bfe-card" type="button" data-key={d.file.replace("persona-", "")} aria-label={`Open the ${d.tag} deck`} tabindex={i < decks.length ? 0 : -1}>
+          <a class="bfe-card" href={`/personas/${d.file.replace("persona-", "")}`} data-key={d.file.replace("persona-", "")} aria-label={`${d.tag}: ${d.title}`} tabindex={i < decks.length ? 0 : -1}>
             <span class="bfe-ic" set:html={ICONS[d.icon]} />
             <span class="bfe-tag">{d.tag}</span>
             <span class="bfe-name">{d.title}</span>
             <span class="bfe-open">Open deck →</span>
-          </button>
+          </a>
         ))}
       </div>
     </div>
@@ -292,9 +299,16 @@ const loop = [...decks, ...decks];
     }
 
     document.querySelectorAll<HTMLElement>(".bfe-card").forEach((card) => {
-      card.addEventListener("click", () => {
+      card.addEventListener("click", (e) => {
+        // Let modified clicks (new tab/window) and non-primary buttons through
+        // to the browser — the href points at a real persona page, so those
+        // gestures should navigate rather than open an overlay.
+        const me = e as MouseEvent;
+        if (me.metaKey || me.ctrlKey || me.shiftKey || me.altKey || me.button !== 0) return;
         const k = card.dataset.key;
-        if (k) openDeck(k);
+        if (!k) return;
+        e.preventDefault();
+        openDeck(k);
       });
     });
 

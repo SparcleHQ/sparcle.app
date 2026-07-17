@@ -90,6 +90,37 @@ ban "nothing leaves your boundary" \
 ban "Leak nothing" \
     "unqualified no-egress guarantee; say \"keep the identifiers yours\""
 
+# BYO-LLM asserted as the product's default rather than a choice the customer
+# makes. Caught only when the persona pages surfaced this deck prose into
+# indexable HTML — it sat in 9 decks while this guard reported clean, because
+# the ban list held the strings I had already seen, not the rule they violate.
+# A phrase list catches REGRESSIONS of known claims; it does not prove the
+# absence of new phrasings of the same idea. When adding copy, ask whether the
+# claim is true, not whether the guard is quiet.
+ban "never leaves either" \
+    "asserts BYO-LLM as the default; say \"point it at your own LLM and the rest stays inside your boundary\""
+ban "the deal never leaves" \
+    "conditional on BYO-LLM being configured; make the condition explicit"
+ban "the document never leaves" \
+    "conditional on BYO-LLM being configured; make the condition explicit"
+# DELIBERATELY NOT BANNED: bare "never leaves" / "data never leaves".
+#
+# A substring cannot tell a claim from its own disclaimer. Banning
+# "data never leaves" flagged exactly two files, and both were CORRECT:
+#   - trust/where-the-model-runs.astro: "What we do not claim — We do not claim
+#     that data never leaves your perimeter in Mode C. It does, in masked form."
+#     The guard flagged the page for being honest. That is backwards.
+#   - persona-overview: "Air-gap deployable — Runs with zero outbound calls;
+#     citizen data never leaves the boundary." True, and scoped to the air-gap
+#     tier (verified: zero phone-home).
+# It is also TRUE of genuinely local surfaces: "searchable clipboard history,
+# never leaves the device", "Local decode. The payload never leaves the box",
+# "most of it never leaves your machine".
+#
+# The false CONSTRUCTIONS are banned individually above. That is the honest
+# limit of a phrase list: it pins down claims we have already reasoned about,
+# and it cannot judge a sentence it has not seen.
+
 # --- Absolute masking / recall -------------------------------------------
 # bolt-api config.rs GlinerConfig: name detection is an HTTP SIDECAR whose
 # `endpoint` defaults to empty, and `fail_mode: open` "returns the text

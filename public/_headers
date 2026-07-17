@@ -36,14 +36,21 @@
 /api/contact
   Cache-Control: no-store
 
-# Persona decks and the PDF twins of noindexed pages are raw assets under
-# public/ — they never pass through BaseLayout, so they cannot declare noindex
-# themselves and are indexable by default. A 2026-07-16 claim audit of all 18
-# decks found capability claims that do not hold against live code (crypto-shred
-# attested "Always on" though it has no production caller; absolute masking
-# guarantees on a sub-100%-recall detector; an implied hosted-LLM path that does
-# not exist). Hold them out of the index until those are fixed, then lift this.
-# Reachability is unaffected — a link you send still opens.
+# The decks are PAYLOADS, not pages — this noindex is permanent by design.
+#
+# public/decks/*.html are chrome-less documents that PersonaStrip fetches and
+# injects into a shadow DOM. They carry no nav, no footer, no canonical, and no
+# link back to sparcle.app, so a searcher landing on one hits a dead end. They
+# are also unindexable in practice regardless of this header: shadow DOM means
+# their prose appears in no document a crawler ever parses.
+#
+# The indexable surface is /personas/<key> — real pages that render the same
+# copy through BaseLayout with nav, canonical, meta and a CTA, linked from the
+# homepage strip and listed in the sitemap. The deck stays the deck: the persona
+# page deep-links to it at /#deck=<key>, and any link you send still opens.
+#
+# So: index the page, not the payload. Do not lift this expecting SEO value —
+# there is none to gain here, and a chrome-less orphan in the index is a loss.
 /decks/*
   X-Robots-Tag: noindex
 

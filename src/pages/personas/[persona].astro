@@ -1,0 +1,72 @@
+---
+/**
+ * A crawlable page per persona.
+ *
+ * The decks in public/decks are the source of this copy — they are fetched into
+ * a shadow DOM by PersonaStrip, which is why 175k characters of persona prose
+ * currently appear in no document any crawler can see. These pages give that
+ * substance a real URL with nav, footer, canonical and a CTA, without touching
+ * the deck experience: "View this as a deck" deep-links straight back to the
+ * modal.
+ *
+ * The deck file stays the single source of the copy, so check-claims.sh governs
+ * one body of text rather than a page copy that would drift away from it.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+import { parseDeck } from "../../lib/deckContent";
+
+export async function getStaticPaths() {
+  // Read the decks at build time. import.meta.glob gives us the raw HTML
+  // without shipping any of it to the client.
+  const decks = import.meta.glob("/public/decks/persona-*.html", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  }) as Record<string, string>;
+
+  return Object.entries(decks).map(([path, html]) => {
+    const key = path.replace(/^.*persona-/, "").replace(/\.html$/, "");
+    return { params: { persona: key }, props: { html, key } };
+  });
+}
+
+const { html, key } = Astro.props;
+const deck = parseDeck(html);
+const canonical = `https://sparcle.app/personas/${key}`;
+---
+
+<BaseLayout title={`${deck.title} | Sparcle`} description={deck.description} canonical={canonical}>
+  <main class="persona-page">
+    <PageSection eyebrow="Bolt for your role" title={deck.title} lede={deck.description} stripe="a">
+      <p class="persona-deck-link">
+        <a href={`/#deck=${key}&slide=0`}>View this as a deck</a>
+      </p>
+    </PageSection>
+
+    {
+      deck.sections.map((section, i) => (
+        <PageSection title={section.title} stripe={i % 2 === 0 ? "b" : "a"} width="prose" align="left">
+          {section.paragraphs.map((p) => (
+            <p>{p}</p>
+          ))}
+        </PageSection>
+      ))
+    }
+
+    <CTAStrip title="See it on your own data" lede="Bolt runs inside your perimeter, on the LLM you choose.">
+      <a class="btn btn-primary" href="/download">Download Bolt</a>
+      <a class="btn btn-secondary" href="/demo">Book a demo</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style>
+  .persona-deck-link {
+    margin-top: 1rem;
+  }
+  .persona-page :global(p) {
+    max-width: 68ch;
+  }
+</style>

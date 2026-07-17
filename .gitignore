@@ -5,7 +5,13 @@ dist/
 .astro/
 
 # dependencies
-node_modules/
+# No trailing slash: `node_modules/` matches only a directory, so it silently
+# fails to ignore the node_modules SYMLINK that `wt new` creates in every
+# worktree. On 2026-07-16 a `git add -A` committed that symlink to main; the
+# next `wt done` fast-forwarded the main checkout, git materialized the tracked
+# symlink at sparcle.app/node_modules pointing to itself, and the real
+# directory was destroyed. Match both forms.
+node_modules
 
 # logs
 npm-debug.log*

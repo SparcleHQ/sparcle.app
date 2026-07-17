@@ -13,6 +13,7 @@
  * one body of text rather than a page copy that would drift away from it.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
 import PageSection from "../../components/ui/PageSection.astro";
 import CTAStrip from "../../components/ui/CTAStrip.astro";
 import { parseDeck } from "../../lib/deckContent";
@@ -39,11 +40,16 @@ const canonical = `https://sparcle.app/personas/${key}/`;
 
 <BaseLayout title={`${deck.title} | Sparcle`} description={deck.description} canonical={canonical}>
   <main class="persona-page">
-    <PageSection eyebrow="Bolt for your role" title={deck.title} lede={deck.description} stripe="a">
+    {/*
+      Hero, not PageSection: PageSection renders its title as an <h2>, which
+      left these pages with no <h1> at all. Hero is what every other page uses
+      for its top, and it renders the h1.
+    */}
+    <Hero eyebrow="Bolt for your role" title={deck.title} lede={deck.tagline} stripe="a">
       <p class="persona-deck-link">
-        <a href={`/#deck=${key}&slide=0`}>View this as a deck</a>
+        <a class="btn btn-secondary" href={`/#deck=${key}&slide=0`}>View this as a deck</a>
       </p>
-    </PageSection>
+    </Hero>
 
     {
       deck.sections.map((section, i) => (
@@ -64,7 +70,8 @@ const canonical = `https://sparcle.app/personas/${key}/`;
 
 <style>
   .persona-deck-link {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+    text-align: center;
   }
   .persona-page :global(p) {
     max-width: 68ch;

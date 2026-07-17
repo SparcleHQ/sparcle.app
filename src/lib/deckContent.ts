@@ -33,8 +33,11 @@ export interface PersonaSection {
 export interface PersonaContent {
   /** The deck's own <title> — already written for the persona. */
   title: string;
-  /** First substantial paragraph, trimmed for a meta description. */
+  /** Composed for the <meta> tag. Not rendered — see `tagline`. */
   description: string;
+  /** The cover slide's own line, shown as the visible lede. */
+  tagline: string;
+  /** Body slides. Excludes the cover, which is already title + tagline. */
   sections: PersonaSection[];
 }
 
@@ -75,11 +78,19 @@ export function parseDeck(html: string): PersonaContent {
       if (text.length > 40 && text.split(" ").length > 6) paragraphs.push(text);
     }
 
-    const deduped = [...new Set(paragraphs)];
+    // A slide's own heading is usually repeated as its first line of markup, and
+    // data-title mirrors it. Rendering both prints the same sentence twice under
+    // itself, which reads as a bug.
+    const deduped = [...new Set(paragraphs)].filter((p) => p !== heading);
     if (heading && deduped.length) sections.push({ title: heading, paragraphs: deduped });
   }
 
-  return { title, description: buildDescription(sections), sections };
+  // The cover slide IS the title and the lede. Rendering it again as the first
+  // body section repeated the same sentence a third time.
+  const [cover, ...body] = sections;
+  const tagline = cover?.title ?? "";
+
+  return { title, description: buildDescription(sections), tagline, sections: body };
 }
 
 /**

@@ -1,0 +1,66 @@
+---
+/**
+ * Hub for the persona pages.
+ *
+ * Without this, /personas/ 404s — the URL a visitor or a crawler naturally
+ * tries after seeing /personas/ciso/. It also gives the 18 pages a single
+ * parent to link them, so discovery does not depend on the homepage strip
+ * alone.
+ *
+ * The cards read from the same deck files the pages do, so there is one source
+ * of this copy and check-claims.sh keeps governing it.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+import { parseDeck } from "../../lib/deckContent";
+
+const decks = import.meta.glob("/public/decks/persona-*.html", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
+
+const personas = Object.entries(decks)
+  .map(([path, html]) => {
+    const key = path.replace(/^.*persona-/, "").replace(/\.html$/, "");
+    const deck = parseDeck(html);
+    return { key, title: deck.title, tagline: deck.tagline };
+  })
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<BaseLayout
+  title="Bolt for your role: CISO, DPO, CIO, CFO, Legal and more | Sparcle"
+  description="What Bolt does for your role — governed AI inside your own perimeter, on the LLM you choose. Pages for the CISO, DPO, General Counsel, CIO, CFO, SOC and more."
+  canonical="https://sparcle.app/personas/"
+>
+  <main>
+    <Hero
+      eyebrow="Bolt for your role"
+      title="Pick the seat you sit in"
+      lede="The same governed AI surface, argued from where you sit — what it changes for your role, and what your security review will ask about it."
+      stripe="a"
+    />
+
+    <PageSection stripe="b">
+      <CardGrid>
+        {
+          personas.map((p) => (
+            <Card href={`/personas/${p.key}/`} title={p.title}>
+              {p.tagline}
+            </Card>
+          ))
+        }
+      </CardGrid>
+    </PageSection>
+
+    <CTAStrip title="See it on your own data" lede="Bolt runs inside your perimeter, on the LLM you choose.">
+      <a class="btn btn-primary" href="/download/">Download Bolt</a>
+      <a class="btn btn-secondary" href="/demo/">Book a demo</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>

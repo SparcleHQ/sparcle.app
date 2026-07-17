@@ -7,11 +7,10 @@ import Card from "../components/ui/Card.astro";
 import CTAStrip from "../components/ui/CTAStrip.astro";
 
 const tierRows = [
-  ["Data plane",      "Your perimeter",          "Your perimeter"],
-  ["AI inference",    "Your LLM (BYOK / BYO)",   "Sparcle-managed gateway (zero-retention)"],
-  ["Hosting",         "You",                     "You"],
-  ["SLA",             "Self-managed",            "Priority support"],
-  ["Air-gap option",  "✓",                  "·"],
+  ["Data plane",      "Your perimeter"],
+  ["AI inference",    "Your LLM (BYOK / BYO)"],
+  ["Hosting",         "You"],
+  ["Air-gap option",  "✓"],
 ];
 ---
 <BaseLayout
@@ -138,8 +137,9 @@ const tierRows = [
         <Card title="Inside your perimeter">
           Self-hosted on AWS, Azure, GCP, on-prem, or fully air-gapped. Identity flows through
           your existing IdP (SAML, OIDC, JWT). Your data, prompts, and responses stay inside your
-          network. If you opt into Managed AI, only LLM calls route through a Sparcle-managed
-          zero-retention gateway under an MSA + DPA; your data plane never leaves your perimeter.
+          network. When you point Bolt at a local or self-hosted model there is no outbound LLM
+          traffic at all; when you point it at a cloud provider you chose, only the PII-masked
+          prompt leaves, never the raw one, and never to Sparcle.
         </Card>
         <Card title="Multi-layer security pipeline">
           Every prompt and response passes through a multi-layer pipeline covering identity
@@ -515,21 +515,19 @@ const tierRows = [
 
     <PageSection
       eyebrow="Deployment"
-      title="Two operating models. Same platform."
-      lede="Bolt and Aeira always self-host the data plane and hosting in your own perimeter. Sparcle never hosts your data. The only choice is who runs the AI inference: bring your own LLM, or opt into a Sparcle-managed zero-retention gateway."
+      title="One operating model. Yours."
+      lede="Bolt and Aeira self-host the data plane and the hosting in your own perimeter, always. Sparcle never hosts your data and never runs your inference. You bring the LLM, so there is no Sparcle hop to audit and no retention policy of ours to take on faith."
       stripe="b"
     >
-      <div class="data-table data-table--cols3">
+      <div class="data-table data-table--model">
         <div class="data-table__row data-table__row--head">
           <div></div>
           <div>Self-Hosted</div>
-          <div>Managed AI option</div>
         </div>
         {tierRows.map((row) => (
           <div class="data-table__row">
             <div class="data-table__label">{row[0]}</div>
             <div>{row[1]}</div>
-            <div>{row[2]}</div>
           </div>
         ))}
       </div>
@@ -561,13 +559,14 @@ const tierRows = [
 </BaseLayout>
 
 <style is:global>
-  /* 3-column data-table variant: for the operating-model matrix.
-     Shares the .data-table base styles defined globally on /security. */
-  .data-table--cols3 .data-table__row {
-    grid-template-columns: 180px repeat(2, 1fr);
+  /* Operating-model table. Shares the .data-table base styles defined
+     globally on /security. Distinct name (not --cols2) so it cannot collide
+     with the shared variant used on /trust/vulnerability-disclosure. */
+  .data-table--model .data-table__row {
+    grid-template-columns: 180px 1fr;
   }
   @media (max-width: 720px) {
-    .data-table--cols3 .data-table__row {
+    .data-table--model .data-table__row {
       grid-template-columns: 1fr;
     }
   }

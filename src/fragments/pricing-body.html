@@ -181,7 +181,7 @@
                                 <rect x="3" y="14" width="7" height="7" rx="1" />
                                 <rect x="14" y="14" width="7" height="7" rx="1" />
                             </svg></a> (free)</li>
-                    <li>Optional Managed AI (prepaid, at provider cost, no markup)</li>
+                    <li>Bring your own LLM. You pay your provider directly, and we never mark up tokens.</li>
                     <li>Community + best-effort email support</li>
                 </ul>
             </div>
@@ -215,7 +215,7 @@
                     <li>Custom plugins</li>
                     <li>Shared team skill library</li>
                     <li>Policy controls</li>
-                    <li>Optional Managed AI (prepaid, at provider cost, no markup)</li>
+                    <li>Bring your own LLM. You pay your provider directly, and we never mark up tokens.</li>
                     <li>Privacy-first defaults</li>
                     <li><a href="#aeira">Aeira Catalog <svg class="inline-icon" viewBox="0 0 24 24" fill="none"
                                 stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -429,12 +429,7 @@
                                 <td class="plan-col"><span class="check">&#10003;</span></td>
                                 <td class="plan-col"><span class="check">&#10003;</span></td>
                             </tr>
-                            <tr>
-                                <td>Managed AI (optional, at cost)</td>
-                                <td class="plan-col"><span class="check">&#10003;</span></td>
-                                <td class="plan-col"><span class="check">&#10003;</span></td>
-                                <td class="plan-col"><span class="check">&#10003;</span></td>
-                            </tr>
+
                             <tr>
                                 <td>AI model</td>
                                 <td class="plan-col">BYO-LLM</td>
@@ -506,7 +501,7 @@
                             </svg>
                         </div>
                         <div class="trust-label">Self-hosted</div>
-                        <div class="trust-desc">Every tier self-hosts inside your own infrastructure. Sparcle never hosts your data. Optional Managed AI runs through a zero-retention gateway, covered by DPA.</div>
+                        <div class="trust-desc">Every tier self-hosts inside your own infrastructure. Sparcle never hosts your data and never runs your inference &mdash; you bring the LLM under your own provider contract.</div>
                     </div>
                     <div class="trust-item">
                         <div class="trust-icon">
@@ -553,8 +548,8 @@
                                     d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                             </svg>
                         </div>
-                        <div class="trust-label">Zero-retention AI gateway</div>
-                        <div class="trust-desc">Optional Managed AI: no prompts or responses stored by LLM providers</div>
+                        <div class="trust-label">Admin-enforced privacy floor</div>
+                        <div class="trust-desc">Set a minimum endpoint privacy tier and Bolt refuses any model below it &mdash; local-only, or no-training routes</div>
                     </div>
                     <div class="trust-item">
                         <div class="trust-icon">
@@ -861,7 +856,7 @@
                             <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
                         </summary>
                         <div class="faq-answer-wrapper">
-                            <div class="faq-answer"><p>No. BYO-LLM is the default in every tier. You connect your own provider (OpenAI, Anthropic, Bedrock, Azure, or a local model) and pay your provider directly at your own rate. We never mark up tokens. If you'd rather not manage keys, optional Managed AI is available on any tier, billed prepaid at provider cost with no markup. No surprise bills.</p></div>
+                            <div class="faq-answer"><p>No. BYO-LLM is the default in every tier. You connect your own provider (OpenAI, Anthropic, Bedrock, Azure, or a local model) and pay your provider directly at your own rate. We never mark up tokens. There is no Sparcle inference gateway and no Sparcle-managed key option. Your provider bills you directly, so there are no surprise bills from us.</p></div>
                         </div>
                     </details>
                     <details class="faq-details">
@@ -879,7 +874,7 @@
                             <span class="faq-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
                         </summary>
                         <div class="faq-answer-wrapper">
-                            <div class="faq-answer"><p>Entirely in your own infrastructure, in every tier. Authorize, Backbone, and Certify all self-host inside your perimeter. Sparcle never hosts your data. If you opt into Managed AI, prompts route through a zero-retention gateway covered by a DPA; nothing is stored by the LLM provider.</p></div>
+                            <div class="faq-answer"><p>Entirely in your own infrastructure, in every tier. Authorize, Backbone, and Certify all self-host inside your perimeter. Sparcle never hosts your data and never runs your inference. You bring your own LLM under your own provider contract, so no prompt ever transits Sparcle infrastructure.</p></div>
                         </div>
                     </details>
                     <details class="faq-details">

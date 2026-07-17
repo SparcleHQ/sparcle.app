@@ -74,9 +74,9 @@ const ndaItems = [
       <CardGrid cols={2}>
         <Card title="Your data. Your perimeter.">
           Self-host on AWS, Azure, GCP, on-prem, or fully air-gapped. Every Bolt tier and Aeira
-          Federated keep your data plane in your perimeter; Sparcle never hosts your data. If you
-          opt into Managed AI, only LLM inference routes through a Sparcle-managed gateway under
-          MSA + DPA with zero-retention guarantees from upstream providers; your data stays put.
+          Federated keep your data plane in your perimeter; Sparcle never hosts your data and
+          never runs your inference. You bring the LLM, under your own provider contract, so
+          nothing routes through us at any tier.
         </Card>
         <Card title="Identity-bound by design">
           Every query inherits the calling user's identity from your IdP (SAML, OIDC, JWT). Aeira
@@ -139,11 +139,12 @@ const ndaItems = [
           Docker Compose for staging, Kubernetes for production HA, air-gap option available. Most
           regulated buyers start here. From $30/seat/month for Bolt; from $999/month for Aeira Dynamic.
         </Card>
-        <Card title="Managed AI option (any tier)">
-          You keep the data plane in your perimeter. If you'd rather not run inference yourself,
-          Sparcle routes only LLM calls through a managed gateway under an MSA + DPA with
-          zero-retention guarantees from upstream providers. Your data plane never leaves your
-          perimeter; only PII-masked prompts reach the gateway.
+        <Card title="Bring your own LLM (any tier)">
+          You keep the data plane in your perimeter and you own the model contract. Point Bolt at
+          a local or self-hosted model and no LLM traffic leaves at all; point it at a cloud
+          provider you chose and only the PII-masked prompt goes, under your agreement with them,
+          never through Sparcle. An admin can set a privacy floor and Bolt will refuse any model
+          whose endpoint sits below it.
         </Card>
         <Card title="Air-Gapped (Aeira Federated)">
           No outbound, no inbound, no telemetry. Multi-region VPC or physically air-gapped. License

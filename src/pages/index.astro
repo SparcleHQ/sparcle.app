@@ -76,9 +76,9 @@ const proofs = [
             <!-- Hero video: Bolt + Aeira combined story (1:30). Bigger than the
                  two-tile row below to signal "start here." -->
             <div class="hero-video-hero" id="heroVideoHero">
-              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-aeira-90s.mp4?v=20260621a" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
+              <div class="hero-video-card hero-video-card--hero" data-video-src="media/bolt-aeira-90s.mp4?v=20260718a" data-video-captions="media/bolt-aeira-90s.vtt?v=20260718a" data-video-title="Bolt and Aeira. Intelligent Execution. Defensible Answers." role="button" tabindex="0" aria-label="Open Bolt and Aeira combined story with audio">
                 <video class="hero-preview-video" muted playsinline preload="metadata" loop autoplay>
-                  <source src="media/bolt-aeira-90s.mp4?v=20260621a" type="video/mp4">
+                  <source src="media/bolt-aeira-90s.mp4?v=20260718a" type="video/mp4">
                 </video>
                 <div class="video-controls-overlay video-preview-overlay">
                   <div class="video-play-btn" title="Click to watch with audio">
@@ -589,13 +589,29 @@ const proofs = [
         return null;
       }
 
-      function openModal(src, slug, syncUrl) {
+      // Captions live only on videos that have a .vtt (currently the 90s story).
+      // The modal is shared by all three, so the track is attached per-open and
+      // cleared on close, otherwise a caption file would bleed across videos.
+      function setModalCaptions(vtt) {
+        var old = modalVideo.querySelectorAll('track');
+        for (var i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+        if (!vtt) return;
+        var t = document.createElement('track');
+        t.kind = 'captions'; t.label = 'English'; t.srclang = 'en'; t.src = vtt; t.default = true;
+        // `default` is unreliable for dynamically added tracks, so force it showing.
+        t.addEventListener('load', function () { if (t.track) t.track.mode = 'showing'; });
+        modalVideo.appendChild(t);
+        if (t.track) t.track.mode = 'showing';
+      }
+
+      function openModal(src, slug, syncUrl, captions) {
         if (!src) return;
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         pauseAllPreviews();
         if (syncUrl) setVideoParam(slug);
         modalVideo.src = src;
+        setModalCaptions(captions);
         modalVideo.muted = false;
         modalVideo.currentTime = 0;
         setPlaybackRate(1);
@@ -606,6 +622,7 @@ const proofs = [
         modal.style.display = 'none';
         document.body.style.overflow = '';
         modalVideo.pause();
+        setModalCaptions(null);
         modalVideo.removeAttribute('src');
         modalVideo.load();
         if (clearUrlParam) setVideoParam('');
@@ -620,13 +637,14 @@ const proofs = [
       }
       cards.forEach(function (c) {
         var src = c.getAttribute('data-video-src');
+        var caps = c.getAttribute('data-video-captions');
         var slug = c === heroCard ? 'bolt-aeira'
                  : c === leftCard ? 'why-bolt'
                  : c === rightCard ? 'how-bolt'
                  : '';
-        c.addEventListener('click', function () { openModal(src, slug, true); });
+        c.addEventListener('click', function () { openModal(src, slug, true, caps); });
         c.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(src, slug, true); }
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(src, slug, true, caps); }
         });
       });
       closeBtn.addEventListener('click', function (e) { e.stopPropagation(); closeModal(true); });
@@ -637,10 +655,11 @@ const proofs = [
       var deepCard = slugToCard(deep);
       if (deepCard) {
         var deepSrc = deepCard.getAttribute('data-video-src');
+        var deepCaps = deepCard.getAttribute('data-video-captions');
         var norm = deepCard === heroCard ? 'bolt-aeira'
                  : deepCard === leftCard ? 'why-bolt'
                  : 'how-bolt';
-        openModal(deepSrc, norm, true);
+        openModal(deepSrc, norm, true, deepCaps);
       }
       if (modal.style.display !== 'flex') playLeftPreview();
     })();

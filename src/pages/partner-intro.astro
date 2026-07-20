@@ -264,6 +264,12 @@ const bookingUrl =
     max-width: 40rem;
     margin: 0 auto;
   }
+  /* The `hidden` attribute is applied via the UA sheet's [hidden]{display:none},
+     which any author-level `display` beats. .pi-form and .pi-success both set
+     `display: grid`, so without this they stay visible while marked hidden. */
+  .page-partner-intro [hidden] {
+    display: none !important;
+  }
   .page-partner-intro .pi-form {
     display: grid;
     gap: 1.25rem;

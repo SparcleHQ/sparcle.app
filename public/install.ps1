@@ -40,7 +40,7 @@ $ErrorActionPreference = "Stop"
 
 # ── Config ──────────────────────────────────────────────────────────────────
 $FallbackVersion = "0.1.0"
-$GitHubRepo      = "Sparcle-LLC/sparcle.app"
+$GitHubRepo      = "SparcleHQ/sparcle.app"
 $DefaultBoltPgReleasesUrl = "https://sparcle.app"
 $DefaultBoltPgFallbackReleasesUrl = ""
 $DownloadRetryMax = 5

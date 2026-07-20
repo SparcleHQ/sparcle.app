@@ -20,7 +20,7 @@
 set -e
 
 FALLBACK_VERSION="0.1.0"
-GITHUB_REPO="Sparcle-LLC/sparcle.app"
+GITHUB_REPO="SparcleHQ/sparcle.app"
 CACHE_BASE_DIR="${BOLT_INSTALLER_CACHE_DIR:-${HOME}/.cache/bolt-installer}"
 CACHE_KEEP_VERSIONS="2"
 

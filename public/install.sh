@@ -33,8 +33,8 @@ set -e
 
 # ── Config ───────────────────────────────────────────────────────────────────
 FALLBACK_VERSION="0.1.0"
-GITHUB_REPO="Sparcle-LLC/sparcle.app"
-DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/Sparcle-LLC/sparcle.app"
+GITHUB_REPO="SparcleHQ/sparcle.app"
+DEFAULT_BOLT_PG_RELEASES_URL="https://github.com/SparcleHQ/sparcle.app"
 DEFAULT_BOLT_PG_FALLBACK_RELEASES_URL="https://github.com/theseus-rs/postgresql-binaries"
 DEFAULT_BOLT_PG_PREWARM_REQUIRED="1"
 DEFAULT_BOLT_PG_VERSION="18.3.0"

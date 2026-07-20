@@ -1,0 +1,371 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+// Reuses the booking URL the demo page already expects. PUBLIC_BOOKING_URL is the
+// scheduler-neutral name; PUBLIC_CALENDLY_URL is kept as a fallback so whichever is
+// already set in the Cloudflare env keeps working.
+const bookingUrl =
+  import.meta.env.PUBLIC_BOOKING_URL ?? import.meta.env.PUBLIC_CALENDLY_URL ?? "";
+---
+
+<BaseLayout
+  title="Request a discovery call | Sparcle"
+  description="Tell us what you want to evaluate and we will set up a live product walkthrough against it."
+  canonical="https://sparcle.app/partner-intro/"
+  noindex={true}
+>
+  <main class="page-partner-intro">
+    <Hero
+      eyebrow="Discovery call"
+      title="Tell us what you want to <strong>evaluate</strong>."
+      lede="Five questions. They let us run the call against your actual problem instead of a generic overview, and they take about two minutes."
+    />
+
+    <PageSection stripe="b" width="content">
+      <div class="pi-wrap">
+        <form id="pi-form" class="pi-form" novalidate>
+          <label class="pi-label">
+            <span>Your name <span class="req">*</span></span>
+            <input type="text" name="name" required autocomplete="name" />
+          </label>
+
+          <label class="pi-label">
+            <span>Work email <span class="req">*</span></span>
+            <input
+              type="email"
+              name="email"
+              required
+              autocomplete="email"
+              aria-describedby="pi-email-help"
+            />
+            <small id="pi-email-help" class="pi-help">
+              Use your company address. Personal mailboxes such as Gmail or Outlook.com are not accepted.
+            </small>
+          </label>
+
+          <label class="pi-label">
+            <span>Company <span class="req">*</span></span>
+            <input type="text" name="company" required autocomplete="organization" />
+          </label>
+
+          <label class="pi-label">
+            <span>Your job title <span class="req">*</span></span>
+            <input
+              type="text"
+              name="role"
+              required
+              autocomplete="organization-title"
+              placeholder="e.g. CISO, Director of IT, Head of Data"
+            />
+          </label>
+
+          <fieldset class="pi-fieldset">
+            <legend>Budget for a purchase of this type <span class="req">*</span></legend>
+            <label class="pi-radio">
+              <input type="radio" name="budgetAuthority" value="hold" required />
+              <span>I hold the budget</span>
+            </label>
+            <label class="pi-radio">
+              <input type="radio" name="budgetAuthority" value="influence" />
+              <span>I influence it, or I report directly to who holds it</span>
+            </label>
+            <label class="pi-radio">
+              <input type="radio" name="budgetAuthority" value="neither" />
+              <span>Neither</span>
+            </label>
+            <small class="pi-help" id="pi-budget-note" hidden>
+              We may not be able to take the call at this stage. Submit anyway and we will tell you either way.
+            </small>
+          </fieldset>
+
+          <label class="pi-label">
+            <span>What do you want to evaluate? <span class="req">*</span></span>
+            <textarea
+              name="useCase"
+              required
+              rows="5"
+              minlength="80"
+              placeholder="The business problem, the data involved, and what a good outcome looks like."
+            ></textarea>
+            <small class="pi-help"><span id="pi-count">0</span> of 80 characters minimum.</small>
+          </label>
+
+          <label class="pi-label">
+            <span>Evaluation timeframe <span class="req">*</span></span>
+            <select name="timeframe" required>
+              <option value="">Pick one</option>
+              <option value="0-3">Next 0 to 3 months</option>
+              <option value="3-6">3 to 6 months</option>
+              <option value="6-12">6 to 12 months</option>
+              <option value="exploratory">Exploratory only, no timeframe</option>
+            </select>
+          </label>
+
+          <label class="pi-consent">
+            <input type="checkbox" name="consent" value="yes" />
+            <span>
+              Sparcle may contact me about this evaluation by email. I can withdraw this at any time by replying to any message.
+            </span>
+          </label>
+
+          <p class="pi-privacy">
+            We collect these answers to prepare and run your call, and we keep them as the record of your request. Sparcle is a United States company, so your details are stored in the United States. Ask us at
+            <a href="mailto:bolt@sparcle.app">bolt@sparcle.app</a> to see or delete them at any time.
+          </p>
+
+          {turnstileSiteKey && (
+            <div
+              class="cf-turnstile"
+              data-sitekey={turnstileSiteKey}
+              data-callback="onTurnstilePI"
+              data-error-callback="onTurnstilePIError"
+            />
+          )}
+
+          <button id="pi-submit" class="pi-submit" type="submit">Request the call</button>
+
+          <p id="pi-error" class="pi-error" hidden></p>
+        </form>
+
+        <div id="pi-success" class="pi-success" hidden>
+          <h3>Thanks, that is everything we need.</h3>
+          <p>
+            We have emailed you a confirmation. Pick a time that suits you and we will run the walkthrough against what you described.
+          </p>
+          {bookingUrl ? (
+            <a class="pi-book" href={bookingUrl} target="_blank" rel="noopener">Pick a time</a>
+          ) : (
+            <p>Reply to the confirmation email and we will find a time that works.</p>
+          )}
+        </div>
+      </div>
+    </PageSection>
+  </main>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+
+  <script is:inline>
+    (function () {
+      let turnstileToken = "";
+      window.onTurnstilePI = function (token) {
+        turnstileToken = token;
+      };
+      window.onTurnstilePIError = function () {
+        turnstileToken = "";
+      };
+
+      const form = document.getElementById("pi-form");
+      const submitBtn = document.getElementById("pi-submit");
+      const success = document.getElementById("pi-success");
+      const errorBox = document.getElementById("pi-error");
+      if (!form) return;
+
+      // Carry the partner code through from the link they were given.
+      const params = new URLSearchParams(window.location.search);
+      const partnerRef = params.get("p") || params.get("partner") || "";
+
+      const useCase = form.querySelector('[name="useCase"]');
+      const counter = document.getElementById("pi-count");
+      if (useCase && counter) {
+        useCase.addEventListener("input", function () {
+          counter.textContent = String(useCase.value.trim().length);
+        });
+      }
+
+      const budgetNote = document.getElementById("pi-budget-note");
+      form.querySelectorAll('[name="budgetAuthority"]').forEach(function (el) {
+        el.addEventListener("change", function () {
+          if (budgetNote) budgetNote.hidden = el.value !== "neither";
+        });
+      });
+
+      const FREE = [
+        "gmail.com","googlemail.com","outlook.com","hotmail.com","live.com","msn.com",
+        "yahoo.com","yahoo.co.uk","yahoo.co.in","ymail.com","icloud.com","me.com",
+        "mac.com","aol.com","proton.me","protonmail.com","pm.me","gmx.com","mail.com",
+        "zoho.com","yandex.com","qq.com","163.com","naver.com","fastmail.com",
+        "rediffmail.com","mail.ru","web.de","bigpond.com","rogers.com","shaw.ca"
+      ];
+
+      function fail(msg) {
+        errorBox.textContent = msg;
+        errorBox.hidden = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Request the call";
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        errorBox.hidden = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        const fd = new FormData(form);
+        const email = String(fd.get("email") || "").trim().toLowerCase();
+        const domain = email.split("@")[1] || "";
+        const text = String(fd.get("useCase") || "").trim();
+
+        if (!fd.get("budgetAuthority")) return fail("Please answer the budget question.");
+        if (FREE.indexOf(domain) !== -1) {
+          return fail("Please use your company email address rather than a personal mailbox.");
+        }
+        if (text.length < 80) {
+          return fail("Please give us a little more detail on what you want to evaluate.");
+        }
+        if (!fd.get("consent")) {
+          return fail("Please tick the box so we know we may contact you about this.");
+        }
+
+        const payload = {
+          name: fd.get("name") || "",
+          email: email,
+          company: fd.get("company") || "",
+          role: fd.get("role") || "",
+          budgetAuthority: fd.get("budgetAuthority") || "",
+          useCase: text,
+          timeframe: fd.get("timeframe") || "",
+          consent: true,
+          partnerRef: partnerRef,
+          turnstileToken: turnstileToken,
+        };
+
+        try {
+          const resp = await fetch("/api/partner-intro", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await resp.json();
+          if (data && data.ok) {
+            form.hidden = true;
+            success.hidden = false;
+          } else if (data && data.error === "work_email_required") {
+            fail("Please use your company email address rather than a personal mailbox.");
+          } else if (data && data.error === "use_case_too_short") {
+            fail("Please give us a little more detail on what you want to evaluate.");
+          } else if (data && data.error === "consent_required") {
+            fail("Please tick the box so we know we may contact you about this.");
+          } else {
+            fail("Something went wrong. Please try again, or email bolt@sparcle.app.");
+          }
+        } catch (err) {
+          fail("Something went wrong. Please try again, or email bolt@sparcle.app.");
+        }
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .page-partner-intro .pi-wrap {
+    max-width: 40rem;
+    margin: 0 auto;
+  }
+  .page-partner-intro .pi-form {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .page-partner-intro .pi-label {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .page-partner-intro .pi-label input,
+  .page-partner-intro .pi-label select,
+  .page-partner-intro .pi-label textarea {
+    font: inherit;
+    font-weight: 400;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--border, #d3d6dd);
+    border-radius: 6px;
+    background: var(--surface, #fff);
+    color: inherit;
+    width: 100%;
+  }
+  .page-partner-intro .pi-label textarea {
+    resize: vertical;
+  }
+  .page-partner-intro .req {
+    color: #c0392b;
+  }
+  .page-partner-intro .pi-help {
+    font-weight: 400;
+    font-size: 0.82rem;
+    opacity: 0.75;
+  }
+  .page-partner-intro .pi-fieldset {
+    border: 1px solid var(--border, #d3d6dd);
+    border-radius: 6px;
+    padding: 0.9rem 1rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .page-partner-intro .pi-fieldset legend {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0 0.35rem;
+  }
+  .page-partner-intro .pi-radio,
+  .page-partner-intro .pi-consent {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    font-size: 0.92rem;
+    font-weight: 400;
+    line-height: 1.45;
+  }
+  .page-partner-intro .pi-radio input,
+  .page-partner-intro .pi-consent input {
+    margin-top: 0.22rem;
+    flex: none;
+  }
+  .page-partner-intro .pi-privacy {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .page-partner-intro .pi-submit {
+    font: inherit;
+    font-weight: 600;
+    padding: 0.7rem 1.4rem;
+    border: 0;
+    border-radius: 6px;
+    background: var(--accent, #1f2933);
+    color: #fff;
+    cursor: pointer;
+    justify-self: start;
+  }
+  .page-partner-intro .pi-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .page-partner-intro .pi-error {
+    color: #c0392b;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  .page-partner-intro .pi-success {
+    text-align: center;
+    display: grid;
+    gap: 0.9rem;
+    justify-items: center;
+  }
+  .page-partner-intro .pi-book {
+    font-weight: 600;
+    padding: 0.7rem 1.4rem;
+    border-radius: 6px;
+    background: var(--accent, #1f2933);
+    color: #fff;
+    text-decoration: none;
+  }
+  @media (max-width: 640px) {
+    .page-partner-intro .pi-wrap {
+      max-width: 100%;
+    }
+  }
+</style>

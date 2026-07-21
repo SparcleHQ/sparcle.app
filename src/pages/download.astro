@@ -228,9 +228,11 @@ const faqs = [
             Sensitive values in a request are detected and tokenized before the LLM adapter is invoked.
             Internal tools still operate on unmasked values so productivity does not regress, and tool
             results are re-masked on the way back into the loop. DLP policy is enforced at the agent
-            boundary, not after the fact. One gap we name rather than hide: values a user has asked Bolt
-            to remember are assembled into the system prompt as stored, so the masking layer does not
-            cover them yet. That fix is in flight.
+            boundary, not after the fact. Values a user has asked Bolt to remember go through the same
+            masking chokepoint on their way into the system prompt, so a remembered identifier reaches
+            the model as a token rather than as itself. One thing we name rather than hide: that covers
+            what the model sees, not what the database holds. Remembered text is still stored unmasked
+            at rest, and closing that needs a masking decision at write time plus a backfill.
           </p>
         </article>
 

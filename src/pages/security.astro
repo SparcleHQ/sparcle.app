@@ -150,10 +150,10 @@ const ndaItems = [
           a local or self-hosted model and no LLM traffic leaves at all; point it at a cloud
           provider you chose and only the PII-masked prompt goes, under your agreement with them,
           never through Sparcle. An admin can set a privacy floor: Bolt derives a privacy tier for
-          each endpoint and refuses to build a provider below the floor. Enforcement runs per
-          request where the provider is constructed, and it does not yet sit on every path into
-          the model, so today the floor is a strong default rather than a hard gate. Closing the
-          remaining paths is in flight.
+          each endpoint and refuses to build a provider below the floor. The check sits at the
+          egress point every request passes through, streaming and non-streaming alike, so a call
+          path cannot skip it. Leaving the floor unset is the default and means no enforcement,
+          which is the right posture for a trial and the wrong one for production.
         </Card>
         <Card title="Air-Gapped (Aeira Federated)">
           No outbound, no inbound, no telemetry. Multi-region VPC or physically air-gapped. License

@@ -549,7 +549,7 @@
                             </svg>
                         </div>
                         <div class="trust-label">Admin-enforced privacy floor</div>
-                        <div class="trust-desc">Set a minimum endpoint privacy tier (local-only, or no-training routes) and Bolt refuses to build a provider below it. Enforcement is per request at provider construction and does not yet cover every path to the model</div>
+                        <div class="trust-desc">Set a minimum endpoint privacy tier (local-only, or no-training routes) and Bolt refuses to build a provider below it. The check sits at the egress point every model call passes through, so no call path can skip it. Unset by default, so set it deliberately</div>
                     </div>
                     <div class="trust-item">
                         <div class="trust-icon">

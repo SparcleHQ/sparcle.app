@@ -531,6 +531,33 @@ Invoke-CacheGc -CurrentVersionDir $VersionDir
 # $env:BOLT_REQUIRE_VERIFICATION = "1" (recommended for locked-down/MDM fleets).
 $BoltMinisignPubKey = "RWSd12rmLcdOLGl9yZ2hL7tigihN0ZGT923La8KNXaLQfW3lsSsPom0Q"
 
+# Decode a Tauri-format detached signature into a raw minisign .minisig.
+# Tauri writes the .sig base64-ENCODED (its bytes are the base64 of a raw
+# minisign signature whose first line is "untrusted comment:"); `minisign -V`
+# needs that raw form. This mirrors install.sh's decode_tauri_sig — WITHOUT it
+# the wrapped file is handed straight to minisign, which rejects it and
+# false-aborts a genuine download (the exact bug install.sh already fixed).
+# Returns $true and writes $OutPath only when the result looks like a real
+# minisign signature; on $false the caller SKIPS minisign rather than verifying
+# against a mangled sig.
+function Decode-TauriSig {
+  param([string]$InPath, [string]$OutPath)
+  try {
+    $raw = [System.IO.File]::ReadAllText($InPath)
+    if ($raw -match '^untrusted comment:') {
+      # Already raw (defensive; a future release may ship the sig unwrapped).
+      Copy-Item -LiteralPath $InPath -Destination $OutPath -Force
+    } else {
+      $bytes = [Convert]::FromBase64String(($raw -replace '\s', ''))
+      [System.IO.File]::WriteAllBytes($OutPath, $bytes)
+    }
+    return ((Test-Path $OutPath) `
+      -and ((Get-Content -LiteralPath $OutPath -TotalCount 1) -match '^untrusted comment:'))
+  } catch {
+    return $false
+  }
+}
+
 function Verify-Download {
   param([string]$Path)
   if (-not (Test-Path $Path)) { Fail "Internal error: downloaded file missing before verification." }
@@ -568,13 +595,17 @@ function Verify-Download {
   # Layer 2 — minisign authenticity (best-effort; stronger than a checksum).
   if (Get-Command minisign -ErrorAction SilentlyContinue) {
     $sigPath = "$Path.sig"
+    $rawSigPath = "$Path.minisig"
     $haveSig = $false
     try {
       Invoke-WebRequest -Uri "$BaseUrl/$fname.sig" -OutFile $sigPath -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop
       $haveSig = (Test-Path $sigPath) -and ((Get-Item $sigPath).Length -gt 0)
     } catch { $haveSig = $false }
-    if ($haveSig) {
-      & minisign -V -P $BoltMinisignPubKey -m $Path -x $sigPath *> $null
+    # Tauri ships the .sig base64-wrapped; minisign needs the raw form. If it
+    # can't be decoded, SKIP minisign rather than feed the wrapped file to
+    # `minisign -V`, which would reject it and false-abort a genuine download.
+    if ($haveSig -and (Decode-TauriSig -InPath $sigPath -OutPath $rawSigPath)) {
+      & minisign -V -P $BoltMinisignPubKey -m $Path -x $rawSigPath *> $null
       if ($LASTEXITCODE -eq 0) {
         if ($method) { $method = "$method + minisign" } else { $method = "minisign" }
         $verified = $true

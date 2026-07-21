@@ -354,7 +354,15 @@ function Stop-BoltProcesses {
     }
   }
   if ($killed) {
-    Start-Sleep -Milliseconds 500
+    # Wait for the processes to actually exit and release their file locks
+    # before the installer replaces the bundle. Stop-Process -Force is async
+    # w.r.t. handle release; without this the new bolt-api binary can fail to
+    # copy (silent partial upgrade), and a lingering sidecar keeps the embedded
+    # Postgres cluster busy during first launch.
+    $deadline = (Get-Date).AddSeconds(8)
+    while ((Get-Process -Name $names -ErrorAction SilentlyContinue) -and ((Get-Date) -lt $deadline)) {
+      Start-Sleep -Milliseconds 300
+    }
     Info "Stopped running Bolt processes so files can be replaced"
   }
 }
@@ -512,6 +520,118 @@ try {
 
 # Prune older version caches in the background.
 Invoke-CacheGc -CurrentVersionDir $VersionDir
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Integrity verification of the downloaded artifact
+# ══════════════════════════════════════════════════════════════════════════════
+# Mirrors install.sh: SHA-256 against the release's SHA256SUMS (zero new deps),
+# plus minisign authenticity when available. A mismatch aborts and deletes the
+# file. "Neither available" (older release, or no minisign + no SHA256SUMS) warns
+# and continues so existing releases still install — unless
+# $env:BOLT_REQUIRE_VERIFICATION = "1" (recommended for locked-down/MDM fleets).
+$BoltMinisignPubKey = "RWSd12rmLcdOLGl9yZ2hL7tigihN0ZGT923La8KNXaLQfW3lsSsPom0Q"
+
+# Decode a Tauri-format detached signature into a raw minisign .minisig.
+# Tauri writes the .sig base64-ENCODED (its bytes are the base64 of a raw
+# minisign signature whose first line is "untrusted comment:"); `minisign -V`
+# needs that raw form. This mirrors install.sh's decode_tauri_sig — WITHOUT it
+# the wrapped file is handed straight to minisign, which rejects it and
+# false-aborts a genuine download (the exact bug install.sh already fixed).
+# Returns $true and writes $OutPath only when the result looks like a real
+# minisign signature; on $false the caller SKIPS minisign rather than verifying
+# against a mangled sig.
+function Decode-TauriSig {
+  param([string]$InPath, [string]$OutPath)
+  try {
+    $raw = [System.IO.File]::ReadAllText($InPath)
+    if ($raw -match '^untrusted comment:') {
+      # Already raw (defensive; a future release may ship the sig unwrapped).
+      Copy-Item -LiteralPath $InPath -Destination $OutPath -Force
+    } else {
+      $bytes = [Convert]::FromBase64String(($raw -replace '\s', ''))
+      [System.IO.File]::WriteAllBytes($OutPath, $bytes)
+    }
+    return ((Test-Path $OutPath) `
+      -and ((Get-Content -LiteralPath $OutPath -TotalCount 1) -match '^untrusted comment:'))
+  } catch {
+    return $false
+  }
+}
+
+function Verify-Download {
+  param([string]$Path)
+  if (-not (Test-Path $Path)) { Fail "Internal error: downloaded file missing before verification." }
+  $fname = Split-Path -Leaf $Path
+  $verified = $false
+  $method = ""
+
+  # Layer 1 — SHA-256 against the release's SHA256SUMS.
+  $sumsPath = Join-Path $env:TEMP "BoltSHA256SUMS-$Version.txt"
+  $haveSums = $false
+  try {
+    Invoke-WebRequest -Uri "$BaseUrl/SHA256SUMS" -OutFile $sumsPath -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop
+    $haveSums = (Test-Path $sumsPath) -and ((Get-Item $sumsPath).Length -gt 0)
+  } catch { $haveSums = $false }
+  if ($haveSums) {
+    $expected = $null
+    foreach ($line in Get-Content $sumsPath) {
+      $parts = $line -split '\s+', 2
+      if ($parts.Count -eq 2) {
+        $name = $parts[1].TrimStart('*').Trim()
+        if ($name -eq $fname) { $expected = $parts[0].Trim().ToLower(); break }
+      }
+    }
+    if ($expected) {
+      $actual = (Get-FileHash -Path $Path -Algorithm SHA256).Hash.ToLower()
+      if ($actual -eq $expected) {
+        $verified = $true; $method = "SHA-256"
+      } else {
+        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+        Fail "Integrity check FAILED for ${fname}.`n  expected $expected`n  got      $actual`n  The download is corrupted or has been tampered with - do not run it.`n  Re-download from https://sparcle.app/download; if it fails again, contact security@sparcle.app."
+      }
+    }
+  }
+
+  # Layer 2 — minisign authenticity (best-effort; stronger than a checksum).
+  if (Get-Command minisign -ErrorAction SilentlyContinue) {
+    $sigPath = "$Path.sig"
+    $rawSigPath = "$Path.minisig"
+    $haveSig = $false
+    try {
+      Invoke-WebRequest -Uri "$BaseUrl/$fname.sig" -OutFile $sigPath -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop
+      $haveSig = (Test-Path $sigPath) -and ((Get-Item $sigPath).Length -gt 0)
+    } catch { $haveSig = $false }
+    # Tauri ships the .sig base64-wrapped; minisign needs the raw form. If it
+    # can't be decoded, SKIP minisign rather than feed the wrapped file to
+    # `minisign -V`, which would reject it and false-abort a genuine download.
+    if ($haveSig -and (Decode-TauriSig -InPath $sigPath -OutPath $rawSigPath)) {
+      & minisign -V -P $BoltMinisignPubKey -m $Path -x $rawSigPath *> $null
+      if ($LASTEXITCODE -eq 0) {
+        if ($method) { $method = "$method + minisign" } else { $method = "minisign" }
+        $verified = $true
+      } else {
+        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+        Fail "Signature verification FAILED for $fname - it is NOT authentically signed by Sparcle.`n  Do not run it. Re-download from https://sparcle.app/download or contact security@sparcle.app."
+      }
+    }
+  }
+
+  if ($verified) {
+    Ok "Verified $fname ($method)"
+  } else {
+    Warn "Could not verify ${fname}: no signature/checksum available for this release."
+    if (-not (Get-Command minisign -ErrorAction SilentlyContinue)) {
+      Warn "Install 'minisign' (winget install jedisct1.minisign) for signature verification."
+    }
+    if ($env:BOLT_REQUIRE_VERIFICATION -eq "1") {
+      Remove-Item $Path -Force -ErrorAction SilentlyContinue
+      Fail "BOLT_REQUIRE_VERIFICATION=1 is set but $fname could not be verified - aborting."
+    }
+  }
+}
+
+# Verify before we trust/install/run anything from the download.
+Verify-Download -Path $DlPath
 
 # ── Mark as trusted for Windows to run safely ───────────────────────────────
 Info "Marking $AppName as trusted..."

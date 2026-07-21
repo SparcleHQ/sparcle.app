@@ -78,7 +78,7 @@ const sections = [
       },
       {
         q: "How are agent and tool capabilities provisioned and restricted?",
-        a: "Capabilities are declared in a single MCP-native YAML manifest and enforced server-side. Admins provision org-wide Apps centrally; users can build their own desktop Apps; where the two overlap, admin-provisioned Apps take precedence. Entitlements (which tools and connectors a given identity can invoke) are checked on the server, not the client, so a user cannot widen their own surface. Most launcher actions are deterministic and never invoke an agent or a model at all.",
+        a: "Two layers, and it helps to keep them apart. Apps and utilities are declared in YAML manifests (a recognize block plus a transform pipeline, MCP-native where they call a tool). That is the surface admins author and provision org-wide; users can build their own desktop Apps, and where the two overlap, admin-provisioned Apps take precedence. The capability set itself is not YAML: it is a fixed list compiled into the server, so no manifest edit can invent a new capability or widen an existing one. Enforcement is server-side and on by default across session middleware, admin-only middleware, OAuth scope checks, a per-tool capability check in the agent loop, and Aeira's per-tenant SQL ACL pre-filter. On top of that sits an optional policy decision point for rule-based capability policy; it ships in the box but is inert under the default governance profile, so a deployment that wants it turns it on deliberately and we walk through that configuration during a pilot. Most launcher actions are deterministic and never invoke an agent or a model at all.",
       },
     ],
   },
@@ -89,11 +89,11 @@ const sections = [
     items: [
       {
         q: "Do you log security events?",
-        a: "Yes. Structured JSON to stdout (set LOG_FORMAT=json; default in production overlay). Customer routes via Vector, Fluent Bit, OpenTelemetry Collector, or Datadog Agent to their SIEM. SIEM export guide is shared during pilot evaluation.",
+        a: "Yes, and there are two ways to get them out. Collector path: structured JSON to stdout (set LOG_FORMAT=json; default in production overlay), which Vector, Fluent Bit, OpenTelemetry Collector, or Datadog Agent picks up like any other workload. Direct path: bolt-api ships an authenticated forwarder with backends for Splunk HEC, Microsoft Sentinel via the HMAC-signed collector API, Microsoft Sentinel via a Data Collection Rule with AAD OAuth2 and automatic token refresh, and syslog over TCP. The direct forwarder is off by default and no shipped values file turns it on, so plan it as a deployment step. It sends best-effort with no retry buffer today, so if you need guaranteed delivery under a transient SIEM outage, put a collector in front. SIEM export guide is shared during pilot evaluation.",
       },
       {
         q: "What events are logged?",
-        a: "Authentication events, authorization decisions, admin actions (KMS rotation, PII reveal, audit seal, SCIM token issuance and revoke), data access via Aeira search (ingest path; search-side audit emit is on the roadmap), tool executions, LLM calls, errors, state-machine transitions on agent runs. Audit lines tagged with event_type=security for SIEM-side index separation.",
+        a: "Authentication events, authorization decisions, admin actions (KMS rotation, PII reveal, audit seal, SCIM token issuance and revoke), Aeira search on every exit path (denied, router-allowed, and keyword-allowed alike, sealed into the Merkle chain), tool executions, LLM calls, errors, state-machine transitions on agent runs. Aeira search cannot serve a result it did not record: the same Postgres that wires the audit sink is required to run a search at all, so the failure mode is a 503, not a silent unaudited answer. Where the coverage stops today: Aeira's catalog routes (browse, entity, graph, kinds) and Bolt's own connector-side search endpoints return results without emitting an audit event. Routing both through the same emit chokepoint is in flight, and I would rather you hear that from me than find it in a log review. Audit lines tagged with event_type=security for SIEM-side index separation.",
       },
       {
         q: "Is the audit log tamper-evident?",

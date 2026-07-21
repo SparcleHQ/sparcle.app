@@ -85,8 +85,10 @@ const ndaItems = [
         </Card>
         <Card title="Encrypted & auditable">
           KMS-enveloped storage with per-tenant key isolation. Provable cryptographic erasure for
-          GDPR &amp; HIPAA obligations. Audit trail on every query, including which results were
-          filtered and why. Specific KMS posture and crypto choices reviewed under NDA.
+          GDPR &amp; HIPAA obligations. Aeira search seals an audit event for every query it serves,
+          allowed or denied, recording the query, the calling principal, the tenant, and the
+          decision. Per-result filtering detail is not recorded today. Specific KMS posture and
+          crypto choices reviewed under NDA.
         </Card>
         <Card title="Patent-pending architecture">
           Bolt's patent-pending architecture covers the runtime architecture, the priority engine,
@@ -97,9 +99,13 @@ const ndaItems = [
           self-contained proof bundle and an auditor verifies it completely offline, with no database,
           and nothing from Sparcle, in the verification loop.
         </Card>
-        <Card title="Streams to your SIEM out of the box">
-          Audit events forward to your SIEM (Splunk, Microsoft Sentinel, or syslog) with no extra
-          tooling. Your security team watches Bolt activity in the same place it watches everything else.
+        <Card title="Forwards to your SIEM">
+          Audit events forward straight to Splunk HEC, Microsoft Sentinel (HMAC-signed collector
+          or a Data Collection Rule with AAD OAuth2), or syslog over TCP, authenticated from
+          bolt-api. Forwarding is off until you configure it, and the stdout-to-collector route
+          (Vector, Fluent Bit, OpenTelemetry) stays available if you would rather ship Bolt's logs
+          the way you ship everything else. Either way your security team watches Bolt activity
+          where it watches the rest of the estate.
         </Card>
       </CardGrid>
     </PageSection>
@@ -143,8 +149,11 @@ const ndaItems = [
           You keep the data plane in your perimeter and you own the model contract. Point Bolt at
           a local or self-hosted model and no LLM traffic leaves at all; point it at a cloud
           provider you chose and only the PII-masked prompt goes, under your agreement with them,
-          never through Sparcle. An admin can set a privacy floor and Bolt will refuse any model
-          whose endpoint sits below it.
+          never through Sparcle. An admin can set a privacy floor: Bolt derives a privacy tier for
+          each endpoint and refuses to build a provider below the floor. Enforcement runs per
+          request where the provider is constructed, and it does not yet sit on every path into
+          the model, so today the floor is a strong default rather than a hard gate. Closing the
+          remaining paths is in flight.
         </Card>
         <Card title="Air-Gapped (Aeira Federated)">
           No outbound, no inbound, no telemetry. Multi-region VPC or physically air-gapped. License

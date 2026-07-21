@@ -186,7 +186,7 @@ const faqs = [
         <article class="org-benefit">
           <h3 class="org-benefit__title">Central governance + audit</h3>
           <p class="org-benefit__body">
-            Sealed Merkle audit chain on every retrieval, masking decision, tool call, and LLM call. Per-tenant
+            Sealed Merkle audit chain over Aeira search queries, privileged admin actions, tool calls, and LLM calls. Per-tenant
             CMK envelopes. Crypto-shred for right-to-erasure. Standalone verifier binary your CISO can run
             offline. SIG Lite, threat model, DPA, and MSA drafts ready for security review.
           </p>
@@ -225,10 +225,12 @@ const faqs = [
         <article class="org-benefit">
           <h3 class="org-benefit__title">PII + DLP at the LLM boundary</h3>
           <p class="org-benefit__body">
-            Sensitive values are masked before any LLM call. Internal tools still operate on unmasked
-            values so productivity does not regress. DLP policy is enforced at the agent boundary, not
-            after the fact. The masking contract is provable in the audit chain. Show the auditor
-            exactly which fields the model saw.
+            Sensitive values in a request are detected and tokenized before the LLM adapter is invoked.
+            Internal tools still operate on unmasked values so productivity does not regress, and tool
+            results are re-masked on the way back into the loop. DLP policy is enforced at the agent
+            boundary, not after the fact. One gap we name rather than hide: values a user has asked Bolt
+            to remember are assembled into the system prompt as stored, so the masking layer does not
+            cover them yet. That fix is in flight.
           </p>
         </article>
 

@@ -259,11 +259,14 @@ import Prose from "../../components/ui/Prose.astro";
           and verified after the response comes back. For remote agents, the
           same contract is honored at the wire.
         </Card>
-        <Card title="Audit chain captures every step">
-          Every routing decision, every reasoning turn, every tool selection,
-          every tool call, every subagent invocation. The same chain Apps
-          and Retrieval use. Remote and subagent calls are recorded with the
-          requesting user's identity through the full chain.
+        <Card title="Audit chain captures the run">
+          Routing decisions, tool selections, tool calls, subagent invocations,
+          and the run's state-machine transitions, sealed into the same chain
+          Apps and Aeira search use. Remote and subagent calls are recorded with
+          the requesting user's identity through the full chain. What is not in
+          the chain today: Bolt's own connector-side search endpoints and Aeira's
+          catalog browse routes, which return results without emitting an event.
+          Routing them through the same chokepoint is in flight.
         </Card>
         <Card title="Supervision sees status, never content">
           Operator oversight exposes operational metadata only (a run's status

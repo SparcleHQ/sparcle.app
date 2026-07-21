@@ -35,10 +35,10 @@ const governance = [
 
 const outcomes = [
   { metric: "Hours",     label: "Time reclaimed",              body: "Launcher utilities save hours per person per week before AI fires. The product earns its keep before the LLM bill starts." },
-  { metric: "Prevented", label: "Policy violations stopped",   body: "ACL pre-filter blocks cross-role exposure at the database. Not detected after; prevented before." },
-  { metric: "Hidden",    label: "PII masked at the LLM boundary", body: "Deterministic tokens replace private values before any LLM call; restoration happens on the return path. In Mode A and Mode B the prompt stays inside your perimeter; in Mode C the masked form leaves while the unmasked record stays in your audit log." },
+  { metric: "Pre-filtered", label: "Cross-role exposure blocked", body: "Aeira's search ACL is a SQL pre-filter with no bypass flag, so unauthorized rows are never read rather than filtered out afterwards. The catalog and vector lanes filter after the candidate fetch, so the guarantee is strongest on the path most queries take." },
+  { metric: "Hidden",    label: "PII masked at the LLM boundary", body: "Deterministic tokens replace private values in the request before the LLM adapter is invoked; restoration happens on the return path. Stored user memories are outside that layer today and the fix is in flight. In Mode A and Mode B the prompt stays inside your perimeter; in Mode C the masked form leaves while the unmasked record stays in your audit log." },
   { metric: "Bounded",   label: "Spend contained",             body: "20+ utilities and 20+ scopes cost zero tokens. AI fires only when reasoning is genuinely needed." },
-  { metric: "Enforced",  label: "Compliance met",              body: "Role, model, and source governance enforced automatically. Your rules become your guardrails." },
+  { metric: "Enforced",  label: "Your policy applied at runtime", body: "Role, model, and source governance are configured once and applied by the runtime instead of living in a document nobody reads. Whether you are compliant is your auditor's determination, never ours; what we give you is the enforcement and the evidence to show them." },
   { metric: "Sealed",    label: "Audit evidence preserved",    body: "Tamper-evident Merkle chain ready when the regulator calls. No \"trust our SOC report.\"" },
 ];
 ---

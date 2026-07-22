@@ -29,12 +29,12 @@
 Bolt is a responsible-AI surface for your whole workforce — the governed alternative to employees pasting confidential data into whatever cloud AI is closest. It connects to your business systems (email, calendar, tasks, Slack, Salesforce, JIRA, SAP, HR systems, and more) via the open MCP protocol, surfaces the single most important action a user needs to take right now, and routes sensitive data through a multi-layer security pipeline — all running inside the customer's own infrastructure. Most queries resolve deterministically and on-device — launcher recognition, manifest-to-MCP utility calls, and search run with no LLM call and no egress; agents step in only when the work needs them, and execute under identity- and permission-aware governance.
 
 **Key differentiators vs. SaaS AI assistants (Copilot 365, Gemini Workspace, etc.):**
-- PII / PHI / financial values masked at the LLM-call boundary; audit logs stay PII-free; Sparcle has no hosted ingest path
+- Structured PII, financial values, and secrets masked or blocked at the LLM-call boundary by default; free-text PHI (names, narrative context) masked when the compliance profile's on-prem NER model is enabled; audit logs stay PII-free; Sparcle has no hosted ingest path
 - Bring Your Own LLM: OpenAI, Anthropic, Ollama, NVIDIA NIM, or any OpenAI-compatible endpoint
 - Deploy completely air-gapped for ITAR/classified environments
 - Open MCP protocol — not locked into any vendor's plugin ecosystem
 - Transparent multi-layer security pipeline with audit logs the customer owns
-- 4-level ACL (public / department / group / user)
+- 4-level ACL model (public / department / group / user), enforced via the regulated governance profile; the single-user desktop build stays lean and advisory (no org directory to enforce against)
 - Model-agnostic — switch LLM providers without changing employee workflows or governance posture
 - Architecture designed for HIPAA, GDPR, DPDPA, and sovereign-AI workflows
 
@@ -214,8 +214,9 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
   jurisdiction privacy packs (GDPR, UK GDPR, CCPA, LGPD, DPDP, PIPL, APPI, PIPA, PDPA for
   Singapore and Thailand, Australia Privacy, PIPEDA, Quebec Law 25, POPIA, NDPA, KVKK, PDPL,
   FADP, and more).
-- An enabled pack masks or blocks its sensitive patterns at the model boundary and validates
-  national IDs with real check-digit math.
+- An enabled pack recognizes and labels its sensitive patterns and validates national IDs with
+  real check-digit math; on regulated deployments its mask/block tiers are enforced at the model
+  boundary (context-gated PHI masking uses the on-prem NER model).
 - Packs are Ed25519-signed .boltpack bundles that install offline with a review-and-consent
   step, so new regulation reaches an air-gapped deployment without a software update.
 - Cryptographic erasure cascade with a deletion receipt and an offline-verifiable audit

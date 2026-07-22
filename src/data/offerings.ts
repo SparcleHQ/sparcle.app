@@ -213,15 +213,15 @@ export const boltProductContent: ProductPageContent = {
 };
 
 export const aeiraProductContent: ProductPageContent = {
-  title: "Aeira: Self-Hosted Enterprise Search & Data Plane, ACL-Aware (Sovereign) | Sparcle",
+  title: "Aeira: Self-Hosted, ACL-Aware Enterprise Search & Answer Engine (Sovereign) | Sparcle",
   description:
-    "Aeira is a self-hosted, ACL-aware enterprise search and data plane for regulated teams: identity-bound hybrid search, per-tenant KMS, crypto-shred erasure for GDPR/HIPAA. Runs on-prem, in your VPC, or fully air-gapped; your data stays inside your perimeter.",
+    "Aeira is a self-hosted, ACL-aware enterprise search and answer engine (a sovereign data plane) for regulated teams: identity-bound hybrid search turns your knowledge into defensible answers, with per-tenant KMS and crypto-shred erasure for GDPR/HIPAA. Runs on-prem, in your VPC, or fully air-gapped; your data stays inside your perimeter.",
   canonical: "https://sparcle.app/products/aeira.html",
   productName: "Aeira",
-  productKicker: "Sovereign Enterprise Data Plane",
-  productHeadline: "The data plane your CISO will actually approve.",
+  productKicker: "The Sovereign Answer Engine",
+  productHeadline: "Defensible answers your CISO will actually approve.",
   productIntro:
-    "Aeira is the fully self-hosted enterprise data plane for regulated industry and any organization that takes data privacy and data sovereignty seriously in the new age of AI. Identity-bound search, provable erasure for GDPR / HIPAA obligations, audit-trail responses your compliance team can actually point to. Especially relevant for defense, finance, healthcare, and federal; same architecture works for any enterprise that wants its data inside the firewall. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped. Architecture details available under NDA.",
+    "Aeira organizes your organization's knowledge and turns it into defensible answers for the right people and agents. Every answer is identity-bound (the agent never sees what the user can't), provably erasable for GDPR / HIPAA obligations, and carries the audit trail your compliance team can actually point to. Especially relevant for defense, finance, healthcare, and federal; the same ACL-aware data plane works for any enterprise that wants its knowledge inside the firewall. Deploy on AWS, Azure, GCP, on-prem, or fully air-gapped. Architecture details available under NDA.",
   primaryCtaLabel: "Design Aeira Deployment",
   primaryCtaHref: "#contact:Aeira Deployment Design",
   secondaryCtaLabel: "Pricing & Tiers",
@@ -234,7 +234,7 @@ export const aeiraProductContent: ProductPageContent = {
     "<strong>Identity-bound access control</strong>: every query is filtered to what the calling user is entitled to see; the agent never sees what they can't",
     "<strong>Provable erasure for GDPR / HIPAA</strong>: cryptographically destroy the data, not just delete the row; auditor-acceptable proof",
     "<strong>Fully self-hosted</strong>: AWS, Azure, GCP, on-prem, or fully air-gapped; data never leaves your perimeter",
-    "<strong>Audit-trail responses</strong>: every result carries the why-filtered context regulators ask for during reviews",
+    "<strong>Defensible answers</strong>: every result is access-filtered to the caller, cited to its source, and carries the why-filtered context regulators ask for during reviews",
     "<strong>Standalone or with Bolt</strong>: buy Aeira alone for ACL-aware enterprise search, or get Catalog free with every Bolt plan",
     "<strong>Stable API across all tiers</strong>: start with Catalog, scale to Federated without integration rewrites",
     "<strong>License-validated</strong>: Catalog (free with Bolt) → Dynamic ($999/mo) → Enhanced ($4,999/mo) → Federated (from $500K/yr)",
@@ -243,7 +243,7 @@ export const aeiraProductContent: ProductPageContent = {
     {
       title: "Identity-bound access control",
       detail:
-        "Every query is automatically filtered to what the calling user's identity is entitled to see: region, department, sensitivity clearance, and role, derived from your existing IdP. Your AI agents and your auditors see the same answer.",
+        "Every query is automatically filtered to what the calling user's identity is entitled to see: region, department, sensitivity clearance, and role, derived from your existing IdP. Your AI agents and your auditors get the same answer, filtered to the same identity. That is what makes it defensible: access-correct, cited, and reproducible.",
       icon: "lock",
     },
     {
@@ -266,6 +266,11 @@ export const aeiraProductContent: ProductPageContent = {
     },
   ],
   faqs: [
+    {
+      title: "What makes an answer \"defensible\", and does Aeira generate it?",
+      detail:
+        "A defensible answer is one you can stand behind in an audit: filtered to the caller's identity (they never see what their ACL forbids), cited to its source, and reproducible. Aeira produces that access-correct, cited evidence and its provenance. When you want it synthesized into prose, that generation runs on your own BYO model inside your own boundary, with PII masked at the model boundary; Aeira itself makes no outbound model calls.",
+    },
     {
       title: "Is Aeira Catalog included in all Bolt plans?",
       detail:

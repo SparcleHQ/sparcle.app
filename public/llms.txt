@@ -1,6 +1,6 @@
 # Sparcle — AI-Readable Product & Company Summary
 # Standard: llms.txt (https://llmstxt.org/)
-# Updated: 2026-07-16
+# Updated: 2026-07-22
 # Primary URL: https://sparcle.app
 
 ## Company
@@ -119,7 +119,7 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
 - Backend: Rust (Axum), clean architecture, circuit breakers, distributed rate limiting
 - Protocol: Open Model Context Protocol (MCP) for all integrations
 - Supported LLMs: OpenAI, Azure OpenAI, Anthropic, Google Vertex, Ollama, NVIDIA NIM, LM Studio, any OpenAI-compatible API
-- Identity: OIDC + SAML (Google, Microsoft Entra/Azure AD, Okta, Zoho)
+- Identity: OIDC + SAML + SCIM 2.0 provisioning and directory/group sync (Google, Microsoft Entra/Azure AD, Okta, Zoho)
 - Integrations: Gmail, Outlook, Google Calendar, Exchange, Google Tasks, Slack, Salesforce, JIRA, SAP, OneDrive, SharePoint, plus a growing roster via open MCP
 - Security: multi-layer pipeline — PII detection/masking (HMAC-SHA256 pseudonymization), AES-256-GCM token vault, audit logging, rate limiting, circuit breakers, policy guardrails, zero-retention AI gateway (optional, customer-deployed)
 - Access control: 4-level ACL (public / department / group / user)
@@ -240,11 +240,26 @@ Sparcle targets the $10T+ global regulated economy — industries where SaaS AI 
   pay); pending approvals survive restart.
 - Audit trail on every request (method, path, user, status, duration, correlation IDs);
   audit logs kept free of raw PII.
-- Identity-aware access: OIDC and SAML; 4-level model (public / department / group / user);
-  the server is the final authority on access.
+- Identity-aware access: OIDC and SAML; SCIM 2.0 user provisioning and directory sync
+  (department, groups, and job title pulled from Google Workspace, Microsoft Entra / Azure AD,
+  or Zoho at login); 4-level model (public / department / group / user); the server is the
+  final authority on access.
 - Data-policy enforcement at every display/copy/share boundary: (staged) framework ships;
   enforcement is being wired boundary by boundary. Do not describe blanket DLP enforcement
   as complete.
+- Enterprise spend controls (admin, configurable): per-user daily query quotas and monthly
+  token budgets (per-user and org-pool-per-seat); admin-editable per-model spend caps with
+  three enforcement modes — hard-block, notify-only, or auto-downgrade to a cheaper fallback
+  model when a cap is hit. Enforced once a plan tier and limits are set; BYO key means zero
+  token markup on top.
+- Auto model routing (Backbone tier): publish an "auto" model and each query is classified
+  and routed to the cheapest capable model in a pool (cheap / balanced / best), with per-turn
+  stickiness and a routing-decision log.
+- Cost and spend analytics for admins: total AI spend plus per-model, per-user, and
+  per-department / per-role / per-group breakdowns.
+- Governed agent platform: named agents with keyword/explicit routing and delegation; durable
+  checkpointed agents that resume after a restart; async tools (await webhook / message / timer,
+  human approval, sub-agent fan-out), all under the same masking, approvals, and audit.
 
 ## Integration and extensibility (GA)
 

@@ -1,0 +1,273 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/ui/Hero.astro";
+import PageSection from "../components/ui/PageSection.astro";
+import CardGrid from "../components/ui/CardGrid.astro";
+import Card from "../components/ui/Card.astro";
+import CTAStrip from "../components/ui/CTAStrip.astro";
+import BlockQuote from "../components/marketing/BlockQuote.astro";
+
+const icons = {
+  location: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+  restraint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>',
+  dev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>',
+  everyday: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  security: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+  legal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M10 18h4"/></svg>',
+  finance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  leaders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg>',
+  server: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="7" rx="2"/><rect x="2" y="14" width="20" height="7" rx="2"/><path d="M6 7h.01M6 18h.01"/></svg>',
+  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+};
+
+const personas = [
+  { icon: icons.dev, title: "Developer", body: "Decode a JWT offline, diff two configs, redact a stack trace before it hits a ticket, pull your Jira issues with =jira. All rendered in the launcher, no model, zero tokens." },
+  { icon: icons.everyday, title: "Everyday work", body: "Reformat a messy CSV, read a spreadsheet with =stats (spread, mean, median), get a timezone planner and overlap in one keystroke." },
+  { icon: icons.security, title: "Security and IT", body: "The shadow-AI paste leak is your KPI. Bolt is the sanctioned local alternative that removes the reason to paste, plus a paste-guard that warns or redacts on AI sites." },
+  { icon: icons.legal, title: "Legal and compliance", body: "Redact before any external paste of a contract excerpt or client detail. Court-day date math and contract diffs, all on-device." },
+  { icon: icons.finance, title: "Finance", body: "Runway, burn, and growth math on numbers too sensitive for ChatGPT, computed on your own machine, never pasted out." },
+  { icon: icons.leaders, title: "Leaders", body: "Board-call timezone overlap and quick growth math without ever breaking flow, and a workforce using AI you can actually account for." },
+];
+
+const stack = [
+  "Password and secrets access",
+  "Secure notes",
+  "Clipboard history",
+  "Secure sharing",
+  "DLP paste-guard",
+  "Permission-safe search",
+  "Governed AI assistant",
+];
+---
+<BaseLayout
+  title="Why Bolt: the AI that runs inside your walls, in plain language"
+  description="Every AI shortcut your team takes has a hidden bill: data leaving your control, tokens for work AI never needed, compliance you cannot prove. Bolt gives your team the speed without the bill: most tasks run on-device with no model, and when a model is needed you define the boundary and pick the model."
+  canonical="https://sparcle.app/why-bolt/"
+>
+  <link slot="head" rel="stylesheet" href="/css/why-bolt.css" />
+  <main class="page-why-bolt">
+    <Hero
+      eyebrow="Bolt, in plain language"
+      title="Every AI shortcut your team takes has a <strong>hidden bill</strong>."
+      lede="Every day, small tasks get done the fastest way, pasted into a cloud chatbot. And each one quietly costs you: data that leaves your control, tokens you never needed to spend, compliance you cannot prove later, and the time and focus you do not get back. Bolt gives your team that same speed with none of the bill. The everyday tasks run inside your boundary, most with no model at all, and confidential data is masked before anything leaves."
+    >
+      <a class="btn btn-primary btn-lg" href="#day">See what a morning costs</a>
+      <a class="btn btn-secondary btn-lg" href="/download/">Get Bolt, free</a>
+    </Hero>
+    <p class="why-jump">
+      <a href="#exec">Or jump to what it means for your org, by role &rarr;</a>
+    </p>
+
+    <PageSection
+      id="day"
+      eyebrow="A day in the life"
+      title="The same morning, and what it quietly costs."
+      lede="Nothing here is exotic; it is an ordinary knowledge worker's day. But look at what each shortcut spends. With Bolt, every task stays in one keystroke, on your machine."
+      stripe="b"
+      width="content"
+    >
+      <div class="daylife">
+        <div class="daylife__head">
+          <div>Time</div><div>Today</div><div class="is-bolt">With Bolt</div>
+        </div>
+
+        <div class="daylife__row">
+          <div class="t">9:05</div>
+          <div class="today">Debugging an API, you paste a login token into jwt.io to read it.<span class="tg tg-sw">switch</span></div>
+          <div class="bolt">Paste the token into Bolt and it is decoded instantly, on-device.</div>
+        </div>
+        <div class="daylife__row">
+          <div class="t">9:20</div>
+          <div class="today">A vendor CSV lands, you open an online converter to make it readable.<span class="tg tg-lk">exposure</span></div>
+          <div class="bolt">Paste it into Bolt: a clean table, and <code>=stats</code> reads the numbers, on-device.</div>
+        </div>
+        <div class="daylife__row">
+          <div class="t">9:40</div>
+          <div class="today">Standup with London and Pune, you google "PST to IST".<span class="tg tg-sw">switch</span></div>
+          <div class="bolt">Type "9am PT with london and pune" and get the planner and overlap instantly.</div>
+        </div>
+        <div class="daylife__row">
+          <div class="t">10:15</div>
+          <div class="today">Tidying customer notes, you paste them into ChatGPT.<span class="tg tg-lk">exposure</span><span class="tg tg-tk">tokens</span></div>
+          <div class="bolt">Paste the notes into Bolt; cleaned locally, and if a model helps, names are masked first and you pick the model.</div>
+        </div>
+        <div class="daylife__row">
+          <div class="t">11:00</div>
+          <div class="today">Comparing two config versions, you find an online diff tool and paste both.<span class="tg tg-lk">exposure</span></div>
+          <div class="bolt">Paste both versions into Bolt; <code>=diff</code> shows exactly what changed, on-device.</div>
+        </div>
+        <div class="daylife__row">
+          <div class="t">11:30</div>
+          <div class="today">A quick runway number, you paste the financials into a chatbot.<span class="tg tg-lk">exposure</span><span class="tg tg-tk">tokens</span></div>
+          <div class="bolt">Paste the numbers into Bolt; runway and burn computed on-device, and the numbers stay on your machine.</div>
+        </div>
+        <div class="daylife__row">
+          <div class="t">2:00</div>
+          <div class="today">Redacting a doc before sending, by hand, and you miss one.<span class="tg tg-lk">exposure</span></div>
+          <div class="bolt">Paste it into Bolt; <code>=redact</code> strips secrets and PII in one motion, then copy.</div>
+        </div>
+
+        <div class="daylife__tally">
+          <div class="t">By 2pm</div>
+          <div class="today"><span class="lbl">Today</span>6 trips out of the app, 5 sensitive pastes into places you cannot see into, several token calls for deterministic work, 1 near-miss.</div>
+          <div class="bolt"><span class="lbl">With Bolt</span>0 trips out, 0 sensitive pastes, 0 tokens for those tasks, 0 near-misses.</div>
+        </div>
+      </div>
+
+      <p class="daylife__punch">The work was always the point. <em>The tax was everything around it.</em> Bolt deletes the tax.</p>
+
+      <BlockQuote
+        quote="Your workforce burns <strong>~5 weeks per year</strong> reorienting after interruptions."
+        citation="Gloria Mark, UC Irvine: Attention Span"
+        href="/research.html"
+      />
+    </PageSection>
+
+    <PageSection
+      eyebrow="What Bolt actually is"
+      title="It brings the thinking to where your work already is."
+      lede="Every AI tool you know sends your work out to someone else's computer to think about it. Bolt keeps it inside your control. And most of the time, it does not need an AI model at all."
+      stripe="a"
+    >
+      <CardGrid cols={2}>
+        <Card variant="default" icon={icons.location} title="Location">
+          Processing runs inside your boundary, your laptop or your own servers. Same class of answer, your data stays under your control.
+        </Card>
+        <Card variant="default" icon={icons.restraint} title="Restraint">
+          About 80 everyday tasks run instantly on-device with no model at all. A model is called only when the task needs judgment, and sensitive data is masked first.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="The Copilot question"
+      title="Same pipe, opposite direction for your data."
+      lede="You already have Copilot connected to Jira over MCP. Connecting is table stakes; everyone does it. The difference is which way your data flows through the pipe, and whether it needs a model at all."
+      stripe="b"
+      width="content"
+    >
+      <div class="contrast">
+        <div class="contrast__col is-them">
+          <p class="contrast__who">Copilot + MCP</p>
+          <p class="contrast__lead">Connects to Jira by shipping your Jira out</p>
+          <div class="contrast__flow">
+            <span class="node">Your Jira</span>
+            <span class="arrow is-out" aria-hidden="true">&rarr;</span>
+            <span class="node">Microsoft cloud + OpenAI</span>
+          </div>
+          <p class="contrast__note">Ticket contents travel to a vendor's cloud to be processed, and "what's in my Jira?" is a billed model call every time.</p>
+        </div>
+        <div class="contrast__col is-us">
+          <p class="contrast__who">Bolt</p>
+          <p class="contrast__lead">Connects to Jira by bringing the AI to it</p>
+          <div class="contrast__flow">
+            <span class="node">Your Jira</span>
+            <span class="arrow is-in" aria-hidden="true">&larr;</span>
+            <span class="node">Reasoning inside your boundary</span>
+          </div>
+          <p class="contrast__note"><code>=jira</code> is a deterministic lookup rendered in the launcher, no model, zero tokens. Identifiers are masked before any model is involved, and you pick the model.</p>
+        </div>
+      </div>
+      <p class="contrast__oneliner">
+        <strong>Copilot connects to Jira by shipping your Jira to Microsoft. Bolt connects to Jira by bringing the AI to your Jira.</strong> And most of the day, decode, reformat, diff, calculate, needs no model at all: zero tokens, nothing to paste out.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Find your Tuesday"
+      title="Whatever your job is, it shows up here."
+      lede="Each of these is a task people do today by pasting into a cloud tool. Every one Bolt absorbs locally is a leak that never happens and a token you never paid for."
+      stripe="a"
+      width="content"
+    >
+      <CardGrid cols={3}>
+        {personas.map((p) => (
+          <Card variant="default" icon={p.icon} title={p.title}>{p.body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="One app instead of a stack"
+      title="The things you'd buy separately, and keep adding as you grow."
+      lede="Beyond the utilities, Bolt already includes capabilities most teams license from several vendors, and add more of every year as needs and regulations pile up. No single vendor unifies them; Bolt puts them in one app, out of the box."
+      stripe="b"
+      width="content"
+    >
+      <div class="stack">
+        <ul class="stack__list">
+          {stack.map((s) => <li>{s}</li>)}
+          <li class="is-more">and more, added by config, not another vendor</li>
+        </ul>
+        <div class="stack__arrow" aria-hidden="true">&rarr;</div>
+        <div class="stack__one">
+          <p class="stack__one-big">One app</p>
+          <p class="stack__one-sm">Self-hosted, inside your walls. One grammar to learn, one bill instead of a stack that adds up fast across an org.</p>
+        </div>
+      </div>
+    </PageSection>
+
+    <PageSection
+      id="exec"
+      eyebrow="For decision-makers"
+      title="What this means for your org, not just your Tuesday."
+      lede="The same product, read in your unit of decision: risk you can prove, money you can count, a stack you can standardize, a workforce you can enable."
+      stripe="a"
+      width="content"
+    >
+      <CardGrid cols={2}>
+        <Card variant="default" icon={icons.security} title="CISO: provable control, not just policy">
+          PII masked at the model boundary on every call, a model privacy floor no user can loosen, DLP policy pushed to the whole fleet, and a tamper-evident audit chain you verify yourself. You can <strong>show</strong> what your people did with AI, not assert it.
+        </Card>
+        <Card variant="default" icon={icons.finance} title="CFO: the math, made explicit">
+          <strong>$30 a seat</strong> versus <strong>$44 to $52 all-in</strong> for Copilot plus its M365 base. One app instead of a stack of separate subscriptions. Zero token markup, and most tasks use no model at all, set against the cost of a single leak: an average breach runs <strong>$4.44M</strong> (IBM, 2025).
+        </Card>
+        <Card variant="default" icon={icons.server} title="CIO: fits your stack, no lock-in">
+          Deploys inside your perimeter (Helm, Docker, or air-gapped), brings your own LLM and swaps it anytime, SSO and SCIM for identity, and sits alongside M365 or Workspace rather than replacing it. One app to standardize on and govern from one console.
+        </Card>
+        <Card variant="default" icon={icons.leaders} title="CEO: enable the whole workforce, safely">
+          Your people are already using AI on sensitive work. Bolt gives everyone a fast, sanctioned alternative that keeps data inside your boundary, so you get the productivity without the exposure, and a story you can defend to a customer, a regulator, or the board.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Govern once"
+      title="Set the rules once, and answers that respect who you are."
+      stripe="b"
+      width="content"
+    >
+      <CardGrid cols={2}>
+        <Card variant="default" icon={icons.sliders} title="Govern once, push to the fleet">
+          Your org defines what counts as sensitive (custom patterns masked at the model boundary). Admins set the DLP mode, the AI sites it covers, and a model privacy floor no user can loosen, pushed as managed policy across every browser and locked. Define the boundary once; it survives the model swap and the staff change.
+        </Card>
+        <Card variant="default" icon={icons.search} title="Company search that respects who you are (Aeira)">
+          Ordinary AI search over a company drive retrieves by relevance, so it can surface a document you were never allowed to open. Aeira filters by your permissions inside the search itself, before it retrieves, so it cannot hand you what you could not already see.
+        </Card>
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Why Bolt, and why now"
+      title="Models will change. Vendors will change. Your governance shouldn't have to."
+      lede="The model you pick today will not be the model you run in two years. Bolt is the control layer that sits around your AI and your systems: the boundary, the masking, the rules, and the audit trail you define once, and they carry across every model and vendor you swap underneath. You are not betting on a model. You are building the governance that outlives it."
+      stripe="a"
+      width="prose"
+    >
+      <p class="capstone__pull"><em>Swap your stack without rewriting your governance.</em></p>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Try it on your own machine, today."
+      lede="Free for individuals, runs locally, nothing to configure. See how many trips out of the app simply stop happening."
+    >
+      <a class="btn btn-primary btn-lg" href="/download/">Get Bolt, free</a>
+      <a class="btn btn-secondary btn-lg" href="/pilot/">Talk to us about your team</a>
+      <Fragment slot="note">
+        Bolt is self-hosted; Sparcle operates no cloud that receives your data. You define the boundary and choose your LLM.
+      </Fragment>
+    </CTAStrip>
+  </main>
+</BaseLayout>

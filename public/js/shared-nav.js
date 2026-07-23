@@ -51,7 +51,7 @@
             return ' nav-active';
         }
         if (page === 'aeira' && path.indexOf('/aeira') !== -1) return ' nav-active';
-        if (page === 'resources' && (path.indexOf('answers') !== -1 || path.indexOf('architecture') !== -1 || path.indexOf('security') !== -1 || path.indexOf('integrations') !== -1 || path.indexOf('research') !== -1 || path.indexOf('terms') !== -1 || path.indexOf('privacy') !== -1)) return ' nav-active';
+        if (page === 'resources' && (path.indexOf('answers') !== -1 || path.indexOf('architecture') !== -1 || path.indexOf('security') !== -1 || path.indexOf('integrations') !== -1 || path.indexOf('research') !== -1 || path.indexOf('terms') !== -1 || path.indexOf('privacy') !== -1 || path.indexOf('why-bolt') !== -1)) return ' nav-active';
         return '';
     }
 
@@ -89,6 +89,7 @@
         '        <li><a href="/security" class="nav-link">Security &amp; Compliance</a></li>',
         '        <li><a href="/integrations" class="nav-link">Integrations</a></li>',
         '        <li><a href="/why-sparcle" class="nav-link">Why Sparcle</a></li>',
+        '        <li><a href="/why-bolt" class="nav-link">Why Bolt</a></li>',
         '        <li><a href="/research.html" class="nav-link">Research &amp; Whitepaper</a></li>',
         '        <li><a href="/crisis" class="nav-link">The Crisis (background)</a></li>',
         '        <li><a href="/terms#ip" class="nav-link">Patents &amp; IP</a></li>',

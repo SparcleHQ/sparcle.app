@@ -38,7 +38,7 @@
   background: var(--bg-muted);
   border-bottom: 1px solid var(--border-default);
 }
-.daylife__head > div.is-bolt { color: var(--color-success); }
+.daylife__head > div.is-bolt { color: var(--brand-primary); }
 .daylife__row { border-bottom: 1px solid var(--border-default); }
 .daylife__row > div { padding: 0.9rem 1.1rem; font-size: 0.9rem; line-height: 1.5; }
 .daylife__row .t { color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: 0.82rem; }
@@ -54,28 +54,34 @@
   font-weight: 600;
   font-size: 0.85em;
 }
+/* One restrained outline chip for every cost tag. The site's brand is
+   monochromatic blue with neutral slate; three status colors (amber/red/blue)
+   read as a generic rainbow and the amber failed contrast on white. All these
+   tags mark the same thing (what the shortcut spent), so they share one muted
+   treatment; colour is reserved for meaning (blue = Bolt = the win). */
 .daylife .tg {
   display: inline-block;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
-  padding: 0.05rem 0.4rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.45rem;
   border-radius: var(--radius-sm);
-  margin-left: 0.45rem;
+  margin-left: 0.4rem;
   vertical-align: middle;
   white-space: nowrap;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-strong);
 }
-.daylife .tg-sw { background: var(--color-warning-bg); color: var(--color-warning); }
-.daylife .tg-lk { background: var(--color-danger-bg); color: var(--color-danger); }
-.daylife .tg-tk { background: var(--brand-primary-light); color: var(--brand-primary); }
 .daylife__tally { background: var(--bg-muted); }
 .daylife__tally > div { padding: 1rem 1.1rem; font-size: 0.86rem; line-height: 1.55; }
 .daylife__tally .today {
-  color: var(--color-danger);
+  color: var(--text-body);
   border-left: 1px solid var(--border-default);
   border-right: 1px solid var(--border-default);
 }
-.daylife__tally .bolt { color: var(--color-success); font-weight: 600; }
+.daylife__tally .bolt { color: var(--brand-primary); font-weight: 600; }
 .daylife__tally .lbl {
   display: block;
   font-size: 0.64rem;
@@ -119,9 +125,9 @@
 }
 .contrast__flow .arrow { font-size: 1.15rem; font-weight: 700; }
 .contrast__flow .arrow.is-out { color: var(--color-danger); }
-.contrast__flow .arrow.is-in { color: var(--color-success); }
+.contrast__flow .arrow.is-in { color: var(--brand-primary); }
 .contrast__note { font-size: 0.86rem; color: var(--text-muted); margin: 0; line-height: 1.55; }
-.contrast__note code { font-family: var(--font-mono); color: var(--color-success); font-weight: 600; font-size: 0.85em; }
+.contrast__note code { font-family: var(--font-mono); color: var(--brand-primary); font-weight: 600; font-size: 0.85em; }
 .contrast__oneliner {
   margin: 1.5rem auto 0;
   padding: 1rem 1.25rem;

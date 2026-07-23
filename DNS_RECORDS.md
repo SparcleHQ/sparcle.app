@@ -21,7 +21,7 @@ as signals of whether a domain is actively managed. We were missing four of them
 | MX | present | `mx.zoho.com` (10), `mx2.zoho.com` (20), `mx3.zoho.com` (50) |
 | DMARC | **MISSING** | no `_dmarc.sparcle.app` record at all |
 | DKIM | **NOT FOUND** | not present at `zoho`, `zmail`, `default`, `selector1`, or `s1` |
-| CAA | **MISSING** | any CA may currently issue for this domain |
+| CAA | absent **by decision** | any CA may issue. Deliberate, see section 3 |
 | DNSSEC | **NOT ENABLED** | no DS at the registrar, no RRSIG in responses |
 | MTA-STS | missing | optional, see below |
 
@@ -84,20 +84,43 @@ forwarding while SPF does not. Without DKIM, forwarded mail fails DMARC once you
 
 ---
 
-## 3. CAA
+## 3. CAA — DECIDED AGAINST, 2026-07-23. Do not add.
 
-States which certificate authorities may issue for this domain. Free, and a hygiene signal.
+**Decision: we are not publishing CAA records.** Recorded here so nobody re-opens it as an easy win.
 
-**Careful: a hand-written CAA record can break Cloudflare certificate renewal.** Cloudflare
-Universal SSL issues from more than one CA and rotates between them; pinning only the CA that
-happens to be serving today (Google Trust Services, `pki.goog`) will cause a future renewal to fail
-CAA validation and the site to go down when the current certificate expires.
+The reasoning. CAA states which certificate authorities may issue for this domain. It was originally
+on this list as free hygiene, on the assumption it fed enterprise reputation scoring. It does not:
+research on 2026-07-23 found **no verified evidence** that CAA moves URL categorization or reputation
+at any gateway vendor. So the upside is close to zero, while the downside is a **silent, delayed site
+outage**, which is a bad trade for a domain whose whole current problem is being trusted.
 
-**Preferred path.** Cloudflare dashboard → SSL/TLS → Edge Certificates → **Add CAA records**. This
-generates the correct set for whichever CAs your zone actually uses, and Cloudflare maintains it.
-Use this rather than hand-authoring.
+Why the downside is worse than it looks. CAA is enforced **only at certificate issuance**, never when
+a browser connects. Add a record pinning the CA serving today (Google Trust Services, `pki.goog`) and
+nothing happens: the existing certificate is untouched and the site is fine for weeks. Then Cloudflare
+renews, picks a different CA from its pool, that CA reads the CAA record, refuses to issue, and the
+certificate lapses. The site goes down with a browser interstitial, five or more weeks after the DNS
+change that caused it, with no error in between to warn you.
 
-**If you author manually**, cover every CA Cloudflare may use, not just the current one:
+**If this is ever revisited, the only safe path is the Cloudflare dashboard.** SSL/TLS → Edge
+Certificates → the CAA section. Cloudflare knows its own current CA pool and maintains the set when
+partners rotate. Do not hand-author, and do not add `issuewild` restrictions: with `issuewild` absent,
+`issue` governs wildcards too, which is what we want, and a narrow `issuewild` would block the
+`mta-sts.sparcle.app` certificate that section 6 would need.
+
+If it is ever added, also set a calendar check before the then-current certificate expires:
+
+```sh
+echo | openssl s_client -connect sparcle.app:443 -servername sparcle.app 2>/dev/null \
+  | openssl x509 -noout -issuer -dates
+```
+
+An unchanged `notAfter` as expiry approaches means renewal is failing.
+
+<details>
+<summary>Record set that would have been used (reference only, not applied)</summary>
+
+Every CA Cloudflare may use, not just the one currently serving. Pinning a single CA is the bug;
+listing the pool is the fix.
 
 | Type | Name | Content |
 |---|---|---|
@@ -111,8 +134,7 @@ Use this rather than hand-authoring.
 The `iodef` line asks CAs to report issuance policy violations to us, and reuses the security
 address already published in `/.well-known/security.txt`.
 
-After adding, confirm the certificate still renews. Do not add `issuewild` restrictions unless you
-have checked nothing depends on a wildcard certificate.
+</details>
 
 ---
 
@@ -161,10 +183,11 @@ this file and it is not a categorization or reputation signal. Do items 1 throug
 
 1. Create `dmarc@sparcle.app` in Zoho, then add the DMARC record at `p=none`. Zero delivery risk.
 2. Enable DKIM in Zoho and publish the selector.
-3. Add CAA via the Cloudflare dashboard button.
-4. Enable DNSSEC at Cloudflare, then add the DS at Namecheap.
-5. Two weeks later, read the DMARC reports. If clean, move to `p=quarantine`, then `p=reject`, and
+3. Enable DNSSEC at Cloudflare, then add the DS at Namecheap.
+4. Two weeks later, read the DMARC reports. If clean, move to `p=quarantine`, then `p=reject`, and
    tighten SPF to `-all`.
 
-Steps 1 through 3 are safe to do in one sitting. Step 4 is the only one that can take the domain
-offline if done out of order, so do it deliberately and verify before walking away.
+CAA is deliberately not in this list. See section 3.
+
+Steps 1 and 2 are safe to do in one sitting. Step 3 is the only one that can take the domain offline
+if done out of order, so do it deliberately and verify before walking away.

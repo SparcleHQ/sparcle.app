@@ -56,3 +56,37 @@
 
 /docs/pdfs/pilot-preflight-checklist.pdf
   X-Robots-Tag: noindex
+
+# Installer scripts are served as readable text, deliberately.
+#
+# They previously went out as application/x-sh and application/octet-stream,
+# which made a browser DOWNLOAD them instead of displaying them. That is the
+# wrong default for a script we are asking people to pipe into a shell: the
+# reviewer who wants to read it before running it should be able to click the
+# link and read it, and /trust/network-allowlist tells security teams they can
+# do exactly that. text/plain makes that claim true.
+#
+# Two side benefits. An inspecting corporate proxy sees declared plain text
+# rather than an opaque generic-binary content type, which is one less thing
+# that reads as evasion. And PowerShell's `irm | iex` gets a string back from
+# text/plain rather than a byte array, which is what iex actually wants.
+#
+# charset=utf-8 is explicit because X-Content-Type-Options: nosniff is set
+# globally above, so the declared type is the only type.
+/install.sh
+  Content-Type: text/plain; charset=utf-8
+
+/install.ps1
+  Content-Type: text/plain; charset=utf-8
+
+/install-cli.sh
+  Content-Type: text/plain; charset=utf-8
+
+/personal.sh
+  Content-Type: text/plain; charset=utf-8
+
+/trial.sh
+  Content-Type: text/plain; charset=utf-8
+
+/trial.ps1
+  Content-Type: text/plain; charset=utf-8

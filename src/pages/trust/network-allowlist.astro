@@ -1,0 +1,349 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/ui/Hero.astro";
+import PageSection from "../../components/ui/PageSection.astro";
+import CardGrid from "../../components/ui/CardGrid.astro";
+import Card from "../../components/ui/Card.astro";
+import CTAStrip from "../../components/ui/CTAStrip.astro";
+
+// Install-time destinations. Verified against the shipping installer
+// (https://sparcle.app/install.sh) and a live release-asset redirect.
+const installHosts = [
+  ["sparcle.app", "443 / TCP", "The download page, the install scripts, and published SHA-256 checksums."],
+  ["api.github.com", "443 / TCP", "Resolves which release version is current. One GET, no authentication."],
+  ["github.com", "443 / TCP", "Release download URLs. Issues a redirect to the asset host below."],
+  ["release-assets.githubusercontent.com", "443 / TCP", "Where the installer bytes actually come from. GitHub redirects here, so allowing github.com alone is not sufficient."],
+  ["objects.githubusercontent.com", "443 / TCP", "Legacy GitHub release-asset host. Still serves some older releases; allow it if you pin an older version."],
+];
+
+// Runtime destinations, split by whether they are required.
+const runtimeRequired = [
+  ["github.com", "Update check", "The desktop updater fetches a small JSON manifest from our GitHub release channel. It does not contact any Sparcle-operated server. Block this and Bolt keeps working; it simply stops offering updates."],
+  ["release-assets.githubusercontent.com", "Update download", "The update package itself, if a user accepts an update."],
+];
+
+const runtimeOptional = [
+  ["huggingface.co, us.aws.cdn.hf.co, cdn-lfs.huggingface.co", "On-device model download, one time per model", "Only if a user enables local visual search, local embeddings, or local speech-to-text. These pull open models once and then run entirely on-device. If your policy is to preload models rather than let endpoints fetch them, tell us and we will document the offline path."],
+  ["Your LLM endpoint", "Model inference", "Bolt ships no model and has no default cloud endpoint. This is whatever you configure: an on-prem server, an in-tenant cloud model, or a vendor API. If you point Bolt at an internal endpoint, nothing leaves your network for inference at all."],
+  ["accounts.google.com, www.googleapis.com, gmail.googleapis.com, calendar.google.com", "Google Workspace", "Only for accounts a user explicitly connects. OAuth is user-consented and revocable."],
+  ["login.microsoftonline.com, graph.microsoft.com, outlook.office.com", "Microsoft 365", "Only for accounts a user explicitly connects."],
+  ["Your MCP server hostnames", "Tool and data connectors", "Only the MCP servers you configure. Bolt enables none by default."],
+];
+
+const vendorRecipes = [
+  {
+    title: "Palo Alto Networks (PAN-OS, Prisma Access)",
+    body: "PAN-DB already rates sparcle.app as Computer-and-Internet-Info at Low-Risk, so a URL category rule should not be blocking us. If a PAN gateway is still blocking, look at file-type or download controls on the installer rather than the URL category. To allow explicitly anyway, create a custom URL Category holding the hostnames above and reference it in a URL Filtering profile with the action set to allow, ordered above your block rules.",
+  },
+  {
+    title: "Zscaler (ZIA)",
+    body: "Add the hostnames as a URL Filtering policy exception, or place them in a custom URL category with an allow rule ordered above your block rules. If your tenant blocks Newly Registered and Observed Domains, note that sparcle.app was registered on 1 December 2025 and is well outside the 30-day NROD window, so that rule is not what is stopping you.",
+  },
+  {
+    title: "Cisco Umbrella and Secure Access",
+    body: "Add the hostnames to a Destination List with the Allow action and attach it to the relevant policy. Umbrella evaluates allow lists before content categories, so this survives a category-level block.",
+  },
+  {
+    title: "Netskope",
+    body: "Add the hostnames to a custom URL list and reference it in a Real-time Protection policy with the Allow action, ordered above any category-based block. There is no public self-serve categorization portal, so an allow list is the direct path.",
+  },
+  {
+    title: "Fortinet FortiGate",
+    body: "Add the hostnames to a Web Rating Override, or create a URL Filter entry with the Exempt or Allow action in the web filter profile applied to the outbound policy.",
+  },
+  {
+    title: "Broadcom, Symantec, Forcepoint, iboss, Menlo and others",
+    body: "The pattern is the same everywhere: a customer-defined allow list or URL exception evaluated ahead of category rules. If you tell us which gateway you run and what the block page said, we will write the exact steps for it and add them to this page.",
+  },
+];
+
+// Third-party categorization, checked directly at each vendor's public lookup
+// tool. Dated because these change; re-check before citing.
+const categorization = [
+  ["Palo Alto Networks (PAN-DB)", "Computer-and-Internet-Info", "Low-Risk", "23 Jul 2026"],
+  ["Cisco Talos", "No established content category", "Not on the Talos block list", "23 Jul 2026"],
+  ["Trellix and McAfee", "Uncategorized", "Unverified", "23 Jul 2026"],
+];
+
+const honest = [
+  ["We are a new domain, so some databases have not categorized us yet", "sparcle.app was registered in December 2025. Reputation databases rank on crawl history and traffic volume, and a young vendor domain that has not been widely crawled can sit uncategorized for a while. Some gateways block uncategorized destinations by policy. That is a reputation gap rather than a security finding: no vendor we have checked lists this domain as malicious, and Palo Alto already rates it Low-Risk. An allow list is the correct fix while the remaining databases catch up."],
+  ["Our installers are not yet code-signed", "The macOS and Windows binaries are not currently signed with a Developer ID or an OV code-signing certificate, so Gatekeeper and SmartScreen will warn on first launch. We publish SHA-256 checksums so you can verify integrity yourself in the meantime. Signing is funded and in progress, and we would rather say this plainly here than have your endpoint team discover it during a pilot."],
+  ["We would rather you allow-list us narrowly than broadly", "Nothing on this page asks for a wildcard. Every entry is a specific hostname on 443. If a broad rule is the only thing your tooling supports, allow sparcle.app and the GitHub hosts only, and leave the optional runtime entries blocked until a user actually needs the feature."],
+];
+---
+<BaseLayout
+  title="Network Allowlist for Enterprise Proxies | Sparcle Trust Center"
+  description="The exact hostnames to allow so Bolt can be downloaded, updated, and run behind a corporate secure web gateway. Per-vendor allowlist recipes for Palo Alto, Zscaler, Cisco Umbrella, Netskope, and Fortinet."
+  canonical="https://sparcle.app/trust/network-allowlist/"
+>
+  <main class="page-allowlist">
+    <Hero
+      eyebrow="Network Allowlist"
+      title="Blocked by your corporate proxy? Here is the exact allowlist."
+      lede="If your secure web gateway will not load this site or will not let Bolt install, this page has everything your network team needs: the specific hostnames, why each one is contacted, and the per-vendor steps to allow them. Written to be forwarded to a security admin without edits."
+    >
+      <a href="#install" class="btn btn-primary btn-lg">The allowlist</a>
+      <a href="mailto:security@sparcle.app" class="btn btn-secondary btn-lg">Email security@sparcle.app</a>
+    </Hero>
+
+    <PageSection
+      eyebrow="The short version"
+      title="Five hostnames on 443. That is the whole ask."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <p>
+        If you only read one section, allow these outbound over HTTPS and Bolt will install
+        and stay current:
+      </p>
+      <pre class="allowlist-block"><code>sparcle.app
+api.github.com
+github.com
+release-assets.githubusercontent.com
+objects.githubusercontent.com</code></pre>
+      <p>
+        Everything else on this page is detail: what each host is for, what Bolt contacts once it is
+        running, and how to enter these into your specific gateway.
+      </p>
+      <p>
+        <strong>Bolt does not contact a Sparcle-operated server.</strong> There is no activation
+        call, no license phone-home, and no telemetry endpoint. Our own update check points at
+        GitHub, not at us. That is a deliberate architectural choice and you can verify it from the
+        hostnames above: none of them are ours except the site you are reading.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Install time"
+      title="What the installer contacts."
+      lede="Required to download and install Bolt. Verified against the shipping installer and a live release-asset redirect."
+      stripe="a"
+      id="install"
+    >
+      <div class="data-table data-table--cols3">
+        <div class="data-table__row data-table__row--head">
+          <div>Hostname</div>
+          <div>Port</div>
+          <div>Why it is contacted</div>
+        </div>
+        {installHosts.map(([host, port, why]) => (
+          <div class="data-table__row">
+            <div class="data-table__label"><code>{host}</code></div>
+            <div>{port}</div>
+            <div>{why}</div>
+          </div>
+        ))}
+      </div>
+      <p class="allowlist-note">
+        The common failure is allowing <code>github.com</code> but not
+        <code>release-assets.githubusercontent.com</code>. GitHub issues a redirect to that host for
+        the actual bytes, so the download begins and then fails partway. If your gateway logs show a
+        302 followed by a block, that is this.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Runtime, required"
+      title="What Bolt contacts once installed."
+      lede="Two hosts, both GitHub, both only for updates. Block them and Bolt keeps working."
+      stripe="b"
+    >
+      <div class="data-table data-table--cols3">
+        <div class="data-table__row data-table__row--head">
+          <div>Hostname</div>
+          <div>Purpose</div>
+          <div>Detail</div>
+        </div>
+        {runtimeRequired.map(([host, purpose, detail]) => (
+          <div class="data-table__row">
+            <div class="data-table__label"><code>{host}</code></div>
+            <div>{purpose}</div>
+            <div>{detail}</div>
+          </div>
+        ))}
+      </div>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Runtime, optional"
+      title="Contacted only if you turn the feature on."
+      lede="None of these are reached by default. Each corresponds to a capability a user or admin explicitly enables, and most of them are your own systems rather than ours."
+      stripe="a"
+    >
+      <div class="data-table data-table--cols3">
+        <div class="data-table__row data-table__row--head">
+          <div>Destination</div>
+          <div>Triggered by</div>
+          <div>Detail</div>
+        </div>
+        {runtimeOptional.map(([host, purpose, detail]) => (
+          <div class="data-table__row">
+            <div class="data-table__label"><code>{host}</code></div>
+            <div>{purpose}</div>
+            <div>{detail}</div>
+          </div>
+        ))}
+      </div>
+      <p class="allowlist-note">
+        Bolt's launcher recognition, local search, and utility calls are deterministic and run
+        on-device with no network egress in any configuration. See
+        <a href="/trust/where-the-model-runs">where the model runs</a> for the full egress picture,
+        including the PII masking that runs before any outbound model call.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Per-vendor steps"
+      title="How to enter this into your gateway."
+      lede="The mechanism differs by vendor but the shape does not: a customer-defined allow entry, evaluated ahead of category-based block rules."
+      stripe="b"
+    >
+      <CardGrid cols={2}>
+        {vendorRecipes.map(({ title, body }) => (
+          <Card title={title}>{body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Third-party categorization"
+      title="How the reputation databases currently rate us."
+      lede="Checked directly at each vendor's public lookup tool on the date shown. We publish the unflattering rows too, because your gateway is going to tell you anyway."
+      stripe="a"
+    >
+      <div class="data-table data-table--cols4">
+        <div class="data-table__row data-table__row--head">
+          <div>Vendor</div>
+          <div>Category</div>
+          <div>Risk or trust</div>
+          <div>Checked</div>
+        </div>
+        {categorization.map(([vendor, cat, risk, when]) => (
+          <div class="data-table__row">
+            <div class="data-table__label">{vendor}</div>
+            <div>{cat}</div>
+            <div>{risk}</div>
+            <div>{when}</div>
+          </div>
+        ))}
+      </div>
+      <p class="allowlist-note">
+        No vendor we have checked classifies this domain as malicious, phishing, or a
+        command-and-control destination, and Talos confirms it is not on its block list. Where a
+        row says uncategorized, that is an absence of data rather than an adverse finding.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="If your gateway says uncategorized"
+      title="You can also ask your vendor to categorize us."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <p>
+        An allow list fixes your organization. Categorization fixes it for everyone, and a
+        submission from a paying customer carries considerably more weight with a vendor than one
+        from the site owner. If you are willing, the submission portals are:
+      </p>
+      <ul class="allowlist-list">
+        <li>Cisco Talos, <a href="https://talosintelligence.com/reputation_center">Reputation Center</a>, via Submit Content Categorization Ticket</li>
+        <li>Trellix and McAfee, <a href="https://sitelookup.mcafee.com/">Customer URL Ticketing</a>, which allows up to three suggested categories</li>
+        <li>Zscaler, <a href="https://sitereview.zscaler.com/">Site Review</a></li>
+        <li>Broadcom and Symantec, <a href="https://sitereview.bluecoat.com/">WebPulse Site Review</a></li>
+        <li>Fortinet, <a href="https://www.fortiguard.com/faq/wfratingsubmit">rating submission</a></li>
+        <li>Palo Alto Networks, <a href="https://urlfiltering.paloaltonetworks.com/">Test A Site</a>, already correct as of the table above, so nothing to file</li>
+      </ul>
+      <p>
+        The accurate categories for this domain are <strong>Business</strong>,
+        <strong>Computers and Internet</strong>, <strong>Software Updates</strong>, or
+        <strong>Freeware and Shareware</strong>. Palo Alto independently arrived at
+        Computer-and-Internet-Info, which is the same answer. sparcle.app is a vendor marketing and
+        download site: it hosts no model, accepts no prompts, and returns no generated output, so
+        the generative-AI categories do not apply to it under the definitions those vendors
+        publish.
+      </p>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Honest framing"
+      title="Why you are probably seeing this block."
+      stripe="a"
+    >
+      <CardGrid cols={3}>
+        {honest.map(([t, body]) => (
+          <Card title={t}>{body}</Card>
+        ))}
+      </CardGrid>
+    </PageSection>
+
+    <PageSection
+      eyebrow="Verify before you trust"
+      title="Check the download yourself."
+      stripe="b"
+      width="prose"
+      align="left"
+    >
+      <p>
+        Every release publishes SHA-256 checksums. To verify a download before running it:
+      </p>
+      <pre class="allowlist-block"><code># macOS and Linux
+shasum -a 256 &lt;the downloaded file&gt;
+
+# Windows PowerShell
+Get-FileHash -Algorithm SHA256 &lt;the downloaded file&gt;</code></pre>
+      <p>
+        Compare the result against the checksum published with the release. If your policy is to
+        review installer scripts before execution, both are plain text and readable in a browser at
+        <a href="/install.sh"><code>/install.sh</code></a> and
+        <a href="/install.ps1"><code>/install.ps1</code></a>. If your policy prohibits piped shell
+        installers outright, download the platform installer directly from the
+        <a href="/download">download page</a> and skip the script entirely.
+      </p>
+    </PageSection>
+
+    <CTAStrip
+      variant="band"
+      title="Still blocked, or need this in a different format?"
+      lede="We will write the exact steps for your gateway, or answer a security questionnaire, usually within one business day."
+    >
+      <a href="mailto:security@sparcle.app" class="btn btn-primary btn-lg">Email security@sparcle.app</a>
+      <a href="/trust" class="btn btn-secondary btn-lg">Back to Trust Center</a>
+    </CTAStrip>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  .page-allowlist .allowlist-block {
+    background: var(--surface-muted, rgba(127, 127, 127, 0.08));
+    border: 1px solid var(--border-subtle, rgba(127, 127, 127, 0.2));
+    border-radius: 8px;
+    padding: 1rem 1.15rem;
+    margin: 1rem 0 1.25rem 0;
+    overflow-x: auto;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  .page-allowlist .allowlist-block code {
+    background: none;
+    padding: 0;
+    white-space: pre;
+  }
+  .page-allowlist .allowlist-list {
+    list-style: disc;
+    padding-left: 1.4rem;
+    margin: 0.5rem 0 1rem 0;
+  }
+  .page-allowlist .allowlist-list li {
+    margin: 0.4rem 0;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+  .page-allowlist .allowlist-note {
+    margin-top: 1.25rem;
+    color: var(--text-muted, inherit);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+</style>

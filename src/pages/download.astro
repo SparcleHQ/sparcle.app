@@ -161,6 +161,13 @@ const faqs = [
           </div>
         </div>
 
+        <p class="dl-blocked-note">
+          On a corporate network and the download is blocked?
+          <a href="/trust/network-allowlist">Send your network team the allowlist</a>: the exact
+          hostnames Bolt needs, why each one, and the steps for Palo Alto, Zscaler, Umbrella,
+          Netskope, and Fortinet.
+        </p>
+
       </div>
     </PageSection>
 
@@ -535,6 +542,14 @@ const faqs = [
     font-size: 0.74rem;
     color: var(--text-muted);
     margin: 0.5rem 0 0;
+  }
+  .dl-blocked-note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 46rem;
+    margin: 1.75rem auto 0;
+    line-height: 1.6;
   }
   @media (max-width: 480px) {
     .dl-tabs { flex-direction: column; }

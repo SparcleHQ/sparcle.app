@@ -19,7 +19,7 @@ Sparcle does not host your data. Every tier of both products is self-hosted.
 
 ## See it in 90 seconds
 
-[![Bolt and Aeira in 90 seconds. Click to watch.](https://sparcle.app/images/enterprise-film-poster.jpg)](https://sparcle.app/media/bolt-aeira-90s.mp4)
+[![Bolt and Aeira in 90 seconds. Click to watch.](https://sparcle.app/images/enterprise-film-poster.jpg)](https://sparcle.app/#video=film)
 
 *Bolt and Aeira in 90 seconds. The image opens the video on sparcle.app. More demos, the
 product pages and downloads are on [sparcle.app](https://sparcle.app/).*
